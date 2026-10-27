@@ -1,0 +1,16 @@
+{
+  "locked_at": "2026-10-27T07:04:48Z",
+  "decisions": [
+    "D-33",
+    "D-34"
+  ],
+  "hash": "sha256 of UTF-8 text, CRLF normalised to LF; PLAN.md#F-02 = text between the F-02 spec markers",
+  "sha256": {
+    "docs/ledger/PLAN.md#F-02": "92908ee984af42cc865a5164b42cc7c70ff2e636a75c0a7fc312f20a72dd9d58",
+    "fixtures/r1/signup.html": "b9f6f6159943c646ffae1f510a07ae9cd65e07c500bab140bcdcd08d4b3d7a71",
+    "fixtures/r1/steps.json": "d1ffbd7f31b5bd99a9cb60f2e20fac77838c2436f65c06f6d3a08557ec5efac6",
+    "src/speech/validate.mjs": "fe19e73d46a3084a90c8ffe1c00ae8b730c2517a7ff080fad24f3b72b04b7fb2",
+    "src/speech/capture.mjs": "79830ee9f7ccdc43785f517c422e2a4fefd41cb6453b2e78e4fd803ddf932222",
+    "scripts/r1.mjs": "bdb934b0a5bbb2875e3656cb5ec9f7ca6ed532f584d3d670ba0e639a892ed9a1"
+  }
+}

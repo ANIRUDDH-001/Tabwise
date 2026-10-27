@@ -1,0 +1,48 @@
+<!doctype html>
+<!-- R1 fixture (PLAN F-02): our own synthetic sign-up form. No external resources, no personal data. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>R1 sign-up</title>
+<script>
+  // The attempt nonce (?nonce=, 8 hex) goes into the title so NVDA's report-title names this attempt.
+  const nonce = new URLSearchParams(location.search).get('nonce');
+  if (nonce && /^[0-9a-f]{8}$/.test(nonce)) document.title = 'R1 sign-up ' + nonce;
+</script>
+<style>
+  body { font: 18px/1.5 system-ui, sans-serif; margin: 2rem; }
+  label { display: inline-block; min-width: 7rem; }
+  dialog { padding: 1.5rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Newsletter sign-up</h1>
+  <form id="signup" novalidate>
+    <p><label for="name">Full name</label> <input id="name" name="name" type="text" autocomplete="off"></p>
+    <p><label for="email">Email</label> <input id="email" name="email" type="email" autocomplete="off"></p>
+    <p><input id="terms" name="terms" type="checkbox"> <label for="terms">I agree to the terms</label></p>
+    <p><button id="review" type="button">Review</button></p>
+  </form>
+  <div id="status" role="status"></div>
+</main>
+<dialog id="confirm" aria-labelledby="confirm-title">
+  <h2 id="confirm-title">Confirm subscription</h2>
+  <button id="confirm-button" type="button">Confirm</button>
+</dialog>
+<script>
+  const review = document.getElementById('review');
+  const dialog = document.getElementById('confirm');
+  const status = document.getElementById('status');
+  document.getElementById('signup').addEventListener('submit', (e) => e.preventDefault());
+  review.addEventListener('click', () => dialog.showModal());
+  document.getElementById('confirm-button').addEventListener('click', () => {
+    dialog.close();
+    review.focus(); // focus goes back to the opener explicitly
+    // Status after focus speech has started, so the polite announcement is not cut off (F-02 risk note).
+    setTimeout(() => { status.textContent = 'Subscription saved'; }, 300);
+  });
+</script>
+</body>
+</html>
