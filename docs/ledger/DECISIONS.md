@@ -33,3 +33,23 @@ Consequence: plans and STATE track work for "us", with no Dev A/B owners. Indepe
 User answer: "make meaningful modular and multiple commits as per the need https://github.com/ANIRUDDH-001/Tabwise-.git new repo" … "just commit!!!!"
 Consequence: `app/` initialized as standalone git repo on `main` branch with remote `https://github.com/ANIRUDDH-001/Tabwise-.git`. Initial codebase committed in modular conventional commits. | Reversal: git reset
 
+
+## D-28 2026-10-27 — F-01 budget broker + R0 prerequisites spec
+Options: Approve as written (rec) / Approve, but TypeScript / Revise first
+User answer: "Approve as written (Recommended)"
+Consequence: spec copied verbatim into `PLAN.md` § F-01; installs approved: @guidepup/guidepup, @guidepup/setup, @playwright/test + Chromium, @axe-core/playwright (exact pins). The user runs `npx @guidepup/setup` | Reversal: rollback in the spec
+Installed 2026-10-27 (project scope, `npm install --save-exact --ignore-scripts`, 0 vulnerabilities reported): @guidepup/guidepup 0.36.4, @guidepup/setup 0.29.3, @playwright/test 1.64.1, @axe-core/playwright 4.14.0; Chromium build 1248 via `npx playwright install chromium`. Versions chosen by Claude: newest at least ~7 days old
+
+## D-29 2026-10-27 — Spark mode on our fixtures
+Options: Contributor on our fixtures (rec) / Standard only
+User answer: "Contributor on our fixtures (Recommended)"
+Consequence: `muse-spark-1.3-contributor` only for our own synthetic fixture pages; never personal, sensitive or confidential input (Terms §6.2). Everything else uses Standard | Reversal: user MCQ
+
+## D-30 2026-10-27 — Branch for F-01
+Options: Current branch, you commit (rec) / You create feat/F-01-broker
+User answer: "Current branch, you commit (Recommended)"
+Consequence: Claude edits the working tree on the checked-out branch (`main`); the user commits at their own pace ("i will commit at my own pace and requirements") | Reversal: user creates a branch
+
+## D-31 2026-10-27 — Modular commits for F-01 build
+User answer: "again"
+Consequence: F-01 committed modularly in 5 conventional commits (deps, budget broker, meta client, scripts, ledgers & codemap). | Reversal: git reset

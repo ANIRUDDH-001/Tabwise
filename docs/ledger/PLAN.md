@@ -52,3 +52,47 @@ Owner: agent claude|codex · Branch: feat/<id>-<slug>
 Progress: what is done, with LOG.jsonl timestamps
 Next step: the single next action
 -->
+
+### F-01 budget broker + R0 prerequisites — status: in progress
+Spec (verbatim from the D-28 preview):
+```
+ID: F-01 budget broker + R0 prerequisites
+Goal: every Meta call is reserved, capped at $100 total and
+  logged before it runs; R1-R3 tools installed, versions recorded.
+Files: package.json, package-lock.json, .env.example,
+  src/budget/prices.mjs, src/budget/broker.mjs,
+  src/meta/client.mjs (Responses API, api.meta.ai/v1),
+  scripts/spend.mjs, scripts/versions.mjs,
+  test/broker.test.mjs, test/client.test.mjs,
+  docs/ledger/{PROVENANCE,CODEMAP,STATE,LOG,FEATURES},
+  AGENTS.md command table.
+Installs (exact pins, licences recorded):
+  @guidepup/guidepup, @guidepup/setup,
+  @playwright/test + Chromium, @axe-core/playwright.
+  No other deps: SQLite = node:sqlite, tests = node:test
+  (Node 24.22.1 present). Plain JS modules, npm.
+YOU run once: npx @guidepup/setup
+  (changes Windows settings + downloads NVDA; Claude
+  may not change system settings.)
+Prices (dev.meta.ai pricing page, read 2026-10-27):
+  Spark 1.3 Standard $1.25 in / $4.25 out per 1M
+  Spark 1.3 Contributor $0.10 / $0.20 per 1M
+  Image input price not listed -> fixed worst-case bound
+  per image, checked against the first real usage.
+Acceptance:
+ 1 node --test test/  -> all pass, incl.: refuse over cap;
+   refuse if no max_output_tokens; settle releases;
+   crash keeps reservation; 2 concurrent callers can't
+   overspend; COSTS.jsonl schema; API key never logged.
+ 2 node scripts/spend.mjs -> $0.00 spent, cap $100
+ 3 node scripts/versions.mjs -> all versions; NVDA found
+ 4 git check-ignore .env -> ignored
+Cost: $0 credit. ~1.5 h F-01 + 0.5 h R0.
+Out of scope: live API calls, NVDA runs (R1), fixtures (R2).
+Rollback: delete new files; npm uninstall;
+  remove %LOCALAPPDATA%\guidepup.
+```
+Approved: D-28, D-29 (Contributor on fixtures), D-30 (current branch), 2026-10-27T05:27:59Z
+Owner: agent claude · Branch: current (`main`), the user commits
+Progress (LOG.jsonl 2026-10-27T05:36:08Z): deps pinned and installed; broker + client written test-first; acceptance 1, 2, 4 pass; 3 runs, NVDA not found. Deviation: Node 24 `node --test test/` fails ("Cannot find module"), so the command is `npm test` = `node --test "test/*.test.mjs"`
+Next step: the user runs `npx @guidepup/setup`, then `npm run versions` must show NVDA found → R0 complete
