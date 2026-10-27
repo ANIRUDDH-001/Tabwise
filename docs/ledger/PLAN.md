@@ -53,7 +53,7 @@ Progress: what is done, with LOG.jsonl timestamps
 Next step: the single next action
 -->
 
-### F-01 budget broker + R0 prerequisites — status: in progress
+### F-01 budget broker + R0 prerequisites — status: done
 Spec (verbatim from the D-28 preview):
 ```
 ID: F-01 budget broker + R0 prerequisites
@@ -95,4 +95,6 @@ Rollback: delete new files; npm uninstall;
 Approved: D-28, D-29 (Contributor on fixtures), D-30 (current branch), 2026-10-27T05:27:59Z
 Owner: agent claude · Branch: current (`main`), the user commits
 Progress (LOG.jsonl 2026-10-27T05:36:08Z): deps pinned and installed; broker + client written test-first; acceptance 1, 2, 4 pass; 3 runs, NVDA not found. Deviation: Node 24 `node --test test/` fails ("Cannot find module"), so the command is `npm test` = `node --test "test/*.test.mjs"`
-Next step: the user runs `npx @guidepup/setup`, then `npm run versions` must show NVDA found → R0 complete
+Correction (2026-10-27T05:51:35Z, Claude's error in the spec): `npx @guidepup/setup` installs nothing on Windows. In 0.29.3 the `setup` subcommand is a no-op on win32 (lib/commands/setup/index.js), and NVDA comes from the `install` subcommand. That subcommand downloads `guidepup-nvda-0.2.1-2026.2.zip` from github.com/guidepup/nvda releases, checks the pinned sha256 `7df0ca3c…97a1` and unzips it per-user to `%LOCALAPPDATA%\guidepup\nvda\all\0.2.1-2026.2\extracted\` (download-assets.js; no Windows settings changed by that code). `versions.mjs` now uses Guidepup's own lookup (getNVDAInstallationPath.js); the HKCU key in constants.js is unused
+Done 2026-10-27T05:57:35Z: acceptance 1-4 pass; NVDA 0.2.1-2026.2 found after `npx --no-install guidepup install nvda` run from `app/` (the installer resolves Guidepup from the current folder). R0 evidence in FEATURES.json
+Next step: R1 spec (real NVDA speech, $0) by MCQ
