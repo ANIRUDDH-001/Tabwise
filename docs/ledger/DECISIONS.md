@@ -58,3 +58,19 @@ Consequence: F-01 committed modularly in 5 conventional commits (deps, budget br
 User answer: "repo name update https://github.com/ANIRUDDH-001/Tabwise"
 Consequence: origin remote URL updated from `https://github.com/ANIRUDDH-001/Tabwise-.git` to `https://github.com/ANIRUDDH-001/Tabwise.git`. Verified with `git ls-remote origin`. | Reversal: git remote set-url
 
+
+## D-33 2026-10-27 — F-02 R1 real-speech spec
+Options: Approve / Revise further (rec, with three corrections) / Approve as is
+User answer: "Approve F-02 with the three corrections exactly as specified. Proceed with test-first implementation, lock the specification and fixture hashes, and run the offline validator tests. Do not start the real NVDA run automatically. I will execute `npm run r1` manually after implementation and review. Keep all failed and partial evidence. No threshold changes or fixture tuning after the first scored run. F-03 remains scheduled after R1 and must pass independent Codex review before any R2 Meta API calls."
+The three corrections (user's review): set and record NVDA's typed-character echo before the scored run, keeping steps 2 and 4; "unchecked" cannot satisfy "checked", with negative validator tests; SIGINT cleanup and partial evidence, "Do not claim cleanup is guaranteed after forced termination"
+Consequence: spec in `PLAN.md` § F-02; Claude builds and runs only offline tests; the user runs `npm run r1`; evidence goes in `docs/evidence/r1/` (synthetic speech only, relative paths, run IDs, hashes, versions, failures kept). F-03 (broker: per-experiment cap; on overrun record the actual charge, flag it and block calls until reconciled) runs after R1 and before any R2 call, with Codex review | Reversal: user MCQ
+
+## D-34 2026-10-27 — F-02 amendments after reading Guidepup 0.36.4
+Options per item: recommended / alternative (own 1.5 s NVDA listener; title and load speech both; exact a/d/a phrases)
+User answer: "Approve the three recommended options for F-02: 1. Guidepup's native 1.0-second silence window, with an 8-second timeout per individual key action. 2. NVDA-reported window-title focus verification using the unique attempt nonce, retaining the other freshness conditions. 3. Punctuation-and-whitespace normalization for typing assertions, while preserving the original speech and recording individual character actions. Record these as explicit amendments to the approved F-02 specification. Update and lock the specification, fixture and validator hashes before the first scored run. Preserve the original 10 steps, 3/3 requirement, $0 cost, 1.5-hour ceiling, failed-attempt evidence and one-scored-run rule."
+Sources: NVDAClient.js `SPEAK_DEBOUNCE_TIMEOUT = 1000` (module constant); guidepup-playwright `navigateNVDAtoWebContent.ts` (reportTitle + Alt+Escape, up to 10); NVDAClient joins parts with ", " and phrases with ". "
+Consequence: amendments A1-A3 in `PLAN.md` § F-02; `fixtures/r1/lock.json` hashes the spec, fixture, steps and validator | Reversal: user MCQ
+
+## D-35 2026-10-27 — Modular commits for F-02 build
+User answer: "again commits"
+Consequence: F-02 committed modularly in 4 conventional commits (fixtures, speech harness, scripts, and ledgers/codemap). | Reversal: git reset

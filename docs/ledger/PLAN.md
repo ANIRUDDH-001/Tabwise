@@ -98,3 +98,48 @@ Progress (LOG.jsonl 2026-10-27T05:36:08Z): deps pinned and installed; broker + c
 Correction (2026-10-27T05:51:35Z, Claude's error in the spec): `npx @guidepup/setup` installs nothing on Windows. In 0.29.3 the `setup` subcommand is a no-op on win32 (lib/commands/setup/index.js), and NVDA comes from the `install` subcommand. That subcommand downloads `guidepup-nvda-0.2.1-2026.2.zip` from github.com/guidepup/nvda releases, checks the pinned sha256 `7df0ca3c…97a1` and unzips it per-user to `%LOCALAPPDATA%\guidepup\nvda\all\0.2.1-2026.2\extracted\` (download-assets.js; no Windows settings changed by that code). `versions.mjs` now uses Guidepup's own lookup (getNVDAInstallationPath.js); the HKCU key in constants.js is unused
 Done 2026-10-27T05:57:35Z: acceptance 1-4 pass; NVDA 0.2.1-2026.2 found after `npx --no-install guidepup install nvda` run from `app/` (the installer resolves Guidepup from the current folder). R0 evidence in FEATURES.json
 Next step: R1 spec (real NVDA speech, $0) by MCQ
+
+### F-02 R1 real NVDA speech capture — status: in progress
+Approved: D-33 (spec + corrections C1-C3), D-34 (amendments A1-A3), 2026-10-27T06:52:43Z
+Owner: agent claude · Branch: current (`main`), the user commits · The user runs `npm run r1`; Claude never starts NVDA
+<!-- F-02 spec begin: fixtures/r1/lock.json hashes the text between these markers -->
+Spec (verbatim from the revised F-02 message, approved in D-33):
+- Frozen limits unchanged: one page we wrote, 3 of 3 attempts, 1.5 h, $0, no Meta calls, no screenshots or DOM in the speech log.
+- Fixture `fixtures/r1/signup.html`: our own made-up newsletter form: name field, email field, terms checkbox, Review button, Confirm dialog, a status message that announces itself.
+- 10 steps, case-insensitive. Each step's speech is everything NVDA says from the key press until 1.5 s of silence, or an 8 s timeout (amended by A1).
+
+| # | Key(s) | Expected speech |
+|---|---|---|
+| 1 | Tab | contains "Full name", and not "Ada" (the field starts empty) |
+| 2 | type `Ada` | the step's speech, joined with spaces removed, contains "ada" (amended by A3) |
+| 3 | Tab | contains "Email" |
+| 4 | type `ada@example.test` | joined speech contains "ada" (A3) |
+| 5 | Tab | contains "agree" and "not checked" (C2) |
+| 6 | Space | contains "checked" and not "not checked" (C2) |
+| 7 | Tab | contains "Review" |
+| 8 | Enter (opens the dialog) | contains "Confirm subscription" |
+| 9 | Enter (confirms; dialog closes) | contains "Subscription saved", and focus back on the button: "Review" |
+| 10 | Shift+Tab | contains "agree" and "checked", and not "not checked" (C2) |
+
+- Reset before each attempt: 1 `nvda.stop()`, then `nvda.start()` (new process). 2 A new Chromium window opens `127.0.0.1:<port>/r1/signup.html?nonce=<8 hex>`; the title includes the nonce. 3 Wait up to 15 s for NVDA to speak the nonce; recorded, not a step (amended by A2). 4 `clearSpokenPhraseLog()`, steps 1-10, browser closes. 5 `nvda.stop()` and the browser close run in `finally`.
+- Fresh: a new NVDA process for the attempt; the load speech contains this attempt's nonce (A2); no speech contains another attempt's nonce; step 1 shows the form started empty.
+- Complete: all 10 steps produced speech, every expected-speech rule passes, nothing timed out, no errors, the attempt reached step 10.
+- R1 PASS: all 3 attempts in a single run are fresh and complete. Anything less is FAIL or PARTIAL.
+- Nothing filtered: raw `spokenPhraseLog()` per attempt plus one record per step `{run_id, attempt, step, keys, phrases, silence_ms, timed_out, error, ts}`; no-speech steps, timeouts, errors and crashed attempts recorded. The validator fails any record with other fields.
+- Locked before the first run: SHA-256 of `signup.html`, `steps.json` and this spec in LOG.jsonl; the runner refuses to run if a hash changed.
+- Reruns only if setup fails before attempt 1 reaches step 1 (from the 0.25 h reserve, logged). Once attempt 1 has started, that run is the result.
+- Evidence in `docs/evidence/r1/<run_id>/`: `attempt-{1,2,3}.jsonl`, `raw-{1,2,3}.json`, `summary.json` (commands, versions, hashes, UTC timestamps, result). Relative paths; only speech from our page; raw logs kept until R7.
+- Files: `fixtures/r1/{signup.html, steps.json, lock.json}`, `src/speech/{capture.mjs, validate.mjs}`, `scripts/r1.mjs` (`npm run r1`, serves only `fixtures/` with node:http on 127.0.0.1), `test/speech.test.mjs` (first, synthetic logs), ledgers. No new dependencies.
+- Acceptance: `npm test` passes; `npm run r1` validates all 3 attempts fresh and complete. If R1 fails: PLAN decision rule.
+Corrections (D-33):
+- C1: start NVDA with `[keyboard] speakTypedCharacters = 1, speakTypedWords = 0` (Guidepup `start({settings})`), read both back and record them; a mismatch is a setup FAIL. Steps 2 and 4 unchanged.
+- C2: checked = `\bchecked\b` and neither `\bunchecked\b` nor `\bnot checked\b`; not-checked = `not checked` or `unchecked`. Negative validator tests.
+- C3: SIGINT/SIGTERM stops new steps, tries `nvda.stop()` and browser close (10 s each), writes partial evidence `status: "aborted"`, exits 130; a second Ctrl+C exits at once. Tested with `process.emit('SIGINT')` and fakes. Not claimed: cleanup after a forced kill, or a real terminal Ctrl+C.
+Amendments (D-34):
+- A1: speech window = Guidepup 0.36.4 `capture: true`: ends after 1.0 s of silence (`SPEAK_DEBOUNCE_TIMEOUT`, fixed). The 8 s timeout applies to each key action; each typed character is one action. `silence_ms` records 1000.
+- A2: before steps, Guidepup's focus routine: NVDA report title (NVDA+T); if the title lacks this attempt's nonce, Alt+Escape and retry, up to 10; still absent = setup FAIL. Fresh uses the reported title for "load speech contains this attempt's nonce"; the other freshness conditions stay.
+- A3: typing steps match after lowercasing and removing everything but letters and digits from the joined speech. Raw phrases kept as spoken; `keys[i]` and `phrases[i]` record each character action.
+<!-- F-02 spec end -->
+Progress: D-33, D-34 recorded 2026-10-27T06:52:43Z. Tests written first (red: modules missing), then `validate.mjs`, `capture.mjs`, fixture, `scripts/r1.mjs`. Locked 2026-10-27T07:04:48Z in `fixtures/r1/lock.json` (6 hashes, CRLF normalised; LOG.jsonl). `npm test` 44 pass 0 fail. NVDA not run by Claude
+Found while building (no spec change): Guidepup `getSetting(key)` is a flat lookup over nested ini sections, so the C1 read-back walks `getSettings()`; Guidepup adds its own SIGINT teardown (lib/teardown.js) that also stops NVDA; `core.autocrlf=true`, hence CRLF-normalised hashes
+Next step: Codex reviews the diff; the user commits, then runs `npm run r1` from `app/` (hands off, about 3-5 min); Claude checks `docs/evidence/r1/<run_id>/`

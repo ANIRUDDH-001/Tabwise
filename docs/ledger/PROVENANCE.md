@@ -13,6 +13,7 @@ Licence rows are from research 13 §7 (pinned public notices, CHECKED). "Planned
 | @playwright/test (+ playwright, playwright-core) | dependency | npm 1.64.1; Chromium build 1248 downloaded | Apache-2.0 (package.json) | Controlled actions | 2026-10-27, F-01 |
 | @axe-core/playwright (+ axe-core) | dependency | npm 4.14.0 / 4.14.0 | MPL-2.0 (package.json) | Baseline rule checks | 2026-10-27, F-01 |
 | Other transitive packages | dependencies | `package-lock.json`: 58 packages | MIT 45, Apache-2.0 4, ISC 3, MPL-2.0 2, BSD-3-Clause 1, BlueOak-1.0.0 1, GPL-3.0-or-later 1, none 1 (counted from the lockfile) | — | 2026-10-27, F-01 |
+| R1 fixture | fixture | `fixtures/r1/signup.html`, `steps.json`: written by us, synthetic, no external resources or personal data | ours | R1 real-speech page | 2026-10-27, F-02 |
 | Test fixtures | fixtures | written by us in this repo | ours | Healthy/broken pages | planned, R2 |
 
 ## New work during the event (building period 2026-10-27 → 2026-11-04)
@@ -20,3 +21,4 @@ Licence rows are from research 13 §7 (pinned public notices, CHECKED). "Planned
 |---|---|---|---|---|
 | Governance and ledgers | `AGENTS.md`, `CLAUDE.md`, `.claude/`, `.codex/`, `docs/` | claude (drafted 2026-10-26 in research, installed 2026-10-27) | 2026-10-27 | Process documents, not product code |
 | Budget broker, Meta client, scripts | `src/budget/`, `src/meta/`, `scripts/`, `test/` | claude | 2026-10-27 | F-01; tests written first |
+| R1 speech harness | `src/speech/`, `scripts/r1.mjs`, `fixtures/r1/`, `test/speech.test.mjs` | claude | 2026-10-27 | F-02; tests written first; no new dependencies |
