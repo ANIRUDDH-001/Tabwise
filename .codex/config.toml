@@ -1,0 +1,9 @@
+# Project-level Codex config. Codex loads it only for a trusted project (S-CODEX-CONFIG).
+# Codex reads AGENTS.md natively; no fallback filename needed.
+
+# A sandbox approval is not an MCQ approval of a spec or a commit (13 CX28). AGENTS.md gates still apply.
+# Ask before leaving the sandbox (installs, network, writes outside the workspace).
+approval_policy = "on-request"
+
+# Writes allowed inside the workspace only.
+sandbox_mode = "workspace-write"
