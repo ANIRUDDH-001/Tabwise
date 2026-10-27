@@ -1,0 +1,3 @@
+# Append-only ledgers: keep both sides' lines on merge (12 RT39)
+docs/ledger/LOG.jsonl merge=union
+docs/ledger/COSTS.jsonl merge=union

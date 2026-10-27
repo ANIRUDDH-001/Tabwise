@@ -1,0 +1,20 @@
+# Secrets (AGENTS Security)
+.env
+.env.*
+!.env.example
+
+# Local agent settings
+.claude/settings.local.json
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node
+node_modules/
+
+# Caches and replay data that may hold API responses
+.cache/
+cache/
