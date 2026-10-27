@@ -1,7 +1,8 @@
-// R0: record installed versions. Read-only: queries files and the registry, changes nothing.
+// R0: record installed versions. Read-only: reads files, changes nothing.
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { join, resolve } from 'node:path';
+import { homedir } from 'node:os';
+import { createHash } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 
 const pkg = (name) => {
@@ -15,17 +16,19 @@ db.close();
 const msPlaywright = join(process.env.LOCALAPPDATA ?? '', 'ms-playwright');
 const browsers = existsSync(msPlaywright) ? readdirSync(msPlaywright).filter((d) => d.startsWith('chromium')).join(', ') : '';
 
-// Guidepup's setup records NVDA under this key (node_modules/@guidepup/guidepup/lib/windows/NVDA/constants.js).
+// Same lookup as Guidepup's own getNVDAInstallationPath (lib/windows/NVDA/getNVDAInstallationPath.js):
+// <cache>/nvda/all/<manifest version>/extracted/nvda.exe, cache = GUIDEPUP_SCREEN_READERS_PATH or %LOCALAPPDATA%\guidepup.
 function nvda() {
   if (process.platform !== 'win32') return 'n/a (not Windows)';
-  try {
-    const out = execFileSync('reg', ['query', 'HKCU\\Software\\Guidepup\\Nvda'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
-    const values = out.split('\n').filter((l) => l.includes('REG_SZ')).map((l) => l.trim().split(/\s{2,}/).pop());
-    return values.length ? `found (Guidepup): ${values.join('; ')}` : 'Guidepup key present, no path';
-  } catch {
-    const system = ['C:\\Program Files (x86)\\NVDA\\nvda.exe', 'C:\\Program Files\\NVDA\\nvda.exe'].find(existsSync);
-    return system ? `NOT SET UP for Guidepup; system NVDA at ${system}` : 'NOT FOUND: run npx @guidepup/setup';
-  }
+  const manifest = JSON.parse(readFileSync(join('node_modules', '@guidepup', 'guidepup', 'manifest.json'), 'utf8'));
+  const asset = manifest.screenReaders.find(({ id }) => id === 'nvda').assets[0];
+  const cache = process.env.GUIDEPUP_SCREEN_READERS_PATH
+    ? resolve(process.env.GUIDEPUP_SCREEN_READERS_PATH)
+    : resolve(process.env.LOCALAPPDATA ?? join(homedir(), 'AppData', 'Local'), 'guidepup');
+  const exe = join(cache, 'nvda', 'all', asset.version, 'extracted', 'nvda.exe');
+  if (!existsSync(exe)) return `NOT FOUND (expects ${asset.asset}): run npx @guidepup/setup install nvda`;
+  const sha = createHash('sha256').update(readFileSync(exe)).digest('hex');
+  return `found ${asset.version} at ${exe} (nvda.exe sha256 ${sha.slice(0, 16)}…)`;
 }
 
 const rows = [
