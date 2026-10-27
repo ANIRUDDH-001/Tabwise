@@ -82,8 +82,9 @@ Shared by Claude Code and Codex for the Meta Global AI Developer Hackathon 2026 
 |---|---|
 | UTC timestamp | `date -u +%Y-%m-%dT%H:%M:%SZ` |
 | Recent log | `tail -n 20 docs/ledger/LOG.jsonl` |
-| Spend so far | Filled in when the scaffold is approved |
-| Test one file | Filled in when the scaffold is approved |
+| Spend so far | `npm run spend` |
+| Test one file | `node --test test/<file>.test.mjs` |
+| Installed versions (R0) | `npm run versions` |
 | Lint one file | Filled in when the scaffold is approved |
 
 ## References

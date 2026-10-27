@@ -1,0 +1,20 @@
+{
+  "name": "tabwise",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.22.1"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\"",
+    "spend": "node scripts/spend.mjs",
+    "versions": "node scripts/versions.mjs"
+  },
+  "dependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@guidepup/guidepup": "0.36.4",
+    "@guidepup/setup": "0.29.3",
+    "@playwright/test": "1.64.1"
+  }
+}
