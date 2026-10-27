@@ -1,0 +1,2 @@
+{"ts":"2026-10-27T05:07:41Z","agent":"claude","dev":"us","task":"governance","event":"decision","detail":"D23 gates frozen; PLAN.md hash ca0c9feb568e7c9c4ea41832607f510af0cbf5548242adcd77f729e039af3362","verify":"python -I sha256 of PLAN.md gates span → ca0c9feb…3362"}
+{"ts":"2026-10-27T05:23:43Z","agent":"codex","dev":"us","task":"governance","event":"done","detail":"D27 repo initialized on main with remote Tabwise-; modular initial commits","verify":"git log --oneline"}

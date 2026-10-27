@@ -1,0 +1,10 @@
+{
+  "_rules": "Agents may change only the 'passes' and 'evidence' fields. Only the user adds, removes or edits entries. Entries are the Day-1 tests frozen in D23 (PLAN.md, from research 13 §8). Product acceptance tests are added after the 2026-10-28 checkpoint. 'evidence' names the evidence class and run_id (PROTOCOLS §10). 'result' is PASS, FAIL, NOT RUN or PARTIAL.",
+  "features": [
+    {"id": "R0", "area": "prereq", "description": "Versions recorded; own-fixture rights; broker reservation and payload logging work before any metered call", "verify": "TBD at scaffold", "threshold": "all items present; $0", "passes": false, "result": null, "evidence": null},
+    {"id": "R1", "area": "speech", "description": "NVDA + Guidepup on this Windows 11 Home host: keyboard-only 10-step local task, complete fresh speech log", "verify": "TBD at scaffold", "threshold": "3/3 reset attempts; no screenshots or DOM in payload; $0; <=1.5 h", "passes": false, "result": null, "evidence": null},
+    {"id": "R2", "area": "diagnosis", "description": "Independently labelled healthy/broken pairs (silent validation error, focus lost after dialog, unannounced update); same-Spark visual and speech control; axe-core baseline", "verify": "TBD at scaffold", "threshold": ">=1 non-axe barrier localized correctly; 0 barriers claimed on healthy pages; <=$1.50; <=2 h", "passes": false, "result": null, "evidence": null},
+    {"id": "R3", "area": "repair", "description": "Human-reviewed patch rescues the withheld task on rerun; deliberately wrong patch not marked solved", "verify": "TBD at scaffold", "threshold": "both hold; <=$0.50; <=0.5 h", "passes": false, "result": null, "evidence": null},
+    {"id": "R7", "area": "review", "description": "Independent check of R0-R3 results by someone who did not run them, without tuning", "verify": "manual record in LOG.jsonl", "threshold": "failures and abstentions recorded; $0; <=1 h", "passes": false, "result": null, "evidence": null}
+  ]
+}
