@@ -9,7 +9,8 @@
   "scripts": {
     "test": "node --test \"test/*.test.mjs\"",
     "spend": "node scripts/spend.mjs",
-    "versions": "node scripts/versions.mjs"
+    "versions": "node scripts/versions.mjs",
+    "r1": "node scripts/r1.mjs"
   },
   "dependencies": {
     "@axe-core/playwright": "4.14.0",
