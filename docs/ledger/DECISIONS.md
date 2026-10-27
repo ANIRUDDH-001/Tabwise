@@ -53,3 +53,8 @@ Consequence: Claude edits the working tree on the checked-out branch (`main`); t
 ## D-31 2026-10-27 — Modular commits for F-01 build
 User answer: "again"
 Consequence: F-01 committed modularly in 5 conventional commits (deps, budget broker, meta client, scripts, ledgers & codemap). | Reversal: git reset
+
+## D-32 2026-10-27 — Remote URL update to Tabwise
+User answer: "repo name update https://github.com/ANIRUDDH-001/Tabwise"
+Consequence: origin remote URL updated from `https://github.com/ANIRUDDH-001/Tabwise-.git` to `https://github.com/ANIRUDDH-001/Tabwise.git`. Verified with `git ls-remote origin`. | Reversal: git remote set-url
+
