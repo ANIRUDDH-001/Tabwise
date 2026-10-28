@@ -190,3 +190,16 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Publication: user commits/pushes review branch → PR → two independent successful hosted Windows preflights → user-approved fast-forward → separate R1 authorization. Any hosted failure blocks integration.
 - Rollback: discard only the explicitly listed D-51 changes after review; preserve unrelated work and untracked files.
 - D-51 continuation (user-approved): close B1/B2, address S1–S3 and preserve original records. Add one polling regression (206 total); qualify final modified source separately with20 read-only LF/CRLF suites,13 precise-assertion mutants and56 publication scenarios across PS5.1/7. External final17-file seal is generated after all review/ledger edits; no required self-hash is embedded in one of17. Another Claude verdict is required before publication; all real writes remain uncommitted.
+
+
+### Workspace consolidation / D-52 — approved migration and finalization
+- Goal: one permanent active checkout; published D-51 base34a1ae02cce4da959078180da81976e8c2f333bd preserved.
+- Files for publication: docs/ledger/{DECISIONS,LOG,PLAN,STATE}; recovery archives and machine-specific details stay local.
+- Acceptance: backup hashes, non-force retirement, sole worktree, source-lock/pin/gate integrity, git fsck, preflight and206 offline tests.
+- Cost ceiling: $0; no installs or metered calls.
+- MEASURED migration:540 backup items verified; original1623-file state restored;68 changed/untracked originals retained;116 non-ledger blobs match D-51.
+- MEASURED retirement: four stray files moved/hash-checked; redundant worktree removed through Git; permanent checkout alone remains.
+- Review branch: feat/D-52-workspace-finalization. Cross-tool review is required before commit; Claude CLI currently signed out.
+- Publication: explicit four-file staging only, review staged diff, then authorized local commit; user-only remote push. No automatic main update.
+- Rollback: use verified external recovery; local original-state archives and historical evidence are retained.
+- Out of scope: R1/NVDA/input/Meta, source changes, dependencies, remote writes, tags or historical-code publication.

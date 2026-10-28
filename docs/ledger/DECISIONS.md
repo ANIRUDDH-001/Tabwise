@@ -181,3 +181,12 @@ User answer: "Cross-tool verdict: BLOCK." "Review these findings and make the sm
 Scope: B1 sealed staged/committed tree and exact contents across normal hooks; B2 Windows PowerShell5.1/7 native handling; S1 external non-self-referential17-file seal; S2 diagnostic-only mutation attribution and bounded assertions; S3 post-quit polling success coverage. Original records retained; fresh206-test qualification and scratch validation only.
 Restrictions: "DO NOT: Commit or push to the real remote. Trigger any GitHub workflow. Run local NVDA, screen-reader automation or desktop keyboard actions. Call Meta APIs or incur charges. Modify frozen R1 production logic or safety deadlines. Delete unrelated files from either worktree. Change the governance protocol to bypass cross-tool review. Claim approval before the next independent reviewer issues it."
 Consequence: prior Claude BLOCK stays in force pending another cross-tool verdict; no real index.lock deletion, no hook disabling, no retry of an ambiguous push. Commit subject unchanged; exact execution requires the separately supplied external seal/hash. Reversal: explicit user instruction.
+
+
+## D-52 2026-10-28 — Consolidation and safeguarded worktree retirement
+User answer: "You are authorized to perform reversible local workspace operations AFTER verified backups and reconciliation checks."
+Finalization: "The user explicitly APPROVES safeguarded retirement of the redundant C: worktree." "Do not bypass the existing user-only remote-push restriction."
+Consequence: permanent checkout retained; redundant worktree retired through the approved non-force procedure after backup/source checks; all four stray files archived and hash-checked.
+Preservation: all68 old changed/untracked project originals, local configuration, budget data, Git recovery metadata and historical evidence remain in external local recovery. No old code integrated.
+Publication: prepare only these four ledger files; local commit remains blocked pending cross-tool review (Claude CLI signed out); user alone pushes.
+Reversal: use the verified external recovery copies; never overwrite active common Git metadata. Full original authorization and local paths retained privately.
