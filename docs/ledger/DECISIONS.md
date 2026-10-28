@@ -199,3 +199,15 @@ Boundary: "Do not commit or push. Do not dispatch R1." No local real NVDA, deskt
 Consequence: tests first; config-only candidate and final source/spec re-lock; independent Claude review of exact diff before separately authorized hosted qualification.
 Preservation: original R1 #3 remains scored FAIL/no rerun; prior uncommitted STATE and LOG preserved in local review evidence; LOG remains append-only.
 Approval recorded at: 2026-10-28T15:00:38Z (UTC, date -u); user selected the configuration-only design in this session.
+## D-54 2026-10-28T15:30:38Z — Authorize one A15 R1 qualification
+User approval: "let's do it", followed by a request for execution steps.
+Scope: One manual GitHub Actions workflow_dispatch on main using
+.github/workflows/r1.yml, on a disposable GitHub-hosted Windows runner.
+Profile: D-53/A15, virtualBuffers.enableOnPageLoad=false.
+Acceptance: Original ten steps, three fresh complete attempts,
+strict key acknowledgements, original speech expectations and all guards.
+Budget: No Meta API calls or additional metered services.
+R1 #3 remains scored FAIL with rerun_allowed=false.
+This is a distinct A15 qualification, not a rerun of R1 #3.
+No local NVDA execution or automatic retry is authorized.
+The resulting scored run must be recorded in RUNS.md after evidence review.
