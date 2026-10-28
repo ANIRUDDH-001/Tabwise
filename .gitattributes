@@ -1,3 +1,6 @@
 # Append-only ledgers: keep both sides' lines on merge (12 RT39)
 docs/ledger/LOG.jsonl merge=union
 docs/ledger/COSTS.jsonl merge=union
+
+# Vendored upstream bytes (D-39): never convert line endings, so files stay byte-identical to npm's
+vendor/** -text

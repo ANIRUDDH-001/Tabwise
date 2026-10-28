@@ -1,0 +1,92 @@
+# R1 (PLAN F-02, D-36, D-37): real NVDA speech on our own fixture page, on a disposable GitHub-hosted Windows VM.
+# Manual trigger on main only; one R1 job at a time; read-only token; no secrets and no Meta API calls.
+# Actions are pinned to full commit SHAs (S-01; PROVENANCE.md). Evidence is written under RUNNER_TEMP,
+# outside the checkout, and uploaded even when a step fails or the run is cancelled (if: always()).
+name: r1
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r1
+  cancel-in-progress: false
+
+jobs:
+  r1:
+    runs-on: windows-2025
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.22.1
+      - name: Install dependencies from the lockfile (no install scripts)
+        run: npm ci --ignore-scripts
+      - name: Prepare the VM for screen-reader automation (Guidepup)
+        run: npx --no-install guidepup setup --ci
+      - name: Install NVDA (Guidepup assets)
+        run: npx --no-install guidepup install nvda
+      - name: Install Chromium (Playwright)
+        run: npx --no-install playwright install chromium
+      # M-07: tracked files and the hooked Guidepup files become read-only. A speed bump against accidental
+      # writes, not a lock: the job's own user can clear the attribute. r1.mjs still checks before every step.
+      - name: Make the checkout read-only
+        shell: pwsh
+        run: |
+          foreach ($f in (git ls-files)) { Set-ItemProperty -LiteralPath $f -Name IsReadOnly -Value $true }
+          Get-ChildItem -Recurse -File node_modules/@guidepup/guidepup/lib | ForEach-Object { $_.IsReadOnly = $true }
+      - name: Offline tests
+        run: npm test
+      - name: R1
+        id: r1
+        timeout-minutes: 30
+        run: npm run r1
+      # S-04: this job's diagnostics only. RUNNER_TEMP is emptied at the start and end of each job.
+      - name: Job diagnostic
+        if: always()
+        shell: pwsh
+        run: |
+          $root = Join-Path $env:RUNNER_TEMP 'r1-evidence'
+          $diag = Join-Path $root '_runner'
+          New-Item -ItemType Directory -Force $diag | Out-Null
+          # NVDA's log is scrubbed of local paths and capped at 1 MiB, never uploaded raw.
+          node scripts/r1.mjs --scrub-log "$env:TEMP\nvda.log" (Join-Path $diag 'nvda.log')
+          $runs = @(Get-ChildItem -Path $root -Directory | Where-Object { $_.Name -ne '_runner' } | ForEach-Object {
+            @{ run = $_.Name; summary = (Test-Path (Join-Path $_.FullName 'summary.json')) } })
+          $summary_files = @(Get-ChildItem -Path $root -Recurse -File -Filter 'summary.json' |
+            ForEach-Object { $_.FullName.Substring($root.Length + 1).Replace('\', '/') })
+          @{ run_id = '${{ github.run_id }}'; run_attempt = '${{ github.run_attempt }}'; sha = '${{ github.sha }}';
+             job_status = '${{ job.status }}'; r1_outcome = '${{ steps.r1.outcome }}'; runs = $runs;
+             summary_files = $summary_files } |
+            ConvertTo-Json -Depth 4 | Set-Content -Encoding utf8 (Join-Path $diag 'job.json')
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: r1-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/r1-evidence/
+          if-no-files-found: error
+          retention-days: 30
+      # S-04: once R1 has started, there must be a run folder and each must hold a summary.json. Checked after
+      # the upload, so the evidence is kept either way; a missing summary fails the job.
+      - name: Evidence contract
+        if: always()
+        shell: pwsh
+        env:
+          R1_OUTCOME: ${{ steps.r1.outcome }}
+        run: |
+          if ($env:R1_OUTCOME -eq 'skipped' -or $env:R1_OUTCOME -eq '') { Write-Output 'R1 did not start.'; exit 0 }
+          $root = Join-Path $env:RUNNER_TEMP 'r1-evidence'
+          $runs = @(Get-ChildItem -Path $root -Directory -Filter 'r1-*' -ErrorAction SilentlyContinue)
+          $missing = @($runs | Where-Object { -not (Test-Path (Join-Path $_.FullName 'summary.json')) })
+          if ($runs.Count -eq 0) { Write-Output "R1 outcome $env:R1_OUTCOME, but no r1-* evidence folder."; exit 1 }
+          if ($missing.Count) { Write-Output "No summary.json in: $($missing.Name -join ', ')"; exit 1 }
+          Write-Output "summary.json present in $($runs.Count) run folder(s)."

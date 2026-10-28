@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "screenReaders": [
+    {
+      "id": "orca",
+      "name": "Orca",
+      "platforms": ["linux"],
+      "defaultDownload": true,
+      "assets": [
+        {
+          "version": "0.3.0-51.1",
+          "platformVersion": "7",
+          "repository": "guidepup/orca",
+          "asset": "guidepup-orca-0.3.0-51.1.tar.gz",
+          "sha256": "aec9d34ba4b258208938054e97a725216c8e4fbd00c5d9483c120cfccd2ef4f3"
+        }
+      ]
+    },
+    {
+      "id": "nvda",
+      "name": "NVDA",
+      "platforms": ["win32"],
+      "defaultDownload": true,
+      "assets": [
+        {
+          "version": "0.2.1-2026.2",
+          "repository": "guidepup/nvda",
+          "asset": "guidepup-nvda-0.2.1-2026.2.zip",
+          "sha256": "7df0ca3c1c9e8c6521bc7553486ca360ed6f0b4f9bdbd6603131e38b5c1497a1"
+        }
+      ]
+    },
+    {
+      "id": "voiceover",
+      "name": "VoiceOver",
+      "platforms": ["darwin"],
+      "defaultDownload": true,
+      "assets": [
+        {
+          "version": "0.0.1-VoiceOver4",
+          "platformVersion": "21",
+          "repository": "guidepup/voiceover",
+          "asset": "guidepup-voiceover-preferences-macos-14.dmg",
+          "sha256": "fd88500b740bb3389ec295465d35a5351d49a57fe120983aed3c761cfb349c6a"
+        },
+        {
+          "version": "0.0.1-VoiceOver4",
+          "platformVersion": "22",
+          "repository": "guidepup/voiceover",
+          "asset": "guidepup-voiceover-preferences-macos-14.dmg",
+          "sha256": "fd88500b740bb3389ec295465d35a5351d49a57fe120983aed3c761cfb349c6a"
+        },
+        {
+          "version": "0.0.1-VoiceOver4",
+          "platformVersion": "23",
+          "repository": "guidepup/voiceover",
+          "asset": "guidepup-voiceover-preferences-macos-14.dmg",
+          "sha256": "fd88500b740bb3389ec295465d35a5351d49a57fe120983aed3c761cfb349c6a"
+        },
+        {
+          "version": "0.0.1-VoiceOver4",
+          "platformVersion": "24",
+          "repository": "guidepup/voiceover",
+          "asset": "guidepup-voiceover-preferences-macos-15.dmg",
+          "sha256": "ef5a533e38f37aff44682b125b07855b4cd0eb24d04416d48df5097386580799"
+        },
+        {
+          "version": "0.0.1-VoiceOver4",
+          "platformVersion": "25",
+          "repository": "guidepup/voiceover",
+          "asset": "guidepup-voiceover-preferences-macos-26.dmg",
+          "sha256": "c46e353d4f2d4a717d3362211de638ee55fcb58dbec9cf9abd0170c35d41b225"
+        },
+        {
+          "version": "0.1.0-VoiceOver4",
+          "platformVersion": "27",
+          "repository": "guidepup/voiceover",
+          "asset": "guidepup-voiceover-preferences-xcode-27.dmg",
+          "sha256": "3ea13925dc75bf42df0ffe981814efc2a6d822b13321e2d5b0cb77593d15cee2"
+        }
+      ]
+    }
+  ]
+}

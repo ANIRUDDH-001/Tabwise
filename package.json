@@ -7,7 +7,7 @@
     "node": ">=24.22.1"
   },
   "scripts": {
-    "test": "node --test \"test/*.test.mjs\"",
+    "test": "node --test --test-timeout=10000 \"test/*.test.mjs\"",
     "spend": "node scripts/spend.mjs",
     "versions": "node scripts/versions.mjs",
     "r1": "node scripts/r1.mjs"
