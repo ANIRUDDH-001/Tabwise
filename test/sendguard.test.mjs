@@ -3,6 +3,7 @@
 // NVDAClient #sendChord, runVbsScript runSendKeys): admit (bounded check), commit in the same turn,
 // dispatch, release (ack, settle, post-check). test/vendor.test.mjs runs the vendored code itself.
 // Replaces the D-37 wrapper tests; the brief (docs/reviews/R1-D39-review-brief.md) maps old to new.
+import { deferred, reached } from './helpers/reliability.mjs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { sendGate, judgeKeys, pageKeyOf, pageAck, VK } from '../src/speech/sendguard.mjs';
@@ -18,7 +19,7 @@ const OK_ACK = Object.assign(async (token) => ({ ack: pageKeyOf(token.info) === 
 // A gate with a scripted foreground check and ack; the clock only moves when a test moves it.
 function rig({ verdict = () => [], ack = OK_ACK, integrity = () => [], ...opts } = {}) {
   let t = 0;
-  const gate = sendGate({ checkMs: 100, settleMs: 0, ackMs: 100, maxAgeMs: 100, now: () => t, ...opts });
+  const gate = sendGate({ checkMs: 5000, settleMs: 0, ackMs: 5000, maxAgeMs: 100, now: () => t, ...opts });
   const log = [];
   gate.setCheck(async (ctx) => { log.push(`${ctx.phase}:${ctx.send}`); return verdict(ctx); });
   if (ack) gate.setAck(Object.assign(async (token) => { log.push(`ack:${token.id}`); return ack(token); }, { before: async () => [] }));
@@ -59,14 +60,14 @@ test('gate: armed -> pre-check, one dispatch, ack, post-check, in that order', a
 });
 
 test('T3 gate: stopped while the pre-check is pending, the check then says OK -> zero sends, epoch refusal', async () => {
-  let release;
-  const { gate } = rig({ verdict: () => new Promise((r) => { release = () => r([]); }) });
+  const entered = deferred(), reply = deferred();
+  const { gate } = rig({ verdict: () => { entered.resolve(); return reply.promise; } });
   gate.arm('Tab');
   const phys = [];
   const p = send(gate, TAB, () => phys.push('Tab'));
-  await tick();
+  await reached(entered.promise, p, 'foreground check');
   gate.stop('SIGINT received');
-  release();
+  reply.resolve([]);
   await assert.rejects(p, /R1_REFUSED/);
   assert.deepEqual(phys, []);
   assert.equal(gate.status().refused, 1);
@@ -74,18 +75,20 @@ test('T3 gate: stopped while the pre-check is pending, the check then says OK ->
 });
 
 test('T4 gate: a pre-check that says OK only after its timeout -> zero sends, stopped as pre', async () => {
-  const { gate } = rig({ verdict: () => new Promise((r) => setTimeout(() => r([]), 300)) });
+  const reply = deferred();
+  const { gate } = rig({ checkMs: 40, verdict: () => reply.promise });
   gate.arm('Tab');
   const phys = [];
   await assert.rejects(send(gate, TAB, () => phys.push('Tab')), /R1_REFUSED/);
-  await new Promise((r) => setTimeout(r, 350));
+  reply.resolve([]);
+  await tick();
   assert.deepEqual(phys, []);
   assert.equal(gate.status().kind, 'pre');
   assert.match(gate.status().reason, /timed out/);
 });
 
 test('gate: a check that throws, returns no verdict, or a mismatch -> zero sends', async () => {
-  for (const verdict of [() => { throw new Error('probe died'); }, () => undefined, () => ['foreground pid 9 is not Chromium 1']]) {
+  for (const [verdict, reason] of [[() => { throw new Error('probe died'); }, 'foreground check failed: probe died'], [() => undefined, 'foreground check returned no verdict'], [() => ['foreground pid 9 is not Chromium 1'], 'foreground pid 9 is not Chromium 1']]) {
     const { gate } = rig({ verdict });
     gate.arm('Tab');
     const phys = [];
@@ -93,6 +96,7 @@ test('gate: a check that throws, returns no verdict, or a mismatch -> zero sends
     assert.deepEqual(phys, []);
     assert.equal(gate.status().kind, 'pre');
     assert.equal(gate.status().misdelivered, false);
+    assert.ok(gate.status().reason.endsWith(reason), gate.status().reason);
   }
 });
 
@@ -114,11 +118,14 @@ test('gate: no check, no ack reader, or a failing integrity check -> refused bef
 });
 
 test('T9 gate: two concurrent chords -> the second admit is refused, the gate stops, the first commit is refused', async () => {
-  const { gate } = rig({ verdict: () => new Promise((r) => setTimeout(() => r([]), 10)) });
+  const { gate } = rig();
   gate.arm('click');
   const phys = [];
   const results = await Promise.allSettled([send(gate, TAB, () => phys.push(1)), send(gate, TAB, () => phys.push(2))]);
   assert.deepEqual(results.map((r) => r.status), ['rejected', 'rejected']);
+  for (const r of results) assert.match(r.reason.message, /^R1_REFUSED:/);
+  assert.match(results[1].reason.message, /while send 1 is in flight/);
+  assert.match(results[0].reason.message, /stopped|epoch|action ended/);
   assert.deepEqual(phys, []);
   assert.equal(gate.status().kind, 'protocol');
   assert.match(gate.status().reason, /in flight/);
@@ -168,7 +175,7 @@ test('T19 gate: ack false -> possibly misdelivered (kind ack), the post-check st
 });
 
 test('T19 gate: an ack reader that hangs is bounded and counts as missing', async () => {
-  const { gate } = rig({ ack: () => new Promise(() => {}) });
+  const { gate } = rig({ ackMs: 40, ack: () => new Promise(() => {}) });
   gate.arm('Tab');
   await send(gate, TAB);
   assert.equal(gate.status().kind, 'ack');
@@ -299,7 +306,7 @@ test('T19/T26 pageAck: waits for the key, advances its cursor, tolerates a late 
   const late = await short(tok(TAB));
   assert.equal(late.ack, false);
   assert.match(late.reasons[0], /saw 0/);
-  const broken = pageAck({ read: async () => { throw new Error('Target closed'); }, ackMs: 30, pollMs: 2 });
+  const broken = pageAck({ read: async () => { throw new Error('Target closed'); }, ackMs: 5000, pollMs: 2 });
   const b = await broken(tok(TAB));
   assert.equal(b.ack, false);
   assert.match(b.reasons.join(' '), /Target closed/);
@@ -309,7 +316,7 @@ test('T19/T26 pageAck: waits for the key, advances its cursor, tolerates a late 
 // ack (D39-B01 P04 below), so q lands after the acknowledged Tab here.
 test('pageAck.final: a non-modifier key after the last acknowledged one is reported', async () => {
   const log = [ev(1, 'Tab'), ev(2, 'Control')];
-  const ack = pageAck({ read: async (from) => log.filter((e) => e.seq > from), ackMs: 30, pollMs: 2 });
+  const ack = pageAck({ read: async (from) => log.filter((e) => e.seq > from), ackMs: 5000, pollMs: 2 });
   assert.equal((await ack({ id: 1, info: TAB })).ack, true);
   log.push(ev(3, 'q'));
   const rest = await ack.final();
@@ -321,7 +328,7 @@ test('pageAck.final: a non-modifier key after the last acknowledged one is repor
 // Codex P04: the page log holds Tab, Control, A before the Tab ack is read; the later A send delivers nothing.
 test('D39-B01 P04 pageAck: a key after a Control in the same window fails that ack; it is not kept for the next send', async () => {
   const log = [ev(1, 'Tab'), ev(2, 'Control'), ev(3, 'A', true)];
-  const ack = pageAck({ read: async (from) => log.filter((e) => e.seq > from), ackMs: 30, pollMs: 2 });
+  const ack = pageAck({ read: async (from) => log.filter((e) => e.seq > from), ackMs: 5000, pollMs: 2 });
   const tab = await ack({ id: 1, info: TAB });
   assert.equal(tab.ack, false);
   assert.match(tab.reasons.join(' '), /saw 2/);
@@ -332,7 +339,7 @@ test('D39-B01 P04 gate: the same trace through sendGate -> misdelivered at the T
   const gate = sendGate({ checkMs: 100, settleMs: 0, ackMs: 30, maxAgeMs: 1000 });
   gate.setCheck(async () => []);
   gate.setIntegrity(() => []);
-  gate.setAck(pageAck({ read: async (from) => log.filter((e) => e.seq > from), ackMs: 30, pollMs: 2 }));
+  gate.setAck(pageAck({ read: async (from) => log.filter((e) => e.seq > from), ackMs: 5000, pollMs: 2 }));
   const sent = [];
   gate.arm('Tab');
   await send(gate, TAB, () => { sent.push('Tab'); log.push(ev(1, 'Tab'), ev(2, 'Control'), ev(3, 'A', true)); });
@@ -352,7 +359,7 @@ test('D39-B01 pre-send check: a non-modifier key already on the page -> refused 
   const gate = sendGate({ checkMs: 100, settleMs: 0, ackMs: 30, maxAgeMs: 1000 });
   gate.setCheck(async () => []);
   gate.setIntegrity(() => []);
-  gate.setAck(pageAck({ read: async (from) => { reads += 1; return log.filter((e) => e.seq > from); }, ackMs: 30, pollMs: 2 }));
+  gate.setAck(pageAck({ read: async (from) => { reads += 1; return log.filter((e) => e.seq > from); }, ackMs: 5000, pollMs: 2 }));
   const sent = [];
   gate.arm('Tab');
   await send(gate, TAB, () => { sent.push('Tab'); log.push(ev(4, 'Tab')); });
@@ -374,7 +381,7 @@ test('D39-B01 residual (disclosed, D-42): an identical stray landing after the p
   const gate = sendGate({ checkMs: 100, settleMs: 0, ackMs: 30, maxAgeMs: 1000 });
   gate.setCheck(async () => []);
   gate.setIntegrity(() => []);
-  gate.setAck(pageAck({ read: async (from) => log.filter((e) => e.seq > from), ackMs: 30, pollMs: 2 }));
+  gate.setAck(pageAck({ read: async (from) => log.filter((e) => e.seq > from), ackMs: 5000, pollMs: 2 }));
   gate.arm('type A');
   // Our A is lost; a stray A arrives inside the ack window. Same key, same window: counted as confirmed.
   await send(gate, CHAR('A'), () => { log.push(ev(1, 'Shift', true), ev(2, 'A', true)); });

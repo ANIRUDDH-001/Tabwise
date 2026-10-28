@@ -1,20 +1,35 @@
-# STATE — R1 #2 offline-test failure, test hardening and Windows preflight (D-50)
+# STATE — D-51 corrections ready for Claude cross-tool review; no publication
+Updated: 2026-10-28T12:06:28Z · by: codex
+- Now: test/d51-reliability at 6eceb0e64075ba522866f344719a643f3744ca59;C: safety worktree;all17 approved paths uncommitted.
+- B1: original hook-extra18-file push reproduced; corrected snapshot/parent/tree/17paths/blobs/modes/raw/index/worktree/message/ref checks and immutable-OID push prevent this script's unauthorized publication.
+- B2: PS5.1 original stderr false-failure reproduced (including remote accepted push); .NET concurrent native wrapper validated PS5.1 and7; no push retries.
+- S1: external final17-file seal is generated AFTER this ledger;rawSHA256+Gitblobs/modes;fingerprint supplied outside17;no self-reference.
+- S2: original records preserved; old late-start reasonMatched corrected additively;final13/13 precise assertion catches,0cancellations.
+- S3: new four-probe polling success test;full206 includes original205;skip-poll mutation caught. Frozen production/dependencies/workflows/locks/acceptance unchanged;R1 remains false.
+- MEASURED: new final20x206 read-only LF/CRLF suites pass;56/56 publication cases acrossPS5.1/7 pass;30additional publication206 suites;worktree206/206;targeted3/3.
+- Review: fresh separate-agent APPROVE code/local evidence,no open blockers (MODEL/L1);original Claude BLOCK remains until next cross-tool verdict. Claude CLI signed out;no login/model request.
+- Next: owner gives sealed package to Claude;NO-GO publication until new verdict+authorization;two independent hosted preflights before FF integration;separate R1 authorization.
+- Last verification: node scripts/preflight.mjs ok;git diff --check ok;real index empty;real HEAD/remote main unchanged;no NVDA/input/R1/Meta/spend/real commit/push;no index.lock deleted.
 
-Updated: 2026-10-28T07:03:31Z · by: claude
-
-- Now: D-50 hardens the async tests that failed R1 #2 and adds a test-only Windows preflight workflow (`offline-preflight`).
-- R1 #2 (workflow 40637055592 at 9151992): offline tests 204/205 (T1 "release is not a function" + a late R1_REFUSED rejection); the R1 step was skipped. Not a scored attempt, no RUNS row; R1 #1 stays FAIL/setup-failed.
-- Root cause: tests waited a fixed sleep for a point the code under test reaches later on a slow runner, and left promises unhandled. Reproduced locally with injected fs delay and event-loop stalls.
-- Change: test code only (vendor, sendguard, speech, engineering tests) plus `test/helpers/faults.mjs`, `scripts/preflight.mjs`, `.github/workflows/preflight.yml`. No assertion removed or weakened; new assertions listed in D-50.
-- Unchanged: `src/`, `scripts/r1.mjs`, `r1.yml`, fixtures, `vendor/`, lock (no re-lock), Day-1 gates ca0c9feb…3362, A14, foreground checks, steps, expected speech, 3/3, thresholds.
-- Tests: stress matrix 90 runs before review fixes (4 failed runs: A4 and D43 windows, both fixed); then 69 runs in read-only CRLF and LF clones (repeated, random order, parallel, fs delay, stalls up to 120 ms), 0 failures, 0 late activity; the workflow's profile step simulated locally, all passed. Local Windows 11 only: not full parity with windows-2025.
-- Mutants: 7 detected (one only by the test timeout), 1 equivalent excluded.
-- Review: separate read-only Claude agent (same vendor): REQUEST CHANGES (T20 nearly vacuous, A4 flaky under stalls); both fixed and re-checked.
-- Next: user commits and pushes to a review branch, opens a PR to main and checks the `offline-preflight` run. A second R1 run needs the user's separate approval after that.
-- No NVDA, desktop input, Actions dispatch, R1 run, Meta calls, installs, commits or pushes in this work.
-
-## Handoff
-Uncommitted: docs/CODEMAP.md, docs/ledger/{DECISIONS.md,LOG.jsonl,STATE.md}
-Uncommitted: test/{vendor,sendguard,speech,engineering}.test.mjs
-Uncommitted (new): test/helpers/faults.mjs, scripts/preflight.mjs, .github/workflows/preflight.yml
-Publication: review branch + PR for this change (D-50 overrides D-44 once). R1 rerun not approved.
+## Handoff —17 explicit uncommitted paths
+Worktree: C:\Users\ANIRUDDH\.codex\worktrees\tabwise-r1-safety\app
+Modified: docs/CODEMAP.md
+Modified: docs/ledger/DECISIONS.md
+Modified: docs/ledger/LOG.jsonl
+Modified: docs/ledger/PLAN.md
+Modified: docs/ledger/STATE.md
+Modified: test/broker.test.mjs
+Modified: test/engineering.test.mjs
+Modified: test/sendguard.test.mjs
+Modified: test/speech.test.mjs
+Modified: test/vendor.test.mjs
+Modified: test/helpers/faults.mjs
+Modified: test/helpers/sandbox.mjs
+New: test/helpers/reliability.mjs
+New: docs/reviews/D51-report.md
+New: docs/reviews/D51-results.json
+New: docs/reviews/D51-review.md
+New: docs/reviews/D51-publish.ps1
+External seal/command/package: D:\Projects\Meta AI\D51-review-package\ (not staged;generated after all17 edits).
+Preserved: primary D: checkout and four unrelated C: untracked files.
+Proposed commit: test(r1): eliminate residual CI timing races (D-51)

@@ -4,6 +4,7 @@
 // - R1T_FS_DELAY_MS=n   each fs.promises call waits n ms before it runs (slow disk, antivirus scan);
 // - R1T_STALL_MS=n      the event loop is blocked for n ms ...
 // - R1T_STALL_EVERY_MS=m  ... every m ms (CPU contention on a shared runner; default 25).
+// - R1T_COMPLETION_DELAY_MS=n delays setImmediate fake OS completions (targeted tests).
 // With none set, this module changes nothing.
 import fs from 'node:fs';
 
@@ -11,6 +12,10 @@ const num = (k) => { const v = Number(process.env[k] ?? 0); return Number.isFini
 const fsDelay = num('R1T_FS_DELAY_MS');
 const stall = num('R1T_STALL_MS');
 const every = num('R1T_STALL_EVERY_MS') || 25;
+// Delay fake asynchronous OS completions separately from event-loop stalls. This exposes a
+// positive fixture whose write/exit deadline is shorter than the completion it is waiting for.
+const completion = num('R1T_COMPLETION_DELAY_MS');
+if (completion) globalThis.setImmediate = (fn, ...args) => setTimeout(fn, completion, ...args);
 
 if (fsDelay) {
   for (const [name, real] of Object.entries(fs.promises)) {

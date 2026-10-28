@@ -32,7 +32,7 @@ beforeEach(() => reset());
 
 // The vendored code against our real gate, with a scripted foreground check.
 function wire(v, { verdict = () => [], ...opts } = {}) {
-  const gate = sendGate({ checkMs: 100, settleMs: 0, ackMs: 100, maxAgeMs: 1000, writeMs: 50, sendMs: 50, killMs: 50, ...opts });
+  const gate = sendGate({ checkMs: 5000, settleMs: 0, ackMs: 5000, maxAgeMs: 1000, writeMs: 5000, sendMs: 5000, killMs: 2000, ...opts });
   const log = [];
   gate.setCheck(async (ctx) => { log.push(`${ctx.phase}:${ctx.send}`); return verdict(ctx); });
   gate.setAck(Object.assign(async (token) => ({ ack: pageKeyOf(token.info) === null ? null : true, reasons: [] }), { before: async () => [] }));
@@ -107,7 +107,7 @@ test('r1Gate: no gate -> no key; one-shot; an incomplete gate is rejected', asyn
 test('NVDA key: canonical bytes, all downs then ups reversed, pre-check before and post-check after the write callback (T20)', async () => {
   const v = loadVendor();
   const { client, sock } = await connected(v);
-  const { gate, log } = wire(v);
+  const { gate, log } = wire(v, { writeMs: 500 });
   gate.arm('Shift+Tab');
   await client.sendKeyCode({ keyCode: [v.KeyCodes.Tab], modifiers: [v.Modifiers.Shift] });
   assert.deepEqual(sock.keyWrites(), [keyMsg(160, 42, false, true), TAB_DOWN, TAB_UP, keyMsg(160, 42, false, false)]);
@@ -206,7 +206,7 @@ test('T22 connect retries stop at once when the gate stops; no handshake writes'
 test('T5 write callback never fires -> end (flush), then destroy; possibly misdelivered; dispatch ended', async () => {
   const v = loadVendor();
   const { client, sock } = await connected(v);
-  const { gate } = wire(v);
+  const { gate } = wire(v, { writeMs: 50, sendMs: 50, killMs: 50 });
   gate.arm('Tab');
   sock.hold = true;
   sock.ops.length = 0;
@@ -265,10 +265,13 @@ test('stop-speech is awaited and gated before the action key (capture path)', as
 test('T9 two concurrent chords -> second admit refused, first commit refused, 0 key writes; click is sequential', async () => {
   const v = loadVendor();
   const { client, sock } = await connected(v);
-  const { gate } = wire(v, { verdict: () => sleep(10).then(() => []) });
+  const { gate } = wire(v);
   gate.arm('click');
   const r = await Promise.allSettled([client.sendKeyCode({ keyCode: v.KeyCodes.Tab }), client.sendKeyCode({ keyCode: v.KeyCodes.Tab })]);
   assert.deepEqual(r.map((x) => x.status), ['rejected', 'rejected']);
+  for (const x of r) assert.match(x.reason.message, /^R1_REFUSED:/);
+  assert.match(r[1].reason.message, /while send 1 is in flight/);
+  assert.match(r[0].reason.message, /stopped|epoch|action ended/);
   assert.deepEqual(sock.keyWrites(), []);
   assert.equal(gate.status().kind, 'protocol');
   const src = fs.readFileSync(path.join(VENDOR, 'lib/windows/NVDA/NVDA.js'), 'utf8');
@@ -365,14 +368,14 @@ test('T1 VBS preparation held, the gate stopped, the hold released -> 0 execFile
 // T21 at the vendored boundary: the admit passes, then the event loop stalls past maxAgeMs before the vendored
 // code calls commit. commit returns false, and the vendored code must not send anyway.
 function stallingGate(v) {
-  const gate = sendGate({ checkMs: 100, settleMs: 0, ackMs: 100, maxAgeMs: 20, writeMs: 50, sendMs: 50, killMs: 50 });
+  let clock = 0;
+  const gate = sendGate({ now: () => clock, checkMs: 100, settleMs: 0, ackMs: 100, maxAgeMs: 20, writeMs: 50, sendMs: 50, killMs: 50 });
   gate.setCheck(async () => []);
   gate.setAck(Object.assign(async (token) => ({ ack: pageKeyOf(token.info) === null ? null : true, reasons: [] }), { before: async () => [] }));
   gate.setIntegrity(() => []);
   const stalled = { ...gate, admit: async (info) => {
     const token = await gate.admit(info);
-    const until = performance.now() + 40;
-    while (performance.now() < until) { /* stall */ }
+    clock += 40; // deterministically expire freshness between admission and commit
     return token;
   } };
   v.r1Gate.setGate(stalled);
@@ -465,7 +468,7 @@ test('runSendKeys: a non-zero exit is possibly misdelivered; a gate stop kills t
 
 test('T6 cscript never exits -> killed; still live after the kill wait; settles when the child finally exits', async () => {
   const v = loadVendor();
-  const { gate } = wire(v);
+  const { gate } = wire(v, { writeMs: 50, sendMs: 50, killMs: 50 });
   gate.arm('type A');
   let child;
   fakes['fs.writeFile'] = async () => {};

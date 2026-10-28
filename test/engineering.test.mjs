@@ -2,6 +2,7 @@
 import { fakes, reset, loadVendor, fakeNvdaInstall } from './helpers/sandbox.mjs';
 import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { deferred, reached, exactError } from './helpers/reliability.mjs';
 import { EventEmitter } from 'node:events';
 import { PassThrough } from 'node:stream';
 import { sendGate, pageAck, pageKeyOf, VK } from '../src/speech/sendguard.mjs';
@@ -27,17 +28,21 @@ async function dispatch(gate, info, sent = []) {
 }
 
 test('D43 freshness: a delayed page pre-read cannot release input from an earlier passing foreground verdict', async () => {
-  let clock = 0, away = false, finish;
+  let clock = 0, away = false;
+  const entered = deferred(), finish = deferred();
   const gate = gateAt(() => clock);
   gate.setCheck(async () => away ? ['foreground changed'] : []);
-  gate.setAck(reader(undefined, () => new Promise((r) => { finish = r; })));
+  gate.setAck(reader(undefined, () => { entered.resolve(); return finish.promise; }));
   const sent = [];
   const result = dispatch(gate, TAB, sent).then(() => null, (e) => e);
-  await tick();
+  await reached(entered.promise, result, 'page pre-read');
   clock = 350;
   away = true;
-  finish([]);
-  assert.ok(await result, 'the changed/stale foreground must refuse the action');
+  finish.resolve([]);
+  const error = await result;
+  assert.equal(error?.constructor, Error);
+  assert.match(error.message, /^R1_REFUSED: before send 1 .*foreground changed/);
+  assert.equal(gate.status().kind, 'pre');
   assert.deepEqual(sent, []);
 });
 
@@ -81,17 +86,20 @@ test('D43 verification: replacing or removing a capability after admission refus
   }
 });
 
-test('D43 acknowledgement: a late page-read result cannot extend the exact acknowledgement deadline', async () => {
-  let sent = false;
+test('D43 acknowledgement: a late page-read result cannot extend the exact acknowledgement deadline', async (t) => {
+  let sent = false, clock = 0;
+  t.mock.method(performance, 'now', () => clock);
   const ack = pageAck({ ackMs: 10, read: async () => {
     if (!sent) return [];
-    await new Promise((r) => setTimeout(r, 30));
+    clock += 30;
     return [{ seq: 1, key: 'Tab', shift: false }];
   } });
   const token = { id: 1, info: TAB };
   assert.deepEqual(await ack.before(token), []);
   sent = true;
-  assert.equal((await ack(token)).ack, false, 'a late read must fail even when its eventual key matches');
+  const result = await ack(token);
+  assert.equal(result.ack, false, 'a late read must fail even when its eventual key matches');
+  assert.match(result.reasons[0], /^page acknowledgement read exceeded 10 ms/);
 });
 
 test('D43 verification: the dispatch gate methods cannot be replaced at runtime', () => {
@@ -175,7 +183,7 @@ test('D43 lifecycle: a nonzero quit status is an error, not a successful reset',
     setImmediate(() => child.emit('close', 1, null));
     return child;
   };
-  await assert.rejects(v.lib('windows/NVDA/quit.js').quit({ resetMs: 5, pollMs: 1 }), (e) => /quit exit 1/i.test(e.cause?.message ?? e.message));
+  await assert.rejects(v.lib('windows/NVDA/quit.js').quit({ timeoutMs: 5000, resetMs: 0, probeMs: 5000, pollMs: 1 }), exactError('NVDA cannot be quit', 'NVDA quit exit 1'));
 });
 
 function port(running) {
@@ -188,7 +196,35 @@ test('D43 lifecycle: reset requires listener disappearance after a successful qu
   fakes['net.connect'] = () => port(true);
   fakes['child_process.spawn'] = () => { const c = new EventEmitter(); c.pid = 321; c.kill = () => true; setImmediate(() => c.emit('close', 0, null)); return c; };
   fakes['child_process.spawnSync'] = () => ({ status: 0 });
-  await assert.rejects(v.lib('windows/NVDA/quit.js').quit({ timeoutMs: 20, resetMs: 5, probeMs: 5, pollMs: 1 }), (e) => /listener|running|reset/i.test(e.cause?.message ?? e.message));
+  await assert.rejects(v.lib('windows/NVDA/quit.js').quit({ timeoutMs: 5000, resetMs: 0, probeMs: 5000, pollMs: 1 }), exactError('NVDA cannot be quit', 'NVDA listener still running after quit; reset not established'));
+});
+
+test('D51 reset polling: a successful quit waits through present listeners until absence is observed', async () => {
+  const v = loadVendor(); fakeNvdaInstall();
+  const events = [];
+  let probes = 0, launches = 0, kills = 0;
+  fakes['net.connect'] = () => {
+    const n = ++probes, running = n < 4;
+    const socket = port(running);
+    socket.once(running ? 'connect' : 'error', () => events.push(`probe ${n}: ${running ? 'present' : 'absent'}`));
+    return socket;
+  };
+  fakes['child_process.spawn'] = (exe, args, options) => {
+    launches++;
+    assert.deepEqual(args, ['--quit']);
+    assert.equal(options.windowsHide, true);
+    events.push('quit spawned');
+    const child = new EventEmitter(); child.pid = 321;
+    child.kill = () => { kills++; return true; };
+    setImmediate(() => { events.push('quit closed 0'); child.emit('close', 0, null); });
+    return child;
+  };
+  const result = await v.lib('windows/NVDA/quit.js').quit({ timeoutMs: 5000, resetMs: 5000, probeMs: 5000, pollMs: 1 });
+  assert.deepEqual(result, { listener_stopped: true });
+  assert.equal(launches, 1);
+  assert.equal(probes, 4, 'initial listener plus two still-present polls and the final absent poll');
+  assert.equal(kills, 0, 'successful quit needs no kill fallback');
+  assert.deepEqual(events, ['probe 1: present', 'quit spawned', 'quit closed 0', 'probe 2: present', 'probe 3: present', 'probe 4: absent']);
 });
 test('D43 lifecycle: startup returns an owned live PID and refuses an existing listener', async () => {
   const v = loadVendor(); fakeNvdaInstall();
@@ -198,11 +234,11 @@ test('D43 lifecycle: startup returns an owned live PID and refuses an existing l
   fakes['child_process.spawn'] = () => { launches++; const c = new EventEmitter(); c.pid = 777; c.exitCode = null; c.kill = () => true; return c; };
   // D-50: readiness comes on the second probe; the window is not under test here (was 100 ms of wall clock,
   // which a 120 ms event-loop stall used up: "NVDA readiness timed out").
-  const info = await v.lib('windows/NVDA/start.js').start({ timeoutMs: 5_000, pollMs: 1, probeMs: 10 });
+  const info = await v.lib('windows/NVDA/start.js').start({ timeoutMs: 5_000, pollMs: 1, probeMs: 5_000 });
   assert.equal(info?.pid, 777);
   assert.equal(info.isAlive(), true);
   fakes['net.connect'] = () => port(true);
-  await assert.rejects(v.lib('windows/NVDA/start.js').start({ timeoutMs: 20, pollMs: 1 }), /already|listener|reset/i);
+  await assert.rejects(v.lib('windows/NVDA/start.js').start({ timeoutMs: 5_000, pollMs: 1, probeMs: 5_000 }), /already|listener|reset/i);
   assert.equal(launches, 1);
 });
 
@@ -212,15 +248,18 @@ test('D43 lifecycle: port absence cannot hide an owned process that remains aliv
   let launched = 0;
   fakes['child_process.spawn'] = () => { launched++; const c = new EventEmitter(); c.pid = 321; c.kill = () => true; setImmediate(() => c.emit('close', 0, null)); return c; };
   const owned = { isAlive: () => true, process: { kill() {} } };
-  await assert.rejects(v.lib('windows/NVDA/quit.js').quit({ owned, timeoutMs: 20, resetMs: 5, probeMs: 5, pollMs: 1 }));
-  assert.equal(launched, 1);
+  await assert.rejects(v.lib('windows/NVDA/quit.js').quit({ owned, timeoutMs: 5000, resetMs: 0, probeMs: 5000, pollMs: 1 }), exactError('NVDA cannot be quit', 'NVDA listener still running after quit; reset not established'));
+  assert.equal(launched, 1, 'quit must actually launch before rejecting the still-live owner');
+  // Positive counterpart: port absent AND owner exited establishes reset; errors cannot stand in for it.
+  await assert.doesNotReject(v.lib('windows/NVDA/quit.js').quit({ owned: { isAlive: () => false }, probeMs: 5000 }));
+  assert.equal(launched, 1, 'an already stopped owner needs no second quit process');
 });
 test('D43 lifecycle: the read-only relay owner query rejects ambiguous or malformed PID data', async () => {
   const v = loadVendor();
   for (const output of ['777\n', '777\n778\n', 'not a pid\n']) {
     fakes['child_process.spawn'] = () => { const c = helper(); c.pid = 555; setImmediate(() => { c.stdout.write(output); c.emit('close', 0, null); }); return c; };
     if (output === '777\n') assert.equal(await v.lib('windows/NVDA/start.js').relayOwnerPid(), 777);
-    else await assert.rejects(v.lib('windows/NVDA/start.js').relayOwnerPid());
+    else await assert.rejects(v.lib('windows/NVDA/start.js').relayOwnerPid(), { name: 'Error', message: 'NVDA owner query failed or returned an ambiguous PID' });
   }
 });
 

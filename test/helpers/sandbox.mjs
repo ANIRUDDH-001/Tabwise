@@ -7,6 +7,7 @@
 // - GUIDEPUP_SCREEN_READERS_PATH and LOCALAPPDATA point at an empty temp folder, so the real NVDA
 //   cache on this machine (%LOCALAPPDATA%/guidepup) is never found.
 // loadVendor() gives a fresh copy of the vendored tree (and of its one-shot r1Gate) per call.
+import { after } from 'node:test';
 import cp from 'node:child_process';
 import net from 'node:net';
 import tls from 'node:tls';
@@ -45,6 +46,13 @@ for (const name of ['mkdtemp', 'writeFile', 'rm']) {
 }
 
 export const EMPTY = fs.mkdtempSync(path.join(os.tmpdir(), 'r1-sandbox-'));
+const made = [EMPTY];
+after(() => {
+  for (const dir of made) {
+    if (path.dirname(dir) !== os.tmpdir() || !/^r1-(sandbox|fake-nvda)-/.test(path.basename(dir))) throw new Error('unsafe sandbox cleanup');
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
 process.env.GUIDEPUP_SCREEN_READERS_PATH = EMPTY;
 process.env.LOCALAPPDATA = EMPTY;
 
@@ -81,6 +89,7 @@ export function fakeNvdaInstall() {
   const manifest = JSON.parse(fs.readFileSync(path.join(VENDOR, 'manifest.json'), 'utf8'));
   const { version } = manifest.screenReaders.find(({ id }) => id === 'nvda').assets[0];
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'r1-fake-nvda-'));
+  made.push(root);
   const exe = path.join(root, 'nvda', 'all', version, 'extracted', 'nvda.exe');
   const pem = path.join(path.dirname(exe), 'userConfig', 'remoteAccess', 'localRelay', 'NvdaRemoteRelay.pem');
   fs.mkdirSync(path.dirname(pem), { recursive: true });

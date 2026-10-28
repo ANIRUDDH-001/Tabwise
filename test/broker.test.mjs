@@ -105,23 +105,29 @@ test('two concurrent processes cannot overspend', async () => {
   const worker = join(t.dir, 'worker.mjs');
   const brokerUrl = new URL('../src/budget/broker.mjs', import.meta.url).href;
   writeFileSync(worker, `
-    import { openBroker } from ${JSON.stringify(brokerUrl)};
+    import { openBroker, BudgetError } from ${JSON.stringify(brokerUrl)};
     const [dbPath, costsPath, id] = process.argv.slice(2);
     const b = openBroker({ dbPath, costsPath, capUsd: 3 });
     try { b.reserve({ model: 'muse-spark-1.3', inputTokens: 1000000, maxOutputTokens: 0, runId: id }); console.log('ok'); }
-    catch (e) { console.log('refused'); }
+    catch (e) { if (!(e instanceof BudgetError) || !/ > cap /.test(e.message)) throw e; console.log('refused'); }
     finally { b.close(); }
   `);
   const run = (id) => new Promise((resolve, reject) => {
     const p = spawn(process.execPath, [worker, t.dbPath, t.costsPath, id]);
-    let out = '';
+    let out = '', err = '';
     p.stdout.on('data', (d) => { out += d; });
+    p.stderr.on('data', (d) => { err += d; });
     p.on('error', reject);
-    p.on('close', () => resolve(out.trim()));
+    p.on('close', (code, signal) => {
+      if (code !== 0 || signal) reject(new Error(`worker ${id} failed (${code}/${signal}): ${err}`));
+      else if (!['ok', 'refused'].includes(out.trim())) reject(new Error(`worker ${id}: unexpected output ${out}`));
+      else resolve(out.trim());
+    });
   });
   const results = await Promise.all([1, 2, 3, 4, 5].map((i) => run(`w${i}`)));
   // $3 cap / $1.25 each → exactly two fit.
   assert.equal(results.filter((r) => r === 'ok').length, 2, results.join(','));
+  assert.equal(results.filter((r) => r === 'refused').length, 3, results.join(','));
   const b = openBroker({ ...t, capUsd: 3 });
   assert.equal(b.status().reservedUsd, 2.5);
   b.close();
