@@ -416,7 +416,9 @@ test('A4: right process but title lacks the nonce -> setup-failed, zero keys', a
 
 test('A4: our window becomes foreground after a wait -> no keys before it, then completes', async () => {
   const nvda = fakeNvda();
-  const a = await runAttempt(ARGS(nvda, { fg: fakeFg(nvda, (i, n) => (i < 3 ? { pid: 7, title: 'Taskbar' } : { pid: PID, title: `R1 sign-up ${n} - Chromium` })) }));
+  // D-50: this test counts polls, not the window (the never-ours test above keeps FAST's 50 ms); a stalled
+  // event loop used up 50 ms before the 4th poll.
+  const a = await runAttempt(ARGS(nvda, { cfg: { ...FAST, focus_wait_ms: 5_000 }, fg: fakeFg(nvda, (i, n) => (i < 3 ? { pid: 7, title: 'Taskbar' } : { pid: PID, title: `R1 sign-up ${n} - Chromium` })) }));
   assert.equal(a.status, 'completed', a.error);
   const firstKey = nvda.calls.findIndex(([c]) => KEYS.has(c));
   assert.equal(nvda.calls.slice(0, firstKey).filter(([c, ok]) => c === 'fg' && ok === false).length, 3);
@@ -820,6 +822,9 @@ const R1ARGS = (nvda, over = {}) => {
   };
 };
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+// D-50: a run started without await is handled at once and awaited before its test ends, so nothing it does
+// can land in a later test; null means it settled without throwing.
+const settled = (p) => p.then(() => null, (e) => e);
 const physOf = (calls) => calls.filter(([c]) => c === 'phys').map(([, k]) => k);
 const at = (calls, entry) => calls.findIndex((c) => c.length === entry.length && c.every((x, i) => x === entry[i]));
 const TEARDOWN_EVENTS = ['SIGINT', 'SIGTERM', 'SIGBREAK', 'SIGHUP', 'uncaughtException', 'unhandledRejection'];
@@ -845,7 +850,7 @@ test('SIGINT mid-step: one teardown: cleanup tried, partial evidence "aborted", 
   const t = rigTeardown({ state, evidence: ev, guard });
   const nvda = fakeNvda({ hangAt: 4, onHang: () => setImmediate(() => t.proc.emit('SIGINT')) });
   const browser = fakeBrowser(nvda);
-  runR1({ nvda, browser, fg: fakeFg(nvda), cfg: FAST, runId: RUN, baseUrl: 'http://127.0.0.1:1', evidence: ev, state, nonce: () => '0a1b2c3d', meta: {}, guard });
+  const run = settled(runR1({ nvda, browser, fg: fakeFg(nvda), cfg: FAST, runId: RUN, baseUrl: 'http://127.0.0.1:1', evidence: ev, state, nonce: () => '0a1b2c3d', meta: {}, guard }));
   await t.done;
   t.dispose();
   assert.deepEqual(t.codes.map(([c]) => c), [130]);
@@ -860,6 +865,7 @@ test('SIGINT mid-step: one teardown: cleanup tried, partial evidence "aborted", 
   assert.deepEqual(recs.map((r) => r.partial === true), [false, false, true]);
   assert.ok(existsSync(join(out, 'raw-1.json')));
   for (const e of TEARDOWN_EVENTS) assert.equal(t.proc.listenerCount(e), 0, `${e} handler removed`);
+  assert.equal(await run, null);
 });
 
 // Replaces 'second SIGINT exits at once even while cleanup hangs' (C3), which B02 reverses: a later signal
@@ -877,13 +883,14 @@ test('B02: later signals during teardown are logged, not an exit; one exit after
   });
   let stopAt = null;
   nvda.stop = async () => { nvda.calls.push(['stop']); await delay(120); stopAt = Date.now(); };
-  runR1({ nvda, browser: fakeBrowser(nvda), fg: fakeFg(nvda), cfg: FAST, runId: RUN, baseUrl: 'http://127.0.0.1:1', evidence: evidenceWriter(tmp()), state, nonce: () => '0a1b2c3d', meta: {}, guard });
+  const run = settled(runR1({ nvda, browser: fakeBrowser(nvda), fg: fakeFg(nvda), cfg: FAST, runId: RUN, baseUrl: 'http://127.0.0.1:1', evidence: evidenceWriter(tmp()), state, nonce: () => '0a1b2c3d', meta: {}, guard }));
   const exitAt = await t.done.then(() => Date.now());
   await delay(50);
   t.dispose();
   assert.deepEqual(t.codes.map(([c]) => c), [130], 'one exit');
   assert.ok(stopAt !== null && exitAt >= stopAt, 'exit only after nvda.stop finished');
   for (const sig of ['SIGTERM', 'SIGBREAK', 'SIGHUP']) assert.ok(t.lines.some((l) => l.includes(sig) && l.includes('during teardown')), `${sig} logged`);
+  assert.equal(await run, null);
 });
 
 // ---------- server and lock ----------
@@ -1066,7 +1073,7 @@ test('T7 runner: the same window change overlapped with SIGINT -> FAIL, not PART
   let away = false;
   const nvda = gatedNvda(guard, { onPhys: (k) => { if (k === 'd') { away = true; t.proc.emit('SIGINT'); } } });
   const fg = fakeFg(nvda, (i, n) => (away ? { pid: 999, title: 'Notepad' } : OURS(n)));
-  runR1(R1ARGS(nvda, { guard, fg, state, evidence: ev }));
+  const run = settled(runR1(R1ARGS(nvda, { guard, fg, state, evidence: ev })));
   await t.done;
   t.dispose();
   const s = JSON.parse(readFileSync(join(ev.dir, 'summary.json'), 'utf8'));
@@ -1075,6 +1082,7 @@ test('T7 runner: the same window change overlapped with SIGINT -> FAIL, not PART
   assert.equal(s.send_guard.misdelivered, true);
   assert.ok(s.result_reasons.some((r) => r.includes('misdelivered')));
   assert.equal(physOf(nvda.calls).at(-1), 'd');
+  assert.equal(await run, null);
 });
 
 test('D-39 runner: gate pre-check fails before the first send -> setup-failed, zero keys sent', async () => {
@@ -1185,7 +1193,7 @@ test('T12 teardown: live send at a signal -> no close or kill before liveWaitMs,
   let signalAt = null;
   const nvda = gatedNvda(guard, { onPhys: (k) => { if (k === 'd') { signalAt = Date.now(); setImmediate(() => t.proc.emit('SIGTERM')); return { live: true }; } } });
   const args = R1ARGS(nvda, { guard, state, evidence: ev, liveWaitMs: 150 });
-  runR1(args);
+  const run = settled(runR1(args));
   const code = await t.done;
   const exitAt = Date.now();
   t.dispose();
@@ -1197,6 +1205,7 @@ test('T12 teardown: live send at a signal -> no close or kill before liveWaitMs,
   const s = JSON.parse(readFileSync(join(ev.dir, 'summary.json'), 'utf8'));
   assert.equal(s.result, 'FAIL', 'an unsettled send rules out PARTIAL');
   nvda.live.forEach((settle) => settle());
+  assert.equal(await run, null);
 });
 
 test('T12 teardown: the completion entry -> one awaited close per attempt, exit 0 for a persisted PASS; the done stop is not a failure', async () => {
@@ -1227,7 +1236,7 @@ test('T12 teardown: an uncaught exception mid-run -> crashed, FAIL, the error lo
   const ev = evidenceWriter(tmp());
   const t = rigTeardown({ state, evidence: ev, guard });
   const nvda = gatedNvda(guard, { onPhys: (k) => { if (k === 'a') setImmediate(() => { t.proc.emit('uncaughtException', new Error('boom')); t.proc.emit('unhandledRejection', new Error('later')); }); } });
-  runR1(R1ARGS(nvda, { guard, state, evidence: ev }));
+  const run = settled(runR1(R1ARGS(nvda, { guard, state, evidence: ev })));
   assert.equal(await t.done, 1);
   t.dispose();
   assert.match(t.lines[0], /uncaught exception.*boom/);
@@ -1237,6 +1246,7 @@ test('T12 teardown: an uncaught exception mid-run -> crashed, FAIL, the error lo
   assert.equal(s.result, 'FAIL');
   assert.equal(nvda.calls.filter(([c]) => c === 'stop').length, 1);
   assert.equal(t.codes.length, 1);
+  assert.equal(await run, null);
 });
 
 test('T12 teardown: the deadline ends a teardown that runs too long, with one exit and the summary rewritten', async () => {
@@ -1244,16 +1254,20 @@ test('T12 teardown: the deadline ends a teardown that runs too long, with one ex
   const guard = GATE();
   const ev = evidenceWriter(tmp());
   const t = rigTeardown({ state, evidence: ev, guard, liveWaitMs: 400, deadlineMs: 100 });
-  const nvda = gatedNvda(guard, { onPhys: (k) => { if (k === 'd') { setImmediate(() => t.proc.emit('SIGINT')); return { live: true }; } } });
-  runR1(R1ARGS(nvda, { guard, state, evidence: ev, liveWaitMs: 400 }));
+  // D-50: timed from the signal (was: from rigTeardown, so a slow run before the signal counted).
+  let signalAt = null;
+  const nvda = gatedNvda(guard, { onPhys: (k) => { if (k === 'd') { setImmediate(() => { signalAt = Date.now(); t.proc.emit('SIGINT'); }); return { live: true }; } } });
+  const run = settled(runR1(R1ARGS(nvda, { guard, state, evidence: ev, liveWaitMs: 400 })));
   await t.done;
-  assert.ok(t.codes[0][1] < 400, 'the deadline came before liveWaitMs');
+  const exitAt = Date.now();
+  assert.ok(exitAt - signalAt < 400, `the deadline came before liveWaitMs (exit ${exitAt - signalAt} ms after the signal)`);
   assert.ok(t.lines.some((l) => l.includes('deadline')));
   await delay(500);
   t.dispose();
   assert.equal(t.codes.length, 1, 'teardown finishing later does not exit again');
   assert.equal(JSON.parse(readFileSync(join(ev.dir, 'summary.json'), 'utf8')).result, 'FAIL');
   nvda.live.forEach((settle) => settle());
+  assert.equal(await run, null);
 });
 
 test('T12 teardown: listens to every signal and crash entry; dispose removes them all', () => {
@@ -1275,7 +1289,7 @@ test('T14 abort while typing character 2 of step 2 -> intent and action lines an
     atStop = { sends: readJsonl(join(ev.dir, 'sends-1.jsonl')), recs: readJsonl(join(ev.dir, 'attempt-1.jsonl')) };
     return stop();
   };
-  runR1(R1ARGS(nvda, { guard, state, evidence: ev }));
+  const run = settled(runR1(R1ARGS(nvda, { guard, state, evidence: ev })));
   await t.done;
   t.dispose();
   const intents = atStop.sends.filter((l) => l.type === 'intent' && l.step === 2).map((l) => l.key);
@@ -1289,6 +1303,7 @@ test('T14 abort while typing character 2 of step 2 -> intent and action lines an
   assert.match(partial.error, /aborted/);
   const s = JSON.parse(readFileSync(join(ev.dir, 'summary.json'), 'utf8'));
   assert.equal(s.result, 'PARTIAL', 'a clean abort stays PARTIAL');
+  assert.equal(await run, null);
 });
 
 test('M02 summary: cleanup errors, a missing raw log, a gate stop or a crash rule out PASS; safety first even when aborted', () => {
@@ -1413,7 +1428,7 @@ test('D-37 abort: the aborted summary is on disk before cleanup starts; the gate
     atStop = existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')).status : null;
     return stop();
   };
-  runR1(R1ARGS(nvda, { guard, state, evidence: ev }));
+  const run = settled(runR1(R1ARGS(nvda, { guard, state, evidence: ev })));
   await t.done;
   t.dispose();
   assert.equal(atStop, 'aborted');
@@ -1421,6 +1436,7 @@ test('D-37 abort: the aborted summary is on disk before cleanup starts; the gate
   assert.equal(s.send_guard.kind, 'stop');
   assert.equal(s.result, 'PARTIAL');
   assert.equal(state.persisted, true);
+  assert.equal(await run, null);
 });
 
 test('D-37 cleanup: an nvda.start that outlives its timeout is still stopped (M-01)', async () => {
@@ -1509,10 +1525,11 @@ test('D-39 abort: a signal during the foreground check before a key -> that key 
   let i = 0;
   // Check 3 is the runner's check before step 1's Tab: the signal lands while it is pending.
   const fg = { check: async () => { if (++i === 3) { t.proc.emit('SIGINT'); await delay(20); } return OURS(nvda.nonce()); } };
-  runR1(R1ARGS(nvda, { guard, fg, state, evidence: ev }));
+  const run = settled(runR1(R1ARGS(nvda, { guard, fg, state, evidence: ev })));
   await t.done;
   t.dispose();
-  await delay(50);
+  // D-50: the whole run has ended (was: 50 ms more of it) before no Tab is concluded.
+  assert.equal(await run, null);
   assert.ok(!physOf(nvda.calls).includes('Tab'));
 });
 

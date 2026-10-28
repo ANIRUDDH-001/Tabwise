@@ -196,7 +196,9 @@ test('D43 lifecycle: startup returns an owned live PID and refuses an existing l
   let checks = 0, launches = 0;
   fakes['net.connect'] = () => port(++checks > 1);
   fakes['child_process.spawn'] = () => { launches++; const c = new EventEmitter(); c.pid = 777; c.exitCode = null; c.kill = () => true; return c; };
-  const info = await v.lib('windows/NVDA/start.js').start({ timeoutMs: 100, pollMs: 1, probeMs: 10 });
+  // D-50: readiness comes on the second probe; the window is not under test here (was 100 ms of wall clock,
+  // which a 120 ms event-loop stall used up: "NVDA readiness timed out").
+  const info = await v.lib('windows/NVDA/start.js').start({ timeoutMs: 5_000, pollMs: 1, probeMs: 10 });
   assert.equal(info?.pid, 777);
   assert.equal(info.isAlive(), true);
   fakes['net.connect'] = () => port(true);

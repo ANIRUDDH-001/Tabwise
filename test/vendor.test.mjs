@@ -22,6 +22,11 @@ const TAB_DOWN = keyMsg(9, 15, false, true);
 const TAB_UP = keyMsg(9, 15, false, false);
 const tick = () => new Promise((r) => setImmediate(r));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// D-50: wait for a point the code under test must reach; if the promise under test settles first, fail at
+// once with that reason instead of waiting for the test timeout.
+const reached = (event, p, what) => Promise.race([event, p.then(
+  () => { throw new Error(`settled before ${what}`); },
+  (e) => { throw new Error(`rejected before ${what}: ${e?.message ?? e}`); })]);
 
 beforeEach(() => reset());
 
@@ -37,17 +42,18 @@ function wire(v, { verdict = () => [], ...opts } = {}) {
 }
 
 class FakeSocket extends EventEmitter {
-  writes = []; ops = []; destroyed = false; hold = false; failWith = null; autoCancel = false;
+  writes = []; ops = []; destroyed = false; hold = false; failWith = null; autoCancel = false; onWrite = null; onEnd = null;
   setEncoding() {}
   write(msg, cb) {
     this.writes.push(msg);
+    this.onWrite?.(msg);
     this.ops.push('write');
     if (msg.includes('"type":"join"')) setImmediate(() => this.emit('data', '{"type":"channel_joined"}\n'));
     if (this.autoCancel && msg === keyMsg(162, 29, false, false)) setImmediate(() => this.emit('data', '{"type":"cancel"}\n'));
     if (cb && !this.hold) setImmediate(() => cb(this.failWith));
     return true;
   }
-  end() { this.ops.push('end'); setImmediate(() => this.emit('finish')); }
+  end() { this.ops.push('end'); this.onEnd?.(); setImmediate(() => this.emit('finish')); }
   destroy() { this.ops.push('destroy'); this.destroyed = true; }
   keyWrites() { return this.writes.filter((m) => m.includes('"type":"key"')); }
 }
@@ -112,11 +118,18 @@ test('NVDA key: canonical bytes, all downs then ups reversed, pre-check before a
   assert.deepEqual(log, ['pre:1', 'post:1']);
   assert.equal(gate.status().sends, 1);
   assert.equal(gate.status().stopped, false);
-  // T20 at the socket: callbacks held, so no post-check until they fire.
+  // T20 at the socket: callbacks held, so no post-check until they fire. D-50: checked once the key write has
+  // happened and again once the write timeout has ended the socket with the callbacks still held (was: after
+  // a 20 ms sleep); the send's rejection is handled from the start.
   sock.hold = true;
+  const wrote = new Promise((r) => { sock.onWrite = r; });
+  const ended = new Promise((r) => { sock.onEnd = r; });
   const p = client.sendKeyCode({ keyCode: v.KeyCodes.Tab });
-  await sleep(20);
+  p.catch(() => null);
+  await reached(wrote, p, 'the key write');
   assert.deepEqual(log, ['pre:1', 'post:1', 'pre:2']);
+  await reached(ended, p, 'the write timeout');
+  assert.deepEqual(log, ['pre:1', 'post:1', 'pre:2'], 'no post-check while the write callbacks are held');
   await assert.rejects(p, /R1_SEND_FAILED/);
 });
 
@@ -167,11 +180,21 @@ test('T22 connect retries stop at once when the gate stops; no handshake writes'
   const v = loadVendor();
   fakeNvdaInstall();
   const sockets = [];
-  fakes['tls.connect'] = () => { const s = new FakeSocket(); sockets.push(s); setImmediate(() => s.emit('error', new Error('ECONNREFUSED'))); return s; };
+  // D-50: the gate stops once the second connect has failed and its retry is pending (was: a 650 ms sleep
+  // against the 500 ms retry interval).
+  let retryPending;
+  const secondFailed = new Promise((r) => { retryPending = r; });
+  fakes['tls.connect'] = () => {
+    const s = new FakeSocket();
+    sockets.push(s);
+    setImmediate(() => { s.emit('error', new Error('ECONNREFUSED')); if (sockets.length === 2) retryPending(); });
+    return s;
+  };
   const { gate } = wire(v);
   const client = new v.NVDAClient();
   const p = client.connect({ capture: false });
-  await sleep(650);
+  p.catch(() => null);
+  await reached(secondFailed, p, 'the second connect failure');
   assert.equal(count('tls.connect'), 2, 'retries before the first connect while the gate runs');
   gate.stop('test stop');
   await assert.rejects(p, /Cannot connect to NVDA/);
@@ -316,15 +339,23 @@ test('T1 VBS preparation held, the gate stopped, the hold released -> 0 execFile
   const v = loadVendor();
   const { gate } = wire(v);
   gate.arm('type A');
+  // D-50: the gate stops once the held write has started (was: a 20 ms sleep, which a slow mkdtemp outran:
+  // R1 #2 preflight). The rejection is handled from the start and the hold is always released.
   let release;
+  let writing;
+  const held = new Promise((r) => { writing = r; });
   const realWrite = fs.promises.writeFile;
   let dir;
-  fakes['fs.writeFile'] = (file, data) => { dir = path.dirname(file); return new Promise((r) => { release = () => r(); }); };
+  fakes['fs.writeFile'] = (file, data) => { dir = path.dirname(file); writing(); return new Promise((r) => { release = () => r(); }); };
   fakes['child_process.execFile'] = () => new FakeChild();
   const p = v.runVbsScript.runSendKeys('A');
-  await sleep(20);
-  gate.stop('action timed out');
-  release();
+  p.catch(() => null);
+  try {
+    await reached(held, p, 'the held write');
+    gate.stop('action timed out');
+  } finally {
+    release?.();
+  }
   await assert.rejects(p, /R1_REFUSED/);
   assert.equal(count('child_process.execFile'), 0);
   assert.equal(fs.existsSync(dir), false);
@@ -415,10 +446,18 @@ test('runSendKeys: a non-zero exit is possibly misdelivered; a gate stop kills t
   const { gate: g2 } = wire(v2, { sendMs: 1000 });
   g2.arm('type d');
   let child;
-  fakes['child_process.execFile'] = () => { child = new FakeChild({ exitWith: null }); return child; };
+  // D-50: the gate stops once cscript has been launched (was: a 20 ms sleep, which a slow mkdtemp or a busy
+  // event loop outran, so the stop refused the admit instead).
+  let launched;
+  const running = new Promise((r) => { launched = r; });
+  fakes['child_process.execFile'] = () => { child = new FakeChild({ exitWith: null }); launched(); return child; };
   const p = v2.runVbsScript.runSendKeys('d');
-  await sleep(20);
+  p.catch(() => null);
+  await reached(running, p, 'the cscript launch');
   g2.stop('SIGINT received');
+  // D-50: the stop itself kills the child, at once (with only the final count, the 1 s send timeout's own
+  // kill also passed).
+  assert.equal(child.kills, 1, 'the gate stop killed the child');
   await assert.rejects(p, /R1_SEND_FAILED/);
   assert.equal(child.kills, 1);
   assert.equal(g2.status().live, 0);

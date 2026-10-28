@@ -268,26 +268,35 @@ test('T26 judgeKeys (D-40): NVDA control keystrokes in the page log never invali
 test('T19/T26 pageAck: waits for the key, advances its cursor, tolerates a late Control from an earlier send; late or unreadable -> false', async () => {
   const log = [];
   let reads = 0;
-  const read = async (from) => { reads += 1; return log.filter((e) => e.seq > from); };
-  const ack = pageAck({ read, ackMs: 60, pollMs: 2 });
+  // D-50: a key lands on a given page read (was: on a 5-10 ms timer, which a stalled event loop moved past
+  // the 60 ms window). The waiting cases cannot reach their window; the late case below keeps a short one.
+  const due = [];
+  const landOnRead = (n, e) => due.push({ at: reads + n, e });
+  const read = async (from) => {
+    reads += 1;
+    while (due.length && due[0].at <= reads) log.push(due.shift().e);
+    return log.filter((e) => e.seq > from);
+  };
+  const ack = pageAck({ read, ackMs: 5_000, pollMs: 2 }); // below the 10 s test timeout: a missing key fails here
   const tok = (info) => ({ id: 1, info });
-  // The key lands a little after release asks.
-  setTimeout(() => log.push(ev(1, 'Tab')), 10);
+  // The key lands a little after release asks: the first read sees nothing.
+  landOnRead(2, ev(1, 'Tab'));
   assert.deepEqual(await ack(tok(TAB)), { ack: true, reasons: [] });
+  assert.equal(reads, 2, 'the ack waited for the key');
   // stop-speech Control: not page-reaching, nothing to wait for.
   const before = reads;
   assert.deepEqual(await ack(tok(STOP)), { ack: null, reasons: [] });
   assert.equal(reads, before, 'no page read for an NVDA-consumed send');
   // Its Control keydown arrives late, inside the next action's window: tolerated.
   log.push(ev(2, 'Control'));
-  setTimeout(() => log.push(ev(3, 'A', true)), 5);
+  landOnRead(2, ev(3, 'A', true));
   assert.deepEqual(await ack(tok(CHAR('A'))), { ack: true, reasons: [] });
   // The Tab key event from the first window is not seen again.
-  setTimeout(() => log.push(ev(4, 'Tab')), 5);
+  landOnRead(2, ev(4, 'Tab'));
   assert.equal((await ack(tok(TAB))).ack, true);
-  // Late: arrives after ackMs.
-  setTimeout(() => log.push(ev(5, 'Tab')), 120);
-  const late = await ack(tok(TAB));
+  // Late: nothing arrives within ackMs (a key after that is never read by this ack).
+  const short = pageAck({ read: async () => [], ackMs: 60, pollMs: 2 });
+  const late = await short(tok(TAB));
   assert.equal(late.ack, false);
   assert.match(late.reasons[0], /saw 0/);
   const broken = pageAck({ read: async () => { throw new Error('Target closed'); }, ackMs: 30, pollMs: 2 });

@@ -1,0 +1,96 @@
+# D-50: test-only Windows preflight for R1's offline gate. Same image, Node, install and read-only checkout as
+# r1.yml up to its "Offline tests" step, then the suite again (repeated, reordered and under injected delays),
+# the source locks and a clean-checkout check. Nothing after that: no secrets, read-only token, no Meta API
+# calls, no Guidepup setup, NVDA, browser install, desktop input or R1. Safe for pull requests, forks included.
+# Actions are pinned to the same commit SHAs as r1.yml (S-01; PROVENANCE.md).
+name: offline-preflight
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: offline-preflight-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    runs-on: windows-2025
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.22.1
+      - name: Install dependencies from the lockfile (no install scripts)
+        run: npm ci --ignore-scripts
+      - name: Environment
+        shell: bash
+        run: |
+          OUT="$(cygpath -u "$RUNNER_TEMP")/preflight"
+          mkdir -p "$OUT"
+          { echo "sha=$GITHUB_SHA ref=$GITHUB_REF event=$GITHUB_EVENT_NAME run=$GITHUB_RUN_ID/$GITHUB_RUN_ATTEMPT"
+            echo "image=$ImageOS $ImageVersion cpus=$NUMBER_OF_PROCESSORS"
+            echo "node=$(node --version) npm=$(npm --version) git=$(git --version)"
+            echo "core.autocrlf=$(git config --get core.autocrlf || echo unset)"
+            git ls-files --eol -- test/vendor.test.mjs src/speech/sendguard.mjs vendor/guidepup-0.36.4-r1/lib/windows/Key.js
+          } | tee "$OUT/environment.txt"
+      - name: Source locks, frozen fixture and dependencies, before the tests
+        run: node scripts/preflight.mjs --clean --out "${{ runner.temp }}/preflight/before.json"
+      # Same as r1.yml (M-07): tracked files and the hooked Guidepup files become read-only.
+      - name: Make the checkout read-only
+        shell: pwsh
+        run: |
+          foreach ($f in (git ls-files)) { Set-ItemProperty -LiteralPath $f -Name IsReadOnly -Value $true }
+          Get-ChildItem -Recurse -File node_modules/@guidepup/guidepup/lib | ForEach-Object { $_.IsReadOnly = $true }
+      - name: Offline tests (as in r1.yml)
+        run: npm test
+      # Every profile runs even after a failure; the step fails if any did. Faults come from
+      # test/helpers/faults.mjs (slow fs.promises, a stalled event loop); the same profiles pass locally.
+      - name: Offline tests, repeated, reordered and under injected delays
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          OUT="$(cygpath -u "$RUNNER_TEMP")/preflight"
+          faults="file:///$(cygpath -m "$PWD/test/helpers/faults.mjs")"
+          seed=$((GITHUB_RUN_ID % 1000000))
+          failed=()
+          suite() { # name [VAR=value ...] -- [node test flags ...]
+            local name="$1"; shift
+            local vars=(); while [ "$1" != "--" ]; do vars+=("$1"); shift; done; shift
+            echo "::group::$name"
+            if env "${vars[@]}" node --test --test-timeout=10000 "$@" "test/*.test.mjs" > "$OUT/test-$name.txt" 2>&1; then
+              tail -n 8 "$OUT/test-$name.txt"
+            else
+              failed+=("$name"); tail -n 80 "$OUT/test-$name.txt"
+            fi
+            echo "::endgroup::"
+          }
+          suite repeat-1 R1T_NONE=1 --
+          suite repeat-2 R1T_NONE=1 --
+          suite serial R1T_NONE=1 -- --test-concurrency=1
+          suite "random-$seed" R1T_NONE=1 -- --test-randomize "--test-random-seed=$seed"
+          suite slow-fs-30 NODE_OPTIONS="--import=$faults" R1T_FS_DELAY_MS=30 --
+          suite slow-fs-100 NODE_OPTIONS="--import=$faults" R1T_FS_DELAY_MS=100 --
+          suite stall-40 NODE_OPTIONS="--import=$faults" R1T_STALL_MS=40 R1T_STALL_EVERY_MS=50 --
+          suite mixed NODE_OPTIONS="--import=$faults" R1T_FS_DELAY_MS=30 R1T_STALL_MS=60 R1T_STALL_EVERY_MS=80 --
+          if [ ${#failed[@]} -gt 0 ]; then echo "::error::failed: ${failed[*]}"; exit 1; fi
+          echo "all profiles passed"
+      - name: Source locks and an unchanged checkout, after the tests
+        if: always()
+        run: node scripts/preflight.mjs --clean --out "${{ runner.temp }}/preflight/after.json"
+      - name: Upload preflight output
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: offline-preflight-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/preflight/
+          if-no-files-found: warn
+          retention-days: 14

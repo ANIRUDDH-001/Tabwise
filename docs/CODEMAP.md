@@ -29,4 +29,7 @@ Read this before opening source files. One line per file or folder. If a line is
 
 | `src/speech/browser.mjs` | Headed fixture browser adapter with engine signal handlers disabled; supplied engine only after CI gates | `fixtureBrowser()` | `test/browser.test.mjs` (fake engine) |
 | `test/engineering.test.mjs` | D-43 actual gate and vendored transport/lifecycle regression tests; process/network denial imported first | `node --test test/engineering.test.mjs` | fake OS boundaries only |
+| `test/helpers/faults.mjs` | D-50 opt-in faults for the offline suite: slow `fs.promises` (`R1T_FS_DELAY_MS`), event-loop stalls (`R1T_STALL_MS`, `R1T_STALL_EVERY_MS`); loaded with `NODE_OPTIONS=--import`, never by a test | — | used by `preflight.yml` |
+| `scripts/preflight.mjs` | D-50 read-only checks: Node version, `lock.json` vs `r1.mjs --hashes`, Day-1 gates hash, installed deps vs package-lock, `--clean` checkout; JSON report, exit 1 on any failure | `node scripts/preflight.mjs [--clean] [--out f]` | — |
+| `.github/workflows/preflight.yml` | D-50 test-only Windows preflight (pull_request + manual): same image, Node, install and read-only checkout as `r1.yml`, `npm test`, then repeated/serial/random/fault runs; no secrets, no NVDA, no R1 | — | runs the offline suite |
 | `docs/engineering/` | D-43 engineering hypotheses, experiments and handoff | `F-02-ownership-plan.md`, `F-02-experiments.md` | measured offline results, no R1 PASS |
