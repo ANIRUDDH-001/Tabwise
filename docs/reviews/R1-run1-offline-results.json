@@ -1,0 +1,286 @@
+{
+  "recorded_at": "2026-10-28T04:31:44Z",
+  "evidence": {
+    "runId": 40629513668,
+    "jobId": 122622360284,
+    "artifactId": 12790378634,
+    "artifactName": "r1-evidence-40629513668-1",
+    "archiveSHA256": "91cb57c122f92879e534a99f87e61e21848a8fd2c9d3b40e40a04b99e037a1f6",
+    "sourceCommit": "5a5d864b165aecf56074a790ba61a30bfa06e88e"
+  },
+  "historicalFileHashes": {
+    "r1-20261028T035811Z/attempt-1.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "r1-20261028T035811Z/focus-1.jsonl": "91d0e3dd57f3fe2c8409405af13aad06fefc151d832b0a99b7682910b01cdaa3",
+    "r1-20261028T035811Z/raw-1.json": "9cb8032cb214599979430b1a4b9c28006abda7ffdc93cf953925afa28a75c88e",
+    "r1-20261028T035811Z/sends-1.jsonl": "690c809b97e63df4f85cdb92cc36ae4c5323ce8e1f7981021f456183466db670",
+    "r1-20261028T035811Z/summary.json": "518d55a690c4ebd7967f0841bfbeccebde87698f4574893ac456b234b4602d28",
+    "_runner/job.json": "6925a1a271fd7e16ad294d64e6dfe2e433b16dbe32f973ac6cd42dbddfbf2c7e",
+    "_runner/nvda.log": "2254c32f07d26d66d0432a61e8c54f2f3f54915b50cdd6a421c1ec954616aa12"
+  },
+  "originalReplay": {
+    "head": "5a5d864b165aecf56074a790ba61a30bfa06e88e",
+    "artifactFiles": 7,
+    "nonce": "1b11a7f2",
+    "rawTitle": "R 1 sign-up 1b 11a 7f 2 - Google Chrome for Testing",
+    "initialLiteralExpression": false,
+    "validator": {
+      "attempt": 1,
+      "fresh": false,
+      "complete": false,
+      "reasons": [
+        "fresh: reported title lacks this attempt's nonce",
+        "fresh: no step 1 record",
+        "complete: status setup-failed",
+        "complete: 0 of 10 steps recorded"
+      ]
+    },
+    "runResult": "FAIL",
+    "focusChecks": 8,
+    "allFocusPassed": true,
+    "sendIntents": 3,
+    "sendsAtStepZero": true,
+    "rawMatchesTitle": true,
+    "stepRecords": 0,
+    "guard": {
+      "stopped": true,
+      "kind": "done",
+      "reason": "run finished",
+      "misdelivered": false,
+      "sends": 3,
+      "refused": 0,
+      "unsettled": 0,
+      "acks": {
+        "confirmed": 0,
+        "missing": 0,
+        "unconfirmable": 3
+      }
+    }
+  },
+  "candidateFileHashes": {
+    "src/speech/validate.mjs": "e22f218ce7601d2436f62f6e14fe83975e0d5c698768595f7e7df1f245716419",
+    "src/speech/capture.mjs": "39b3b01ff369393848b21732a83f373904a93bf0a0c855b5a429c73ca0114d23",
+    "test/speech.test.mjs": "c1921c15ec449632ea839fa6e5b8d34f9d8d0d90074f994442ae983da918734e"
+  },
+  "verification": {
+    "normal": {
+      "tests": 203,
+      "pass": 203,
+      "fail": 0,
+      "cancelled": 0
+    },
+    "readonlyCRLF": {
+      "tests": 203,
+      "pass": 203,
+      "fail": 0,
+      "cancelled": 0
+    },
+    "protectedReadonlySourceFiles": 407,
+    "nonceChallenges": [
+      {
+        "id": "expanded-red",
+        "exit": 1,
+        "tests": 12,
+        "pass": 4,
+        "fail": 8,
+        "cancelled": 0,
+        "syntaxError": false,
+        "failures": [
+          "N1 observed NVDA title: the actual initial check accepts exact spaced hex and preserves captured speech",
+          "N1 observed NVDA title: final freshness accepts the same decoded field and changes no evidence values",
+          "N1 case folding remains supported without changing the original title characters",
+          "N1 exact identity: every ASCII-space partition of the eight nonce characters is equivalent only in fixture titles",
+          "N1 negative initial titles: incorrect, incomplete, unrelated and ambiguous speech never reaches step 1",
+          "N1 negative final titles: incorrect, incomplete, unrelated and ambiguous speech never proves freshness",
+          "N1 exact hex: single-character substitutions, deletions and insertions cannot match the expected nonce",
+          "N1 stale detection: another attempt nonce is rejected in title, raw, records and mixed speech, spaced or contiguous"
+        ]
+      },
+      {
+        "id": "challenge-baseline",
+        "exit": 0,
+        "tests": 12,
+        "pass": 12,
+        "fail": 0,
+        "cancelled": 0,
+        "syntaxError": false,
+        "failures": []
+      },
+      {
+        "id": "mutation-initial-literal",
+        "exit": 1,
+        "tests": 12,
+        "pass": 9,
+        "fail": 3,
+        "cancelled": 0,
+        "syntaxError": false,
+        "failures": [
+          "N1 observed NVDA title: the actual initial check accepts exact spaced hex and preserves captured speech",
+          "N1 case folding remains supported without changing the original title characters",
+          "N1 negative initial titles: incorrect, incomplete, unrelated and ambiguous speech never reaches step 1"
+        ]
+      },
+      {
+        "id": "mutation-final-literal",
+        "exit": 1,
+        "tests": 12,
+        "pass": 7,
+        "fail": 5,
+        "cancelled": 0,
+        "syntaxError": false,
+        "failures": [
+          "N1 observed NVDA title: final freshness accepts the same decoded field and changes no evidence values",
+          "N1 case folding remains supported without changing the original title characters",
+          "N1 exact identity: every ASCII-space partition of the eight nonce characters is equivalent only in fixture titles",
+          "N1 negative final titles: incorrect, incomplete, unrelated and ambiguous speech never proves freshness",
+          "N1 exact hex: single-character substitutions, deletions and insertions cannot match the expected nonce"
+        ]
+      },
+      {
+        "id": "mutation-skip-spaced-foreign",
+        "exit": 1,
+        "tests": 12,
+        "pass": 11,
+        "fail": 1,
+        "cancelled": 0,
+        "syntaxError": false,
+        "failures": [
+          "N1 stale detection: another attempt nonce is rejected in title, raw, records and mixed speech, spaced or contiguous"
+        ]
+      },
+      {
+        "id": "mutation-global-strip",
+        "exit": 1,
+        "tests": 12,
+        "pass": 9,
+        "fail": 3,
+        "cancelled": 0,
+        "syntaxError": false,
+        "failures": [
+          "N1 negative initial titles: incorrect, incomplete, unrelated and ambiguous speech never reaches step 1",
+          "N1 negative final titles: incorrect, incomplete, unrelated and ambiguous speech never proves freshness",
+          "N1 exact hex: single-character substitutions, deletions and insertions cannot match the expected nonce"
+        ]
+      },
+      {
+        "id": "mutation-allow-final-newline",
+        "exit": 0,
+        "tests": 12,
+        "pass": 12,
+        "fail": 0,
+        "cancelled": 0,
+        "syntaxError": false,
+        "failures": [],
+        "equivalent": true
+      },
+      {
+        "id": "mutation-allow-multiline-identity",
+        "exit": 1,
+        "tests": 12,
+        "pass": 10,
+        "fail": 2,
+        "cancelled": 0,
+        "syntaxError": false,
+        "failures": [
+          "N1 negative initial titles: incorrect, incomplete, unrelated and ambiguous speech never reaches step 1",
+          "N1 negative final titles: incorrect, incomplete, unrelated and ambiguous speech never proves freshness"
+        ]
+      },
+      {
+        "id": "mutation-ignore-last-character",
+        "exit": 1,
+        "tests": 12,
+        "pass": 9,
+        "fail": 3,
+        "cancelled": 0,
+        "syntaxError": false,
+        "failures": [
+          "N1 negative initial titles: incorrect, incomplete, unrelated and ambiguous speech never reaches step 1",
+          "N1 negative final titles: incorrect, incomplete, unrelated and ambiguous speech never proves freshness",
+          "N1 exact hex: single-character substitutions, deletions and insertions cannot match the expected nonce"
+        ]
+      },
+      {
+        "id": "mutation-join-foreign-phrases",
+        "exit": 1,
+        "tests": 12,
+        "pass": 11,
+        "fail": 1,
+        "cancelled": 0,
+        "syntaxError": false,
+        "failures": [
+          "N1 phrase boundaries: neither own identity nor a foreign nonce is assembled across separate utterances"
+        ]
+      },
+      {
+        "id": "mutation-general-whitespace",
+        "exit": 1,
+        "tests": 12,
+        "pass": 10,
+        "fail": 2,
+        "cancelled": 0,
+        "syntaxError": false,
+        "failures": [
+          "N1 negative initial titles: incorrect, incomplete, unrelated and ambiguous speech never reaches step 1",
+          "N1 negative final titles: incorrect, incomplete, unrelated and ambiguous speech never proves freshness"
+        ]
+      },
+      {
+        "id": "restored-focused",
+        "exit": 0,
+        "tests": 12,
+        "pass": 12,
+        "fail": 0,
+        "cancelled": 0,
+        "syntaxError": false,
+        "failures": []
+      }
+    ]
+  },
+  "integrity": {
+    "baseCommit": "5a5d864b165aecf56074a790ba61a30bfa06e88e",
+    "current": {
+      "fileSpecChecks": 12,
+      "dependencyPins": 10,
+      "vendorFiles": 40,
+      "fileSpecMismatches": [],
+      "pinProblems": [],
+      "vendorProblems": [],
+      "vendorTree": "d80eb577e272dd7c16135ebfeaa9e3dc9162308b0ea1323a9b158dcafb774e1d",
+      "vendorTreeMatches": true,
+      "frozenGates": "ca0c9feb568e7c9c4ea41832607f510af0cbf5548242adcd77f729e039af3362"
+    },
+    "candidate": {
+      "fileSpecChecks": 12,
+      "dependencyPins": 10,
+      "vendorFiles": 40,
+      "fileSpecMismatches": [
+        "src/speech/capture.mjs",
+        "src/speech/validate.mjs"
+      ],
+      "pinProblems": [],
+      "vendorProblems": [],
+      "vendorTree": "d80eb577e272dd7c16135ebfeaa9e3dc9162308b0ea1323a9b158dcafb774e1d",
+      "vendorTreeMatches": true,
+      "frozenGates": "ca0c9feb568e7c9c4ea41832607f510af0cbf5548242adcd77f729e039af3362"
+    },
+    "proposalChangedFiles": [
+      "src/speech/capture.mjs",
+      "src/speech/validate.mjs",
+      "test/speech.test.mjs"
+    ],
+    "executedSourceAndTestsMatch": true,
+    "evidenceFiles": 7,
+    "evidenceDrift": [],
+    "archiveSHA256": "91cb57c122f92879e534a99f87e61e21848a8fd2c9d3b40e40a04b99e037a1f6",
+    "activationBlockedUntilApprovedAmendmentAndRelock": true
+  },
+  "status": {
+    "historicalResult": "FAIL / setup-failed before step 1",
+    "productionSourceChanged": false,
+    "historicalEvidenceChanged": false,
+    "proposalOnly": true,
+    "explicitFrozenRuleApprovalRequired": true,
+    "relockRequiredBeforeActivation": true,
+    "newExecutionAuthorized": false
+  }
+}

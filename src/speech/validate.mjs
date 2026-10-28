@@ -4,6 +4,22 @@
 export const RECORD_FIELDS = ['run_id', 'attempt', 'step', 'keys', 'phrases', 'silence_ms', 'timed_out', 'error', 'ts'];
 const NONCE = /^[0-9a-f]{8}$/;
 
+// A14 (D-49) spoken title: exact fixture label and eight hex characters, with only ASCII
+// spaces between nonce characters (and the observed R 1 pronunciation). Never rewrite raw speech.
+const SPOKEN_TITLE = /^r ?1 sign-up ([0-9a-f](?: *[0-9a-f]){7})(?: - (?:chromium|google chrome for testing))?$/i;
+export function spokenTitleHasNonce(title, nonce) {
+  if (typeof title !== 'string' || typeof nonce !== 'string' || !NONCE.test(nonce)) return false;
+  const match = SPOKEN_TITLE.exec(title);
+  // Require the entire original phrase even if regex flags are changed in the future.
+  return match !== null && match[0].length === title.length && match[1].replace(/ /g, '').toLowerCase() === nonce;
+}
+
+// Rejection only: recognize a known foreign nonce within one original utterance. Do not assemble
+// characters across title/raw/step phrase boundaries or use this to accept a window identity.
+function speechHasSpacedNonce(phrase, nonce) {
+  return typeof phrase === 'string' && NONCE.test(nonce) && new RegExp(nonce.split('').join(' *'), 'i').test(phrase);
+}
+
 // C2: "unchecked" and "not checked" must never satisfy "checked".
 export const isNotChecked = (text) => /\bnot checked\b|\bunchecked\b/i.test(text);
 export const isChecked = (text) => /\bchecked\b/i.test(text) && !isNotChecked(text);
@@ -76,9 +92,10 @@ export function judgeAttempt({ steps: cfg, attempt: a, otherNonces = [] }) {
   if (!NONCE.test(a.nonce ?? '')) fresh.push(`nonce ${JSON.stringify(a.nonce)} is not 8 hex`);
   if (a.new_process !== true) fresh.push('NVDA not started as a new process');
   for (const m of settingsMismatch(cfg.nvda_settings, a.settings)) fresh.push(`setting: ${m}`);
-  if (!(a.title_phrase ?? '').toLowerCase().includes((a.nonce ?? '').toLowerCase()) || !a.nonce) fresh.push('reported title lacks this attempt\'s nonce');
-  const spoken = [a.title_phrase ?? '', ...(a.raw ?? []), ...records.flatMap((r) => (Array.isArray(r?.phrases) ? r.phrases : []))].join('\n').toLowerCase();
-  for (const n of otherNonces) if (n && n !== a.nonce && spoken.includes(n.toLowerCase())) fresh.push(`speech contains another attempt's nonce ${n}`);
+  if (!spokenTitleHasNonce(a.title_phrase, a.nonce)) fresh.push('reported title lacks this attempt\'s nonce');
+  const phrases = [a.title_phrase ?? '', ...(a.raw ?? []), ...records.flatMap((r) => (Array.isArray(r?.phrases) ? r.phrases : []))];
+  const spoken = phrases.join('\n').toLowerCase();
+  for (const n of otherNonces) if (n && n !== a.nonce && (spoken.includes(n.toLowerCase()) || phrases.some((p) => speechHasSpacedNonce(p, n)))) fresh.push(`speech contains another attempt's nonce ${n}`);
   const first = records.find((r) => r?.step === 1);
   const firstText = Array.isArray(first?.phrases) ? first.phrases.join(' ').toLowerCase() : '';
   if (!first) fresh.push('no step 1 record');

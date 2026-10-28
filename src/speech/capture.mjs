@@ -9,7 +9,7 @@ import { extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
 import { randomBytes } from 'node:crypto';
-import { actionsOf, judgeRun, settingsMismatch } from './validate.mjs';
+import { actionsOf, judgeRun, settingsMismatch, spokenTitleHasNonce } from './validate.mjs';
 import { foregroundMismatch } from './foreground.mjs';
 import { sendGate, pageAck } from './sendguard.mjs';
 
@@ -322,7 +322,7 @@ export async function runAttempt({
     if (r.timedOut || r.error) return fail('setup-failed', `report title: ${r.error ?? 'timed out'}`);
     a.title_phrase = await nvda.lastSpokenPhrase();
     actionLine('NVDA-T', a.title_phrase, r);
-    if (!a.title_phrase.toLowerCase().includes(nonce)) return fail('setup-failed', 'reported title lacks the nonce');
+    if (!spokenTitleHasNonce(a.title_phrase, nonce)) return fail('setup-failed', 'reported title lacks the nonce');
     await nvda.clearSpokenPhraseLog();
     // Steps. A1: capture:true ends after Guidepup's 1.0 s of silence; 8 s timeout per key action.
     for (const spec of cfg.steps) {

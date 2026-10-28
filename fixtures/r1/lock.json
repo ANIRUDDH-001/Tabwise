@@ -1,5 +1,5 @@
 {
-  "locked_at": "2026-10-28T02:33:36Z",
+  "locked_at": "2026-10-28T04:59:09Z",
   "decisions": [
     "D-33",
     "D-34",
@@ -9,15 +9,16 @@
     "D-40",
     "D-42",
     "D-43",
-    "D-44"
+    "D-44",
+    "D-49"
   ],
   "hash": "sha256 of UTF-8 text, CRLF normalised to LF; PLAN.md#F-02 = text between the F-02 spec markers",
   "sha256": {
-    "docs/ledger/PLAN.md#F-02": "55d8005fb9e88c7730b3620949de7ff14d10d6243fa4117f85d9b38ff7ea4796",
+    "docs/ledger/PLAN.md#F-02": "8dfe9662ddd3a1568ba298eb15ddec9604a4c371bf706d50d5c5c98c95951d91",
     "fixtures/r1/signup.html": "b9f6f6159943c646ffae1f510a07ae9cd65e07c500bab140bcdcd08d4b3d7a71",
     "fixtures/r1/steps.json": "150a95825dd418e719018a5185608865d1353dc9b20b2080c3087fc542828a89",
-    "src/speech/validate.mjs": "fe19e73d46a3084a90c8ffe1c00ae8b730c2517a7ff080fad24f3b72b04b7fb2",
-    "src/speech/capture.mjs": "059f08557655f6c4e6f9f7157adefb87948e4585e289fa036a6f1d4fbb9a0c57",
+    "src/speech/validate.mjs": "584a059ec41390fc48ac5f8baf25f437e239e7a08d92e824e8a2774d43375c61",
+    "src/speech/capture.mjs": "b34bd07ca4d912cbc8563aa28e66aef8f74109f6165be017d587a6dfc2c1cf72",
     "src/speech/foreground.mjs": "2ffc711fdb36499561f0ac1c1b4615e62cce27ed01e1034c5f401c83a60d4e50",
     "src/speech/runguard.mjs": "8884901cb7f690c8beb3c8f208d59d10989cd2e2464fee6bb5fe927593149222",
     "src/speech/sendguard.mjs": "d4882268594466266d85e4eeb82e26bfdfe90dfd08fc98f95f4ca39fd6aff4bd",
@@ -42,7 +43,7 @@
   "vendor_tree_hash": "treeHash(vendor/guidepup-0.36.4-r1): sorted relative paths plus each file sha256 of raw bytes (D-39, T17)",
   "vendor_tree": "d80eb577e272dd7c16135ebfeaa9e3dc9162308b0ea1323a9b158dcafb774e1d",
   "supersedes": {
-    "locked_at": "2026-10-27T15:47:38Z",
+    "locked_at": "2026-10-28T02:33:36Z",
     "decisions": [
       "D-33",
       "D-34",
@@ -50,20 +51,23 @@
       "D-37",
       "D-39",
       "D-40",
-      "D-42"
+      "D-42",
+      "D-43",
+      "D-44"
     ],
     "hash": "sha256 of UTF-8 text, CRLF normalised to LF; PLAN.md#F-02 = text between the F-02 spec markers",
     "sha256": {
-      "docs/ledger/PLAN.md#F-02": "bb9fe43344c0b938a7f420a3c4957de26aae05784182442a79ccf3e2b9e64216",
+      "docs/ledger/PLAN.md#F-02": "55d8005fb9e88c7730b3620949de7ff14d10d6243fa4117f85d9b38ff7ea4796",
       "fixtures/r1/signup.html": "b9f6f6159943c646ffae1f510a07ae9cd65e07c500bab140bcdcd08d4b3d7a71",
       "fixtures/r1/steps.json": "150a95825dd418e719018a5185608865d1353dc9b20b2080c3087fc542828a89",
       "src/speech/validate.mjs": "fe19e73d46a3084a90c8ffe1c00ae8b730c2517a7ff080fad24f3b72b04b7fb2",
-      "src/speech/capture.mjs": "bb63ca2742731dd017e8e5fb9920270c87d1405aa727ab2145b8a2b2369e5615",
-      "src/speech/foreground.mjs": "83ce08023e239ad5c8ce748cb1bf604c5191cf28d2f1ff6d84665ef8a82c25cb",
+      "src/speech/capture.mjs": "059f08557655f6c4e6f9f7157adefb87948e4585e289fa036a6f1d4fbb9a0c57",
+      "src/speech/foreground.mjs": "2ffc711fdb36499561f0ac1c1b4615e62cce27ed01e1034c5f401c83a60d4e50",
       "src/speech/runguard.mjs": "8884901cb7f690c8beb3c8f208d59d10989cd2e2464fee6bb5fe927593149222",
-      "src/speech/sendguard.mjs": "459914fa831ac1ea1c3c2e82fba1190e5108017c18d20a814d87e40ccae47886",
-      "src/speech/vendortree.mjs": "e13d6e02c36c4708df414dd7eafa8d6cd8db221cc8e3527d2f02a6cc00e41584",
-      "scripts/r1.mjs": "d61f9483260ca45c79513edec438756b1b078fa074528271bf739b70b7c42ba9",
+      "src/speech/sendguard.mjs": "d4882268594466266d85e4eeb82e26bfdfe90dfd08fc98f95f4ca39fd6aff4bd",
+      "src/speech/vendortree.mjs": "8cca91e780a5f90d07b87e665b936eb1901cb6686c0cb798aa74f33672931298",
+      "scripts/r1.mjs": "3f5e82940ecc656406f9adc7237c5e2421716066c3def338f8509210b94b1335",
+      "src/speech/browser.mjs": "04a835f37303276df812799cbc1e8b53a76a4cf5c4795256f2030e5d04de08c6",
       ".github/workflows/r1.yml": "e1353c1dc5460d0e8569499239dcb7e87443896b18909ffff47ad604f131355c"
     },
     "dependencies_hash": "sha256 of raw bytes: the installed upstream Guidepup files, the reference checkVendor compares the vendored copy against (D-37, D-39); R1 never loads them",
@@ -74,32 +78,36 @@
       "node_modules/@guidepup/guidepup/lib/windows/NVDA/keyCodeCommands.js": "37093f9e4685c4aa3300b8af9d7fc56f7344d726f66a6bd212cbc4dcfc553081",
       "node_modules/@guidepup/guidepup/lib/windows/Key.js": "d5fb803700c2e879419a0b43f17636ea08aaf6d810fed18b1ab11294b8824973",
       "node_modules/@guidepup/guidepup/lib/windows/sendKeys.js": "06a0a436ca0c38e02154f033f5bab22ad9830c54f0437e5807e9f0a9516543d2",
-      "node_modules/@guidepup/guidepup/lib/windows/runVbsScript.js": "5635545b7b97ea88fb6d754f0cb4d66a47d914ee3dc547fb9d81f0c5c66382fe"
+      "node_modules/@guidepup/guidepup/lib/windows/runVbsScript.js": "5635545b7b97ea88fb6d754f0cb4d66a47d914ee3dc547fb9d81f0c5c66382fe",
+      "node_modules/@guidepup/guidepup/lib/windows/NVDA/start.js": "20e7d28399595971cebfa96d0b25582d6362a411235745342f8df846ecf272c8",
+      "node_modules/@guidepup/guidepup/lib/windows/NVDA/quit.js": "d678d767cc05cac34715a64807a8c326d02e59dddbe3baf0958a268a4688b7fc",
+      "node_modules/@guidepup/guidepup/lib/windows/NVDA/isRunning.js": "d3086fd7540e1179b7776741a87c6d9bc6c17998d2933639f81e40edce9cb18e"
     },
     "vendor_tree_hash": "treeHash(vendor/guidepup-0.36.4-r1): sorted relative paths plus each file sha256 of raw bytes (D-39, T17)",
-    "vendor_tree": "06930f07da16d9af0c1ac55320c6d0b92eb2289395d34def08e4add94f41427a",
+    "vendor_tree": "d80eb577e272dd7c16135ebfeaa9e3dc9162308b0ea1323a9b158dcafb774e1d",
     "supersedes": {
-      "locked_at": "2026-10-27T14:21:16Z",
+      "locked_at": "2026-10-27T15:47:38Z",
       "decisions": [
         "D-33",
         "D-34",
         "D-36",
         "D-37",
         "D-39",
-        "D-40"
+        "D-40",
+        "D-42"
       ],
       "hash": "sha256 of UTF-8 text, CRLF normalised to LF; PLAN.md#F-02 = text between the F-02 spec markers",
       "sha256": {
-        "docs/ledger/PLAN.md#F-02": "62781b107991c4e942ade7be44e22d34dad906c927792fbcab01695f5c53b21f",
+        "docs/ledger/PLAN.md#F-02": "bb9fe43344c0b938a7f420a3c4957de26aae05784182442a79ccf3e2b9e64216",
         "fixtures/r1/signup.html": "b9f6f6159943c646ffae1f510a07ae9cd65e07c500bab140bcdcd08d4b3d7a71",
         "fixtures/r1/steps.json": "150a95825dd418e719018a5185608865d1353dc9b20b2080c3087fc542828a89",
         "src/speech/validate.mjs": "fe19e73d46a3084a90c8ffe1c00ae8b730c2517a7ff080fad24f3b72b04b7fb2",
-        "src/speech/capture.mjs": "67642ba35d9608ab8781370b460ce385f11b4f92efff35981fd5d62a016b9f2a",
+        "src/speech/capture.mjs": "bb63ca2742731dd017e8e5fb9920270c87d1405aa727ab2145b8a2b2369e5615",
         "src/speech/foreground.mjs": "83ce08023e239ad5c8ce748cb1bf604c5191cf28d2f1ff6d84665ef8a82c25cb",
         "src/speech/runguard.mjs": "8884901cb7f690c8beb3c8f208d59d10989cd2e2464fee6bb5fe927593149222",
-        "src/speech/sendguard.mjs": "74df8a1f9c36490f9784c77e5bee3586f49ff597d354f996507cd34fb1d5554d",
-        "src/speech/vendortree.mjs": "7cac1c14e46052a83dfa15da5125c29ded008085f3ae2a34748bb14e2d790d3f",
-        "scripts/r1.mjs": "7e50e6c44ae2da43b372be66de4cc9ccb284c50ac8c0f2a6b3d1e6e8b26a363d",
+        "src/speech/sendguard.mjs": "459914fa831ac1ea1c3c2e82fba1190e5108017c18d20a814d87e40ccae47886",
+        "src/speech/vendortree.mjs": "e13d6e02c36c4708df414dd7eafa8d6cd8db221cc8e3527d2f02a6cc00e41584",
+        "scripts/r1.mjs": "d61f9483260ca45c79513edec438756b1b078fa074528271bf739b70b7c42ba9",
         ".github/workflows/r1.yml": "e1353c1dc5460d0e8569499239dcb7e87443896b18909ffff47ad604f131355c"
       },
       "dependencies_hash": "sha256 of raw bytes: the installed upstream Guidepup files, the reference checkVendor compares the vendored copy against (D-37, D-39); R1 never loads them",
@@ -115,25 +123,30 @@
       "vendor_tree_hash": "treeHash(vendor/guidepup-0.36.4-r1): sorted relative paths plus each file sha256 of raw bytes (D-39, T17)",
       "vendor_tree": "06930f07da16d9af0c1ac55320c6d0b92eb2289395d34def08e4add94f41427a",
       "supersedes": {
-        "locked_at": "2026-10-27T09:53:57Z",
+        "locked_at": "2026-10-27T14:21:16Z",
         "decisions": [
           "D-33",
           "D-34",
           "D-36",
-          "D-37"
+          "D-37",
+          "D-39",
+          "D-40"
         ],
+        "hash": "sha256 of UTF-8 text, CRLF normalised to LF; PLAN.md#F-02 = text between the F-02 spec markers",
         "sha256": {
-          "docs/ledger/PLAN.md#F-02": "60dd21711f95f6ae8b1a80eecff58bd22cf1bf1e3fb9bdb4f93e5ebf1b2167a1",
+          "docs/ledger/PLAN.md#F-02": "62781b107991c4e942ade7be44e22d34dad906c927792fbcab01695f5c53b21f",
           "fixtures/r1/signup.html": "b9f6f6159943c646ffae1f510a07ae9cd65e07c500bab140bcdcd08d4b3d7a71",
           "fixtures/r1/steps.json": "150a95825dd418e719018a5185608865d1353dc9b20b2080c3087fc542828a89",
           "src/speech/validate.mjs": "fe19e73d46a3084a90c8ffe1c00ae8b730c2517a7ff080fad24f3b72b04b7fb2",
-          "src/speech/capture.mjs": "0fb90f79933aacd073b7a23fb12253985f89f0ce2a825e067a38ba254632e548",
+          "src/speech/capture.mjs": "67642ba35d9608ab8781370b460ce385f11b4f92efff35981fd5d62a016b9f2a",
           "src/speech/foreground.mjs": "83ce08023e239ad5c8ce748cb1bf604c5191cf28d2f1ff6d84665ef8a82c25cb",
           "src/speech/runguard.mjs": "8884901cb7f690c8beb3c8f208d59d10989cd2e2464fee6bb5fe927593149222",
-          "src/speech/sendguard.mjs": "1140fcfe54cf2b67c65f236832bf995d2ae4ddef09f068c22e5ffc4b77973024",
-          "scripts/r1.mjs": "f3cc89148f9564c8dde12ea8bdc59bc4b9dfee478fcfbf7c7c0c9bbc872681a2",
-          ".github/workflows/r1.yml": "323aa4c84dc19b5833e0f97fa0cf09446bb023ea949d92cb4a7f34cc213c8274"
+          "src/speech/sendguard.mjs": "74df8a1f9c36490f9784c77e5bee3586f49ff597d354f996507cd34fb1d5554d",
+          "src/speech/vendortree.mjs": "7cac1c14e46052a83dfa15da5125c29ded008085f3ae2a34748bb14e2d790d3f",
+          "scripts/r1.mjs": "7e50e6c44ae2da43b372be66de4cc9ccb284c50ac8c0f2a6b3d1e6e8b26a363d",
+          ".github/workflows/r1.yml": "e1353c1dc5460d0e8569499239dcb7e87443896b18909ffff47ad604f131355c"
         },
+        "dependencies_hash": "sha256 of raw bytes: the installed upstream Guidepup files, the reference checkVendor compares the vendored copy against (D-37, D-39); R1 never loads them",
         "dependencies": {
           "node_modules/@guidepup/guidepup/package.json": "74cc5ef6ca02718abd6db089989d89323f57d57870f98907699c13cc73d29a87",
           "node_modules/@guidepup/guidepup/lib/windows/NVDA/NVDAClient.js": "5b2fe4bdda79b780048a3520fb223e0fe465c8502d634d7206b41395ee10372b",
@@ -143,37 +156,69 @@
           "node_modules/@guidepup/guidepup/lib/windows/sendKeys.js": "06a0a436ca0c38e02154f033f5bab22ad9830c54f0437e5807e9f0a9516543d2",
           "node_modules/@guidepup/guidepup/lib/windows/runVbsScript.js": "5635545b7b97ea88fb6d754f0cb4d66a47d914ee3dc547fb9d81f0c5c66382fe"
         },
+        "vendor_tree_hash": "treeHash(vendor/guidepup-0.36.4-r1): sorted relative paths plus each file sha256 of raw bytes (D-39, T17)",
+        "vendor_tree": "06930f07da16d9af0c1ac55320c6d0b92eb2289395d34def08e4add94f41427a",
         "supersedes": {
-          "locked_at": "2026-10-27T07:58:42Z",
+          "locked_at": "2026-10-27T09:53:57Z",
           "decisions": [
             "D-33",
             "D-34",
-            "D-36"
+            "D-36",
+            "D-37"
           ],
           "sha256": {
-            "docs/ledger/PLAN.md#F-02": "691b287fc3889076801bff919a4a41717e6d9567748e88564161f28ed6c6d87a",
+            "docs/ledger/PLAN.md#F-02": "60dd21711f95f6ae8b1a80eecff58bd22cf1bf1e3fb9bdb4f93e5ebf1b2167a1",
             "fixtures/r1/signup.html": "b9f6f6159943c646ffae1f510a07ae9cd65e07c500bab140bcdcd08d4b3d7a71",
             "fixtures/r1/steps.json": "150a95825dd418e719018a5185608865d1353dc9b20b2080c3087fc542828a89",
             "src/speech/validate.mjs": "fe19e73d46a3084a90c8ffe1c00ae8b730c2517a7ff080fad24f3b72b04b7fb2",
-            "src/speech/capture.mjs": "605b22852bdd668713534c2bf92c348527d2a3e530f09bdf274e3f19edb6ec3f",
+            "src/speech/capture.mjs": "0fb90f79933aacd073b7a23fb12253985f89f0ce2a825e067a38ba254632e548",
             "src/speech/foreground.mjs": "83ce08023e239ad5c8ce748cb1bf604c5191cf28d2f1ff6d84665ef8a82c25cb",
-            "src/speech/runguard.mjs": "4ab8e6c9d6b4675875b5089949188168e252861efb06feee37a6f9c7d320db7e",
-            "scripts/r1.mjs": "389d6a35e172966dffa563d880995b5d0beaee25632826e4e94ad4f03a6a8ae1",
-            ".github/workflows/r1.yml": "434584d2bbf7dd75bd6803258617a56d1d7720a96b59e06ef3c6d85ad7c9a5fa"
+            "src/speech/runguard.mjs": "8884901cb7f690c8beb3c8f208d59d10989cd2e2464fee6bb5fe927593149222",
+            "src/speech/sendguard.mjs": "1140fcfe54cf2b67c65f236832bf995d2ae4ddef09f068c22e5ffc4b77973024",
+            "scripts/r1.mjs": "f3cc89148f9564c8dde12ea8bdc59bc4b9dfee478fcfbf7c7c0c9bbc872681a2",
+            ".github/workflows/r1.yml": "323aa4c84dc19b5833e0f97fa0cf09446bb023ea949d92cb4a7f34cc213c8274"
+          },
+          "dependencies": {
+            "node_modules/@guidepup/guidepup/package.json": "74cc5ef6ca02718abd6db089989d89323f57d57870f98907699c13cc73d29a87",
+            "node_modules/@guidepup/guidepup/lib/windows/NVDA/NVDAClient.js": "5b2fe4bdda79b780048a3520fb223e0fe465c8502d634d7206b41395ee10372b",
+            "node_modules/@guidepup/guidepup/lib/windows/NVDA/NVDA.js": "b6d00ae05ea4a26832167de80d3a9bfff27181d496f09a82d1e561f88c757e1d",
+            "node_modules/@guidepup/guidepup/lib/windows/NVDA/keyCodeCommands.js": "37093f9e4685c4aa3300b8af9d7fc56f7344d726f66a6bd212cbc4dcfc553081",
+            "node_modules/@guidepup/guidepup/lib/windows/Key.js": "d5fb803700c2e879419a0b43f17636ea08aaf6d810fed18b1ab11294b8824973",
+            "node_modules/@guidepup/guidepup/lib/windows/sendKeys.js": "06a0a436ca0c38e02154f033f5bab22ad9830c54f0437e5807e9f0a9516543d2",
+            "node_modules/@guidepup/guidepup/lib/windows/runVbsScript.js": "5635545b7b97ea88fb6d754f0cb4d66a47d914ee3dc547fb9d81f0c5c66382fe"
           },
           "supersedes": {
-            "locked_at": "2026-10-27T07:04:48Z",
+            "locked_at": "2026-10-27T07:58:42Z",
             "decisions": [
               "D-33",
-              "D-34"
+              "D-34",
+              "D-36"
             ],
             "sha256": {
-              "docs/ledger/PLAN.md#F-02": "92908ee984af42cc865a5164b42cc7c70ff2e636a75c0a7fc312f20a72dd9d58",
+              "docs/ledger/PLAN.md#F-02": "691b287fc3889076801bff919a4a41717e6d9567748e88564161f28ed6c6d87a",
               "fixtures/r1/signup.html": "b9f6f6159943c646ffae1f510a07ae9cd65e07c500bab140bcdcd08d4b3d7a71",
-              "fixtures/r1/steps.json": "d1ffbd7f31b5bd99a9cb60f2e20fac77838c2436f65c06f6d3a08557ec5efac6",
+              "fixtures/r1/steps.json": "150a95825dd418e719018a5185608865d1353dc9b20b2080c3087fc542828a89",
               "src/speech/validate.mjs": "fe19e73d46a3084a90c8ffe1c00ae8b730c2517a7ff080fad24f3b72b04b7fb2",
-              "src/speech/capture.mjs": "79830ee9f7ccdc43785f517c422e2a4fefd41cb6453b2e78e4fd803ddf932222",
-              "scripts/r1.mjs": "bdb934b0a5bbb2875e3656cb5ec9f7ca6ed532f584d3d670ba0e639a892ed9a1"
+              "src/speech/capture.mjs": "605b22852bdd668713534c2bf92c348527d2a3e530f09bdf274e3f19edb6ec3f",
+              "src/speech/foreground.mjs": "83ce08023e239ad5c8ce748cb1bf604c5191cf28d2f1ff6d84665ef8a82c25cb",
+              "src/speech/runguard.mjs": "4ab8e6c9d6b4675875b5089949188168e252861efb06feee37a6f9c7d320db7e",
+              "scripts/r1.mjs": "389d6a35e172966dffa563d880995b5d0beaee25632826e4e94ad4f03a6a8ae1",
+              ".github/workflows/r1.yml": "434584d2bbf7dd75bd6803258617a56d1d7720a96b59e06ef3c6d85ad7c9a5fa"
+            },
+            "supersedes": {
+              "locked_at": "2026-10-27T07:04:48Z",
+              "decisions": [
+                "D-33",
+                "D-34"
+              ],
+              "sha256": {
+                "docs/ledger/PLAN.md#F-02": "92908ee984af42cc865a5164b42cc7c70ff2e636a75c0a7fc312f20a72dd9d58",
+                "fixtures/r1/signup.html": "b9f6f6159943c646ffae1f510a07ae9cd65e07c500bab140bcdcd08d4b3d7a71",
+                "fixtures/r1/steps.json": "d1ffbd7f31b5bd99a9cb60f2e20fac77838c2436f65c06f6d3a08557ec5efac6",
+                "src/speech/validate.mjs": "fe19e73d46a3084a90c8ffe1c00ae8b730c2517a7ff080fad24f3b72b04b7fb2",
+                "src/speech/capture.mjs": "79830ee9f7ccdc43785f517c422e2a4fefd41cb6453b2e78e4fd803ddf932222",
+                "scripts/r1.mjs": "bdb934b0a5bbb2875e3656cb5ec9f7ca6ed532f584d3d670ba0e639a892ed9a1"
+              }
             }
           }
         }

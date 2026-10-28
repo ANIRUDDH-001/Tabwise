@@ -1782,3 +1782,201 @@ test('D43 send evidence: an intent-journal write failure refuses physical input'
   assert.deepEqual(physOf(nvda.calls), []);
   assert.ok(s.evidence.write_errors.some((e) => e.includes('sends-')));
 });
+
+// A14 (D-49) spoken title, after R1 #1 (workflow run 40629513668) spoke the nonce with ASCII spaces.
+const OBSERVED_NONCE = '1b11a7f2';
+const OBSERVED_TITLE = 'R 1 sign-up 1b 11a 7f 2 - Google Chrome for Testing';
+const FOREIGN_NONCE = '2b11a7f2';
+const NONCE_TITLE_NEGATIVES = [
+  ['incorrect digit', 'R 1 sign-up 1b 11a 7f 3 - Google Chrome for Testing'],
+  ['missing digit', 'R 1 sign-up 1b 11a 7f - Google Chrome for Testing'],
+  ['extra trailing digit', 'R1 sign-up 1b11a7f20 - Chromium'],
+  ['extra leading digit', 'R1 sign-up 01b11a7f2 - Chromium'],
+  ['another attempt', 'R 1 sign-up 2b 11a 7f 2 - Google Chrome for Testing'],
+  ['two nonce choices', 'R1 sign-up 1b11a7f2 or 2b11a7f2 - Chromium'],
+  ['two titles', 'R1 sign-up 1b11a7f2 - Chromium R1 sign-up 2b11a7f2 - Chromium'],
+  ['duplicate title', 'R1 sign-up 1b11a7f2 - Chromium R1 sign-up 1b11a7f2 - Chromium'],
+  ['unrelated window', 'Notepad 1b11a7f2'],
+  ['wrong fixture label', 'R1 notes 1b11a7f2 - Chromium'],
+  ['missing hyphen in label', 'R1 sign up 1b11a7f2 - Chromium'],
+  ['prefixed unrelated text', 'Other window R1 sign-up 1b11a7f2 - Chromium'],
+  ['nonce alone', '1b11a7f2'],
+  ['URL containing nonce', 'https://example.test/1b11a7f2'],
+  ['unrecognized browser suffix', 'R1 sign-up 1b11a7f2 - Notepad'],
+  ['punctuation in nonce', 'R1 sign-up 1b-11a-7f-2 - Chromium'],
+  ['spoken number words', 'R1 sign-up one b one one a seven f two - Chromium'],
+  ['confusable letter', 'R1 sign-up lb11a7f2 - Chromium'],
+  ['tab in nonce', 'R1 sign-up 1b\t11a 7f 2 - Chromium'],
+  ['NBSP in nonce', 'R1 sign-up 1b\u00a011a 7f 2 - Chromium'],
+  ['zero-width in nonce', 'R1 sign-up 1b\u200b11a 7f 2 - Chromium'],
+  ['newline in nonce', 'R1 sign-up 1b\n11a 7f 2 - Chromium'],
+  ['final LF', 'R1 sign-up 1b11a7f2 - Chromium\n'],
+  ['final CRLF', 'R1 sign-up 1b11a7f2 - Chromium\r\n'],
+];
+
+test('N1 observed NVDA title: the actual initial check accepts exact spaced hex and preserves captured speech', async () => {
+  const nvda = fakeNvda({ titles: () => OBSERVED_TITLE });
+  const a = await runAttempt(ARGS(nvda, { nonce: OBSERVED_NONCE }));
+  assert.equal(a.status, 'completed', a.error);
+  assert.equal(a.records.length, 10);
+  assert.equal(a.title_phrase, OBSERVED_TITLE);
+  assert.deepEqual(a.raw, HEALTHY, 'normalization must not rewrite raw step speech');
+});
+
+test('N1 observed NVDA title: final freshness accepts the same decoded field and changes no evidence values', () => {
+  const a = healthyAttempt(1, OBSERVED_NONCE, { title_phrase: OBSERVED_TITLE, raw: [OBSERVED_TITLE, ...HEALTHY] });
+  const before = structuredClone(a);
+  const j = judgeAttempt({ steps: CFG, attempt: a });
+  assert.equal(j.fresh, true, j.reasons.join('; '));
+  assert.equal(j.complete, true);
+  assert.deepEqual(a, before);
+});
+
+test('N1 case folding remains supported without changing the original title characters', async () => {
+  const title = 'R 1 SIGN-UP 1B 11A 7F 2 - GOOGLE CHROME FOR TESTING';
+  const nvda = fakeNvda({ titles: () => title });
+  const a = await runAttempt(ARGS(nvda, { nonce: OBSERVED_NONCE }));
+  assert.equal(a.status, 'completed', a.error);
+  assert.equal(a.title_phrase, title);
+  assert.equal(judgeAttempt({ steps: CFG, attempt: a }).fresh, true);
+});
+
+test('N1 exact identity: every ASCII-space partition of the eight nonce characters is equivalent only in fixture titles', () => {
+  for (let mask = 0; mask < 128; mask++) {
+    const field = [...OBSERVED_NONCE].map((c, i) => c + (i < 7 && (mask & (1 << i)) ? ' ' : '')).join('');
+    for (const prefix of ['R1', 'R 1']) {
+      for (const suffix of ['', ' - Chromium', ' - Google Chrome for Testing']) {
+        const a = healthyAttempt(1, OBSERVED_NONCE, { title_phrase: `${prefix} sign-up ${field}${suffix}` });
+        assert.equal(judgeAttempt({ steps: CFG, attempt: a }).fresh, true, a.title_phrase);
+      }
+    }
+  }
+});
+
+test('N1 negative initial titles: incorrect, incomplete, unrelated and ambiguous speech never reaches step 1', async () => {
+  for (const [name, title] of NONCE_TITLE_NEGATIVES) {
+    const nvda = fakeNvda({ titles: () => title });
+    const a = await runAttempt(ARGS(nvda, { nonce: OBSERVED_NONCE }));
+    assert.equal(a.status, 'setup-failed', name);
+    assert.equal(a.records.length, 0, name);
+    assert.deepEqual(keyCalls(nvda.calls).map(([c]) => c), ['perform'], name);
+    assert.equal(a.title_phrase, title, 'failed speech stays verbatim');
+  }
+});
+
+test('N1 negative final titles: incorrect, incomplete, unrelated and ambiguous speech never proves freshness', () => {
+  for (const [name, title] of NONCE_TITLE_NEGATIVES) {
+    const a = healthyAttempt(1, OBSERVED_NONCE, { title_phrase: title });
+    assert.equal(judgeAttempt({ steps: CFG, attempt: a }).fresh, false, name);
+  }
+});
+
+test('N1 exact hex: single-character substitutions, deletions and insertions cannot match the expected nonce', () => {
+  const rejects = (field) => {
+    const a = healthyAttempt(1, OBSERVED_NONCE, { title_phrase: `R1 sign-up ${field} - Chromium` });
+    assert.equal(judgeAttempt({ steps: CFG, attempt: a }).fresh, false, field);
+  };
+  for (let i = 0; i < 8; i++) {
+    rejects(OBSERVED_NONCE.slice(0, i) + OBSERVED_NONCE.slice(i + 1));
+    for (const ch of '0123456789abcdef') {
+      if (ch !== OBSERVED_NONCE[i]) rejects(OBSERVED_NONCE.slice(0, i) + ch + OBSERVED_NONCE.slice(i + 1));
+    }
+  }
+  for (let i = 0; i <= 8; i++) for (const ch of '0123456789abcdef') rejects(OBSERVED_NONCE.slice(0, i) + ch + OBSERVED_NONCE.slice(i));
+});
+
+test('N1 stale detection: another attempt nonce is rejected in title, raw, records and mixed speech, spaced or contiguous', () => {
+  const foreign = 'R 1 sign-up 2b 11a 7f 2 - Chromium';
+  const mixed = `${OBSERVED_TITLE}; ${foreign}`;
+  const cases = [
+    healthyAttempt(1, OBSERVED_NONCE, { title_phrase: foreign }),
+    healthyAttempt(1, OBSERVED_NONCE, { raw: [FOREIGN_NONCE] }),
+    healthyAttempt(1, OBSERVED_NONCE, { raw: [foreign] }),
+    healthyAttempt(1, OBSERVED_NONCE, { raw: ['2b 11a 7f 2'] }),
+    healthyAttempt(1, OBSERVED_NONCE, { raw: ['2B 11A 7F 2'] }),
+    healthyAttempt(1, OBSERVED_NONCE, { raw: [mixed] }),
+    healthyAttempt(1, OBSERVED_NONCE, { raw: [`${foreign} ${foreign}`] }),
+  ];
+  const inStep = healthyAttempt(1, OBSERVED_NONCE);
+  inStep.records[1].phrases[0] = mixed;
+  cases.push(inStep);
+  for (const a of cases) {
+    const before = structuredClone(a);
+    const j = judgeAttempt({ steps: CFG, attempt: a, otherNonces: [FOREIGN_NONCE] });
+    assert.equal(j.fresh, false);
+    assert.ok(j.reasons.some((s) => s.includes(`another attempt's nonce ${FOREIGN_NONCE}`)));
+    assert.deepEqual(a, before);
+  }
+});
+
+test('N1 phrase boundaries: neither own identity nor a foreign nonce is assembled across separate utterances', () => {
+  const own = healthyAttempt(1, OBSERVED_NONCE, { title_phrase: 'R1 sign-up 1b 11a', raw: ['7f 2 - Chromium'] });
+  assert.equal(judgeAttempt({ steps: CFG, attempt: own }).fresh, false);
+  const separate = healthyAttempt(1, OBSERVED_NONCE, { raw: ['2b 11a', '7f 2'] });
+  assert.equal(judgeAttempt({ steps: CFG, attempt: separate, otherNonces: [FOREIGN_NONCE] }).fresh, true);
+});
+
+test('N1 native identity remains strict: wrong process or spaced native nonce refuses before title-report input', async () => {
+  for (const reading of [
+    { pid: 999, title: `R1 sign-up ${OBSERVED_NONCE}` },
+    { pid: PID, title: 'R1 sign-up 1b 11a 7f 2' },
+    { pid: PID, title: 'Unrelated window without the nonce' },
+  ]) {
+    const nvda = fakeNvda({ titles: () => OBSERVED_TITLE });
+    const a = await runAttempt(ARGS(nvda, { nonce: OBSERVED_NONCE, fg: fakeFg(nvda, () => reading) }));
+    assert.equal(a.status, 'setup-failed');
+    assert.equal(keyCalls(nvda.calls).length, 0);
+  }
+});
+
+test('N1 historical failure stays FAIL: recognizing its title cannot invent step records or completed attempts', () => {
+  const historical = healthyAttempt(1, OBSERVED_NONCE, {
+    title_phrase: OBSERVED_TITLE, raw: [OBSERVED_TITLE], status: 'setup-failed', records: [], error: 'reported title lacks the nonce',
+  });
+  const before = structuredClone(historical);
+  const result = judgeRun({ steps: CFG, attempts: [historical] });
+  assert.equal(result.result, 'FAIL');
+  assert.equal(result.attempts[0].complete, false);
+  assert.equal(result.attempts[0].fresh, false);
+  assert.deepEqual(historical, before);
+});
+
+test('N1 no error suppression: accepted title cannot clear step timeouts, lost settings or a reused nonce', () => {
+  const a = healthyAttempt(1, OBSERVED_NONCE, { title_phrase: OBSERVED_TITLE });
+  a.records[0].timed_out = true;
+  a.records[0].error = 'original failure';
+  assert.equal(judgeAttempt({ steps: CFG, attempt: a }).complete, false);
+  assert.equal(a.records[0].error, 'original failure');
+  const missing = healthyAttempt(1, OBSERVED_NONCE, { title_phrase: OBSERVED_TITLE, new_process: false });
+  assert.equal(judgeAttempt({ steps: CFG, attempt: missing }).fresh, false);
+  const badSettings = healthyAttempt(1, OBSERVED_NONCE, { title_phrase: OBSERVED_TITLE, settings: {} });
+  assert.equal(judgeAttempt({ steps: CFG, attempt: badSettings }).fresh, false);
+  const duplicate = [1, 2, 3].map((n) => healthyAttempt(n, OBSERVED_NONCE, { title_phrase: OBSERVED_TITLE }));
+  assert.equal(judgeRun({ steps: CFG, attempts: duplicate }).result, 'FAIL');
+});
+
+// R1 #1's grouping: a space after a hex letter that is followed by a digit (1b11a7f2 -> 1b 11a 7f 2).
+const spacedTitle = (n) => `R 1 sign-up ${n.replace(/([a-f])(?=\d)/g, '$1 ')} - Google Chrome for Testing`;
+const N1_NONCES = ['1b11a7f2', 'a0c3e9d4', '7f00be12'];
+
+test('N1 end to end: three attempts whose titles are spoken with ASCII spaces PASS through the gated runner, titles kept verbatim', async () => {
+  const guard = GATE();
+  const nvda = gatedNvda(guard, { titles: (n) => spacedTitle(n) });
+  let i = 0;
+  const s = await runR1(R1ARGS(nvda, { guard, nonce: () => N1_NONCES[i++] }));
+  assert.equal(s.result, 'PASS', JSON.stringify(s.result_reasons));
+  const text = JSON.stringify(s);
+  for (const n of N1_NONCES) assert.ok(text.includes(JSON.stringify(spacedTitle(n))), `summary keeps ${spacedTitle(n)} verbatim`);
+});
+
+test('N1 end to end: attempt 2 speaking attempt 1\'s spaced nonce is a setup failure after attempt 1 ran, so FAIL with no rerun and no page keys', async () => {
+  const guard = GATE();
+  const nvda = gatedNvda(guard, { titles: (n) => spacedTitle(n === N1_NONCES[1] ? N1_NONCES[0] : n) });
+  let i = 0;
+  const s = await runR1(R1ARGS(nvda, { guard, nonce: () => N1_NONCES[i++] }));
+  assert.equal(s.result, 'FAIL');
+  assert.equal(s.rerun_allowed, false);
+  assert.ok(JSON.stringify(s).includes('reported title lacks the nonce'));
+  // Attempts 1 and 3 run in full; attempt 2 sends only stopSpeech and NVDA+T.
+  assert.equal(physOf(nvda.calls).length, 2 * 2 * (1 + HEALTHY.length) + 2);
+});

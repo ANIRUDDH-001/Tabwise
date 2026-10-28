@@ -7,7 +7,7 @@ Read this before opening source files. One line per file or folder. If a line is
 | `AGENTS.md`, `CLAUDE.md` | Agent rules (Claude imports AGENTS.md) | — | — |
 | `docs/governance/PROTOCOLS.md` | Protocols, read by section | — | — |
 | `docs/ledger/` | STATE, PLAN, DECISIONS, LOG, COSTS, FEATURES, QUESTIONS, PROVENANCE, INCIDENTS (I-01), RUNS (scored R1 runs, append-only; S13) | — | — |
-| `docs/reviews/` | Review briefs and reports (`R1-D36-*`, `R1-D37-*`, `R1-D39-patch-spec.md`, `R1-D39-review-brief.md` for Codex) | — | — |
+| `docs/reviews/` | R1 #1 nonce analysis (`R1-run1-analysis-codex.md`, `R1-run1-offline-results.json`), proposed nonce patch, its D-48 review and the D-49 review (`R1-spoken-nonce-*`); review briefs and reports (`R1-D36-*`, `R1-D37-*`, `R1-D39-patch-spec.md`, `R1-D39-review-brief.md` for Codex) | — | — |
 | `.github/workflows/r1.yml` | R1 on a GitHub-hosted Windows VM: manual trigger, one job, no secrets, actions pinned to commit SHAs, main only, read-only checkout, evidence from `RUNNER_TEMP` uploaded `if: always()`; `nvda.log` scrubbed and capped; `Evidence contract` step fails the job when a run folder has no `summary.json` (D-36, D-37, D-39 S-04) | `workflow_dispatch` | workflow text tests (LF and CRLF) in `test/speech.test.mjs` |
 | `.claude/`, `.codex/` | Tool config and the SessionStart hook | `.claude/hooks/session_start.py` | — |
 | `src/budget/prices.mjs` | Meta prices (nano-USD per token), source and read date | `PRICES`, `worstCaseUsd()`, `settledUsd()`, `IMAGE_TOKEN_BOUND` | `test/broker.test.mjs` |
