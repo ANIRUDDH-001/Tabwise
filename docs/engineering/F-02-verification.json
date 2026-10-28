@@ -1,0 +1,44 @@
+{
+  "evidence_class": "MEASURED",
+  "independence": "Implementation tests plus separate reviewer reproduction; all fake OS boundaries",
+  "node": "24.22.1",
+  "command": "npm test",
+  "counts": {
+    "tests": 191,
+    "pass": 191,
+    "fail": 0,
+    "cancelled": 0
+  },
+  "hashes": {
+    "locked_at": "2026-10-28T02:33:36Z",
+    "fileHashes": 12,
+    "pins": 10,
+    "vendorFiles": 40,
+    "changed": 8,
+    "added": 2,
+    "vendor_tree": "d80eb577e272dd7c16135ebfeaa9e3dc9162308b0ea1323a9b158dcafb774e1d",
+    "gatesHash": "ca0c9feb568e7c9c4ea41832607f510af0cbf5548242adcd77f729e039af3362",
+    "mismatches": [],
+    "vendorErrors": [],
+    "originalDrift": [],
+    "manifestFiles": 61,
+    "evidenceExists": false
+  },
+  "not_measured": [
+    "Real Windows foreground/helper latency",
+    "NVDA process launcher and relay ownership behavior",
+    "Hosted interactive desktop and audio",
+    "Three-attempt scored R1 result"
+  ],
+  "committed_archive": {
+    "commit": "a628cd1f2c4528b5c71a625205a36bd136121bce",
+    "command": "npm test",
+    "counts": {
+      "tests": 191,
+      "pass": 191,
+      "fail": 0,
+      "cancelled": 0
+    },
+    "dependencies": "Existing installed dependencies copied/linked, no installation"
+  }
+}

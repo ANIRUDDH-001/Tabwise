@@ -1,0 +1,545 @@
+{
+  "evidence_class": "MEASURED",
+  "scope": "Offline tests with faked OS boundaries; no real NVDA run",
+  "baseline": {
+    "id": "baseline",
+    "exit": 0,
+    "timed": false,
+    "tests": 191,
+    "pass": 191,
+    "fail": 0,
+    "cancelled": 0,
+    "parseError": false,
+    "failures": []
+  },
+  "mutations": [
+    {
+      "id": "01",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 182,
+      "fail": 9,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "NVDA key: canonical bytes, all downs then ups reversed, pre-check before and post-check after the write callback (T20)",
+        "NVDA key: invalid key fields are refused before the gate, 0 writes; a custom toString cannot change the bytes",
+        "T5 write callback never fires -> end (flush), then destroy; possibly misdelivered; dispatch ended",
+        "T8 stopSpeech refused or failing -> the action rejects, no unhandled rejection, run stops",
+        "stop-speech is awaited and gated before the action key (capture path)",
+        "T10 after a passing send, the methods and tables cannot be replaced; an instance override cannot reach the socket",
+        "T21 vendored NVDA key: commit refused after a stall -> rejects, 0 key writes",
+        "T16 vendor tree on disk: unchanged files byte-identical to upstream, changed files match VENDORED.md, closure equals the set",
+        "T16 drift in a copy of the tree is reported: a changed byte, an extra extensionless file, a CR, a stale VENDORED.md hash"
+      ]
+    },
+    {
+      "id": "01b",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 184,
+      "fail": 7,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "T21 vendored runSendKeys: commit refused after a stall -> rejects, 0 execFile calls",
+        "T1 runSendKeys order: the VBS file is written before the admit check, so the check sits right before the launch",
+        "runSendKeys: one gated cscript per character, hidden window, exact script, temp removed",
+        "runSendKeys: a non-zero exit is possibly misdelivered; a gate stop kills the running child",
+        "T6 cscript never exits -> killed; still live after the kill wait; settles when the child finally exits",
+        "T16 vendor tree on disk: unchanged files byte-identical to upstream, changed files match VENDORED.md, closure equals the set",
+        "T16 drift in a copy of the tree is reported: a changed byte, an extra extensionless file, a CR, a stale VENDORED.md hash"
+      ]
+    },
+    {
+      "id": "03",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 187,
+      "fail": 4,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D43 protocol: error or close after the final speech immediately invalidates the run without a next key",
+        "T2 socket error after connect -> client dead: no reconnect, the next key writes nothing",
+        "T16 vendor tree on disk: unchanged files byte-identical to upstream, changed files match VENDORED.md, closure equals the set",
+        "T16 drift in a copy of the tree is reported: a changed byte, an extra extensionless file, a CR, a stale VENDORED.md hash"
+      ]
+    },
+    {
+      "id": "02",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 188,
+      "fail": 3,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "T1 runSendKeys order: the VBS file is written before the admit check, so the check sits right before the launch",
+        "T16 vendor tree on disk: unchanged files byte-identical to upstream, changed files match VENDORED.md, closure equals the set",
+        "T16 drift in a copy of the tree is reported: a changed byte, an extra extensionless file, a CR, a stale VENDORED.md hash"
+      ]
+    },
+    {
+      "id": "05",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 188,
+      "fail": 3,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "T10 after a passing send, the methods and tables cannot be replaced; an instance override cannot reach the socket",
+        "T16 vendor tree on disk: unchanged files byte-identical to upstream, changed files match VENDORED.md, closure equals the set",
+        "T16 drift in a copy of the tree is reported: a changed byte, an extra extensionless file, a CR, a stale VENDORED.md hash"
+      ]
+    },
+    {
+      "id": "06",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 188,
+      "fail": 3,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "T23 characters outside [A-Za-z0-9@.] and multi-character or modifier sendKeys throw before any work; runVbsScript is disabled",
+        "T16 vendor tree on disk: unchanged files byte-identical to upstream, changed files match VENDORED.md, closure equals the set",
+        "T16 drift in a copy of the tree is reported: a changed byte, an extra extensionless file, a CR, a stale VENDORED.md hash"
+      ]
+    },
+    {
+      "id": "04",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 188,
+      "fail": 3,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "T8 stopSpeech refused or failing -> the action rejects, no unhandled rejection, run stops",
+        "T16 vendor tree on disk: unchanged files byte-identical to upstream, changed files match VENDORED.md, closure equals the set",
+        "T16 drift in a copy of the tree is reported: a changed byte, an extra extensionless file, a CR, a stale VENDORED.md hash"
+      ]
+    },
+    {
+      "id": "07",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 189,
+      "fail": 2,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D43 runner epilogue: the exact production completion block cannot kill the target ahead of teardown",
+        "T11/T12/T17/T18 r1.mjs: vendor tree lock, gate and upstream refusal before the vendored load; one teardown; signal options"
+      ]
+    },
+    {
+      "id": "09",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 188,
+      "fail": 3,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "T18 vendored teardown adds no process listeners",
+        "T16 vendor tree on disk: unchanged files byte-identical to upstream, changed files match VENDORED.md, closure equals the set",
+        "T16 drift in a copy of the tree is reported: a changed byte, an extra extensionless file, a CR, a stale VENDORED.md hash"
+      ]
+    },
+    {
+      "id": "08",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 189,
+      "fail": 2,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D43 browser lifetime: no engine signal handler removes the target before teardown allows closure",
+        "T11/T12/T17/T18 r1.mjs: vendor tree lock, gate and upstream refusal before the vendored load; one teardown; signal options"
+      ]
+    },
+    {
+      "id": "11",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 189,
+      "fail": 2,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "runR1: evidence folder deleted mid-run -> recreated, flagged, result cannot be PASS",
+        "T13 summary: still changing after 3 rounds -> FAIL \"summary not stable\", persisted false, on stderr"
+      ]
+    },
+    {
+      "id": "10",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 165,
+      "fail": 20,
+      "cancelled": 6,
+      "parseError": false,
+      "failures": [
+        "D43 verification: null cannot confirm a page-reaching key and success cannot carry failure reasons",
+        "gate: armed -> pre-check, one dispatch, ack, post-check, in that order",
+        "T19 gate: ack false -> possibly misdelivered (kind ack), the post-check still runs",
+        "T19 gate: an ack reader that hangs is bounded and counts as missing",
+        "T20 gate: the post-check runs only after release, never before the dispatch has ended",
+        "D39-B01 P04 gate: the same trace through sendGate -> misdelivered at the Tab ack; the A send is refused, never confirmed",
+        "D-39 runner: every physical send has a passing check right before and right after it; page keys acknowledged",
+        "T26 runner (D-40): NVDA's own Control and Insert on the page, even late, do not fail an ack; a leaked key does",
+        "T7 runner: window changes during a send -> possibly misdelivered, focus-lost, FAIL, no rerun, nothing more sent",
+        "T7 runner: the same window change overlapped with SIGINT -> FAIL, not PARTIAL; nothing more sent",
+        "D-39 runner: an action timeout stops the gate; no later attempt, a late send is refused",
+        "D-39 runner: repository change before a step stops the attempt before any key of that step (M-07)",
+        "T19 runner: the page never sees the key, or sees one extra -> possibly misdelivered, FAIL, nothing more sent",
+        "T5 runner: a write callback that never fires -> possibly misdelivered, FAIL; the page closes only once the send has ended",
+        "T6 runner: a cscript child that never exits is killed; the page is neither closed nor killed while it lives; NVDA still stops",
+        "T12 teardown: live send at a signal -> no close or kill before liveWaitMs, then a deliberate, logged exit",
+        "T12 teardown: the completion entry -> one awaited close per attempt, exit 0 for a persisted PASS; the done stop is not a failure",
+        "T12 teardown: an uncaught exception mid-run -> crashed, FAIL, the error logged first, exit 1; a later rejection is only logged",
+        "T12 teardown: the deadline ends a teardown that runs too long, with one exit and the summary rewritten",
+        "T14 abort while typing character 2 of step 2 -> intent and action lines and a partial record on disk before slow cleanup",
+        "D-37 abort: the aborted summary is on disk before cleanup starts; the gate is stopped (M-05)",
+        "D-39 runner: a send that arrives after its action resolved is refused and stops the run",
+        "D39-B01 runner (P04): Tab, Control, A on the page in the Tab window -> the Tab ack fails; the dropped A is never confirmed",
+        "D39-B01 runner: a stray A between sends is caught by the pre-send log check; the next key is never sent",
+        "D39-M01: a crash during the completion teardown of a PASS run -> FAIL, exit 1 (not 0)",
+        "stop-speech is awaited and gated before the action key (capture path)"
+      ]
+    },
+    {
+      "id": "12",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 174,
+      "fail": 17,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D43 protocol: coalesced speech and cancel frames preserve exact ordering",
+        "D43 protocol: fragmented speech frames are retained until the newline",
+        "D43 protocol: malformed and truncated input stops the gate instead of silently dropping evidence",
+        "D43 protocol: error or close after the final speech immediately invalidates the run without a next key",
+        "D43 actual NVDA startup: foreign relay PID or stop during ownership never establishes a fresh process",
+        "r1Gate: no gate -> no key; one-shot; an incomplete gate is rejected",
+        "NVDA key: canonical bytes, all downs then ups reversed, pre-check before and post-check after the write callback (T20)",
+        "NVDA key: invalid key fields are refused before the gate, 0 writes; a custom toString cannot change the bytes",
+        "T2 socket destroyed before a key -> 0 writes, 0 connects, rejects, gate stopped",
+        "T2 socket error after connect -> client dead: no reconnect, the next key writes nothing",
+        "T22 connect retries stop at once when the gate stops; no handshake writes",
+        "T5 write callback never fires -> end (flush), then destroy; possibly misdelivered; dispatch ended",
+        "T8 stopSpeech refused or failing -> the action rejects, no unhandled rejection, run stops",
+        "stop-speech is awaited and gated before the action key (capture path)",
+        "T9 two concurrent chords -> second admit refused, first commit refused, 0 key writes; click is sequential",
+        "T10 after a passing send, the methods and tables cannot be replaced; an instance override cannot reach the socket",
+        "T21 vendored NVDA key: commit refused after a stall -> rejects, 0 key writes"
+      ]
+    },
+    {
+      "id": "13",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 188,
+      "fail": 3,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D39-B01 P04 pageAck: a key after a Control in the same window fails that ack; it is not kept for the next send",
+        "D39-B01 P04 gate: the same trace through sendGate -> misdelivered at the Tab ack; the A send is refused, never confirmed",
+        "D39-B01 runner (P04): Tab, Control, A on the page in the Tab window -> the Tab ack fails; the dropped A is never confirmed"
+      ]
+    },
+    {
+      "id": "14",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 187,
+      "fail": 4,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D43 freshness: a delayed page pre-read cannot release input from an earlier passing foreground verdict",
+        "D39-B01 pre-send check: a non-modifier key already on the page -> refused before dispatch, misdelivered; Control, Shift, Insert are not strays",
+        "T26 runner (D-40): NVDA's own Control and Insert on the page, even late, do not fail an ack; a leaked key does",
+        "D39-B01 runner: a stray A between sends is caught by the pre-send log check; the next key is never sent"
+      ]
+    },
+    {
+      "id": "14b",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 170,
+      "fail": 14,
+      "cancelled": 7,
+      "parseError": false,
+      "failures": [
+        "D-39 runner: every physical send has a passing check right before and right after it; page keys acknowledged",
+        "T26 runner (D-40): NVDA's own Control and Insert on the page, even late, do not fail an ack; a leaked key does",
+        "T7 runner: window changes during a send -> possibly misdelivered, focus-lost, FAIL, no rerun, nothing more sent",
+        "T7 runner: the same window change overlapped with SIGINT -> FAIL, not PARTIAL; nothing more sent",
+        "D-39 runner: a hung probe inside the gate sends nothing and stops the run",
+        "D-39 runner: an action timeout stops the gate; no later attempt, a late send is refused",
+        "D-39 runner: repository change before a step stops the attempt before any key of that step (M-07)",
+        "T19 runner: the page never sees the key, or sees one extra -> possibly misdelivered, FAIL, nothing more sent",
+        "T5 runner: a write callback that never fires -> possibly misdelivered, FAIL; the page closes only once the send has ended",
+        "T6 runner: a cscript child that never exits is killed; the page is neither closed nor killed while it lives; NVDA still stops",
+        "T12 teardown: live send at a signal -> no close or kill before liveWaitMs, then a deliberate, logged exit",
+        "T12 teardown: the completion entry -> one awaited close per attempt, exit 0 for a persisted PASS; the done stop is not a failure",
+        "T12 teardown: an uncaught exception mid-run -> crashed, FAIL, the error logged first, exit 1; a later rejection is only logged",
+        "T12 teardown: the deadline ends a teardown that runs too long, with one exit and the summary rewritten",
+        "T14 abort while typing character 2 of step 2 -> intent and action lines and a partial record on disk before slow cleanup",
+        "D-37 abort: the aborted summary is on disk before cleanup starts; the gate is stopped (M-05)",
+        "D-39 runner: a send that arrives after its action resolved is refused and stops the run",
+        "D-39 abort: a signal during the foreground check before a key -> that key is never sent (M-01)",
+        "D39-B01 runner (P04): Tab, Control, A on the page in the Tab window -> the Tab ack fails; the dropped A is never confirmed",
+        "D39-B01 runner: a stray A between sends is caught by the pre-send log check; the next key is never sent",
+        "D39-M01: a crash during the completion teardown of a PASS run -> FAIL, exit 1 (not 0)"
+      ]
+    },
+    {
+      "id": "14c",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 188,
+      "fail": 2,
+      "cancelled": 1,
+      "parseError": false,
+      "failures": [
+        "D39-B01 pre-send check: a non-modifier key already on the page -> refused before dispatch, misdelivered; Control, Shift, Insert are not strays",
+        "T26 runner (D-40): NVDA's own Control and Insert on the page, even late, do not fail an ack; a leaked key does",
+        "D39-B01 runner: a stray A between sends is caught by the pre-send log check; the next key is never sent"
+      ]
+    },
+    {
+      "id": "15",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 189,
+      "fail": 2,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D39-M01 P05: a crash during a signal teardown -> FAIL with the crash in the summary; status aborted, one exit, 130",
+        "D39-M01: a crash during the completion teardown of a PASS run -> FAIL, exit 1 (not 0)"
+      ]
+    },
+    {
+      "id": "15b",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 190,
+      "fail": 1,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D39-M01 P05: a crash during a signal teardown -> FAIL with the crash in the summary; status aborted, one exit, 130"
+      ]
+    },
+    {
+      "id": "16",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 190,
+      "fail": 1,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D39-S01 P06: a summary-only write error shows in the returned summary's evidence.write_errors, not only on stderr"
+      ]
+    },
+    {
+      "id": "17",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 190,
+      "fail": 1,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D39-S02 X04: the lock pins exactly the upstream files r1.mjs requires; a missing, extra, changed or empty entry is refused"
+      ]
+    },
+    {
+      "id": "17b",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 190,
+      "fail": 1,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D39-S02 X04: the lock pins exactly the upstream files r1.mjs requires; a missing, extra, changed or empty entry is refused"
+      ]
+    },
+    {
+      "id": "17c",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 190,
+      "fail": 1,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D39-S02 X04: the lock pins exactly the upstream files r1.mjs requires; a missing, extra, changed or empty entry is refused"
+      ]
+    },
+    {
+      "id": "18-freshness",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 187,
+      "fail": 4,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D43 freshness: the full foreground request/reply and evidence delay count against 100 ms",
+        "T21 gate: an event-loop stall longer than maxAgeMs between admit and commit -> commit refused, zero sends",
+        "T21 vendored NVDA key: commit refused after a stall -> rejects, 0 key writes",
+        "T21 vendored runSendKeys: commit refused after a stall -> rejects, 0 execFile calls"
+      ]
+    },
+    {
+      "id": "19-capability",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 190,
+      "fail": 1,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D43 verification: a missing pre-send capability refuses before any physical send"
+      ]
+    },
+    {
+      "id": "20-ack-class",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 190,
+      "fail": 1,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D43 verification: null cannot confirm a page-reaching key and success cannot carry failure reasons"
+      ]
+    },
+    {
+      "id": "21-terminal",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 190,
+      "fail": 1,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D43 terminal evidence: an unexplained page key during raw collection cannot produce PASS"
+      ]
+    },
+    {
+      "id": "22-framing",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 188,
+      "fail": 3,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D43 protocol: fragmented speech frames are retained until the newline",
+        "T16 vendor tree on disk: unchanged files byte-identical to upstream, changed files match VENDORED.md, closure equals the set",
+        "T16 drift in a copy of the tree is reported: a changed byte, an extra extensionless file, a CR, a stale VENDORED.md hash"
+      ]
+    },
+    {
+      "id": "23-quit-status",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 188,
+      "fail": 3,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D43 lifecycle: a nonzero quit status is an error, not a successful reset",
+        "T16 vendor tree on disk: unchanged files byte-identical to upstream, changed files match VENDORED.md, closure equals the set",
+        "T16 drift in a copy of the tree is reported: a changed byte, an extra extensionless file, a CR, a stale VENDORED.md hash"
+      ]
+    },
+    {
+      "id": "24-owner",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 188,
+      "fail": 3,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D43 actual NVDA startup: foreign relay PID or stop during ownership never establishes a fresh process",
+        "T16 vendor tree on disk: unchanged files byte-identical to upstream, changed files match VENDORED.md, closure equals the set",
+        "T16 drift in a copy of the tree is reported: a changed byte, an extra extensionless file, a CR, a stale VENDORED.md hash"
+      ]
+    },
+    {
+      "id": "25-disconnect",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 188,
+      "fail": 3,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D43 protocol: error or close after the final speech immediately invalidates the run without a next key",
+        "T16 vendor tree on disk: unchanged files byte-identical to upstream, changed files match VENDORED.md, closure equals the set",
+        "T16 drift in a copy of the tree is reported: a changed byte, an extra extensionless file, a CR, a stale VENDORED.md hash"
+      ]
+    },
+    {
+      "id": "26-ack-deadline",
+      "exit": 1,
+      "timed": false,
+      "tests": 191,
+      "pass": 190,
+      "fail": 1,
+      "cancelled": 0,
+      "parseError": false,
+      "failures": [
+        "D43 acknowledgement: a late page-read result cannot extend the exact acknowledgement deadline"
+      ]
+    }
+  ],
+  "runtime17_correction": "The final test-only reorder makes actual dependency expression fail before the source assertion. Independent focused baseline1/1 and valid mutant0/1 completed; 17-runtime-corrected.tap.",
+  "harness_correction": "First defense preload blocked loopback fixture fetch; no mutants ran on that baseline. Corrected preload allows only HTTP127.0.0.1 with redirects rejected; v2 baseline191/191 passed."
+}

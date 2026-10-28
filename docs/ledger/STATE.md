@@ -1,29 +1,29 @@
-# STATE — overwrite each session, ≤40 lines
+# STATE — F-02 engineering handoff
 
-Updated: 2026-10-27T07:22:00Z · by: codex
+Updated: 2026-10-28T02:51:34Z · by: codex
 
-## Team (D26: the user divides work; tracked as "us")
-- Product (provisional, D22): sharpened C3, accessibility regression testing for forms and dialogs.
-- Test rulebook frozen (D23): `PLAN.md` R0–R3 and R7. Gates hash: ca0c9feb…3362 (unchanged).
-- Budget (D25): $150 strict ceiling; broker hard stop $100. `npm run spend` → $0.00 spent.
-- Now: F-02 (R1 real NVDA speech) committed modularly on `main` (D-35); locked and verified.
-- Next:
-  1. The user runs `git push`.
-  2. The user runs `npm run r1` from `app/`: hands off keyboard and mouse ~3–5 min; NVDA speaks.
-  3. Claude checks `docs/evidence/r1/<run_id>/` against the validator; FEATURES R1 `passes` only then.
-  4. F-03 broker hardening (per-experiment cap; overrun → record, flag, block until reconciled) after R1, Codex review before any R2 call (D-33).
-- Blocked: nothing. No Meta calls until F-03 passes review.
-- Last verification (2026-10-27T07:22:00Z): `npm test` → 44 pass 0 fail; `node scripts/r1.mjs --hashes` → 0 mismatches vs `fixtures/r1/lock.json`.
-
-## Notes for whoever resumes
-- Spec: `PLAN.md` § F-02 between the spec markers (D-33 corrections C1–C3, D-34 amendments A1–A3).
-- Any edit to the 6 locked items makes `npm run r1` refuse; re-lock only before the first scored run, logged.
-- No threshold changes or fixture tuning after the first scored run; keep all failed/partial evidence (D-33).
-- Rerun only if setup fails before attempt 1 reaches step 1 (summary `rerun_allowed: true`).
-- Every Meta call goes through `respond()` in `src/meta/client.mjs` (D-29). Run tests via `npm test`.
+- Now: reviewed R1 safety bundle a628cd1 published to main under D-46. Manual workflow available; not triggered.
+- Publication: main only (D-44). Earlier records commits e09a068 and0932f68; final engineering records accompany this handoff.
+- Completed software repair: conservative request-start freshness, mandatory before hook, strict ack class/reasons and exact ack deadline.
+- Completed transport/lifecycle repair: framing, unexpected-loss failure, bounded owned reset/start and relay PID equality.
+- Completed evidence repair: intent persistence before dispatch, terminal check after raw capture, retained failure/cleanup diagnostics.
+- Last verification: npm test ->191 pass,0 fail,0 cancelled; committed a628cd1 archive independently exported and also191/191.
+- Mutations: baseline191/191;32/32 valid faults detected. Individual cancellations10:6,14b:7,14c:1 disclosed; no syntax/process-timeout results.
+- Integrity:12 normalized file/spec hashes,10 upstream pins,40 vendor files; no mismatch. Frozen gates ca0c9feb...3362 unchanged.
+- Independent technical review: APPROVE;61manifest matches and all60staged files checked (vendor exact, text EOL-normalized).
+- Remaining material send-boundary/false-PASS blockers: none found by final independent review; this is not native execution evidence.
+- R1 remains NOT RUN/NOT PASS; FEATURES passes=false. No live three-attempt run performed here.
+- Next: a separately approved, named-commit manual dispatch on disposable hosted Windows; preserve all results and one-scored-run rule.
+- Blocked by explicit boundary: user approved publishing, explicitly said do not run it. No execution authority inferred.
+- No NVDA, desktop keystrokes, Actions run, Meta calls or dependency installation during this engineering session.
+- Native PID/foreground mapping, hosted desktop/audio/VBScript and cleanup behavior remain unmeasured.
+- Residual: launched OS input cannot be recalled; an identical foreign key inside the send window is indistinguishable.
+- Historical I-01 and D39/D42 BLOCK reports preserved unchanged.
 
 ## Handoff
-Uncommitted in `app/`: none (all committed). Remote: `origin/main` awaiting user `git push`.
-Verified by: `npm test` (44 pass); `node scripts/r1.mjs --hashes` (0 mismatches).
-Proposed next step: user pushes `main`, then runs `npm run r1`.
-Review needed from: user
+- Active engineering checkout: this managed worktree; original D:/Projects/Meta AI/app mixed checkout preserved, no baseline file drift.
+- Records: docs/reviews/R1-D43-review-independent.md; docs/engineering/F-02-{operations,ownership-plan,experiments}.md.
+- Machine evidence: F-02-verification.json, F-02-mutation-results.json, F-02-source-manifest.json.
+- Reproducible offline fault harness: node docs/engineering/F-02-mutations.mjs from repo root; creates only unique scratch copies.
+- Raw artifacts: %TEMP%/tabwise-owner-4563fa9d; reviewer placeholder directory in independent report.
+- Never run npm run r1 locally, trigger Actions or make Meta calls without the applicable separate approval.
