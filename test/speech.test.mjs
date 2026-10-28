@@ -9,6 +9,7 @@ import { PassThrough } from 'node:stream';
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, existsSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
+import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import {
@@ -21,9 +22,13 @@ import {
 } from '../src/speech/capture.mjs';
 import { foregroundMismatch, foregroundProbe } from '../src/speech/foreground.mjs';
 import { ciGuardErrors, repoSnapshot, repoChanges, workflowGuardErrors } from '../src/speech/runguard.mjs';
-import { sendGate, VK } from '../src/speech/sendguard.mjs';
+import { sendGate, pageAck, VK } from '../src/speech/sendguard.mjs';
 
 const CFG = JSON.parse(readFileSync(new URL('../fixtures/r1/steps.json', import.meta.url), 'utf8'));
+// Pure vendored configuration functions; never load the NVDA client or execute input.
+const require = createRequire(import.meta.url);
+const { buildIni } = require('../vendor/guidepup-0.36.4-r1/lib/windows/NVDA/config/buildIni.js');
+const { parseIni } = require('../vendor/guidepup-0.36.4-r1/lib/windows/NVDA/config/parseIni.js');
 // Positive execution windows tolerate scheduling contention. Timeout-negative tests override only
 // their intended deadline; frozen production settings in steps.json are unchanged.
 const FAST = { ...CFG, action_timeout_ms: 5000, cleanup_timeout_ms: 2000, focus_wait_ms: 5000, focus_poll_ms: 1 };
@@ -64,7 +69,7 @@ function healthyRecords(attempt = 1, phrases = HEALTHY) {
 function healthyAttempt(attempt, nonce, over = {}) {
   return {
     attempt, nonce, status: 'completed', new_process: true,
-    settings: { 'keyboard.speakTypedCharacters': 1, 'keyboard.speakTypedWords': 0 },
+    settings: { 'keyboard.speakTypedCharacters': 1, 'keyboard.speakTypedWords': 0, 'virtualBuffers.enableOnPageLoad': false },
     title_phrase: `R1 sign-up ${nonce} - Chromium`, focus_tries: 1, error: null,
     records: healthyRecords(attempt), raw: [...HEALTHY], ...over,
   };
@@ -94,7 +99,7 @@ function fakeNvda({ phrases = HEALTHY, titles = (n) => `R1 sign-up ${n} - Chromi
       calls.push(['start', opts]);
       running = true;
       action = 0; titleTries = 0;
-      session = settings ?? { keyboard: { ...opts?.settings?.keyboard } };
+      session = settings ?? structuredClone(opts?.settings ?? {});
       const pid = 60000 + calls.filter(([c]) => c === 'start').length;
       return { pid, relay_pid: pid, reset_confirmed: true };
     },
@@ -276,13 +281,63 @@ test('step rules: timeout, error and silence each fail', () => {
 // ---------- C1: settings read-back ----------
 test('settings read-back: mismatch or missing value is reported', () => {
   const want = CFG.nvda_settings;
-  assert.deepEqual(settingsMismatch(want, { 'keyboard.speakTypedCharacters': 1, 'keyboard.speakTypedWords': 0 }), []);
+  assert.deepEqual(settingsMismatch(want, { 'keyboard.speakTypedCharacters': 1, 'keyboard.speakTypedWords': 0, 'virtualBuffers.enableOnPageLoad': false }), []);
   assert.ok(settingsMismatch(want, { 'keyboard.speakTypedCharacters': 0, 'keyboard.speakTypedWords': 0 }).length);
   assert.ok(settingsMismatch(want, { 'keyboard.speakTypedWords': 0 }).length);
-  assert.deepEqual(settingsMismatch(want, { 'keyboard.speakTypedCharacters': '1', 'keyboard.speakTypedWords': '0' }), [], 'ini values read back as strings');
+  assert.deepEqual(settingsMismatch(want, { 'keyboard.speakTypedCharacters': '1', 'keyboard.speakTypedWords': '0', 'virtualBuffers.enableOnPageLoad': false }), [], 'keyboard ini values may read back as strings; A15 parser readback is boolean');
 });
 
 // ---------- fresh and complete ----------
+// D-53/A15: only the startup profile changes; all journey/speech semantics remain frozen.
+test('A15 fixture: explicit false plus both keyboard settings; original journey fingerprint unchanged', () => {
+  assert.deepEqual(CFG.nvda_settings, { keyboard: { speakTypedCharacters: 1, speakTypedWords: 0 }, virtualBuffers: { enableOnPageLoad: false } });
+  assert.equal(createHash('sha256').update(JSON.stringify(CFG.steps)).digest('hex'), 'c09327ae5dd0be82a926de69e58e26fbf69f274b276b60bd38baeca7d7f967c2', 'pins all ten actions, key sequence and speech expectations');
+});
+test('A15 INI: the actual vendored serialization/parser round-trip preserves boolean false', () => {
+  const text = buildIni(CFG.nvda_settings);
+  assert.match(text, /\[virtualBuffers\]\n\s*enableOnPageLoad = False(?:\n|$)/);
+  assert.equal(parseIni(text).virtualBuffers.enableOnPageLoad, false);
+  assert.deepEqual(parseIni(text).keyboard, { speakTypedCharacters: 1, speakTypedWords: 0 });
+});
+test('A15 startup: profile passes unchanged into start; parsed C1 false permits the unchanged journey without a mode toggle', async () => {
+  const nvda = fakeNvda({ settings: parseIni(buildIni(CFG.nvda_settings)) }), browser = fakeBrowser(nvda);
+  const a = await runAttempt({ nvda, browser, fg: fakeFg(nvda), cfg: FAST, runId: RUN, attempt: 1, nonce: '0a1b2c3d', baseUrl: 'http://127.0.0.1:1', evidence: evidenceWriter(tmp()), state: { aborted: false } });
+  assert.equal(nvda.calls[0][1].settings.virtualBuffers?.enableOnPageLoad, false);
+  assert.equal(a.settings['virtualBuffers.enableOnPageLoad'], false);
+  assert.equal(a.status, 'completed', a.error);
+  assert.deepEqual(keyCalls(nvda.calls), [['perform', 'NVDA-T'], ...CFG.steps.flatMap(s => s.press ? [['press', s.press]] : [...s.type].map(c => ['type', c]))]);
+  assert.deepEqual(a.raw, HEALTHY);
+});
+for (const value of [undefined, true]) test(`A15 C1 rejects ${value === undefined ? 'missing' : 'true'} readback before page open`, async () => {
+  const settings = { keyboard: { speakTypedCharacters: 1, speakTypedWords: 0 }, virtualBuffers: value === undefined ? {} : { enableOnPageLoad: value } };
+  const nvda = fakeNvda({ settings }), browser = fakeBrowser(nvda);
+  const a = await runAttempt({ nvda, browser, fg: fakeFg(nvda), cfg: FAST, runId: RUN, attempt: 1, nonce: '0a1b2c3d', baseUrl: 'http://127.0.0.1:1', evidence: evidenceWriter(tmp()), state: { aborted: false } });
+  assert.equal(a.status, 'setup-failed');
+  assert.match(a.error, /virtualBuffers\.enableOnPageLoad/);
+  assert.equal(browser.calls.length, 0);
+  assert.equal(keyCalls(nvda.calls).length, 0);
+  assert.equal(nvda.calls.filter(([c]) => c === 'stop').length, 1);
+});
+test('A15 acceptance: exactly three fresh complete attempts with the profile are required', () => {
+  const attempts = [1, 2, 3].map(n => healthyAttempt(n, `0000000${n}`, { settings: { 'keyboard.speakTypedCharacters': 1, 'keyboard.speakTypedWords': 0, 'virtualBuffers.enableOnPageLoad': false } }));
+  assert.equal(judgeRun({ steps: CFG, attempts }).result, 'PASS');
+  assert.equal(judgeRun({ steps: CFG, attempts: attempts.slice(0, 2) }).result, 'FAIL');
+  const missing = structuredClone(attempts); delete missing[2].settings['virtualBuffers.enableOnPageLoad'];
+  assert.equal(judgeRun({ steps: CFG, attempts: missing }).result, 'FAIL');
+  const incomplete = structuredClone(attempts); incomplete[2].records.pop();
+  assert.equal(judgeRun({ steps: CFG, attempts: incomplete }).result, 'FAIL');
+});
+test('A15 acknowledgement stays strict: absent, duplicate, incorrect and late Tab all fail at the original 1000ms', async () => {
+  const tok = { id: 1, info: { path: 'nvda', keys: [{ vk: VK.Tab }] } };
+  const tab = { seq: 1, key: 'Tab', shift: false };
+  for (const events of [[], [tab, { ...tab, seq: 2 }], [{ ...tab, key: 'Enter' }]]) {
+    const ack = pageAck({ read: async () => events, ackMs: 1000 });
+    assert.equal((await ack(tok)).ack, false);
+  }
+  const late = pageAck({ read: async () => { await new Promise(r => setTimeout(r, 1001)); return [tab]; }, ackMs: 1000 });
+  const r = await late(tok); assert.equal(r.ack, false); assert.match(r.reasons.join('; '), /exceeded 1000 ms/);
+});
+
 test('attempt: healthy attempt is fresh and complete', () => {
   const j = judgeAttempt({ steps: CFG, attempt: healthyAttempt(1, '0a1b2c3d'), otherNonces: ['11112222'] });
   assert.deepEqual(j.reasons, []);
@@ -933,7 +988,7 @@ test('specText: text between the F-02 markers; lockMismatches names changed file
 test('fixture: steps.json is the frozen 10 steps with C1 settings', () => {
   assert.equal(CFG.steps.length, 10);
   assert.deepEqual(CFG.steps.map((s) => s.press ?? `type:${s.type}`), ['Tab', 'type:Ada', 'Tab', 'type:ada@example.test', 'Tab', 'Space', 'Tab', 'Enter', 'Enter', 'Shift+Tab']);
-  assert.deepEqual(CFG.nvda_settings, { keyboard: { speakTypedCharacters: 1, speakTypedWords: 0 } });
+  assert.deepEqual(CFG.nvda_settings, { keyboard: { speakTypedCharacters: 1, speakTypedWords: 0 }, virtualBuffers: { enableOnPageLoad: false } });
   assert.equal(CFG.silence_ms, 1000);
   assert.equal(CFG.action_timeout_ms, 8000);
   // D-36 A4 replaced focus_retries/focus_delay_ms (A2) with a bounded read-only wait.

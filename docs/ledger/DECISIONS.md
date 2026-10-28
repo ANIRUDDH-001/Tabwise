@@ -190,3 +190,12 @@ Consequence: permanent checkout retained; redundant worktree retired through the
 Preservation: all68 old changed/untracked project originals, local configuration, budget data, Git recovery metadata and historical evidence remain in external local recovery. No old code integrated.
 Publication: prepare only these four ledger files; local commit remains blocked pending cross-tool review (Claude CLI signed out); user alone pushes.
 Reversal: use the verified external recovery copies; never overwrite active common Git metadata. Full original authorization and local paths retained privately.
+
+## D-53 — A15 configuration-only NVDA candidate
+User answer: "Decision: Select Claude's configuration-only design." "Reject the custom observer, authenticated receipt channel and NVDA+Space toggle."
+Approved setting: "virtualBuffers.enableOnPageLoad === false" through existing per-attempt settings/C1; keyboard settings, all ten step objects/speech expectations and strict acknowledgements remain unchanged.
+Approved A15 wording is recorded verbatim in PLAN.md inside F-02, outside the pre-registered Day-1 gates. No other frozen-source change is authorized.
+Boundary: "Do not commit or push. Do not dispatch R1." No local real NVDA, desktop automation, vendor changes or dependencies.
+Consequence: tests first; config-only candidate and final source/spec re-lock; independent Claude review of exact diff before separately authorized hosted qualification.
+Preservation: original R1 #3 remains scored FAIL/no rerun; prior uncommitted STATE and LOG preserved in local review evidence; LOG remains append-only.
+Approval recorded at: 2026-10-28T15:00:38Z (UTC, date -u); user selected the configuration-only design in this session.

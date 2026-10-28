@@ -7,7 +7,7 @@
   "cleanup_timeout_ms": 10000,
   "focus_wait_ms": 10000,
   "focus_poll_ms": 250,
-  "nvda_settings": { "keyboard": { "speakTypedCharacters": 1, "speakTypedWords": 0 } },
+  "nvda_settings": { "keyboard": { "speakTypedCharacters": 1, "speakTypedWords": 0 }, "virtualBuffers": { "enableOnPageLoad": false } },
   "record_settings": ["virtualBuffers.autoSayAllOnPageLoad"],
   "steps": [
     { "step": 1, "press": "Tab", "expect": { "all": ["full name"], "none": ["ada"] } },
