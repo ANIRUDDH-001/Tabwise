@@ -1,0 +1,441 @@
+--- a/src/speech/sendguard.mjs
++++ b/src/speech/sendguard.mjs
+@@ -57,16 +57,17 @@
+ const errText = (e) => e?.message ?? String(e);
+ 
+ // Page acknowledgement over the page's keydown log. read(cursor) returns the events with seq > cursor.
+-// A send's window runs from the cursor to the first Control after its key (the next send's stop-speech
+-// chord starts there). The cursor advances only on success, so an unexplained key fails the next window;
+-// final() reports any key after the last acknowledged one.
++// D-42 (D39-B01): before(token) runs inside admit, right before the send: every key since the cursor must
++// be an ignored one, else something unexplained reached the page and the send is refused. The send's window
++// then starts there, and every non-ignored key in it must be the expected key exactly once. Nothing is kept
++// for a later send, so an earlier stray can never confirm it. Residual (disclosed): an identical stray that
++// lands after before() while our own key is lost looks the same as our key. final() reports any key after
++// the last acknowledged one.
+ export function pageAck({ read, ackMs, pollMs = 10 }) {
+   let cursor = 0;
+-  const windowOf = (evs) => {
+-    const first = evs.findIndex((e) => !IGNORED.has(e.key));
+-    if (first < 0) return null;
+-    const end = evs.findIndex((e, i) => i > first && e.key === 'Control');
+-    return end < 0 ? evs : evs.slice(0, end);
++  const top = (evs) => Math.max(cursor, ...evs.map((e) => e.seq));
++  const readLog = async () => {
++    try { return { evs: await read(cursor) }; } catch (e) { return { reasons: [`page key log unreadable: ${errText(e)}`] }; }
+   };
+   const ack = async (token) => {
+     const expected = pageKeyOf(token.info);
+@@ -74,19 +75,26 @@
+     if (expected.key === null) return { ack: false, reasons: judgeKeys([], expected) };
+     const t0 = Date.now();
+     for (;;) {
+-      let evs;
+-      try { evs = await read(cursor); } catch (e) { return { ack: false, reasons: [`page key log unreadable: ${errText(e)}`] }; }
+-      const win = windowOf(evs);
+-      if (win) {
+-        const reasons = judgeKeys(win, expected);
++      const { evs, reasons: unreadable } = await readLog();
++      if (unreadable) return { ack: false, reasons: unreadable };
++      if (evs.some((e) => !IGNORED.has(e.key))) {
++        const reasons = judgeKeys(evs, expected);
+         if (reasons.length) return { ack: false, reasons };
+-        cursor = Math.max(cursor, ...win.map((e) => e.seq));
++        cursor = top(evs);
+         return { ack: true, reasons: [] };
+       }
+       if (Date.now() - t0 >= ackMs) return { ack: false, reasons: judgeKeys(evs, expected) };
+       await delay(pollMs);
+     }
+   };
++  ack.before = async (token) => {
++    const { evs, reasons: unreadable } = await readLog();
++    if (unreadable) return unreadable;
++    const stray = evs.filter((e) => !IGNORED.has(e.key));
++    if (stray.length) return stray.map((e) => `page key ${shown(e.key)} before send ${token.id}`);
++    cursor = top(evs);
++    return [];
++  };
+   ack.final = async () => {
+     try {
+       return (await read(cursor)).filter((e) => !IGNORED.has(e.key)).map((e) => `page key ${shown(e.key)} after the last acknowledged send`);
+@@ -178,13 +186,20 @@
+       const token = { id: ++n, action: armed, epoch, info, key, at: null, committed: false };
+       inflight = token;
+       intent?.(token);
+-      const pre = await verdict({ phase: 'pre', send: token.id, action: token.action.label, key });
++      // D-42: the page-log check runs beside the foreground check, so both are fresh when token.at is set.
++      const [pre, strays] = await Promise.all([
++        verdict({ phase: 'pre', send: token.id, action: token.action.label, key }),
++        typeof ackFn.before === 'function'
++          ? bounded(() => ackFn.before(token), ackMs + ACK_MARGIN_MS).then((r) => (r.timedOut ? [`page key log check timed out after ${ackMs} ms`] : r.error ? [`page key log check failed: ${r.error}`] : Array.isArray(r.value) ? r.value : ['page key log check returned no verdict']))
++          : [],
++      ]);
+       const clear = () => { if (inflight === token) inflight = null; };
+       if (st.stopped || epoch !== token.epoch) {
+         clear();
+         throw refuse(st.kind, `send ${token.id} (${key}) refused: gate stopped or epoch changed during its check (${st.reason})`);
+       }
+       if (armed !== token.action) { clear(); throw refuse('protocol', `send ${token.id} (${key}): action ended during its check`); }
++      if (strays.length) { clear(); st.misdelivered = true; throw refuse('ack', `before send ${token.id} (${key}): ${strays.join('; ')}`); }
+       if (pre.length) { clear(); throw refuse('pre', `before send ${token.id} (${key}): ${pre.join('; ')}`); }
+       token.at = now();
+       return token;
+--- a/src/speech/capture.mjs
++++ b/src/speech/capture.mjs
+@@ -278,7 +278,9 @@
+     page = o.value;
+     // D-39 decision 1: each send is acknowledged from the page's own keydown log.
+     ack = pageAck({ read: (from) => page.keys(from), ackMs: guard.bounds?.ackMs ?? 1000 });
+-    guard.setAck(async (tok) => { const r = await ack(tok); acks.push(r.ack); return r; });
++    const reader = async (tok) => { const r = await ack(tok); acks.push(r.ack); return r; };
++    reader.before = (tok) => ack.before(tok); // D-42: the page log is checked right before each send
++    guard.setAck(reader);
+     // A4: wait (read-only, no keys) up to focus_wait_ms for our window to be in front. No focus recovery.
+     const until = Date.now() + cfg.focus_wait_ms;
+     let away = await check();
+@@ -362,7 +364,8 @@
+ // D-37: so do cleanup errors (M-02), a missing raw log, any send-gate stop, and evidence-check findings.
+ // D-39 (M02): safety first. A possibly misdelivered key, a missing acknowledgement, a send still live,
+ // interference or damaged evidence make the result FAIL even when the run was aborted; a clean abort is PARTIAL.
+-export function buildSummary({ cfg, runId, attempts, status, reached = null, meta = {}, interference = [], evidence = null, guard = null, evidenceCheck = [] }) {
++// D-42 (D39-M01): a crash during teardown (crashes) makes it FAIL too.
++export function buildSummary({ cfg, runId, attempts, status, reached = null, meta = {}, interference = [], evidence = null, guard = null, evidenceCheck = [], crashes = [] }) {
+   const j = judgeRun({ steps: cfg, attempts });
+   const ev = evidence ?? { dir_recreated: false, write_errors: [] };
+   const missing = guard?.acks?.missing ?? 0;
+@@ -380,11 +383,12 @@
+   if (missing > 0) reasons.push(`page acknowledgements missing: ${missing}`);
+   if (live > 0) reasons.push(`sends still live at the summary: ${live}`);
+   if (status === 'crashed') reasons.push('runner crashed');
++  for (const c of crashes) reasons.push(`runner crashed during teardown: ${c}`);
+   const unsafe = guard?.misdelivered || missing > 0 || live > 0 || interference.length > 0 || evidenceCheck.length > 0
+     || ev.dir_recreated || ev.write_errors.length > 0;
+   let result = status === 'aborted' ? (unsafe ? 'FAIL' : 'PARTIAL') : j.result;
+   if (result === 'PASS' && reasons.length) result = 'FAIL';
+-  if (status === 'crashed') result = 'FAIL';
++  if (status === 'crashed' || crashes.length) result = 'FAIL';
+   return {
+     run_id: runId,
+     status,
+@@ -415,7 +419,8 @@
+ // evidence file again and rewrite while the findings change, at most 3 writes. A third write means the
+ // evidence kept changing: it is FAIL, "summary not stable". state.persisted is true only when the last
+ // write succeeded, the findings were stable and summary.json on disk is the one returned. Otherwise the
+-// summary and the writer's status go to the CI log (stderr).
++// summary and the writer's status go to the CI log (stderr). D-42 (D39-S01): a summary that did not reach
++// disk is rebuilt, so the returned one carries the summary.json write error in evidence.write_errors.
+ export function writeSummary({ evidence, state, build, diag = () => {} }) {
+   const verify = () => (evidence.verify?.() ?? []).filter((p) => !p.startsWith('summary.json:'));
+   const errs = () => evidence.status?.().write_errors ?? [];
+@@ -427,7 +432,9 @@
+   let summary;
+   let stable = false;
+   let wrote = false;
++  let rounds = 0;
+   for (let round = 1; round <= 3; round++) {
++    rounds = round;
+     summary = build(found);
+     if (round === 3) summary = { ...summary, result: 'FAIL', result_reasons: [...(summary.result_reasons ?? []), 'summary not stable'] };
+     const before = errs().filter((e) => e.startsWith('summary.json')).length;
+@@ -442,7 +449,11 @@
+   }
+   const onDisk = wrote && !(evidence.verify?.() ?? []).some((p) => p.startsWith('summary.json:'));
+   state.persisted = stable && onDisk;
+-  if (!onDisk) summary = { ...summary, result: 'FAIL', result_reasons: [...(summary.result_reasons ?? []), 'summary.json not persisted'] };
++  if (!onDisk) {
++    summary = build(found);
++    const extra = [...(rounds === 3 ? ['summary not stable'] : []), 'summary.json not persisted'];
++    summary = { ...summary, result: 'FAIL', result_reasons: [...(summary.result_reasons ?? []), ...extra] };
++  }
+   if (!state.persisted) diag(`r1 summary not persisted: ${toJson(summary, 1)} writer: ${toJson(evidence.status?.() ?? null)}`);
+   return summary;
+ }
+@@ -490,7 +501,8 @@
+ //      nvda.stop last
+ //   4. rewrite the summary, report it, exit: 0 for a persisted PASS, 1 for any other finish or a crash,
+ //      130 for a signal.
+-// A later entry is logged, never a second exit. A deadline (default liveWaitMs + 8 cleanup bounds) ends a
++// A later entry is logged, never a second exit. D-42 (D39-M01): a later crash is also recorded at once
++// (FAIL, "runner crashed during teardown") and the exit code can no longer be 0. A deadline (default liveWaitMs + 8 cleanup bounds) ends a
+ // teardown that runs too long, with the summary rewritten first. All of it is best effort: GitHub Actions
+ // can end a cancelled step sooner, and nothing here runs after a forced kill.
+ export function installTeardown({
+@@ -498,15 +510,21 @@
+   report = () => {}, exit = (c) => process.exit(c), now = isoNow, diag = () => {},
+ }) {
+   let entered = null;
++  let rewrite = null;
++  const crashes = [];
+   let exited = false;
+   let timer = null;
+   const gate = () => guard ?? state.guard ?? null;
+   const quit = (code) => { if (exited) return; exited = true; clearTimeout(timer); exit(code); };
+   const teardown = (reason, { status = 'aborted', extra = {} } = {}) => {
+-    if (entered) { diag(`r1 teardown: ${reason} during teardown`); return entered; }
++    if (entered) {
++      diag(`r1 teardown: ${reason} during teardown`);
++      if (status === 'crashed') { crashes.push(reason); if (!exited) rewrite?.(); }
++      return entered;
++    }
+     diag(`r1 teardown: ${reason}`);
+     const finished = status === 'finished';
+-    const code = (s) => (status === 'aborted' ? 130 : status === 'crashed' ? 1 : (state.persisted && s?.result === 'PASS' ? 0 : 1));
++    const code = (s) => (status === 'aborted' ? 130 : status === 'crashed' || crashes.length ? 1 : (state.persisted && s?.result === 'PASS' ? 0 : 1));
+     if (!finished) state.aborted = true;
+     try { gate()?.stop(reason, finished ? 'done' : 'stop'); } catch (e) { diag(`r1 teardown: gate stop: ${errText(e)}`); }
+     const a = state.current;
+@@ -524,11 +542,12 @@
+           build: (found) => buildSummary({
+             cfg, runId, attempts: state.attempts ?? [], status, reached, meta: { ...meta, ...state.meta, ...info },
+             interference: state.interference ?? [], evidence: evidence.status?.() ?? null,
+-            guard: gate()?.status() ?? null, evidenceCheck: found,
++            guard: gate()?.status() ?? null, evidenceCheck: found, crashes,
+           }),
+         });
+       } catch (e) { diag(`r1 teardown: summary: ${errText(e)}`); return null; }
+     };
++    rewrite = write;
+     write();
+     const ms = deadlineMs ?? liveWaitMs + 8 * cfg.cleanup_timeout_ms;
+     timer = setTimeout(() => {
+--- a/src/speech/vendortree.mjs
++++ b/src/speech/vendortree.mjs
+@@ -17,6 +17,26 @@
+ export const VENDOR_DIR = path.join(ROOT, 'vendor', 'guidepup-0.36.4-r1');
+ export const UPSTREAM_VERSION = '0.36.4';
+ 
++// D-42 (D39-S02): the installed upstream files fixtures/r1/lock.json pins (its dependencies), exactly these.
++const UP = 'node_modules/@guidepup/guidepup';
++export const UPSTREAM_PINS = Object.freeze([
++  `${UP}/package.json`, `${UP}/lib/windows/NVDA/NVDAClient.js`, `${UP}/lib/windows/NVDA/NVDA.js`,
++  `${UP}/lib/windows/NVDA/keyCodeCommands.js`, `${UP}/lib/windows/Key.js`, `${UP}/lib/windows/sendKeys.js`,
++  `${UP}/lib/windows/runVbsScript.js`,
++]);
++// lockDeps: the lock's dependencies; actual: path -> sha256 of the installed file (null if unreadable).
++export function pinErrors(lockDeps, actual) {
++  const pins = lockDeps && typeof lockDeps === 'object' ? lockDeps : {};
++  const out = [];
++  for (const k of UPSTREAM_PINS) {
++    if (!(k in pins)) out.push(`missing from lock.dependencies: ${k}`);
++    else if (!/^[0-9a-f]{64}$/.test(pins[k] ?? '')) out.push(`not a sha256 in lock.dependencies: ${k}`);
++    else if (actual?.[k] !== pins[k]) out.push(`installed file differs from lock.dependencies: ${k}`);
++  }
++  for (const k of Object.keys(pins)) if (!UPSTREAM_PINS.includes(k)) out.push(`not expected in lock.dependencies: ${k}`);
++  return out;
++}
++
+ const sha = (buf) => createHash('sha256').update(buf).digest('hex');
+ const abs = (dir, rel) => path.join(dir, ...rel.split('/'));
+ 
+--- a/scripts/r1.mjs
++++ b/scripts/r1.mjs
+@@ -16,7 +16,7 @@
+ import { foregroundProbe } from '../src/speech/foreground.mjs';
+ import { ciGuardErrors, repoSnapshot, repoChanges, workflowGuardErrors } from '../src/speech/runguard.mjs';
+ import { sendGate } from '../src/speech/sendguard.mjs';
+-import { treeHash, checkVendor, upstreamLoaded, vendorIntegrity, VENDOR_DIR } from '../src/speech/vendortree.mjs';
++import { treeHash, checkVendor, upstreamLoaded, vendorIntegrity, VENDOR_DIR, UPSTREAM_PINS, pinErrors } from '../src/speech/vendortree.mjs';
+ 
+ const LOCKED = [
+   'fixtures/r1/signup.html', 'fixtures/r1/steps.json', 'src/speech/validate.mjs', 'src/speech/capture.mjs',
+@@ -35,7 +35,7 @@
+ // the vendored tree is compared against (checkVendor); R1 never loads them.
+ const lock = JSON.parse(readFileSync('fixtures/r1/lock.json', 'utf8'));
+ const rawSha = (f) => { try { return createHash('sha256').update(readFileSync(f)).digest('hex'); } catch { return null; } };
+-const depHashes = () => Object.fromEntries(Object.keys(lock.dependencies ?? {}).map((f) => [f, rawSha(f)]));
++const depHashes = () => Object.fromEntries(UPSTREAM_PINS.map((f) => [f, rawSha(f)]));
+ 
+ if (process.argv.includes('--hashes')) {
+   console.log(JSON.stringify({ sha256: hashes(), dependencies: depHashes(), vendor_tree: treeHash(VENDOR_DIR) }, null, 2));
+@@ -58,7 +58,7 @@
+ const changed = lockMismatches(lock.sha256, current);
+ if (changed.length) refuse(`changed since the lock (${lock.locked_at}): ${changed.join(', ')}`);
+ const deps = depHashes();
+-const depChanged = Object.keys(lock.dependencies ?? {}).length ? lockMismatches(lock.dependencies, deps) : ['fixtures/r1/lock.json has no dependencies'];
++const depChanged = pinErrors(lock.dependencies, deps); // D-42 (D39-S02): exactly UPSTREAM_PINS
+ if (depChanged.length) refuse(`upstream Guidepup files differ from lock.dependencies: ${depChanged.join(', ')}`);
+ 
+ const cfg = JSON.parse(readFileSync('fixtures/r1/steps.json', 'utf8'));
+--- a/test/sendguard.test.mjs
++++ b/test/sendguard.test.mjs
+@@ -295,10 +295,13 @@
+   assert.match(b.reasons.join(' '), /Target closed/);
+ });
+ 
++// D-42: changed. It was [Tab, Control, q] with the Tab ack true; with no Control window the q now fails that
++// ack (D39-B01 P04 below), so q lands after the acknowledged Tab here.
+ test('pageAck.final: a non-modifier key after the last acknowledged one is reported', async () => {
+-  const log = [ev(1, 'Tab'), ev(2, 'Control'), ev(3, 'q')];
++  const log = [ev(1, 'Tab'), ev(2, 'Control')];
+   const ack = pageAck({ read: async (from) => log.filter((e) => e.seq > from), ackMs: 30, pollMs: 2 });
+   assert.equal((await ack({ id: 1, info: TAB })).ack, true);
++  log.push(ev(3, 'q'));
+   const rest = await ack.final();
+   assert.equal(rest.length, 1);
+   assert.match(rest[0], /q/);
+--- a/test/speech.test.mjs
++++ b/test/speech.test.mjs
+@@ -921,10 +921,11 @@
+ // press and perform, one SendKeys character for type. ['phys', key] marks the moment a key would physically
+ // be sent; the page's keydown log (fakeBrowser page.keys) gets what that key would produce there, NVDA's own
+ // Control and Insert included (T26). onPhys(key) may return:
+-//   { drop }    the key never reaches the page;      { extra: k }  the page also sees key k;
++//   { drop }    the key never reaches the page;      { extra: k }  the page also sees key k (or each of a list);
+ //   { lateMs }  the page sees the key that much later; { hold: p } dispatch ends when p does, bounded by
+ //   writeMs (NVDA chord) or sendMs (character), like the vendored code;
+-//   { live }    the cscript child never exits (character only): released with ended false, settle later.
++//   { live }    the cscript child never exits (character only): released with ended false, settle later;
++//   { after }   after(toPage), called once the send is released (D-42: a stray key between sends).
+ // Replaces guardedNvda (D-37 wrapper fake); the brief maps the old tests to these.
+ const CHORDS = {
+   stopSpeech: [[VK.Control, 29, false]], 'NVDA-T': [[VK.Insert, 82, true], [84, 20, false]],
+@@ -952,7 +953,7 @@
+     const o = onPhys?.(k) ?? {};
+     if (o.lateMs) setTimeout(() => toPage(k), o.lateMs);
+     else if (!o.drop) toPage(k);
+-    if (o.extra) toPage(o.extra);
++    if (o.extra) for (const x of [].concat(o.extra)) toPage(x);
+     let error = o.error ?? null;
+     if (o.hold) {
+       const r = await withTimeout(o.hold, typed ? gate.bounds.sendMs : gate.bounds.writeMs);
+@@ -962,6 +963,7 @@
+     if (live) error = 'cscript did not exit';
+     await gate.release(token, { error, ended: !live });
+     nvda.calls.push(['released', k]);
++    o.after?.(toPage);
+     if (live) nvda.live.push(() => gate.settled(token));
+     if (error) throw new Error(`R1_SEND_FAILED: ${error}`);
+   };
+@@ -1015,14 +1017,15 @@
+   const s = await runR1(R1ARGS(nvda, { guard }));
+   assert.equal(s.result, 'PASS', JSON.stringify(s.result_reasons));
+   assert.ok(nvda.keylog.some((e) => e.key === 'Control') && nvda.keylog.some((e) => e.key === 'Insert'));
+-  // NVDA+T leaks a 't' to the page: seen in the next page-reaching key's window, which then fails.
++  // NVDA+T leaks a 't' to the page. D-42: changed. It was caught in the Tab's window, after the stop-speech
++  // Control and the Tab were sent; the pre-send log check now refuses the next send, so neither is sent.
+   const g2 = GATE();
+   const leaky = gatedNvda(g2, { onPhys: (k) => (k === 'NVDA-T' ? { extra: 't' } : undefined) });
+   const s2 = await runR1(R1ARGS(leaky, { guard: g2 }));
+   assert.equal(s2.result, 'FAIL');
+   assert.equal(s2.send_guard.kind, 'ack');
+   assert.equal(s2.send_guard.misdelivered, true);
+-  assert.deepEqual(physOf(leaky.calls), ['stopSpeech', 'NVDA-T', 'stopSpeech', 'Tab'], 'nothing after the failed ack');
++  assert.deepEqual(physOf(leaky.calls), ['stopSpeech', 'NVDA-T'], 'nothing after the leaked key');
+ });
+ 
+ test('T7 runner: window changes during a send -> possibly misdelivered, focus-lost, FAIL, no rerun, nothing more sent', async () => {
+@@ -1607,3 +1610,113 @@
+   assert.match(src, /RUNNER_TEMP/);
+   assert.doesNotMatch(src, /docs\/evidence\/r1\/\$\{runId\}/, 'evidence is not written into the checkout');
+ });
++
++// ---------- D-42 (D-39 exception): D39-B01, M01, S01, S02 regression tests from Codex's P04, P05, P06, X04 ----------
++test('D39-B01 runner (P04): Tab, Control, A on the page in the Tab window -> the Tab ack fails; the dropped A is never confirmed', async () => {
++  const guard = GATE();
++  let tabs = 0;
++  const nvda = gatedNvda(guard, { onPhys: (k) => {
++    if (k === 'Tab' && ++tabs === 1) return { extra: ['stopSpeech', 'A'] };
++    if (k === 'A') return { drop: true };
++    return undefined;
++  } });
++  const s = await runR1(R1ARGS(nvda, { guard }));
++  assert.equal(s.result, 'FAIL');
++  assert.equal(s.send_guard.kind, 'ack');
++  assert.equal(s.send_guard.misdelivered, true);
++  assert.equal(s.send_guard.acks.confirmed, 0);
++  assert.deepEqual(physOf(nvda.calls), ['stopSpeech', 'NVDA-T', 'stopSpeech', 'Tab'], 'nothing after the failed ack');
++});
++
++test('D39-B01 runner: a stray A between sends is caught by the pre-send log check; the next key is never sent', async () => {
++  const guard = GATE();
++  let tabs = 0;
++  const nvda = gatedNvda(guard, { onPhys: (k) => {
++    if (k === 'Tab' && ++tabs === 1) return { after: (toPage) => toPage('A') };
++    if (k === 'A') return { drop: true };
++    return undefined;
++  } });
++  const s = await runR1(R1ARGS(nvda, { guard }));
++  assert.equal(s.result, 'FAIL');
++  assert.equal(s.send_guard.kind, 'ack');
++  assert.equal(s.send_guard.misdelivered, true);
++  assert.equal(s.send_guard.acks.confirmed, 1, 'only the Tab');
++  assert.deepEqual(physOf(nvda.calls), ['stopSpeech', 'NVDA-T', 'stopSpeech', 'Tab'], 'the stop-speech chord before A is refused');
++});
++
++test('D39-M01 P05: a crash during a signal teardown -> FAIL with the crash in the summary; status aborted, one exit, 130', async () => {
++  let finish;
++  const state = { aborted: false, attempts: [], finish: () => new Promise((r) => { finish = r; }) };
++  const guard = GATE();
++  const ev = evidenceWriter(tmp());
++  const t = rigTeardown({ state, evidence: ev, guard });
++  t.proc.emit('SIGINT');
++  await delay(5);
++  assert.equal(JSON.parse(readFileSync(join(ev.dir, 'summary.json'), 'utf8')).result, 'PARTIAL', 'a clean abort first');
++  t.proc.emit('uncaughtException', new Error('boom'));
++  const mid = JSON.parse(readFileSync(join(ev.dir, 'summary.json'), 'utf8'));
++  assert.equal(mid.result, 'FAIL', 'the crash is written at once, before cleanup ends');
++  finish();
++  assert.equal(await t.done, 130);
++  t.dispose();
++  const s = JSON.parse(readFileSync(join(ev.dir, 'summary.json'), 'utf8'));
++  assert.equal(s.status, 'aborted');
++  assert.equal(s.result, 'FAIL');
++  assert.ok(s.result_reasons.some((r) => /crash.*during teardown.*boom/.test(r)), JSON.stringify(s.result_reasons));
++  assert.deepEqual(t.codes.map(([c]) => c), [130]);
++  assert.ok(t.lines.some((l) => l.includes('boom') && l.includes('during teardown')));
++});
++
++test('D39-M01: a crash during the completion teardown of a PASS run -> FAIL, exit 1 (not 0)', async () => {
++  const state = { aborted: false };
++  const guard = GATE();
++  const ev = evidenceWriter(tmp());
++  const t = rigTeardown({ state, evidence: ev, guard });
++  const nvda = gatedNvda(guard);
++  const s0 = await runR1(R1ARGS(nvda, { guard, state, evidence: ev }));
++  assert.equal(s0.result, 'PASS');
++  let finish;
++  const cleanup = state.finish;
++  state.finish = async () => { await new Promise((r) => { finish = r; }); return cleanup?.(); };
++  t.teardown('run finished', { status: 'finished' });
++  t.proc.emit('unhandledRejection', new Error('late failure'));
++  finish();
++  assert.equal(await t.done, 1);
++  t.dispose();
++  const s = JSON.parse(readFileSync(join(ev.dir, 'summary.json'), 'utf8'));
++  assert.equal(s.status, 'finished');
++  assert.equal(s.result, 'FAIL');
++  assert.ok(s.result_reasons.some((r) => /during teardown.*late failure/.test(r)));
++});
++
++test('D39-S01 P06: a summary-only write error shows in the returned summary\'s evidence.write_errors, not only on stderr', async () => {
++  const denied = (f, body) => {
++    if (basename(f) === 'summary.json') { const e = new Error('permission denied'); e.code = 'EACCES'; throw e; }
++    writeFileSync(f, body);
++  };
++  const args = R1ARGS(fakeNvda());
++  args.evidence = evidenceWriter(args.evidence.dir, { write: denied });
++  const s = await runR1(args);
++  assert.equal(args.state.persisted, false);
++  assert.equal(s.result, 'FAIL');
++  assert.deepEqual(s.evidence.write_errors.filter((e) => e.startsWith('summary.json')), ['summary.json: EACCES']);
++  assert.ok(s.result_reasons.some((r) => r.startsWith('evidence write errors')));
++  assert.ok(s.result_reasons.includes('summary.json not persisted'));
++});
++
++test('D39-S02 X04: the lock pins exactly the upstream files r1.mjs requires; a missing, extra, changed or empty entry is refused', async () => {
++  const { UPSTREAM_PINS, pinErrors } = await import('../src/speech/vendortree.mjs');
++  const lock = JSON.parse(readFileSync(new URL('../fixtures/r1/lock.json', import.meta.url), 'utf8'));
++  assert.deepEqual(Object.keys(lock.dependencies).sort(), [...UPSTREAM_PINS].sort());
++  const actual = { ...lock.dependencies };
++  assert.deepEqual(pinErrors(lock.dependencies, actual), []);
++  const [first, ...rest] = UPSTREAM_PINS;
++  const missing = Object.fromEntries(rest.map((k) => [k, actual[k]]));
++  assert.match(pinErrors(missing, actual).join(' '), new RegExp(`missing.*${first.replace(/[.*+?^${}()|[\]\/]/g, '\$&')}`));
++  assert.match(pinErrors({ ...lock.dependencies, 'node_modules/x.js': 'ab' }, actual).join(' '), /not expected.*node_modules\/x\.js/);
++  assert.match(pinErrors(lock.dependencies, { ...actual, [first]: 'changed' }).join(' '), /differs/);
++  assert.ok(pinErrors({}, actual).length >= UPSTREAM_PINS.length);
++  assert.ok(pinErrors(undefined, actual).length >= UPSTREAM_PINS.length);
++  const src = readFileSync(new URL('../scripts/r1.mjs', import.meta.url), 'utf8');
++  assert.match(src, /pinErrors\(lock\.dependencies, deps\)/, 'r1.mjs refuses on pinErrors');
++});
