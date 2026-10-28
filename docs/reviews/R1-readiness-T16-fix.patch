@@ -1,0 +1,15 @@
+diff --git a/test/vendor.test.mjs b/test/vendor.test.mjs
+index cd969f0..0a98d7d 100644
+--- a/test/vendor.test.mjs
++++ b/test/vendor.test.mjs
+@@ -487,7 +487,9 @@ test('T16 vendor tree on disk: unchanged files byte-identical to upstream, chang
+ 
+ test('T16 drift in a copy of the tree is reported: a changed byte, an extra extensionless file, a CR, a stale VENDORED.md hash', () => {
+   const copy = fs.mkdtempSync(path.join(os.tmpdir(), 'r1-vendor-drift-'));
+-  const fresh = () => { fs.rmSync(copy, { recursive: true, force: true }); fs.cpSync(VENDOR, copy, { recursive: true }); };
++  // The workflow makes tracked files read-only before npm test; cpSync keeps that attribute, so clear it in the copy.
++  const writable = (d) => { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory()) writable(p); else fs.chmodSync(p, 0o644); } };
++  const fresh = () => { fs.rmSync(copy, { recursive: true, force: true }); fs.cpSync(VENDOR, copy, { recursive: true }); writable(copy); };
+   const drift = (fn) => { fresh(); fn(); return checkVendor({ vendor: copy, upstream: UPSTREAM }); };
+   try {
+     fresh();

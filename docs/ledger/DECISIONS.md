@@ -138,3 +138,12 @@ Consequence: briefly interrupted independent review, then resumed engineering an
 Question: publish the reviewed R1 bundle to main including the manual workflow, or keep it local; enabling manual dispatch needs separate approval under D-43.
 User answer: "Publish the reviewed bundle to main; do not run it (Recommended)".
 Consequence: Codex may commit and push the exact independently approved bundle and supporting records to main. The workflow becomes manually available; no trigger, NVDA execution or Meta call is authorized. | Reversal: explicit user instruction
+
+## D-47 2026-10-28 — Approve T16 read-only test-harness fix (B-01)
+
+Question: the independent readiness review (docs/reviews/R1-readiness-claude.md) reproduced B-01. In r1.yml, the read-only step comes before `npm test`, so the T16 drift test's temp copy of vendor/ inherits read-only and its writes fail with EPERM (190/191). R1 would be skipped on every dispatch. Choices: clear the attribute in T16's temp copy (one test file), or move the tests before the read-only step (edits locked r1.yml, lock.json, PLAN S8, speech.test:1541).
+User answer: "Approve T16 fix".
+Consequence: the one change to test/vendor.test.mjs (`fresh()` now also clears read-only on its temp copy; every drift assertion is unchanged) may be committed by Codex on top of 918c8f5. No locked file, gate, fixture, predicate, ownership check or threshold changes. This authorizes no dispatch. Running r1.yml still needs a separate approval naming the new main SHA. | Reversal: explicit user instruction
+
+Publication authorization: "Approve Codex to commit and push the verified D-47 T16 correction to main." User-supplied commit subject: "test(r1): T16 clears read-only on its temp vendor copy (B-01, D-47)". Destination: "Push: to main only (D-44)." Only the six listed files may be staged.
+Execution boundary: "Do NOT trigger GitHub Actions, execute R1, start NVDA or make Meta API calls. Execution requires my separate approval."
