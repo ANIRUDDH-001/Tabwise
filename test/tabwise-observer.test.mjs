@@ -8,7 +8,7 @@ function setup(overrides={}){
  let client,stopped=false,t=0;const stops=[],connects=[];
  class Client extends EventEmitter{constructor(){super();client=this;}async connect(options){connects.push(options);}disconnect(){this.closed=true;}}
  const guard={isStopped:()=>stopped,stop:(...args)=>{stopped=true;stops.push(args);}};
- return {args:{NVDAClient:Client,guard,relayOwnerPid:async()=>123,startupReceipt:{pid:123,relay_pid:123,reset_confirmed:true},deadlineMs:1000,now:()=>++t,...overrides},get client(){return client;},stops,connects};
+ return {args:{NVDAClient:Client,guard,getGate:()=>guard,relayOwnerPid:async()=>123,startupReceipt:{pid:123,relay_pid:123,reset_confirmed:true},deadlineMs:1000,now:()=>++t,...overrides},get client(){return client;},stops,connects};
 }
 test('observer only uses read-only client surface and keeps an immutable append-only event history',async()=>{
  const source=readFileSync('scripts/tabwise/observer.mjs','utf8');for(const forbidden of ['sendKeyCode','enqueueAndTap','spokenPhraseLog'])assert.equal(source.includes(forbidden),false,forbidden);
