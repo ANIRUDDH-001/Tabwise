@@ -5,7 +5,8 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { priceOf, worstCaseNano, settledNano, toUsd, toNano } from './prices.mjs';
 
-export const HARD_CAP_USD = 100; // D25: $150 of credit is strict; stop at $100 for billing lag.
+export const HARD_CAP_USD = 100; // D25 combined application ceiling; compatibility export.
+export const LOCAL_CAP_USD = 60; // D-59/D13b: local/eval broker may never consume the hosted $40.
 
 export class BudgetError extends Error {
   constructor(message) {
@@ -32,11 +33,14 @@ const SCHEMA = `
     created_utc TEXT NOT NULL, settled_utc TEXT
   );`;
 
-const isCount = (n) => Number.isInteger(n) && n >= 0;
+const isCount = (n) => Number.isSafeInteger(n) && n >= 0;
 
-export function openBroker({ dbPath, costsPath, capUsd = HARD_CAP_USD, now = () => new Date().toISOString() }) {
-  if (typeof capUsd !== 'number' || !Number.isFinite(capUsd) || capUsd <= 0 || capUsd > HARD_CAP_USD) {
-    throw new BudgetError(`cap must be > 0 and <= $${HARD_CAP_USD}, got ${capUsd}`);
+export function openBroker({ dbPath, costsPath, capUsd = LOCAL_CAP_USD, now = () => new Date().toISOString() }) {
+  // Historical callers pass the former $100 default explicitly. Saturate that legacy
+  // value at $60; it never grants access to the hosted allocation. Other raises refuse.
+  if (capUsd === HARD_CAP_USD) capUsd = LOCAL_CAP_USD;
+  if (typeof capUsd !== 'number' || !Number.isFinite(capUsd) || capUsd <= 0 || capUsd > LOCAL_CAP_USD) {
+    throw new BudgetError(`cap must be > 0 and <= $${LOCAL_CAP_USD}, got ${capUsd}`);
   }
   const capNano = toNano(capUsd);
   mkdirSync(dirname(dbPath), { recursive: true });
@@ -83,12 +87,15 @@ export function openBroker({ dbPath, costsPath, capUsd = HARD_CAP_USD, now = () 
     return { spent: imported + Number(t.settled), reserved: Number(t.reserved), open: Number(t.open) };
   }
 
-  function reserve({ model, inputTokens, maxOutputTokens, images = 0, runId = null, task = null }) {
+  function reserve({ model, inputTokens, maxOutputTokens, images = 0, runId = null, task = null, perCallCapUsd = capUsd }) {
     if (!priceOf(model)) throw new BudgetError(`unknown model ${model}: no price, refused`);
     if (!isCount(inputTokens) || !isCount(images)) throw new BudgetError('inputTokens and images must be counts');
     if (!isCount(maxOutputTokens)) throw new BudgetError('max_output_tokens is required: the cost cannot be bounded without it');
     const worst = worstCaseNano({ model, inputTokens, maxOutputTokens, images });
+    if (!Number.isSafeInteger(worst) || worst < 0) throw new BudgetError('unsafe reservation amount');
+    if (!Number.isFinite(perCallCapUsd) || perCallCapUsd < 0 || worst > toNano(perCallCapUsd)) throw new BudgetError('per-call cap exceeded');
     return tx(() => {
+      if (metaGet.get('alarm')) throw new BudgetError('budget alarm: manual reconciliation required before another call');
       const c = current();
       if (c.spent + c.reserved + worst > capNano) {
         throw new BudgetError(`refused: spent $${toUsd(c.spent)} + reserved $${toUsd(c.reserved)} + this call $${toUsd(worst)} > cap $${capUsd}`);
@@ -100,15 +107,23 @@ export function openBroker({ dbPath, costsPath, capUsd = HARD_CAP_USD, now = () 
   }
 
   function settle(id, { usage, record = {} }) {
-    const out = tx(() => {
+    let out;
+    try { out = tx(() => {
       const row = db.prepare('SELECT * FROM reservations WHERE id = ?').get(id);
       if (!row || row.status !== 'open') throw new BudgetError(`reservation ${id} is not open`);
       if (!isCount(usage?.input_tokens) || !isCount(usage?.output_tokens)) throw new BudgetError('usage needs input_tokens and output_tokens');
+      if (!isCount(usage.cached_tokens ?? 0) || (usage.cached_tokens ?? 0) > usage.input_tokens) throw new BudgetError('cached tokens must be within input usage');
       const nano = settledNano(row.model, usage);
+      if (!Number.isSafeInteger(nano) || nano < 0 || nano > Number(row.reserved_nano)) {
+        throw Object.assign(new BudgetError('settled above reservation or unsafe amount: alarm; full reservation retained'), { budgetAlarm: true });
+      }
       const ts = now();
       db.prepare(`UPDATE reservations SET status = 'settled', settled_nano = ?, settled_utc = ? WHERE id = ?`).run(nano, ts, id);
       return { row, nano, ts, cumulative: current().spent };
-    });
+    }); } catch (error) {
+      if (error.budgetAlarm) db.prepare('INSERT OR REPLACE INTO meta (key,value) VALUES (?,?)').run('alarm', 'above-reservation settlement; manual reconciliation required');
+      throw error;
+    }
     const { row, nano, ts, cumulative } = out;
     const line = Object.fromEntries(COST_FIELDS.map((f) => [f, null]));
     Object.assign(line, record, {
@@ -142,6 +157,6 @@ export function openBroker({ dbPath, costsPath, capUsd = HARD_CAP_USD, now = () 
 
 // The project's broker. BUDGET_CAP_USD may lower the cap (e.g. a split cap per machine), never raise it.
 export function openProjectBroker() {
-  const cap = process.env.BUDGET_CAP_USD ? Number(process.env.BUDGET_CAP_USD) : HARD_CAP_USD;
+  const cap = process.env.BUDGET_CAP_USD ? Number(process.env.BUDGET_CAP_USD) : LOCAL_CAP_USD;
   return openBroker({ dbPath: 'cache/budget.sqlite', costsPath: 'docs/ledger/COSTS.jsonl', capUsd: cap });
 }
