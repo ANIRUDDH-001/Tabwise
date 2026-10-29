@@ -1,7 +1,7 @@
 # D-50: test-only Windows preflight for R1's offline gate. Same image, Node, install and read-only checkout as
-# r1.yml up to its "Offline tests" step, then the suite again (repeated, reordered and under injected delays),
+# r1.yml up to source validation, then the classified partial offline subset (repeated and fault-injected),
 # the source locks and a clean-checkout check. Nothing after that: no secrets, read-only token, no Meta API
-# calls, no Guidepup setup, NVDA, browser install, desktop input or R1. Safe for pull requests, forks included.
+# calls, no Guidepup setup, NVDA, browser install, desktop input or R1. Excluded coverage is reported.
 # Actions are pinned to the same commit SHAs as r1.yml (S-01; PROVENANCE.md).
 name: offline-preflight
 
@@ -50,39 +50,17 @@ jobs:
         run: |
           foreach ($f in (git ls-files)) { Set-ItemProperty -LiteralPath $f -Name IsReadOnly -Value $true }
           Get-ChildItem -Recurse -File node_modules/@guidepup/guidepup/lib | ForEach-Object { $_.IsReadOnly = $true }
-      - name: Offline tests (as in r1.yml)
-        run: npm test
-      # Every profile runs even after a failure; the step fails if any did. Faults come from
-      # test/helpers/faults.mjs (slow fs.promises, a stalled event loop); the same profiles pass locally.
-      - name: Offline tests, repeated, reordered and under injected delays
+      - name: Classified offline subset (partial coverage)
+        timeout-minutes: 6
+        run: node scripts/offline-tests.mjs --profile ordinary --out "${{ runner.temp }}/preflight"
+      # Same classification for every profile; bounded per-file processes and profile budgets.
+      - name: Classified offline subset, repeated, reordered and fault-injected
         if: ${{ !cancelled() }}
-        shell: bash
+        timeout-minutes: 30
+        shell: pwsh
         run: |
-          OUT="$(cygpath -u "$RUNNER_TEMP")/preflight"
-          faults="file:///$(cygpath -m "$PWD/test/helpers/faults.mjs")"
-          seed=$((GITHUB_RUN_ID % 1000000))
-          failed=()
-          suite() { # name [VAR=value ...] -- [node test flags ...]
-            local name="$1"; shift
-            local vars=(); while [ "$1" != "--" ]; do vars+=("$1"); shift; done; shift
-            echo "::group::$name"
-            if env "${vars[@]}" node --test --test-timeout=10000 "$@" "test/*.test.mjs" > "$OUT/test-$name.txt" 2>&1; then
-              tail -n 8 "$OUT/test-$name.txt"
-            else
-              failed+=("$name"); tail -n 80 "$OUT/test-$name.txt"
-            fi
-            echo "::endgroup::"
-          }
-          suite repeat-1 R1T_NONE=1 --
-          suite repeat-2 R1T_NONE=1 --
-          suite serial R1T_NONE=1 -- --test-concurrency=1
-          suite "random-$seed" R1T_NONE=1 -- --test-randomize "--test-random-seed=$seed"
-          suite slow-fs-30 NODE_OPTIONS="--import=$faults" R1T_FS_DELAY_MS=30 --
-          suite slow-fs-100 NODE_OPTIONS="--import=$faults" R1T_FS_DELAY_MS=100 --
-          suite stall-40 NODE_OPTIONS="--import=$faults" R1T_STALL_MS=40 R1T_STALL_EVERY_MS=50 --
-          suite mixed NODE_OPTIONS="--import=$faults" R1T_FS_DELAY_MS=30 R1T_STALL_MS=60 R1T_STALL_EVERY_MS=80 --
-          if [ ${#failed[@]} -gt 0 ]; then echo "::error::failed: ${failed[*]}"; exit 1; fi
-          echo "all profiles passed"
+          $seed = ([long]$env:GITHUB_RUN_ID % 1000000).ToString()
+          node scripts/offline-tests.mjs --profile stress --seed $seed --out "${{ runner.temp }}/preflight"
       - name: Source locks and an unchanged checkout, after the tests
         if: always()
         run: node scripts/preflight.mjs --clean --out "${{ runner.temp }}/preflight/after.json"

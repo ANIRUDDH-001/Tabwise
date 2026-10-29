@@ -310,3 +310,9 @@ Independent changed-file review: ChatGPT GPT-6 on 2026-10-29; original D67 clear
 Limits: Existing guarded title-report scope only. Full worker remains BLOCKED. No additional paid inference.
 Authorization: Preparation and activation publication only. Actual hosted dispatch requires separate explicit owner confirmation.
 D-72 and D-73 are retired and must not be reused.
+## D-75 — CI-H1 scoped offline preflight repair
+Question: Approve CI-H1 scoped diagnosis, cleanup, explicit safe selection, watchdog and normal handoff records? | Options: scoped repair (recommended) / diagnosis only.
+User answer: "Approve CI-H1 as scoped (Recommended) — permits the requested local repair; no spend or publication, reviewable diff."
+Consequence: local fix/tabwise-ci-preflight-hang from bb8008b; preflight CI edits authorized; no installs, browser, NVDA, physical input, API spend, dispatch or publication.
+Acceptance: safe subset and CI regressions pass; frozen R1/safety digests match; separate excluded-coverage report.
+Reversal: review/revert this branch's bounded CI-H1 diff; no R2 readiness or qualification status change.

@@ -8,9 +8,10 @@ import AxeBuilder from '@axe-core/playwright';
 test('Fernway three keyboard flows have healthy semantics, broken variants and zero axe violations',{timeout:30000},async()=>{
   const html=readFileSync(new URL('../fixtures/fernway/index.html',import.meta.url));
   const server=createServer((req,res)=>{res.setHeader('Content-Type','text/html');res.end(html);});
-  await new Promise(r=>server.listen(0,'127.0.0.1',r));
-  const browser=await chromium.launch({headless:true});
+  let browser;
   try {
+    await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
+    browser=await chromium.launch({headless:true});
     for(const flow of ['passenger','seat','search']) for(const variant of ['healthy','broken']) {
       const context=await browser.newContext();
       const page=await context.newPage();
@@ -36,5 +37,8 @@ test('Fernway three keyboard flows have healthy semantics, broken variants and z
       assert.ok(await page.evaluate(()=>window.__tabwiseEvents.length)>0);
       await context.close();
     }
-  } finally {await browser.close();await new Promise(r=>server.close(r));}
+  } finally {
+    try {await browser?.close();}
+    finally {server.closeAllConnections();await new Promise(r=>server.close(r));}
+  }
 });

@@ -1,12 +1,31 @@
-# STATE — R2 M2B + M2C done offline, uncommitted (git writes denied by .claude/settings.json); R2 readiness BLOCKED
-Updated: 2026-10-29T16:31:14Z · Claude (cloud session) · branch claude/zen-heisenberg-hqzh9p · HEAD dbb5a6d (= main, M2A)
+# STATE — CI-H1 offline preflight repair complete locally; R2 BLOCKED
+Updated: 2026-10-29T17:31:30Z · Codex · fix/tabwise-ci-preflight-hang · HEAD bb8008b0857f2148c5c808e951fac2a64fc2647b
 
-- M2B: `captureJourney({receipts})` anchors the 1000 ms R2 ack to the M2A ledger's gate-release entry, reads page and speech while the executor settles, and fails closed on missing, invalid, late, expired or contradictory receipts. `captureOfflineJourney({receiptBindings})` installs the ledger. `isSendReceiptLedger` brand (additive). Handoff: docs/engineering/R2-M2B-receipt-capture.md. Tests: test/r2-capture-receipts.test.mjs (22).
-- M2C: the binding stops the gate ('protocol') when a receipt-mode capture fails after the receipt was finalized (a measured live-gate gap). Handoff: docs/engineering/R2-M2C-fail-closed.md. Tests: test/r2-capture-receipts-failclosed.test.mjs (11).
-- The M1 path (no receipts), frozen R1, vendor, CI, locks, fixtures, thresholds and existing tests are unchanged. Provenance synthetic/UNATTESTED; quiescence UNVERIFIED; FEATURES R2 still false.
-- BLOCKED: `git add`/`commit`/`push` are denied by .claude/settings.json deny rules, even after the owner's in-session authorization. Not bypassed; the policy file was not edited. No commit SHAs exist.
-- Env limits (MEASURED): Node 22.22.0 (pinned 24.22.1); no node_modules (install is owner-gated). 2 safe-subset tests and 3 preflight checks fail with ENOENT/version, identically at baseline.
-- Last verification (2026-10-29T16:29Z): `node --test test/r2*.test.mjs` 205/205; safe subset 242/244 (2 env); check-r1-baseline exit 0; preflight exit 1, check-by-check identical to baseline; frozen-path diff empty.
+- Now: demonstrated listener leak fixed in two browser tests; explicit partial selection and bounded per-file/profile runner wired into preflight.
+- MEASURED CI-H1-20261029: ordinary plus all8 stress profiles each478/478 across47 files; all205 R2 tests PASS. Nine browser/process files excluded with reasons.
+- Last verification: node scripts/offline-tests.mjs --profile stress --seed 172785 --out cache/ci-h1 → exit0; baseline/preflight/frozen/digests/diff-check PASS.
+- Protected R1/vendor/locks/qualification status unchanged; no real browser, NVDA, physical input, install, API spend, dispatch or publication.
+- Next: independent diff review; owner commit/publication and offline-preflight on reviewed revision. Full npm test/browser coverage requires separate authorization.
+- Blocked: original hosted trigger unconfirmed; excluded coverage and cross-tool review outstanding; R2 qualification remains BLOCKED.
+- Report: docs/engineering/CI-H1-preflight-hang.md. Raw evidence: cache/ci-h1/. Stop after CI-H1; no M2D.
 
 ## Handoff
-Next: the owner commits M2B then M2C separately (exact commands and patches in the session report), then independent review and a Windows Node 24.22.1 rerun with full `npm test` and preflight. Then a possible M2D: speech received before the gate commit window (not caused by this key) is still attributed to the action window. Proposal only; it needs a policy decision.
+Uncommitted: .github/workflows/preflight.yml (modified)
+Uncommitted: ci/offline-tests.json (new)
+Uncommitted: docs/CODEMAP.md (modified)
+Uncommitted: docs/engineering/CI-H1-preflight-hang.md (new)
+Uncommitted: docs/ledger/DECISIONS.md (modified)
+Uncommitted: docs/ledger/LOG.jsonl (modified)
+Uncommitted: docs/ledger/PLAN.md (modified)
+Uncommitted: docs/ledger/PROVENANCE.md (modified)
+Uncommitted: docs/ledger/STATE.md (modified)
+Uncommitted: scripts/offline-tests.mjs (new)
+Uncommitted: test/ci-browser-cleanup.test.mjs (new)
+Uncommitted: test/ci-offline-selection.test.mjs (new)
+Uncommitted: test/fernway.test.mjs (modified)
+Uncommitted: test/helpers/reject-browser.mjs (new)
+Uncommitted: test/tabwise-network-browser.test.mjs (modified)
+Verified by: ordinary + stress offline runner → all nine profiles PASS; frozen/preflight/qualification integrity PASS.
+Proposed commit: fix(ci): bound classified offline preflight (F-03/CI-H1)
+  Body: close rejected browser setup; classify partial suite; enforce watchdog; cite ordinary/stress verification commands.
+Review needed from: independent other tool / user; no commit or push performed.
