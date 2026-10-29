@@ -9,7 +9,8 @@ export const QUALIFICATION_FILES=Object.freeze([
  'scripts/tabwise/qualification-policy.mjs','scripts/tabwise/qualification-loader.mjs','scripts/tabwise/qualification-providers.mjs','scripts/tabwise/qualification-core.mjs','scripts/tabwise/qualification-evidence.mjs',
  'scripts/tabwise/network.mjs','scripts/tabwise/observer.mjs','scripts/tabwise/observer-qualification.mjs',
 ].sort());
-export function qualificationDigest(root=ROOT){const hash=createHash('sha256');for(const file of QUALIFICATION_FILES){const bytes=readFileSync(resolve(root,file));hash.update(`${file}\0${createHash('sha256').update(bytes).digest('hex')}\n`);}return hash.digest('hex');}
+// Explicit text-only scope: normalize Git's CRLF conversion, preserving every other byte/character.
+export function qualificationDigest(root=ROOT){const hash=createHash('sha256');for(const file of QUALIFICATION_FILES){const text=readFileSync(resolve(root,file),'utf8').replace(/\r\n/g,'\n');hash.update(`${file}\0${createHash('sha256').update(text).digest('hex')}\n`);}return hash.digest('hex');}
 export function checkQualificationApproval({env,head,status,root=ROOT,platform=process.platform}){
  const errors=[...ciGuardErrors(env),...workflowGuardErrors(env,head,{repository:'ANIRUDDH-001/Tabwise',ref:'refs/heads/main',workflow:'.github/workflows/tabwise-observer.yml'})];
  if(platform!=='win32')errors.push('Windows process required');

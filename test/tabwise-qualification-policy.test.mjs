@@ -1,6 +1,8 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,mkdtempSync,mkdirSync,writeFileSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join,dirname} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {checkQualificationApproval,qualificationDigest,QUALIFICATION_FILES} from '../scripts/tabwise/qualification-policy.mjs';
 test('qualification is disabled until independent content review, exact external revision, actor and explicit owner reference agree',()=>{
@@ -22,4 +24,11 @@ test('qualification workflow has one default-disabled manual job, no secrets, pi
 test('default-disabled executable entry refuses without loading any physical runtime',()=>{
  const child=spawnSync(process.execPath,['scripts/tabwise-observer.mjs','--check-only'],{cwd:process.cwd(),env:{TABWISE_QUALIFICATION_ENABLED:'false',SystemRoot:process.env.SystemRoot},encoding:'utf8'});
  assert.equal(child.status,2);assert.match(child.stderr,/BLOCK: observer qualification disabled by default/);assert.equal(child.stdout,'');
+});
+test('qualification review digest tolerates only Git CRLF checkout conversion and still detects changed source',()=>{
+ const root=mkdtempSync(join(tmpdir(),'tw-qual-review-'));try{
+  for(const file of QUALIFICATION_FILES){const path=join(root,file);mkdirSync(dirname(path),{recursive:true});writeFileSync(path,readFileSync(file,'utf8').replace(/\r\n/g,'\n').replace(/\n/g,'\r\n'));}
+  assert.equal(qualificationDigest(root),qualificationDigest());
+  const path=join(root,QUALIFICATION_FILES[0]);writeFileSync(path,readFileSync(path,'utf8')+'changed');assert.notEqual(qualificationDigest(root),qualificationDigest());
+ }finally{rmSync(root,{recursive:true,force:true});}
 });
