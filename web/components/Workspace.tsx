@@ -1,0 +1,5 @@
+import Link from 'next/link';
+export default function Workspace({children,active='Overview'}:{children:React.ReactNode,active?:string}){
+ const links=[['Overview','/w/demo','◫'],['Journeys','/apps/fernway','⌘'],['Recorded runs','/runs/r1-20261028T134638Z','≋'],['Reports','/r/r1-diagnostic','▤'],['Availability','/status','◌']];
+ return <div className="workspace"><aside className="sidebar"><div className="workspace-title">Demo workspace <span className="chip">Read only</span></div>{links.map(([name,href,icon])=><Link key={name} className={`navlink ${active===name?'active':''}`} href={href}><span aria-hidden="true">{icon}</span>{name}</Link>)}<div className="nav-group">Sample application</div><Link className="navlink" href="/apps/fernway">fernway ↗</Link><div className="sidebar-bottom">Real evidence carries its source.<br/>Missing evidence stays visible.<br/><Link className="textlink" href="/status">View what’s available</Link></div></aside><main aria-label="Tabwise workspace" id="main" className="workspace-main">{children}</main></div>;
+}
