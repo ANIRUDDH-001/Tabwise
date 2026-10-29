@@ -20,7 +20,7 @@ export async function readRunEvidence({run,metadata,download}){
  }
  if(!verifyManifest(manifest,files).ok)throw Error('stored manifest integrity failed');
  const entry=manifest.files.find(f=>f.kind==='evidence'),evidence=assertContract('evidence-bundle',JSON.parse(Buffer.from(files[entry.path]).toString('utf8')));
- if(evidence.run_id!==run.id||evidence.provenance!=='observed-nvda'||sha256(files[entry.path])!==manifest.evidence_sha256)throw Error('stored evidence provenance mismatch');
+ if(evidence.run_id!==run.id||evidence.journey_id!==run.journey_id||evidence.provenance!=='observed-nvda'||sha256(files[entry.path])!==manifest.evidence_sha256)throw Error('stored evidence journey/provenance mismatch');
  if(complete&&(manifest.evidence_status!=='complete'||evidence.evidence_status!=='complete'))throw Error('incomplete stored evidence');
  const refs=new Set();for(const event of Object.values(evidence.lanes).flat()){
   if(refs.has(event.evidence_ref))throw Error('duplicate evidence reference');refs.add(event.evidence_ref);

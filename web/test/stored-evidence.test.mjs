@@ -7,7 +7,7 @@ function sample(diagnostic=false){
  const manifest=structuredClone(fixtures['artifact-manifest'].valid),evidence=structuredClone(fixtures['evidence-bundle'].valid);
  evidence.provenance='observed-nvda';evidence.evidence_status=manifest.evidence_status=diagnostic?'incomplete':'complete';
  const bytes=Buffer.from(JSON.stringify(evidence));manifest.files=[{path:'evidence.json',sha256:sha256(bytes),bytes:bytes.length,kind:'evidence'}];manifest.evidence_sha256=sha256(bytes);
- const prefix=diagnostic?'diagnostics/1/':'',run={id:manifest.run_id,status:diagnostic?'failed':'completed',evidence_status:evidence.evidence_status,spec_sha256:manifest.spec_sha256,gh_run_id:manifest.runner.github_run_id,gh_head_sha:manifest.runner.head_sha};
+ const prefix=diagnostic?'diagnostics/1/':'',run={id:manifest.run_id,journey_id:evidence.journey_id,status:diagnostic?'failed':'completed',evidence_status:evidence.evidence_status,spec_sha256:manifest.spec_sha256,gh_run_id:manifest.runner.github_run_id,gh_head_sha:manifest.runner.head_sha};
  const files={[`${run.id}/${prefix}manifest.json`]:Buffer.from(JSON.stringify(manifest)),[`${run.id}/${prefix}evidence.json`]:bytes};
  return {run,metadata:manifest.files.map(f=>({...f,path:prefix+f.path})),download:async path=>files[path],files};
 }
@@ -22,6 +22,9 @@ test('stored evidence refuses changed bytes, foreign identity and missing databa
 });
 test('absent evidence remains unavailable without downloading invented files',async()=>{
  assert.equal(await readRunEvidence({run:{id:'r'},metadata:[],download:()=>{throw Error('must not download');}}),null);
+});
+test('D2 rejects evidence labelled for a different journey even when all file hashes match',async()=>{
+ const value=sample();value.run.journey_id='fernway-seat';await assert.rejects(()=>readRunEvidence(value),/journey|provenance/);
 });
 test('screenshot delivery requires an exact screenshot-lane reference and WebP encoding',()=>{
  const value={artifacts:[{path:'screen.webp',kind:'screenshot'}],evidence:{lanes:{screenshots:[{artifact_path:'screen.webp'}]}},files:{'screen.webp':Buffer.from('RIFF0000WEBPdata')}};
