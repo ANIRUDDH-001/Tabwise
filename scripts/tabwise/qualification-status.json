@@ -1,27 +1,13 @@
 {
-    "enabled":  true,
-    "verdict":  "PASS",
-    "reviewer":  "Claude (Opus 5.5)",
-    "review_ref":  "Claude D67 narrow review 2026-10-29T03:29:32Z; sha256=cd4b1dbdad280ddc04d15a80ed801e72424829b20cc2332c36740828badd0231",
-    "owner_approval_ref":  "D-74",
-    "actor":  "ANIRUDDH-001",
+    "enabled":  false,
+    "verdict":  "BLOCK",
+    "reviewer":  null,
+    "review_ref":  null,
+    "owner_approval_ref":  null,
+    "actor":  null,
     "reviewed_files":  [
-                           ".github/workflows/tabwise-observer.yml",
-                           ".gitignore",
-                           "packages/contracts/limits.mjs",
-                           "scripts/check-r1-baseline.mjs",
-                           "scripts/tabwise-observer.mjs",
-                           "scripts/tabwise/network.mjs",
-                           "scripts/tabwise/observer-qualification.mjs",
-                           "scripts/tabwise/observer.mjs",
-                           "scripts/tabwise/qualification-core.mjs",
-                           "scripts/tabwise/qualification-crash.mjs",
-                           "scripts/tabwise/qualification-evidence.mjs",
-                           "scripts/tabwise/qualification-integrity.mjs",
-                           "scripts/tabwise/qualification-loader.mjs",
-                           "scripts/tabwise/qualification-policy.mjs",
-                           "scripts/tabwise/qualification-providers.mjs"
+
                        ],
-    "reviewed_sha256":  "6972c311a6e9302856ff9bb9195aa73cf106a15da8caf91ac32b781f8909f328",
-    "reason":  "D-74 narrow hosted observer qualification preparation only. D-73 run 40849425253 retired. One separately owner-authorized initial hosted attempt; existing admission-timed revocation protocol and safety limits. No general worker clearance. Full Tabwise worker remains BLOCKED. D67 reviewer/ref identify the original guarded scope only; supplementary changed-file review of the D-73 CRLF repair and regression tests was conducted by ChatGPT GPT-6 on 2026-10-29 under D-74. The updated reviewed-content digest is bound separately."
+    "reviewed_sha256":  null,
+    "reason":  "D-74 retired after initial hosted run 40884258062 at revision 1b60140584fc641d221b280a413f397e49b178f0. GitHub workflow succeeded and produced candidate_pass=true, full_worker_ready=false. Original artifact manifest SHA256 6020bcdf72578f92c598121dc2bbd63615e0c9f5ab5977463e95e9377095ae52; locally archived and independently verified. Owner orchestration outcome FAILED because downloaded artifact was nested under 40884258062-1 and the verifier expected manifest.json at the extraction root. Approval variable revoked and confirmed absent. No D-74 retry. R2, R3, R7 and full worker remain BLOCKED."
 }
