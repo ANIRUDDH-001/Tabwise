@@ -30,6 +30,7 @@ function outputText(data) {
 export async function respond({
   broker, model, input, maxOutputTokens, images = 0, task = null, runId = null, inputClass = null, record = {},
   fetchImpl = fetch, apiKey = process.env.MODEL_API_KEY, baseUrl = BASE_URL, logDir = 'cache/payloads',
+  textFormat = null, maxInputBytes = 131072, perCallCapUsd, timeoutMs = 120000,
 }) {
   const redact = (s) => (apiKey ? String(s).split(apiKey).join('[redacted]') : String(s));
   if (!apiKey) throw new ClientError('MODEL_API_KEY is not set: add it to .env');
@@ -38,10 +39,18 @@ export async function respond({
     throw new ClientError(`${model} takes only inputClass 'own-fixture' (D-29)`);
   }
 
+  if (!Number.isSafeInteger(maxOutputTokens) || maxOutputTokens < 0) throw new ClientError('bounded max_output_tokens required');
+  if (!Number.isSafeInteger(maxInputBytes) || maxInputBytes < 1 || maxInputBytes > 1048576) throw new ClientError('invalid input byte cap');
+  if (!Number.isFinite(timeoutMs) || timeoutMs < 1 || timeoutMs > 120000) throw new ClientError('invalid request timeout');
   const body = { model, input, max_output_tokens: maxOutputTokens };
+  if (textFormat !== null) {
+    if (textFormat.type !== 'json_schema' || textFormat.strict !== true || typeof textFormat.name !== 'string' || !textFormat.schema) throw new ClientError('invalid strict text.format');
+    body.text = { format: textFormat };
+  }
   const bodyText = JSON.stringify(body);
+  if (Buffer.byteLength(bodyText, 'utf8') > maxInputBytes) throw new ClientError('input byte cap exceeded');
   // UTF-8 bytes of the whole request bound its token count from above.
-  const r = broker.reserve({ model, inputTokens: Buffer.byteLength(bodyText, 'utf8'), maxOutputTokens, images, runId, task });
+  const r = await broker.reserve({ model, inputTokens: Buffer.byteLength(bodyText, 'utf8'), maxOutputTokens, images, runId, task, ...(perCallCapUsd === undefined ? {} : { perCallCapUsd }) });
 
   mkdirSync(logDir, { recursive: true });
   const stem = join(logDir, `${runId ?? 'run'}-${r.id}`);
@@ -55,6 +64,7 @@ export async function respond({
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: bodyText,
+      signal: AbortSignal.timeout(timeoutMs),
     });
     text = await res.text();
   } catch (e) {
@@ -73,7 +83,7 @@ export async function respond({
     cached_tokens: u.cached_tokens ?? u.input_tokens_details?.cached_tokens ?? 0,
   };
   const out = outputText(data);
-  const settled = broker.settle(r.id, {
+  const settled = await broker.settle(r.id, {
     usage,
     record: { latency_ms: latency, retries: 0, input_sha256: sha256(bodyText), output_sha256: sha256(out), ...record },
   });
