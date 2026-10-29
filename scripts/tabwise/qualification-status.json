@@ -3,7 +3,7 @@
   "verdict": "PASS",
   "reviewer": "Claude (Opus 5.5)",
   "review_ref": "Claude D67 narrow review 2026-10-29T03:29:32Z; sha256=cd4b1dbdad280ddc04d15a80ed801e72424829b20cc2332c36740828badd0231",
-  "owner_approval_ref": "D-71",
+  "owner_approval_ref": "D-72",
   "actor": "ANIRUDDH-001",
   "reviewed_files": [
     ".github/workflows/tabwise-observer.yml",
@@ -23,5 +23,5 @@
     "scripts/tabwise/qualification-providers.mjs"
   ],
   "reviewed_sha256": "a639387a0a8ccd701b7765afcd420b27dfb71c81a2303450f88aef90cc717efb",
-  "reason": "Narrow observer qualification only: one separately owner-authorized hosted initial attempt under D-71, followed by immediate revision-variable revocation. Full Tabwise worker remains BLOCKED; no general relay or physical-safety clearance."
+  "reason": "Narrow observer qualification only: one separately owner-authorized hosted initial attempt under D-72, followed by immediate revision-variable revocation. Full Tabwise worker remains BLOCKED; no general relay or physical-safety clearance."
 }
