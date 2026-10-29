@@ -1,0 +1,25 @@
+# D69 — reviewed local commits and authorization preparation
+
+MEASURED `tw-d69-20261029`, 2026-10-29T03:49:19Z. Canonical D:/Projects/Meta AI/app, branch feat/TW-01-contracts. No push, activation, dispatch, NVDA execution, credential access, model call, deployment or spending.
+
+| Local commit | Scope / independent review |
+|---|---|
+| 326b8cd | Exact reviewed D67 integrity/timing-path/crash/guard-send-count changes; canonical12 files match Claude's reviewed manifest. Claude returned B1 FIXED, preparation only;34/34 independently passed. |
+| 8dbb3d7 | Disposable os.tmpdir timing roots, t.after cleanup, exclusive separately named evidence; committed one-dispatch revocation runbook. Separate read-only minimal diff review cleared it. Its commit body's “34-file-list” wording means34 tests across15 listed test files. |
+| f423e13 | Owned workspace/catalog, recorder account saving and error states; independent product diff review cleared it. |
+| 80e81bd | Owned source-bound five-lane evidence, distinct claims/citations and patch navigation; product review found two P2 gaps, then independently cleared lifecycle refresh and unavailable-origin citation fixes. |
+| 96145c7 | Genuine historical failed-R1 report source references/printing and presentation styles; independently cleared. |
+| 1bb687c | New private diagnostic snapshot download, authenticated and source-hashed, verification pending/null; focused independent review plus type-fix re-review cleared four-file slice. |
+| 150f713 | Timing test total fixture setup allowance30s, independently cleared; physical per-send100ms threshold, assertions and50 samples unchanged. |
+
+Final checks: full root357/357, web47/47, contracts21/21 and production build/TypeScript PASS; offline preflight and full frozen R1 integrity PASS. Final synthetic late-diagnostics browser check refreshes incomplete→failed without completeness changing, shows report link, has axe0 and no mobile overflow. Earlier D68 checks preserve13-route axe0 and account-save/print keyboard coverage. Tests with intercepted data are not authenticated live sessions or real NVDA/Spark results.
+
+The first parallel full-root attempt hit its10s harness timeout in the disposable timing test; the log does not establish the exact phase or cause and does not record a100ms send acceptance failure; that failed run remains in cache/d69/root-final-tests.txt. After the reviewed harness-only allowance, the full suite passed in cache/d69/root-final-retry-tests.txt. Separately named Windows timing evidence is preserved in cache/d69/timing-final-1.json and timing-suite-2.json. Suite2:324 files,50 samples, median12.700ms/p9514.700ms/max15.204ms, zero refusals; fixture_cleaned=true. Actual validation closure, fake foreground/ack, no physical transport; no live timing clearance.
+
+Reviewed versus final: original D67 package120 sealed source files and Claude outbox remain unchanged (zero manifest mismatches). All15 QUALIFICATION_FILES remain text-identical to the reviewed copies, so the content digest stays `a639387a0a8ccd701b7765afcd420b27dfb71c81a2303450f88aef90cc717efb`. Outside that binding, only the timing-test cleanup/setup allowance and revocation runbook were added to qualification preparation; each received minimal independent diff review. Separate product work was independently reviewed, not folded into Claude's qualification clearance.
+
+Runbook: docs/engineering/Tabwise-observer-execution-runbook.md. It mandates deleting TABWISE_OBSERVER_APPROVED_REVISION immediately after the first dispatch, including failure, before waiting; verifying absence; cancellation if revocation is unconfirmed; later resetting status disabled/BLOCK. This remains procedural, not a run-ID-bound one-shot capability.
+
+An ignored local authorization packet is generated after the final documentation commit at cache/d69/execution-authorization/README.md. It records the exact final local preparation SHA, digest,15-file scope/workflow, limits, required configuration, revocation, unresolved limitations and evidence checklist. It does not activate anything. A future owner-approved status activation creates a new final execution SHA, which must be separately bound and recorded before dispatch. Current status remains enabled=false/BLOCK, references null; full worker separately BLOCKED. Main publication/integration remains owner-only.
+
+Product progress: account-save is wired to persisted versions; owner workspace reads versions/runs/catalog; artifact reader binds database hashes and stored source identity; five lanes and resolvable claim citations display; private diagnostic JSON exports contain source hashes and retain pending verification. Dedicated database had zero real runs/artifacts/diagnoses/verifications at D68 read-only inspection. Real auth/provider configuration, qualified worker evidence, authorized real Spark diagnosis, reviewed patch and actual rerun are still needed. A public immutable verified before/after report and saved-version detail page remain unfinished. R2/R3/R7 NOT RUN.
