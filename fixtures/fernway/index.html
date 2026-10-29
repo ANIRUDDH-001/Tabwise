@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fernway — a little further</title>
+<style>
+:root{color-scheme:light;font-family:Inter,Segoe UI,sans-serif;color:#17352e;background:#f3f7f2}*{box-sizing:border-box}body{margin:0}header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #cbd9cc;padding:20px 28px}.brand{font-size:25px;font-weight:750;letter-spacing:-1px}.caption{font-size:12px;color:#40564c}main{max-width:590px;margin:40px auto;padding:0 24px}h1{font-size:34px;letter-spacing:-1.4px;margin:12px 0}p{line-height:1.6}.ticket{border:1px solid #b8cdbd;border-radius:12px;background:#fff;padding:23px;box-shadow:0 12px 36px #17352e08;margin:24px 0}.route{display:flex;justify-content:space-between;align-items:center;font-size:22px;font-weight:650}.route span{font-weight:400;color:#3e6657}.muted{font-size:13px;color:#40564c}label{display:block;font-size:14px;font-weight:600;margin:21px 0 8px}input{display:block;width:100%;font:inherit;padding:12px;border:1px solid #8b9d90;border-radius:7px;background:white;color:#17352e}button{font:inherit;background:#1a4f3d;border:1px solid #1a4f3d;color:white;padding:12px 19px;border-radius:7px;margin-top:20px;cursor:pointer;font-weight:600}button.secondary{background:white;color:#17352e}button:focus-visible,input:focus-visible{outline:3px solid #0866ff;outline-offset:4px}#email-error{color:#a51e29;font-size:14px;min-height:22px}.status{min-height:25px;margin-top:20px}dialog{border:1px solid #8b9d90;border-radius:12px;padding:28px;max-width:380px}dialog::backdrop{background:#17352e55}.seat-options{display:flex;gap:12px}.seat-options label{margin:8px 0}input[type=radio]{display:inline;width:auto}footer{max-width:590px;padding:0 24px;margin:40px auto;font-size:12px;color:#40564c}section[hidden]{display:none}
+</style></head><body>
+<header aria-label="Fernway"><div class="brand">fernway<span aria-hidden="true"> ↗</span></div><div class="caption">A little further.</div></header>
+<main aria-label="Fernway sample application"><p class="muted" id="flow-label">Your next journey</p><h1 id="heading">Make room for a change of scene.</h1><p id="intro">A fictional rail booking app, built for accessibility testing.</p>
+<div class="ticket"><div class="route">Bengaluru <span aria-hidden="true">─────</span> Mysuru</div><p class="muted">Sample route · synthetic booking · no payment</p></div>
+<section id="passenger" hidden><h2>Who’s travelling?</h2><form novalidate><label for="name">Passenger name</label><input id="name" name="name" autocomplete="off"><label for="email">Email address</label><input id="email" name="email" type="email" autocomplete="off" aria-describedby="email-error"><p id="email-error"></p><button id="continue" type="submit">Continue to booking</button></form></section>
+<section id="seat" hidden><h2>A seat with a view.</h2><p>Choose a seat before continuing your booking.</p><button id="choose-seat">Choose your seat</button><p id="chosen-seat" class="status">No seat selected.</p><dialog aria-labelledby="seat-title"><h2 id="seat-title">Choose your seat</h2><p>Window or aisle? It’s your journey.</p><fieldset><legend>Seat preference</legend><div class="seat-options"><label><input type="radio" name="seat" value="Window" checked> Window</label><label><input type="radio" name="seat" value="Aisle"> Aisle</label></div></fieldset><button id="confirm-seat">Confirm seat</button><button id="close-seat" class="secondary">Close</button></dialog></section>
+<section id="search" hidden><h2>Find your way out of the everyday.</h2><p>Search the sample route to check availability.</p><button id="search-trains">Search trains</button><p id="search-status" class="status"></p></section>
+</main><footer aria-label="Fernway sample details">Fernway is an owned test application. No real reservations are made.</footer>
+<script>
+(()=>{'use strict';
+const query=new URLSearchParams(location.search),flow=['passenger','seat','search'].includes(query.get('flow'))?query.get('flow'):'passenger',healthy=query.get('variant')==='healthy';
+document.querySelector('#'+flow).hidden=false;
+document.querySelector('#flow-label').textContent=flow==='passenger'?'Passenger details':flow==='seat'?'Seat selection':'Search updates';
+document.querySelector('#heading').textContent=flow==='passenger'?'Your next chapter starts here.':flow==='seat'?'A good journey starts with a good seat.':'Find a change of scenery.';
+const events=[];let sequence=0,complete=true,recording=false;
+Object.defineProperty(window,'__tabwiseEvents',{value:events,writable:false});
+Object.defineProperty(window,'__tabwiseComplete',{get:()=>complete});
+Object.defineProperty(window,'__tabwiseSetRecording',{value:enabled=>{recording=enabled===true;}});
+const emit=(type,target,detail={})=>{if(events.length>=5000){complete=false;return;}events.push({seq:++sequence,t:performance.now(),type,target,active:document.activeElement?.id||'body',...detail});};
+window.addEventListener('keydown',e=>{
+ emit('keydown',e.target.id||'body',{key:e.key,shift:e.shiftKey});
+ if(recording&&e.key.length===1){e.preventDefault();parent.postMessage({type:'tabwise-palette-needed'},location.origin);return;}
+ if(recording)parent.postMessage({type:'tabwise-key',key:e.key,shift:e.shiftKey},location.origin);
+},true);
+window.addEventListener('focusin',e=>emit('focusin',e.target.id||'body'),true);
+window.addEventListener('pointerdown',e=>{if(recording){e.preventDefault();parent.postMessage({type:'tabwise-pointer'},location.origin);}},true);
+window.addEventListener('message',e=>{
+ if(e.origin!==location.origin||e.source!==parent)return;
+ if(e.data?.type==='tabwise-record')recording=e.data.enabled===true;
+ if(e.data?.type==='tabwise-palette'&&['test.user@example.com','AshaTest','invalid.email'].includes(e.data.value)&&document.activeElement instanceof HTMLInputElement){document.activeElement.value=e.data.value;document.activeElement.dispatchEvent(new Event('input',{bubbles:true}));}
+});
+const error=document.querySelector('#email-error');if(healthy)error.setAttribute('role','alert');
+document.querySelector('form').addEventListener('submit',e=>{e.preventDefault();const valid=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(document.querySelector('#email').value);error.textContent=valid?'':'Enter a valid email address to continue.';emit(valid?'booking-ready':'validation-error','email-error');});
+const dialog=document.querySelector('dialog'),opener=document.querySelector('#choose-seat');
+opener.addEventListener('click',()=>{dialog.showModal();emit('dialog-open','seat-dialog');});
+const close=()=>{dialog.close();if(healthy)opener.focus();else opener.blur();emit('dialog-close','seat-dialog');};
+dialog.addEventListener('cancel',e=>{e.preventDefault();close();});
+document.querySelector('#close-seat').addEventListener('click',close);
+document.querySelector('#confirm-seat').addEventListener('click',()=>{document.querySelector('#chosen-seat').textContent=document.querySelector('input[name=seat]:checked').value+' seat selected.';close();});
+const status=document.querySelector('#search-status');if(healthy)status.setAttribute('role','status');
+document.querySelector('#search-trains').addEventListener('click',()=>{status.textContent='Your train search is ready.';emit('search-ready','search-status');});
+})();
+</script></body></html>

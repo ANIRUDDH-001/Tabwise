@@ -1,0 +1,23 @@
+{
+  "app": "fernway",
+  "version": "0.1.0",
+  "authored": "Tabwise event new work",
+  "source": "owned-synthetic",
+  "base_sha256": "5ad4631558cdcc557770ae864957ffc167546cd0af58bd11258808e1c0e523be",
+  "files": [
+    {
+      "path": "index.html",
+      "sha256": "5ad4631558cdcc557770ae864957ffc167546cd0af58bd11258808e1c0e523be",
+      "bytes": 7389
+    }
+  ],
+  "journeys": [
+    "fernway-passenger",
+    "fernway-seat",
+    "fernway-search"
+  ],
+  "limitations": [
+    "Headless browser and axe checks are not real NVDA evidence.",
+    "No Fernway worker run or Spark diagnosis has been performed."
+  ]
+}

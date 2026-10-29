@@ -1,0 +1,12 @@
+{
+  "verdict": "BLOCK",
+  "reviewer": null,
+  "review_ref": null,
+  "owner_approval_ref": null,
+  "reviewed_files": [],
+  "reviewed_sha256": null,
+  "reason": "D-63: offline corrections are not live safety clearance. Narrow observer qualification needs independent review and explicit owner authorization; the real worker remains incomplete.",
+  "supported_press": ["Tab", "Shift+Tab", "Enter", "Space"],
+  "typed_policy": "Safe palette strings preflight as whole values; all worker typing remains refused pending guarded executor qualification.",
+  "unsupported": ["All other presses", "Optional stop-speech actions deferred", "Actual relay equivalence, foreground/provider binding, acknowledgement timing and physical quiescence remain unqualified"]
+}
