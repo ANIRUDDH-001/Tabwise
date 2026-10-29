@@ -99,7 +99,7 @@ Correction (2026-10-27T05:51:35Z, Claude's error in the spec): `npx @guidepup/se
 Done 2026-10-27T05:57:35Z: acceptance 1-4 pass; NVDA 0.2.1-2026.2 found after `npx --no-install guidepup install nvda` run from `app/` (the installer resolves Guidepup from the current folder). R0 evidence in FEATURES.json
 Next step: R1 spec (real NVDA speech, $0) by MCQ
 
-### F-02 R1 real NVDA speech capture — status: in progress
+### F-02 R1 real NVDA speech capture — status: done (R1 PASS r1-20261028T153344Z, D-54; D-53/A15 profile only, not default browse-mode coverage)
 Approved: D-33 (spec + corrections C1-C3), D-34 (amendments A1-A3), 2026-10-27T06:52:43Z
 Owner: Codex (D-43) · Publication: main only (D-44), independently verified components · Real R1 execution requires separate approval; never on the personal desktop
 <!-- F-02 spec begin: fixtures/r1/lock.json hashes the text between these markers -->
@@ -217,3 +217,86 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Scope excludes observer/receipt infrastructure, mode toggles, vendor/source changes, new dependencies and altered thresholds.
 - Next: independent Claude review of sealed eight-file diff, then separately approved hosted qualification. Real speech/delivery, especially step9, unverified.
 - Rollback: use preserved baseline and exact diff; never discard prior handoff/evidence.
+
+### F-03 R2 causal offline foundation — status: in progress (offline foundation done; live NVDA and model arms not run)
+- Approval: D-55. Frozen Day-1 R2 row, decision rule and kill checks unchanged; nothing here changes an acceptance rule.
+- Files: `fixtures/r2/{validation,dialog-focus,status}/{healthy,broken}.html`, `fixtures/r2/{manifest,labels.development,development-hashes}.json`, `src/r2/contract.mjs`, `test/r2.test.mjs`, `scripts/r2-baseline.mjs`.
+- Fixtures: three owned pairs; each differs by one declared substitution (test reproduces broken byte-exactly). Split = development: authored, labelled and inspected by Claude; never scored as withheld. `assertEvaluable` refuses pages whose hash is in `development-hashes.json` (append-only), labels by the runner, and non-independent or unreviewed labels.
+- Page evidence: `window.__r2Events`, seq-ordered keydown/focusin/app events; app events record the active element (focusin alone misses focus falling to body).
+- Timeline: speech per action from Node capture records; page events by page seq, assigned to the action whose acknowledged keydown precedes them; clocks across processes are never subtracted. Missing ack or speech record, non-keydown ack, out-of-order acks or duplicate seq → INSUFFICIENT_EVIDENCE.
+- Page outcome (each arm): insufficient → INSUFFICIENT_EVIDENCE; abstain → ABSTAIN; malformed → INSUFFICIENT_EVIDENCE; healthy: barrier claimed → FAIL, else PASS; broken: same step and element as the label → PASS, else FAIL.
+- Run outcome: not evaluable, over $1.50 or 2 h, arms differ in model/version/mode, speech payload with screenshot/image/DOM/HTML, or visual payload with speech → INSUFFICIENT_EVIDENCE (NOT RUN). Any healthy FAIL → FAIL; any healthy INSUFFICIENT → INSUFFICIENT_EVIDENCE; ≥1 broken page with speech PASS and no axe violation on the locus element → PASS; else missing broken evidence → INSUFFICIENT_EVIDENCE, else FAIL.
+- Causal claim (kill check 2026-10-29): kept only if some qualifying barrier is not also localized by the same-model visual control.
+- MEASURED 2026-10-28T16:09:11Z (scripts/r2-baseline.mjs; headless Chromium 156.0.8078.4, axe-core 4.14.0, Playwright CDP keys; no OS input, NVDA or model): 0 axe violations on all 6 pages before and after the task. Dialog close: focus on open-dialog (healthy) vs body (broken); broken's next Tab lands on open-dialog in Chromium. Validation and status differ only in the locus role (alert/status vs none) with identical visible text. Development data, not evaluation.
+- Not done: live R2 NVDA speech (needs a separately approved workflow change; NVDA runs only in r1.yml), withheld fixtures, independent labels, model arms. FEATURES R2 unchanged.
+- Cost: $0 spent; R2 evaluation budget proposed in the report, not authorized.
+- D-56 continuation, user: "You may implement and test the bounded offline R2 preparation." "Handle all engineering tasks yourself."
+- Goal: independent foundation review, demonstrated fixes, provisional private fixture package, minimal hosted integration design; no official R2 evaluation.
+- Files: `src/r2/{contract,preparation}.mjs`, new `test/r2-{review,preparation,preparation-hardening,payload-context}.test.mjs`, `docs/engineering/R2-preparation-handoff.md`, normal session ledgers; private package/source/browser tests outside Git.
+- Acceptance: `npm test` all pass; private `node --test .../private-fixtures.test.mjs .../private-modal.test.mjs` pass; package rebuild has identical pinned seal; `node scripts/preflight.mjs` passes.
+- Cost ceiling: ₹0 additional spend; no metered calls. Scope is the bounded offline preparation in the pasted request; no separate execution/time allowance inferred.
+- Out of scope: installs, local NVDA/desktop input, inference, workflow/policy edits, hosted execution, publication and commits/pushes. Rollback: original dirty files preserved privately; no prior changes discarded.
+- MEASURED r2-prep-20261028-v2: 251/251 offline; private 2/2 browser tests; axe 4.14.0 zero initial/final violations on all six new pages and six development pages; package rebuild byte-identical. R1 locks/gates/deps intact.
+- Corrections: require controls/model identities/distinct label reviewer; reject wrong-key acknowledgements/healthy abstentions; missing visual evidence cannot support causal flag. New strict preparation path blocks official scoring pending blinded review/hosted evidence.
+- Private package: `%USERPROFILE%/.codex/private/tabwise-r2/prep-20261028/package`; self-authored PROVISIONAL labels. Handoff has seal/hash details and exact files. R2 FEATURES remains false; not independently labelled/evaluated.
+- Next: fake-transport R2 capture adapter (complete phrase deltas, silence windows, page snapshots); review new verifier/output code before use. CI policy/private delivery/one live execution remain separately gated.
+
+### F-03/D-57 minimum offline capture continuation — status: offline implementation complete; cross-tool review outstanding
+- User spec: "Implement only the minimum offline, fake-transport R2 capture adapter." Eight acceptance items in the current request; no UI/product architecture/hosted orchestration/inference.
+- Files: `src/r2/capture.mjs`; new `test/r2-capture{,-boundaries}.test.mjs`; `docs/engineering/R2-capture-handoff.md`; normal session ledgers/CODEMAP. R1 source/guards/acceptance and all existing tests remain unchanged.
+- Acceptance commands: `node --test test/r2-capture*.test.mjs`; `npm test`; `node scripts/preflight.mjs`; private `verify-private.mjs` for unchanged fixture seals/export/reproduction.
+- Cost ceiling: ₹0; no paid calls/installs. No separate execution allowance inferred. No commits/pushes/dispatch/live NVDA/desktop input.
+- Rollback: original 25 dirty/untracked files preserved outside Git before edits; new files are uncommitted. No old changes discarded.
+- MEASURED r2-capture-20261028: 23/23 targeted and 274/274 full offline tests; preflight/private fixture integrity passed. Initial RED 19/19 failures; boundary RED 3 failures/1 existing pass.
+- Current contract: append-only speech cursors; explicit bounded silence vs capture failure; action/page snapshots and continuous supplied event logs; separate Node/page clocks; exact page keys via unchanged R1 `judgeKeys`; bounded operations via unchanged R1 `withTimeout`.
+- No official R2 result: fake source is refused by real-NVDA evidence validation; association is window-only. Missing/late/unassigned evidence blocks completion. No product decisions made.
+- Next: cross-tool review of adapter/provider contract before real guarded binding. Hosted qualification additionally needs CI policy/private delivery approval, real continuity/quiet-window qualification and blinded labels.
+
+### F-03/D-58 targeted independent-review corrections — status: offline corrected; real binding BLOCK
+- User: "Correct only demonstrated R2 adapter defects." "Stop after this bounded correction and handoff." Product architecture remains separate.
+- Files: `src/r2/capture.mjs`; new `test/r2-capture-corrections.test.mjs`; `docs/engineering/R2-capture-corrections.md`; append note to prior capture handoff; normal session records/CODEMAP.
+- Acceptance: reproduce both defects RED; targeted capture tests pass; `npm test`; `node scripts/preflight.mjs`; existing private `verify-private.mjs`; no existing tests/R1/fixture edits.
+- Cost ceiling: ₹0; no binding/hosted/NVDA/Meta/UI/orchestration/push/commit. Rollback: 29 initial dirty/untracked files retained privately; evidence preserved.
+- Reproduced: pre-action page-read speech attached to Enter; +1500 ms key accepted under 2000 ms observation. Seven new tests failed before fixes.
+- Minimal corrections: post-page speech boundary check; separate fixed 1000 ms Node acknowledgement-observation cap from executor request; explicit unverified guarded execution and physical quiescence, including ignored cancellation.
+- Scope limitation: no atomic physical-send boundary from untagged logs; conservative cap is not a guard receipt. Capture completion is not official R2 acceptance.
+- Next: reconcile this corrected provider contract with parallel architecture and frozen guard requirements before real-binding approval; stop engineering at this handoff.
+
+### TW-01 / D-59 — Tabwise approved implementation
+- Goal: contracts v0.1, then A data plane/brokers/routes, B Fernway/guarded worker, C product UI/static reports.
+- Files: ci/r1-baseline.sha256; scripts/check-r1-baseline.mjs; packages/contracts/**; new tests; TABWISE-PRODUCT-DIRECTION.md; normal ledger/CODEMAP, then the §16 lane-owned paths.
+- Acceptance: node scripts/check-r1-baseline.mjs; npm test; npm --prefix packages/contracts test; node scripts/preflight.mjs; private verify-private.mjs; lane-specific tests in §16.3.
+- Cost ceiling: zero API calls and zero incremental financial expenditure; no new execution-time allowance inferred.
+- Source: parent TABWISE-PRODUCT-DIRECTION.md (October29 ownership revision), mirrored locally; prompt corrections supersede §16 stale lane/verdict entries.
+- Contracts resolve: runtime-dependency-free ESM, draft2020-12; Ajv dev-only; strict Meta schema separate; palette-only spec; encoded dispatch envelope limit.
+- Out of scope: frozen R1 edits, live execution, spending, deploys, credentials, commits/pushes; real binding remains BLOCK pending Claude PASS and owner approval.
+- Rollback: preserve original31 files and private seal; discard only newly authored task work after review.
+
+
+- MEASURED tw-impl-20261029: contracts21/21; root305/305; web15/15; production build without Supabase env passes;13 UI routes axe0, local recorder/mobile pass.
+- Database: three migrations applied only to dedicatedTabwise project; SQL RLS/admission/budget/immutable tests pass;50 concurrent hosted calls bounded; test rows removed, hosted40cap/spent0/reserved0.
+- BLOCK/remaining: real guarded binding and Claude review (CLI signed out), worker completion, credentials/auth provider, patch/verify/live reports and authenticated live qualification. Exact handoff: docs/engineering/Tabwise-implementation-handoff.md.
+
+### TW-01 / D-63 — continuation and current-tree review corrections
+- User explicitly continues ongoing implementation; no restart or planning questionnaire; no dispatch, Meta/Baseten calls, keys, spending or deployment.
+- Reconcile uploaded Claude F1–F7 against current source; regression-test demonstrated gaps. Scope remains the D-59 files plus new bounded helper/tests and normal ledgers.
+- Owner inputs: Tab/Shift+Tab/Enter/Space only; AshaTest; invalid.email; stop-speech deferred. Whole-journey and typed-value refusals precede providers.
+- Prepare second read-only client candidate/observer qualification only. Actual dispatch additionally requires explicit owner authorization and independent safety clearance.
+- Acceptance: root331/331; contracts21/21; web18/18; build,13-route axe/recorder/mobile/keyboard checks, preflight, original65 and private seal checks PASS (MEASURED tw-d63-review-20261029).
+- Four fake executor tests/five fake observer tests do not qualify physical input/relay equivalence. All worker typing/live binding stays BLOCK; frozen R1/R2 acceptance/private fixtures unchanged.
+- Baseten separate100 allocation recorded only; no shared ledgers, API calls or P0 dependency. Meta local60/hosted40 caps unchanged.
+- Remaining: production binding/loader, independent safety clearance, narrow owner-authorized observer test, real NVDA+Meta diagnosis/verification, authenticated integration and partial diagnostic retention.
+- Later D-63: patch-decision UI/API/RPC and failed diagnostic retention/display implemented; root333/contracts21/web21/build/local keyboard-axe-mobile/rollback-only SQL PASS; five migrations; these changes excluded from fixed155-file/83-test follow-up review.
+
+### TW-01 / D-64 — modular local commits, backend/product integration, offline worker
+- Approved goal/files: owner's continuation attachment; canonical D: repository, existing TW-01 implementation paths; preserve frozen R1/private material and Claude's sealed155-file review.
+- Order: selectively commit coherent verified D-63 units, then complete backend lifecycle and genuine product journey, then offline worker preparation; no routine delegation or review wait.
+- Acceptance: relevant unit suites before each commit; full root/contracts/web and production build for consolidation; targeted red/green regression tests and local keyboard/axe/mobile checks for subsequent behavior changes; preflight/private seal.
+- Cost ceiling: zero incremental spend, no Meta/Baseten calls, dispatch, deploy, key exposure or pushes. Local conventional commits explicitly authorized; pending independent review remains separate from commit authorization.
+- No C: checkout; C: only existing isolated snapshots, private sealed evaluation and temporary evidence. Ignore CLI temp/cache/build outputs. Exact selected paths and commit messages retained under ignored cache/d64.
+
+### TW-01 / D-65 — independent D63 corrections and offline qualification harness
+- Reconcile N-1…N-5 against current D: tree; failing regressions first, then modular local correction commits. Original F1…F7 remain traceable.
+- Implement integrity-first authentic frozen loader, registered guard/relay ownership, one guarded title action, page/foreground providers, hashed artifact and one manual workflow disabled by default. Full worker stays BLOCKED.
+- Files: new scripts/tabwise qualification helpers/entry; existing observer/network/executor and web artifact helpers; new regression/fake integration tests; one .github/workflows qualification file explicitly requested; normal review/ledger/CODEMAP.
+- Acceptance: per-finding red/green, fake loader/provider/title/teardown/artifact integration, full root/contracts/web/build and R1/private preservation. No live dispatch/input/calls/credentials/spend/deploy/push; no dependencies.

@@ -211,3 +211,86 @@ R1 #3 remains scored FAIL with rerun_allowed=false.
 This is a distinct A15 qualification, not a rerun of R1 #3.
 No local NVDA execution or automatic retry is authorized.
 The resulting scored run must be recorded in RUNS.md after evidence review.
+
+## D-55 2026-10-28T16:11:02Z — Close R1; start R2 offline foundation
+User approval: "We have achieved a real R1 PASS. Stop debugging R1." and "Use test-first development for only the minimum offline fixture and evidence-contract infrastructure. Do not build an autonomous repair agent yet. That belongs to R3."
+Scope: R1 closure records; three owned healthy/broken pairs; offline evidence contract; axe-core baseline.
+Constraints (user): "₹0 additional spending." "No Meta API calls or model inference." "No real NVDA execution or local desktop automation." "No GitHub Actions dispatch." "Do not commit or push."
+R1 scope (user): "PASS is for the configured A15 NVDA profile, not default browse-mode coverage. No further R1 development."
+Claude judgment, disclosed: the axe baseline ran headless Chromium locally with Playwright CDP keys (no OS input, no window); treated as not desktop automation.
+
+## D-56 2026-10-28T16:59:17Z — R2 independent review and private offline preparation
+User request: "You may implement and test the bounded offline R2 preparation." "Handle all engineering tasks yourself."
+Required limitation: "Because you author these fixtures and labels, they are NOT independently labelled evidence. Mark them PROVISIONAL and require a separate, blinded review before any official R2 scoring."
+Boundary: "₹0 additional spend." "No commits, pushes, hosted executions or spending until explicitly approved."
+Scope: correct demonstrated R2 defects test-first; prepare reproducible private fixtures/seals and leakage/freeze gates; minimum hosted integration design, no execution or reviewer assignment.
+Consequence: F-03 continuation on feat/R2-withheld-preparation; original dirty files preserved; R1 frozen files unchanged; R2 NOT RUN. Private custody outside all Git ancestors.
+Reversal: retain original snapshots and private sealed revisions; no deletion/publication is authorized by this entry.
+
+## D-57 2026-10-28T17:18:00Z — Minimum offline R2 capture adapter
+User: "Implement only the minimum offline, fake-transport R2 capture adapter."
+Acceptance: "Preserve complete NVDA phrase-log deltas per action, without stale/duplicate utterances." "Distinguish observed silence from missing, failed or disconnected capture."
+Acceptance: "Capture action-linked focus, page events and state snapshots, including transient focus loss." "Preserve event ordering and clock-domain distinctions."
+User: "No commits, pushes, GitHub dispatch, live NVDA, desktop input or spending." "Avoid another broad audit."
+Scope: new injected capture core and targeted tests; unchanged R1 primitives; no UI/product architecture/hosted orchestration/inference; private fixture confidentiality preserved.
+Consequence: F-03 continuation on existing task branch; fake-only measurements do not qualify as observed NVDA or official R2 evidence. Reversal: retain original private snapshot; new files remain uncommitted.
+
+## D-58 — Targeted R2 independent-review corrections
+User: "Write failing regression tests first." "Correct only demonstrated R2 adapter defects."
+User: "Do not modify frozen R1 sendguard logic or weaken its existing thresholds." "Validate that a non-cooperative executor cannot be represented as safely cancelled."
+User: "Run targeted tests, full npm test, R1 preflight and existing private-fixture integrity checks." "Preserve all uncommitted changes."
+Boundary: "Do not implement the real NVDA binding yet." "Stop after this bounded correction and handoff."
+Scope: reproduce/correct the pre-action speech gap and late acknowledgement; retain evidence and separate clocks; explicit guarded-execution/quiescence limits; no UI/product/backend/other R2 work.
+Consequence: only R2 adapter/new regression tests and session handoff records; no commits/pushes/dispatch/live NVDA/Meta calls/spend. Reversal: original 29 dirty/untracked files and test evidence retained privately.
+
+## D-59 2026-10-28T18:40:17Z — Tabwise implementation A+B+C
+User: "The user has approved implementation lanes A+B+C." "BEGIN WITH PREFLIGHT AND CONTRACTS v0.1 NOW."
+Scope: primary Codex; sequential execution; D8 isolated dependencies; no frozen R1 changes, live execution, inference, spending, credentials, deploys or remote writes.
+User: "The five timeline lanes are KEYS, FOCUS, SPEECH, APP EVENTS and SCREENSHOTS. Axe results are separate supporting evidence."
+User: "Verification verdicts must include FIXED, NOT_FIXED, REGRESSED and INCONCLUSIVE."
+Ruling: preserve inherited work uncommitted; no merge/main switch needed for single-session implementation. Supabase reported uninstalled in this chat; local work continues.
+Preservation: C:\Users\ANIRUDDH\.codex\private\tabwise-implementation\20261028T183847Z; owner revision copied from parent directory; Git text hashes normalize only checkout CRLF, raw-byte seal also retained.
+
+
+## D-60 2026-10-28T18:40:31Z — Dedicated Tabwise Supabase project only
+User: "supabase access has been granted to you but dare not touch any other project
+make a separate one for this application and always work in that only!"
+Consequence: create a separate free Tabwise project; pin its project ID; all project-scoped MCP operations restricted to that ID. No other project reads, writes or upgrades.
+Reversal: explicit owner instruction only.
+
+
+## D-61 2026-10-28T18:41:05Z — Supabase organization selection
+User: "Portfolio — create a separate free Tabwise project (Recommended; $0, existing projects untouched)"
+Consequence: organization sqyiuvawjfurgotuepnc; new Tabwise project in ap-south-1 only, zero-cost plan; no project upgrades or other project access.
+Dependency D8: @tabwise/contracts dev-only ajv8.17.1 installed with lifecycle scripts disabled; isolated package-lock; root package/lock unchanged.
+
+
+D-59 execution rulings (2026-10-28T19:28:46Z): legacy explicit broker cap100 saturates60 to preserve frozen client tests; no caller can obtain a local100 cap. Atomic GitHub POST is not automatically retried after an unknown outcome. Original tests remain byte-identical; new verdict fixture states and axe context initialization were corrected without lowering acceptance. Supabase organization plan confirmed Free. Claude auth reports loggedIn=false; architecture/safety review unavailable. No live-binding approval inferred.
+D8 installed direct dependencies: ajv8.17.1 (contracts-dev); next16.4.3/react19.3.1/react-dom19.3.1/@supabase/ssr0.12.7/@supabase/supabase-js2.118.0 (web); typescript7.0.2/@types/node24.10.0/@types/react19.2.2/@types/react-dom19.2.2/tailwindcss4.3.3/@tailwindcss/postcss4.3.3 (web-dev). Exact isolated locks and license inventory retained.
+
+## D-62 2026-10-28T19:42:59Z — Parallel Claude handoff
+User: "give me a handoff for claude if it's ready and i will run that in parallel in claude code"
+Consequence: fixed read-only review snapshot and bounded architecture/safety brief; Claude writes only its separate outbox report. No active-checkout edits or final live-worker approval are requested. Codex continues implementation.
+## D-63 2026-10-28T22:08:28Z — Continue current Tabwise work and reconcile Claude review
+User: "continue working"; "no need to stop"; "do not discard or restart ongoing work"; "Do not initiate another planning questionnaire."
+User: "Only Tab, Shift+Tab, Enter and Space as supported presses until further guarded qualification." "Use AshaTest"; "Use invalid.email"; "Defer optional stop-speech actions."
+User: "Prepare the narrow observer qualification; do not dispatch it without explicit owner authorization and independent safety clearance."
+User: "$60 local/$40 hosted Meta ceilings unchanged"; "Do not mix Baseten expenses into those ledgers"; "Do not add Baseten to P0's critical path."
+User supplied separate $100 Baseten allocation, saved key (not accessed), https://inference.baseten.co/v1, meta-models/muse-spark-open-1026, Chat Completions, advertised up to 2M TPM. Owner-supplied; not independently verified; no calls or expenses.
+User: "No live dispatch, Meta/Baseten API calls, credential exposure, deployment or spending under this message." Claude F-1…F-7 reconciled against active tree; regression tests required. Existing D-59 scope continues.
+
+## D-64 — Continue implementation in canonical D: and make modular local commits
+User: "All actual development, testing, version control, dependency installation and application changes must happen in this D: repository." "LOCAL COMMITS ARE AUTHORIZED." "PUSHES ARE NOT AUTHORIZED."
+User: "Do not wait for Claude to finish before continuing independent implementation work." "Stage exact files selectively." "Run relevant tests before committing."
+User: "Do not edit its source snapshot, manifest, review brief or outbox." "Do not repeat completed work merely to increase test counts."
+Scope: consolidate tested D-63 units, backend/product integration, then offline worker preparation; same TW-01 entry. Local commits may precede pending cross-tool review under this explicit instruction; they do not imply independent clearance or enabled execution.
+User: "No Meta/Baseten live calls without authorization." "No GitHub Actions dispatch." "No deployment." "No credential exposure." "No pushes." "No real NVDA input on the development desktop."
+Audit: canonical D:\Projects\Meta AI\app; feat/TW-01-contracts/0c93fa7; every source path in all three known C: review snapshots exists in D:. No exclusive C: implementation found; snapshots preserved.
+
+## D-65 — Fix Claude N-1…N-5 and prepare a disabled qualification harness
+User: "Write failing regressions before fixes." "R1 integrity-first loader with authentic frozen module identity." "Exact registered guard and relay ownership checks."
+User: "One guarded NVDA title-report action." "Verified page and foreground providers." "Hashed qualification evidence artifact." "Single manually dispatched qualification workflow, disabled by default."
+User: "Keep the full Tabwise worker BLOCKED." "No live NVDA, GitHub workflow dispatch, credential access, deployment or Meta/Baseten calls."
+User: "Work in D:\Projects\Meta AI\app, preserve sealed C: review packages and create meaningful modular local commits with tests. Do not push."
+Scope: observer/qualification/network/executor/artifact-ingest helpers, integrity-first qualification loader/entry/providers/evidence writer, one disabled manual qualification workflow, new regression/fake integration tests and review-to-code evidence. Explicit workflow preparation is authorized; execution is not.
+Acceptance: N1…N5 red/green; targeted fake integration/identity/foreground/page/teardown/evidence checks; full root/contracts/web/build plus R1/private preservation before checkpoint. Cost ceiling0; no new dependency, real input, dispatch, deployment or inference.

@@ -1,25 +1,23 @@
-# STATE — D-53 / A15 configuration-only candidate ready for Claude review
-Updated: 2026-10-28T15:00:38Z · by: codex
-- HEAD: b7a0bcd53a868c749e331fcc810860885ff16f16; branch fix/D-53-a15-configuration; no commit/push/staging.
-- User selected Claude configuration-only design; prior observer/toggle proposals rejected.
-- Only runtime delta: steps.json nvda_settings.virtualBuffers.enableOnPageLoad=false; keyboard settings retained.
-- Existing start settings and C1 readback unchanged; exact false survives vendored INI build/parse; missing/true rejected before page opens.
-- All10 step objects/key sequence/speech expectations unchanged; 3/3 and1000ms ack/foreground/send/evidence rules unchanged.
-- A15 verbatim in F-02 outside Day-1 gates; re-lock changes only PLAN#F-02 and steps hashes; full previous lock retained.
-- MEASURED RED6 fail/1 pass -> GREEN7/7 A15 tests; full npm test213/213; preflight all12 locks/10 pins/vendor/gates pass.
-- R1 #3 remains scored FAIL/no rerun; append-only RUNS row added; no historical evidence changed.
-- Prior uncommitted D-53 STATE and LOG preserved in local review evidence; original LOG bytes retained as prefix.
-- Earlier investigation found source-supported browse interception; its occurrence in #3 remains INFERENCE; original artifact digest retained.
-- Next: owner supplies exact sealed diff + verification evidence to independent Claude; no cross-tool approval claimed yet.
-- Live uncertainty: real delivery/speech under A15, especially dialog confirmation/status at step9, needs separately authorized hosted qualification.
-- No source/vendor/workflow/fixture HTML/dependency changes, observer, mode-toggle, local NVDA/input, Meta/install/dispatch/commit/push.
-
+# STATE — D-64 baseline committed; D-65 review corrections active
+Updated: 2026-10-29T01:13:02Z · Codex · run_id tw-d65-20261029
+- Canonical working/Git root D:/Projects/Meta AI/app; branch feat/TW-01-contracts; current baseline c4d157a.
+- D-64 explicitly authorizes modular LOCAL commits; exact paths only; no push/history rewrite/reset.
+- Ten baseline commits recorded in docs/engineering/Tabwise-D64-local-commits.md; fresh root333/contracts21/web21/build PASS.
+- Six rollback-only SQL suites PASS; only Supabase ueobjrtvsgvkigmjxkks; all other projects prohibited.
+- C: only sealed review/evaluation/evidence; all snapshot source paths exist in D:. No exclusive C: implementation found.
+- Original65 frozen R1 files/private fixtures preserved. Never change R1 workflow/source/lock/evidence or withheld material.
+- Claude follow-up received: docs/reviews/claude-d63-followup-review.md; independently155-file seal/83 tests PASS; BLOCK/NO DISPATCH.
+- D-65 priority N1 observer singleton/no-event transport loss; N2 exact contiguous phrase match; N3 non-HTTP network hardening.
+- N4 pre vs send failure kind; N5 best-effort partial-store cleanup with pending evidence. Write failing regressions first.
+- Then offline qualification harness: authentic integrity-first loader, exact gate/relay identity, one guarded title action,
+  page/foreground providers, hashed artifact, single default-disabled manual workflow. User explicitly authorizes preparation only.
+- Full Tabwise worker remains unconditionally BLOCKED; all worker typing refused; only Tab/Shift+Tab/Enter/Space presses.
+- No NVDA/physical input on dev desktop, dispatch, credential access, deployment, Meta/Baseten calls, spending or pushes.
+- Meta local60/hosted40 unchanged; Baseten separate deferred100 allocation; no key read or cost incurred.
+- Latest runtime/code checkpoint D63: patch approval UI/API/RPC and diagnostic retention exist; real auth/e2e still unqualified.
+- Claude's original88 and follow-up155 sealed snapshots/briefs/outbox must never be modified.
+- D64 test output and exact commit scopes/messages: ignored cache/d64; source always D:.
 ## Handoff
-Uncommitted: fixtures/r1/steps.json, fixtures/r1/lock.json.
-Uncommitted: test/speech.test.mjs — seven new contract tests and approved synthetic-fixture profile updates.
-Uncommitted: docs/ledger/PLAN.md, docs/ledger/DECISIONS.md.
-Uncommitted: docs/ledger/LOG.jsonl, docs/ledger/STATE.md — includes preceding D-53 work.
-Uncommitted: docs/ledger/RUNS.md — scored FAIL appended.
-Verified by: npm test ->213/213; node scripts/preflight.mjs ->ok; node scripts/r1.mjs --hashes ->matches.
-Proposed commit: none authorized; candidate awaits independent Claude review.
-Review needed from: Claude on exact sealed eight-file diff; hosted execution requires separate explicit approval.
+Continue D-65 without waiting/questionnaire; reconcile new review with latest source; no clearance inferred from local commits.
+Next: N1/N2 failing regressions and observer fixes, then N3/N4/N5, then complete offline harness and final review package.
+Review needed: exact post-snapshot changes/new qualification revision; explicit owner approval required before any test dispatch.
