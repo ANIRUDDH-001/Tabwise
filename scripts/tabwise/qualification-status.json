@@ -1,27 +1,11 @@
 {
-  "enabled": true,
-  "verdict": "PASS",
-  "reviewer": "Claude (Opus 5.5)",
-  "review_ref": "Claude D67 narrow review 2026-10-29T03:29:32Z; sha256=cd4b1dbdad280ddc04d15a80ed801e72424829b20cc2332c36740828badd0231",
-  "owner_approval_ref": "D-73",
-  "actor": "ANIRUDDH-001",
-  "reviewed_files": [
-    ".github/workflows/tabwise-observer.yml",
-    ".gitignore",
-    "packages/contracts/limits.mjs",
-    "scripts/check-r1-baseline.mjs",
-    "scripts/tabwise-observer.mjs",
-    "scripts/tabwise/network.mjs",
-    "scripts/tabwise/observer-qualification.mjs",
-    "scripts/tabwise/observer.mjs",
-    "scripts/tabwise/qualification-core.mjs",
-    "scripts/tabwise/qualification-crash.mjs",
-    "scripts/tabwise/qualification-evidence.mjs",
-    "scripts/tabwise/qualification-integrity.mjs",
-    "scripts/tabwise/qualification-loader.mjs",
-    "scripts/tabwise/qualification-policy.mjs",
-    "scripts/tabwise/qualification-providers.mjs"
-  ],
-  "reviewed_sha256": "a639387a0a8ccd701b7765afcd420b27dfb71c81a2303450f88aef90cc717efb",
-  "reason": "Narrow observer qualification only: one separately owner-authorized hosted initial attempt under D-73 using the admission-timed revocation protocol (runbook step 5; revoke after the qualify job is observed in_progress or terminal, bounded deadlines). D-72 retired after skipped run 40826157539. Full Tabwise worker remains BLOCKED; no general relay or physical-safety clearance."
+  "enabled": false,
+  "verdict": "BLOCK",
+  "reviewer": null,
+  "review_ref": null,
+  "owner_approval_ref": null,
+  "actor": null,
+  "reviewed_files": [],
+  "reviewed_sha256": null,
+  "reason": "Reset after D-73 (run 40849425253 admitted at activation 0d1eefca3d685c5c054afcc6e9d2949132955768; approval variable revoked after 35 s; precheck refused before runtime with 'R1 baseline mismatch: package-lock.json'; cause: windows-2025 autocrlf checkout wrote the unchanged LF lockfile blob as CRLF; no NVDA, browser or observer step ran and no evidence artifact was uploaded). D-73 is consumed and retired and must never be retried. A new attempt requires an independent review of the changed check-r1-baseline.mjs, a recomputed digest, a separate owner decision and a status-only activation commit. Full Tabwise worker remains BLOCKED."
 }

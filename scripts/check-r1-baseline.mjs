@@ -10,6 +10,12 @@ const trusted = Object.freeze({
   'package-lock.json': '2f4a4e9f30fbe994995c1c4291eb02a09e89ff58ff12b143623cc270ff515ef4',
 });
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
+// The pinned blob has no CR, so Git's autocrlf checkout (windows-2025 runner, D-73 run 40849425253) maps it
+// one-to-one to CRLF. Undo only a uniform conversion: a lone CR or LF stays, so mixed bytes still mismatch.
+const fromUniformCrlf = bytes => {
+  const text = bytes.toString('latin1');
+  return text.includes('\r') && !/\r(?!\n)|(?<!\r)\n/.test(text) ? Buffer.from(text.replace(/\r\n/g, '\n'), 'latin1') : bytes;
+};
 const LOCK_SHA='5ce41a6b5b18768917536cabaf906531ff0a88fe9c242654b4451f66ec555af5';
 const DEFAULT_ROOT=fileURLToPath(new URL('../',import.meta.url));
 
@@ -57,8 +63,8 @@ export function checkR1Baseline(root = fileURLToPath(new URL('../', import.meta.
   for (const [path, expected] of Object.entries(trusted)) {
     try {
       const bytes = readFileSync(resolve(root, path));
-      // Git core.autocrlf=true in this checkout. Never rewrite the frozen file.
-      const canonical = path === 'package-lock.json' ? bytes : Buffer.from(bytes.toString('utf8').replace(/\r\n/g, '\n'));
+      // Never rewrite the frozen file; compare its Git blob bytes (LF, or a uniform CRLF checkout of them).
+      const canonical = path === 'package-lock.json' ? fromUniformCrlf(bytes) : Buffer.from(bytes.toString('utf8').replace(/\r\n/g, '\n'));
       if (sha(canonical) !== expected) errors.push(`R1 baseline mismatch: ${path}`);
     } catch { errors.push(`R1 baseline missing: ${path}`); }
   }

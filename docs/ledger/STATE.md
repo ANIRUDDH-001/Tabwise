@@ -1,17 +1,13 @@
-# STATE — D70 reviewed product consolidation; execution BLOCKED
-Updated: 2026-10-29T04:03:27Z · Codex · run_id tw-d70-20261029
+# STATE — D-73 consumed (FAILED pre-runtime); CRLF lockfile fix local, uncommitted; qualification BLOCK
+Updated: 2026-10-29T13:13:06Z · Claude (Opus 5.5) · run_id tw-d73-crlf-20261029
 
-- Canonical D:/Projects/Meta AI/app; feat/TW-01-contracts. Prior D66-D69 commits preserved, no history rewrite/push. New a997e66 identity/outage; e467c8b immutable versions/owned nav;5edf01f printable private report;ff6c918 pending verification relationships.
-- Read approved Claude D67/D68 outbox reports; scopes reconciled in docs/engineering/Tabwise-D70-checkpoint.md. New product diff received focused independent read-only review, no remaining blocker.
-- D2 journey equality enforced; D4 initial run database error503 vs absent/foreign404; D3 owned navigation and exact saved-version links fixed. D1 bounded optimization evaluated/deferred: repeated full-bundle download cost remains, no integrity weakening/cache claim.
-- Saved-version owner-only API/UI validates approved steps, displays original stored hash scope honestly. Report viewer checks private export hash/run identity before showing5 lanes and print. Verification reads owned stored relationships but remains pending/null, even if a stored output says FIXED.
-- Verification stale pending-route state was corrected and cleared in focused review before commit. No public successful report or model-predicted repair asserted.
-- MEASURED root357/web55/contracts21/build/TypeScript/preflight/full frozen PASS;13 standard routes axe0;4 new synthetic-state axe scans0; keyboard version/nav/print and mobile checks PASS. No actual authenticated session/populated run/NVDA/Spark integration exercised.
-- Original D67 sealed120-file source and outbox unchanged;15 guarded files match reviewed copies. Digest a639387a0a8ccd701b7765afcd420b27dfb71c81a2303450f88aef90cc717efb unchanged.
-- Existing LOW fixes committed8dbb3d7/150f713: disposable temp fixtures+cleanup, exclusive named evidence, fixture-only30s total allowance, committed immediate one-dispatch revision-variable deletion runbook. Frozen100ms unchanged.
-- Exact final local preparation SHA and updated acceptance/review/config metadata are captured after documentation commit in ignored cache/d70/execution-authorization. New activation SHA remains owner-controlled, not assigned here.
-- Qualification disabled/BLOCK refs null; full worker BLOCK. No publication/activation/dispatch/NVDA/credentials/model calls/deploy/spend. Meta caps60local/40hosted unchanged. Only dedicated Tabwise project may ever be accessed.
-- R1 ledger scoped historical A15 PASS; FEATURES false/null discrepancy remains. R2/R3/R7 NOT RUN as actual evaluations. Code-review passes do not change these outcomes.
+- Canonical D:/Projects/Meta AI/app; feat/TW-01-contracts at 0d1eefc (D-73 activation). No commit/push/dispatch/variable/NVDA/API call by Claude.
+- D-73 run 40849425253 (job 123364901929): admitted, variable revoked after 35 s, `--check-only` refused: `BLOCK: R1 baseline mismatch: package-lock.json`. No NVDA/browser/observer step, no artifact. Local evidence cache/d73/execution/20261029T092429Z: 25/25 hashes match, hashes.json sha256 0a5901d3…29ecd5, unchanged.
+- Root cause MEASURED: package-lock.json blob 29eab6cf… identical at R1 0c93fa7 and 0d1eefc; LF blob sha256 2f4a4e9f… (= manifest); same blob with autocrlf=true checkout = 2306bb99… . `git -c core.autocrlf=true checkout 0d1eefc` reproduces the exact hosted message (exit 2); LF checkout passes all of `--check-only`. check-r1-baseline.mjs compared the lockfile raw while normalizing the other files.
+- Escaped locally (MEASURED): dev worktree lockfile is LF (`git ls-files --eol`: i/lf w/lf) though core.autocrlf=true; tests copied those LF bytes. INFERENCE: npm rewrote it LF locally; windows-2025 Git has autocrlf=true.
+- Fix: scripts/check-r1-baseline.mjs undoes only a uniform CRLF conversion of package-lock.json (lone CR/LF or mixed endings still mismatch); trusted hashes and manifest unchanged. New test/r1-baseline-eol.test.mjs (7 tests).
+- scripts/tabwise/qualification-status.json reset to disabled/BLOCK with D-73 retirement reason. D-73 never reused. Full worker BLOCKED.
+- Last verification: `npm test` 393/393 pass exit 0; check-r1-baseline exit 0; preflight exit 0; observer --check-only refuses disabled (exit 2).
 
 ## Handoff
-Continue productive product work against genuine persisted data when owner auth and qualified evidence exist. Remaining full journey requires auth/provider configuration, separate execution authorization, full worker qualification, real evidence/Spark diagnosis, human patch review, actual rerun/released verification and public immutable result report. D1 egress optimization remains open. Owner alone publishes/activates/dispatches and immediately revokes approval variable.
+Next: independent review of check-r1-baseline.mjs diff + new test; owner commits and publishes by exact SHA (runbook step 2). New attempt needs new D-number, recomputed reviewed_sha256 (check-r1-baseline.mjs is in reviewed scope; D67 digest a639387a… no longer matches), status-only activation commit, owner dispatch script. A local PASS is not hosted qualification.
