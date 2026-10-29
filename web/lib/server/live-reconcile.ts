@@ -4,6 +4,7 @@ import {HttpError,verifyWorkerIdentity} from './core.mjs';
 import {reconcileRun} from './reconcile.mjs';
 import {ingestArchive} from './artifact-ingest.mjs';
 import {ingestDiagnosticArchive} from './diagnostic-ingest.mjs';
+import {createArtifactCompensation} from './artifact-store.mjs';
 type Run={id:string,status:string,deadline_at:string,created_at:string,gh_run_id:string|null,gh_head_sha:string|null,spec_sha256:string|null};
 type Remote={id:number,run_attempt:number,head_sha:string,display_title:string,created_at:string,path:string,event:string,head_branch:string,actor:{login:string},status:string,conclusion:string|null};
 export async function reconcileLive(run:Run){
@@ -23,17 +24,7 @@ export async function reconcileLive(run:Run){
  const store=async(path:string,bytes:Uint8Array,kind:string)=>{const {error}=await db.storage.from('tabwise-evidence').upload(path,bytes,{contentType:kind==='screenshot'?'image/webp':'application/json',upsert:false});if(error)throw new HttpError(500,'artifact_store_failed');};
  type Manifest={files:{path:string,sha256:string,bytes:number,kind:string}[]};
  const record=async(row:Run,manifest:Manifest)=>{const {error}=await db.from('artifacts').insert(manifest.files.map(f=>({run_id:row.id,...f})));if(error)throw new HttpError(500,'artifact_metadata_failed');};
- const compensation=(row:Run)=>({
-  cleanup:async(prefix:string,paths:string[])=>{
-   if((prefix!==row.id&&!prefix.startsWith(`${row.id}/diagnostics/`))||paths.some(path=>!path.startsWith(`${prefix}/`)))throw new HttpError(409,'invalid_cleanup_scope');
-   const results=await Promise.allSettled([db.storage.from('tabwise-evidence').remove(paths),db.from('artifacts').delete().eq('run_id',row.id).in('path',paths.map(path=>path.slice(row.id.length+1)))]);
-   if(results.some(result=>result.status==='rejected'||result.value.error))throw new HttpError(500,'artifact_cleanup_pending');
-  },
-  recordCleanup:async(evidence:{artifact_cleanup_pending:boolean,prefix:string,paths:string[]})=>{
-   const {error}=await db.from('audit_log').insert({actor:'reconciler',action:evidence.artifact_cleanup_pending?'artifact_cleanup_pending':'artifact_cleanup_complete',subject:row.id,detail:evidence});
-   if(error)throw new HttpError(500,'cleanup_evidence_unavailable');
-  },
- });
+ const compensation=(row:Run)=>createArtifactCompensation(db,row.id);
  return reconcileRun(run,{
   transition,
   claim:async(id:string)=>{const {data,error}=await db.rpc('claim_reconcile',{p_run:id});return !error&&data===true;},

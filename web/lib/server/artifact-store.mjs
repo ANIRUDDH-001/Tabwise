@@ -16,3 +16,22 @@ export async function storeArtifactSet({prefix,manifestBytes,manifest,files,stor
   Object.assign(error,{artifact_cleanup_pending:pending,cleanup_evidence_recorded:recorded,cleanup_evidence:evidence});throw error;
  }
 }
+export function createArtifactCompensation(db,runId){
+ return {
+  async cleanup(prefix,paths){
+   const diagnosticPrefix=`${runId}/diagnostics/`;
+   if((prefix!==runId&&!(prefix.startsWith(diagnosticPrefix)&&/^[1-9][0-9]*$/.test(prefix.slice(diagnosticPrefix.length))))||paths.some(path=>!path.startsWith(`${prefix}/`)||path.includes('/../')))throw Error('invalid artifact cleanup scope');
+   const results=await Promise.allSettled([
+    db.storage.from('tabwise-evidence').remove(paths),
+    db.from('artifacts').delete().eq('run_id',runId).in('path',paths.map(path=>path.slice(runId.length+1))),
+    // A metadata/status request may have succeeded before its response failed.
+    db.from('runs').update({evidence_status:'incomplete'}).eq('id',runId).neq('status','completed'),
+   ]);
+   if(results.some(result=>result.status==='rejected'||result.value.error))throw Error('artifact cleanup pending');
+  },
+  async recordCleanup(evidence){
+   const {error}=await db.from('audit_log').insert({actor:'reconciler',action:evidence.artifact_cleanup_pending?'artifact_cleanup_pending':'artifact_cleanup_complete',subject:runId,detail:evidence});
+   if(error)throw Error('cleanup evidence unavailable');
+  },
+ };
+}
