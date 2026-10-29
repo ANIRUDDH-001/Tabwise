@@ -1,0 +1,11 @@
+{
+  "enabled": false,
+  "verdict": "BLOCK",
+  "reviewer": null,
+  "review_ref": null,
+  "owner_approval_ref": null,
+  "actor": null,
+  "reviewed_files": [],
+  "reviewed_sha256": null,
+  "reason": "Offline preparation only. Actual harness revision needs independent safety clearance and explicit owner approval. Full Tabwise worker stays BLOCKED."
+}

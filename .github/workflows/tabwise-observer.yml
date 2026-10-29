@@ -1,0 +1,65 @@
+# D-65 offline preparation ONLY. No dispatch or independent safety clearance is granted.
+name: tabwise-observer-qualification
+run-name: tabwise observer qualification
+on:
+  workflow_dispatch:
+    inputs:
+      enable_qualification:
+        description: Explicit opt-in after independent clearance and owner approval
+        type: boolean
+        default: false
+        required: true
+      owner_approval_ref:
+        description: Owner decision reference D-number (never a credential)
+        type: string
+        default: ''
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: tabwise-observer-qualification
+  cancel-in-progress: false
+jobs:
+  qualify:
+    if: inputs.enable_qualification && github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && vars.TABWISE_OBSERVER_APPROVED_REVISION == github.sha && github.run_attempt == 1
+    runs-on: windows-2025
+    # Initial bounded qualification ceiling, not a measured production runtime guarantee.
+    timeout-minutes: 5
+    env:
+      TABWISE_QUALIFICATION_ENABLED: ${{ inputs.enable_qualification }}
+      TABWISE_OBSERVER_OWNER_APPROVAL: ${{ inputs.owner_approval_ref }}
+      TABWISE_OBSERVER_APPROVED_REVISION: ${{ vars.TABWISE_OBSERVER_APPROVED_REVISION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24.22.1
+      - name: Install existing frozen dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts
+      - name: Validate qualification authorization without loading a runtime
+        run: node scripts/tabwise-observer.mjs --check-only
+      - name: Prepare isolated VM
+        run: npx --no-install guidepup setup --ci
+      - name: Install pinned NVDA assets
+        run: npx --no-install guidepup install nvda
+      - name: Install pinned Chromium
+        run: npx --no-install playwright install chromium
+      - name: Make tracked source and upstream modules read-only
+        shell: pwsh
+        run: |
+          foreach ($file in (git ls-files)) { Set-ItemProperty -LiteralPath $file -Name IsReadOnly -Value $true }
+          Get-ChildItem -Recurse -File node_modules/@guidepup/guidepup/lib | ForEach-Object { $_.IsReadOnly = $true }
+      - name: One guarded title-report qualification
+        run: node scripts/tabwise-observer.mjs
+      - name: Preserve bounded qualification evidence including partial failures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tabwise-observer-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/tabwise-observer/
+          if-no-files-found: ignore
+          retention-days: 1
