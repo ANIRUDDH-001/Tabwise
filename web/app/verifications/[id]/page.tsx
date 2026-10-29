@@ -1,3 +1,3 @@
-import Link from 'next/link';
 import Workspace from '../../../components/Workspace';
-export default function Verification(){return <Workspace><div className="crumb">Verification</div><div className="page-title"><div><h1>The rerun decides.</h1><p>No genuine Fernway verification is available yet. Before and after timelines appear only after an approved patch and a complete real rerun.</p></div><span className="chip">Pending</span></div><div className="panel"><div className="pending"><div><h2>Nothing is marked fixed.</h2><p>Verification may result in FIXED, NOT_FIXED, REGRESSED or INCONCLUSIVE. A model’s predicted speech is never the pass criterion.</p><Link className="textlink" href="/status">View qualification status</Link></div></div></div></Workspace>;}
+import VerificationPanel from '../../../components/VerificationPanel';
+export default async function Verification({params}:{params:Promise<{id:string}>}){const {id}=await params;return <Workspace owned><VerificationPanel id={id}/></Workspace>;}
