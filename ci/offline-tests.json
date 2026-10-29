@@ -1,0 +1,226 @@
+{
+  "broker.test.mjs": {
+    "kind": "process",
+    "reason": "spawns real Node workers for SQLite contention"
+  },
+  "browser.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "ci-browser-cleanup.test.mjs": {
+    "kind": "harness",
+    "reason": "controlled Node children only; fake browser module substitution or synthetic handle; bounded cleanup"
+  },
+  "ci-offline-selection.test.mjs": {
+    "kind": "harness",
+    "reason": "controlled Node children only; fake browser module substitution or synthetic handle; bounded cleanup"
+  },
+  "client.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "engineering.test.mjs": {
+    "kind": "offline",
+    "reason": "sandbox imported first; OS/process/network boundaries denied and replaced with fakes"
+  },
+  "fernway.test.mjs": {
+    "kind": "browser",
+    "reason": "real Chromium execution; separately authorized browser coverage required"
+  },
+  "r1-baseline-eol.test.mjs": {
+    "kind": "process",
+    "reason": "spawns Git, Node digest workers and observer check-only entry"
+  },
+  "r1-baseline.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "r2-binding.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "r2-capture-boundaries.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "r2-capture-corrections.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "r2-capture-receipts-failclosed.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "r2-capture-receipts.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "r2-capture.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "r2-page-provider.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "r2-payload-context.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "r2-preparation-hardening.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "r2-preparation.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "r2-review.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "r2-send-receipt.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "r2.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "sendguard.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "speech.test.mjs": {
+    "kind": "offline",
+    "reason": "fake providers and loopback HTTP fixture only; no external execution"
+  },
+  "tabwise-budget-alarm.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-budget.test.mjs": {
+    "kind": "process",
+    "reason": "spawns 50 real Node workers"
+  },
+  "tabwise-d65-executor.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-d65-network.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-d65-observer.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-d67-crash.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-d67-executor.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-d67-integrity.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-d67-timing.test.mjs": {
+    "kind": "process",
+    "reason": "spawns Git and loads runtime closure in a disposable repository"
+  },
+  "tabwise-d73-admission.test.mjs": {
+    "kind": "process",
+    "reason": "spawns PowerShell with shimmed dispatch commands; uncertain external effects"
+  },
+  "tabwise-diagnosis-persistence.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-diagnosis.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-executor.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-meta.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-network-browser.test.mjs": {
+    "kind": "browser",
+    "reason": "real Chromium execution; separately authorized browser coverage required"
+  },
+  "tabwise-observer.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-patch-review.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-patch-validation.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-qualification-browser.test.mjs": {
+    "kind": "browser",
+    "reason": "real Chromium execution; separately authorized browser coverage required"
+  },
+  "tabwise-qualification-core.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-qualification-evidence.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-qualification-loader.test.mjs": {
+    "kind": "offline",
+    "reason": "sandbox imported first; OS/process/network boundaries denied and replaced with fakes"
+  },
+  "tabwise-qualification-policy.test.mjs": {
+    "kind": "process",
+    "reason": "spawns observer check-only entry (default-disabled refusal)"
+  },
+  "tabwise-qualification-providers.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-review-approval.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-review-input.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-review-integrity.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-review-network.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-verdict-integrity.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-verdict.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "tabwise-worker.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "vendor.test.mjs": {
+    "kind": "offline",
+    "reason": "sandbox imported first; OS/process/network boundaries denied and replaced with fakes"
+  }
+}

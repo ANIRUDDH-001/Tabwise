@@ -301,3 +301,23 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Files: new scripts/tabwise qualification helpers/entry; existing observer/network/executor and web artifact helpers; new regression/fake integration tests; one .github/workflows qualification file explicitly requested; normal review/ledger/CODEMAP.
 - Acceptance: per-finding red/green, fake loader/provider/title/teardown/artifact integration, full root/contracts/web/build and R1/private preservation. No live dispatch/input/calls/credentials/spend/deploy/push; no dependencies.
 - MEASURED D65: N1–N5 red/green; root353/353, web26/26/build, local keyboard/axe/mobile and original65/private checks PASS. Offline harness and default-disabled manual workflow complete; executable35e74ff; actual relay/VM timing/egress remain unverified. Review map and local commits in docs/engineering/Tabwise-D65-*.
+
+### F-03 / CI-H1 — hanging offline preflight (D-75)
+- Goal: bounded offline preflight with explicit coverage and cleanup on rejected browser setup.
+- Baseline: bb8008b0857f2148c5c808e951fac2a64fc2647b; clean review/tabwise-m2b-m2c; branch fix/tabwise-ci-preflight-hang.
+- Files: .github/workflows/preflight.yml; ci/offline-tests.json; scripts/offline-tests.mjs; test/{fernway,tabwise-network-browser,ci-browser-cleanup,ci-offline-selection}.test.mjs; test/helpers/reject-browser.mjs; engineering handoff and normal ledgers/CODEMAP.
+- Acceptance: node --test test/ci-browser-cleanup.test.mjs test/ci-offline-selection.test.mjs; node scripts/offline-tests.mjs --profile ordinary --out cache/ci-h1; node scripts/offline-tests.mjs --profile stress --seed 172785 --out cache/ci-h1; node scripts/check-r1-baseline.mjs; node scripts/preflight.mjs; checkFrozenIntegrity and unchanged qualificationDigest.
+- Cost ceiling: $0; no installs or live execution; bounded to CI-H1 in this session.
+- Out of scope: complete npm test, real browser/NVDA/input, third-party writes, hosted execution, M2D, frozen source/locks/status changes.
+- Rollback: revert reviewed CI-H1 diff on the local branch; preserve baseline/history.
+- R2 qualification remains BLOCKED; FEATURES unchanged.
+- MEASURED CI-H1-20261029: ordinary and all eight stress profiles each478/478 (47 admitted files); all205 R2 tests PASS; excluded9 files separately recorded; frozen/preflight/qualification integrity PASS; uncommitted pending independent review.
+### F-03 / CI-H2 — mixed speech watchdog correction (D-76)
+- Goal: Bound the mixed/speech stress profile without misclassifying slow progress as a deadlock.
+- Files: scripts/offline-tests.mjs; test/ci-offline-selection.test.mjs; docs/engineering/CI-H1-preflight-hang.md; normal governance ledgers.
+- Acceptance: six selection regressions; ordinary and eight stress profiles each 480/480; frozen R1 baseline, preflight and diff checks PASS.
+- Cost ceiling: $0; no dependency installations or hosted execution during local validation.
+- Out of scope: frozen R1, other watchdog limits, browser/NVDA runs, qualification activation, M2D, merge or deployment.
+- Rollback: revert the CI-H2 commit on the review branch.
+- MEASURED locally: 9/9 profiles, 4320/4320 executions PASS; 47 admitted files, nine excluded.
+- Hosted Windows verification pending; R2 qualification remains BLOCKED.
