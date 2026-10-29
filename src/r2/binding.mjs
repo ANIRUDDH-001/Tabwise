@@ -50,6 +50,12 @@ export async function captureOfflineJourney({fixture_id, actions, speech, page, 
   }};
   const result = await captureJourney({fixture_id, actions:journey, speech:observedSpeech, page:observedPage,
     execute:executor.execute, clock, observationMs, pollMs, timeoutMs, receipts});
+  // M2C: an R2 failure after the ledger already finalized its receipt (late, missing or repeated page key,
+  // final boundary) leaves no open receipt to expire. Stop the gate so no caller gets it back live. 'protocol',
+  // not 'ack': R2's observation does not claim R1 misdelivery. An earlier stop keeps its own kind and reason.
+  if (receipts && result.completed !== true && !executorBindings.guard.isStopped()) {
+    executorBindings.guard.stop('R2 capture incomplete: gate stopped after a failed receipt-anchored capture', 'protocol');
+  }
   result.source = SOURCE;
   result.provenance = {kind:'synthetic', attestation:'UNATTESTED', scope:'offline injected providers; no real NVDA or guarded execution attestation'};
   // captureJourney owns the 1000 ms acknowledgement cap (request- or, with receipts, release-relative)
