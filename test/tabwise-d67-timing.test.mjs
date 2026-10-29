@@ -9,7 +9,8 @@ import {createQualificationIntegrity} from '../scripts/tabwise/qualification-int
 import {qualificationDigest,QUALIFICATION_FILES} from '../scripts/tabwise/qualification-policy.mjs';
 import {loadQualificationRuntime} from '../scripts/tabwise/qualification-loader.mjs';
 
-test('B1 actual source closure and frozen guard validation timings on this host; no physical transport',async t=>{
+// Total fixture-copy/Git/cleanup allowance only; frozen per-send freshness remains 100 ms.
+test('B1 actual source closure and frozen guard validation timings on this host; no physical transport',{timeout:30000},async t=>{
  const root=mkdtempSync(join(tmpdir(),'tabwise-d67-timing-'));
  const output=resolve(process.env.TABWISE_TIMING_OUTPUT??`cache/timing/d67-${process.pid}-${randomUUID()}.json`);let measurement;
  t.after(()=>{
