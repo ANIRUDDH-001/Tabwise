@@ -4,11 +4,17 @@ export function documentAllowed(url,method,port){
  if(method!=='GET'||!allowLoopback(url,port))return false;
  return ['/','/index.html'].includes(new URL(url).pathname);
 }
-export const BROWSER_ARGS=Object.freeze(['--dns-prefetch-disable','--disable-background-networking']);
+export const BROWSER_ARGS=Object.freeze(['--dns-prefetch-disable','--disable-background-networking','--force-webrtc-ip-handling-policy=disable_non_proxied_udp']);
 export async function createIsolatedContext(browser,{port,source}){
  if(!allowLoopback(`http://127.0.0.1:${port}/`,port)||typeof source!=='string'||Buffer.byteLength(source)>100000)throw Error('invalid isolated fixture');
  const context=await browser.newContext({serviceWorkers:'block',acceptDownloads:false});
  try{
+  await context.addInitScript(()=>{
+   for(const name of ['RTCPeerConnection','webkitRTCPeerConnection','RTCDataChannel']){
+    delete globalThis[name];
+    Object.defineProperty(globalThis,name,{value:undefined,writable:false,configurable:false});
+   }
+  });
   if(typeof context.routeWebSocket!=='function')throw Error('WebSocket routing required');
   await context.routeWebSocket('**/*',socket=>socket.close({code:1008,reason:'Tabwise network isolation'}));
   await context.route('**/*',route=>{

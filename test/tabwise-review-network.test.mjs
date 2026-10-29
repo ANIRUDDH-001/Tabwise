@@ -8,7 +8,7 @@ test('network policy permits only the owned document and denies remote destinati
 });
 test('isolated context fulfills from memory without fetch/continue; all redirects and sockets have no upstream',async()=>{
  let routeHandler,wsHandler,closed=0;const fulfilled=[],aborted=[];
- const context={route:async(pattern,handler)=>{routeHandler=handler;},routeWebSocket:async(pattern,handler)=>{wsHandler=handler;},close:async()=>closed++};
+ const context={addInitScript:async()=>{},route:async(pattern,handler)=>{routeHandler=handler;},routeWebSocket:async(pattern,handler)=>{wsHandler=handler;},close:async()=>closed++};
  let options;const browser={newContext:async opts=>{options=opts;return context;}};
  assert.equal(await network.createIsolatedContext(browser,{port:4321,source:'<p>owned</p>'}),context);
  assert.equal(options.serviceWorkers,'block');assert.equal(options.acceptDownloads,false);

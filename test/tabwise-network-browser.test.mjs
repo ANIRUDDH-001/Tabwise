@@ -8,7 +8,7 @@ test('headless isolation blocks alternate-port requests, sockets, resources and 
  let hits=0;const sink=createServer((req,res)=>{hits++;res.writeHead(302,{location:'http://127.0.0.1:9/'});res.end();});
  await new Promise(resolve=>sink.listen(0,'127.0.0.1',resolve));
  const target=`http://127.0.0.1:${sink.address().port}`,port=sink.address().port===4321?4322:4321;
- const source=`<!doctype html><title>Isolation fixture</title><link rel="prefetch" href="${target}/prefetch"><style>@import url(${target}/style);</style><img src="${target}/image"><script>
+ const source=`<!doctype html><title>Isolation fixture</title><link rel="preconnect" href="${target}"><link rel="dns-prefetch" href="${target}"><link rel="prefetch" href="${target}/prefetch"><style>@import url(${target}/style);</style><img src="${target}/image"><script>
   window.done=false;
   fetch('${target}/fetch').catch(()=>{});
   navigator.sendBeacon('${target}/beacon','test');
@@ -22,6 +22,7 @@ test('headless isolation blocks alternate-port requests, sockets, resources and 
  try{
   const context=await createIsolatedContext(browser,{port,source});const page=await context.newPage();
   await page.goto(`http://127.0.0.1:${port}/`);assert.equal(await page.evaluate(()=>window.done),true);
+  assert.deepEqual(await page.evaluate(()=>['RTCPeerConnection','webkitRTCPeerConnection','RTCDataChannel'].map(name=>({type:typeof globalThis[name],writable:Object.getOwnPropertyDescriptor(globalThis,name)?.writable}))),Array.from({length:3},()=>({type:'undefined',writable:false})));
   await assert.rejects(()=>page.goto(`${target}/redirect`,{timeout:3000}));
   assert.equal(hits,0);await context.close();
  }finally{await browser.close();await new Promise(resolve=>sink.close(resolve));}

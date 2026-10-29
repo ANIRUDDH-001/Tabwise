@@ -25,6 +25,6 @@ export function applyPatch(files,diff){
   result.push(...original.slice(cursor));output[file]=result.join('\n')+'\n';
  }
  if(changed===0||changed>LIMITS.MAX_PATCH_LINES)throw Error('patch line cap');
- for(const text of Object.values(output))if(/https?:|wss?:|<script\b[^>]*\bsrc\s*=|\b(?:fetch|XMLHttpRequest|WebSocket|importScripts)\s*\(/i.test(text))throw Error('external URL or network code refused');
+ for(const text of Object.values(output))if(/https?:|wss?:|<script\b[^>]*\bsrc\s*=|\b(?:fetch|XMLHttpRequest|WebSocket|importScripts)\s*\(|\b(?:RTCPeerConnection|webkitRTCPeerConnection|RTCDataChannel)\b|\brel\s*=\s*(?:["'][^"']*\b(?:preconnect|dns-prefetch)\b[^"']*["']|(?:preconnect|dns-prefetch)\b)/i.test(text))throw Error('external URL or network code refused');
  return output;
 }
