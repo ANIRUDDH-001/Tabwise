@@ -294,3 +294,11 @@ User: "Keep the full Tabwise worker BLOCKED." "No live NVDA, GitHub workflow dis
 User: "Work in D:\Projects\Meta AI\app, preserve sealed C: review packages and create meaningful modular local commits with tests. Do not push."
 Scope: observer/qualification/network/executor/artifact-ingest helpers, integrity-first qualification loader/entry/providers/evidence writer, one disabled manual qualification workflow, new regression/fake integration tests and review-to-code evidence. Explicit workflow preparation is authorized; execution is not.
 Acceptance: N1…N5 red/green; targeted fake integration/identity/foreground/page/teardown/evidence checks; full root/contracts/web/build plus R1/private preservation before checkpoint. Cost ceiling0; no new dependency, real input, dispatch, deployment or inference.
+
+## D-73 2026-10-29T09:09:28Z - Observer admission recovery preparation
+Owner decision: Publish the reviewed D73 recovery locally and to GitHub.
+Scope: Observer admission orchestration, focused regression tests, runbook, CODEMAP and reset qualification status.
+Verification: Claude reports 386/386 tests passing twice; source bundle inspected independently; targeted tests required before commit.
+Safety: Qualification remains disabled/BLOCK. Full worker remains BLOCKED.
+Limitations: One-shot dispatch cannot be guaranteed during the bounded approval window. Actual hosted admission and NVDA behavior remain unverified.
+Authorization: This decision permits recovery publication only. D73 activation and hosted execution require separate explicit approval.
