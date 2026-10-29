@@ -2,11 +2,14 @@
 // file I/O, model, workflow or physical input. execute MUST be guarded/cancellable in a future runner.
 import { withTimeout } from '../speech/capture.mjs';
 import { judgeKeys } from '../speech/sendguard.mjs';
+import { isSendReceiptLedger } from './send-receipt.mjs';
 
 const NODE_CLOCK = 'node-monotonic-ms';
 const PAGE_CLOCK = 'page-monotonic-ms';
 // Conservative observation cap, matching frozen R1's default ackMs. This is NOT a guard receipt.
 const ACK_MS = 1000;
+// M2B: bounded wait for the ledger's gate-idle check after executor settlement; within send-receipt's 5000 ms cap.
+const RECEIPT_SETTLE_MS = 1000;
 const copy = value => structuredClone(value);
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const problem = (status, message) => Object.assign(new Error(message), { status });
@@ -27,10 +30,16 @@ function expectedKey(press) {
  * page.read: {session,complete,clock:'page-monotonic-ms',t,active,state,events:[{seq,t,type,...}]}.
  * Providers must continuously collect page events and report resets/lost observations as incomplete.
  * Observation duration is explicit policy, not a claim that arbitrarily late speech is impossible.
+ * M2B receipts (optional): a createSendReceiptLedger ledger on the SAME Node clock, for the gate the executor
+ * drives. Then the 1000 ms acknowledgement cap starts at the ledger's gate-release entry (released_at), page and
+ * speech are read while the executor is still settling, and a missing, invalid, late, expired or contradictory
+ * receipt fails the action. Timeliness is the Node time a page read returned, never a page-clock timestamp.
+ * The R1 acknowledgement stays in gate_receipt only; R2's ack_seq comes from its own page reads.
  */
 export async function captureJourney({ fixture_id, actions, speech, page, execute,
   observationMs, pollMs = 10, timeoutMs = 1000,
   clock = { now: () => performance.now(), wait: ms => new Promise(resolve => setTimeout(resolve, ms)) },
+  receipts,
 }) {
   if (typeof fixture_id !== 'string' || !fixture_id || !Array.isArray(actions) || !actions.length ||
     actions.some(a => typeof a?.step !== 'string' || !a.step) || new Set(actions.map(a => a.step)).size !== actions.length) throw Error('invalid action identity or fixture');
@@ -38,6 +47,7 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
   const keys = journey.map(a => expectedKey(a.press));
   if (!positive(observationMs) || !positive(pollMs) || !positive(timeoutMs)) throw Error('observation, poll and operation timeout must be positive');
   if (typeof speech?.read !== 'function' || typeof page?.read !== 'function' || typeof execute !== 'function' || typeof clock?.now !== 'function' || typeof clock?.wait !== 'function') throw Error('missing capture provider');
+  if (receipts !== undefined && !isSendReceiptLedger(receipts)) throw Error('unauthenticated gate receipt ledger');
 
   const controller = new AbortController();
   const result = { schema: 'r2-capture/1', fixture_id, source: 'unattested', evidence_class: 'MACHINE',
@@ -110,13 +120,37 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
     }
   }
 
+  // Detached ledger diagnostics travel with every returned capture; they never enter speech text or ack_seq.
+  const done = () => { if (receipts) result.gate_receipts = receipts.read(); return copy(result); };
+
+  // M2B: the current ledger receipt for this action, checked against the capture's own Node clock.
+  // Returns its gate-release entry time, or null while the gate has not released the send.
+  function gateRelease(record, step, key, observed) {
+    const ledger = receipts.read(), receipt = ledger?.receipts?.at(-1) ?? null;
+    record.gate_receipt = copy(receipt);
+    if (ledger?.schema !== 'r2-gate-release-receipts/1' || ledger.clock !== NODE_CLOCK || ledger.provenance?.attestation !== 'UNATTESTED' ||
+      !Array.isArray(ledger.errors) || !Array.isArray(ledger.receipts)) throw problem('failed', 'gate receipt: invalid ledger snapshot');
+    if (ledger.errors.length) throw problem('failed', `gate ${ledger.errors.join('; ')}`);
+    if (receipt?.step !== step || ledger.receipts.filter(r => r.step === step).length !== 1) throw problem('failed', 'gate receipt: missing or duplicate receipt for this action');
+    if (receipt.expired || receipt.late) throw problem('failed', 'gate receipt: expired or late');
+    if (!Number.isFinite(receipt.started_at) || receipt.started_at < record.node_window.from || receipt.started_at > observed) throw problem('ambiguous', 'gate receipt: contradictory clock domain');
+    if (receipt.released_at === null) return null;
+    const commit = receipt.commit;
+    if (!Number.isFinite(receipt.released_at) || receipt.released_at > observed) throw problem('ambiguous', 'gate receipt: contradictory clock domain or release time');
+    if (commit?.not_after !== receipt.released_at || !(commit.not_before >= receipt.started_at) || commit.not_before > commit.not_after ||
+      commit.sends_after !== commit.sends_before + 1 || receipt.token?.action_label !== `tabwise:${step}` || !same(receipt.expected_key, key)) throw problem('failed', 'gate receipt: invalid release receipt');
+    record.ack_timing.release_at = receipt.released_at;
+    record.ack_timing.commit_not_before = commit.not_before;
+    return receipt.released_at;
+  }
+
   for (const [index, action] of journey.entries()) {
     const record = { seq: index + 1, ...action, capture_status: 'incomplete', text: '', raw_seq: [], ack_seq: null,
       ack_timing: { clock: NODE_CLOCK, reference: 'executor-request', deadline_ms: ACK_MS, observed_at: null },
       execution: { started: false, settled: false, cancellation_requested: false, quiescence: 'UNVERIFIED' },
       association: 'observation-window-only', node_window: { clock: NODE_CLOCK, from: null, to: null }, page: { before: null, after: null, samples: [], events: [], rejected: [] }, reasons: [] };
     result.records.push(record);
-    let started = false, executionSettled = false;
+    let started = false, executionSettled = false, receiptOpen = false;
     try {
       record.node_window.from = now();
       await readSpeech(null, true);
@@ -125,8 +159,70 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
       // A subsequent untagged arrival still cannot establish causality or the physical-send boundary.
       await readSpeech(null, true);
       record.node_window.from = now();
+      if (receipts) {
+        record.ack_timing = { clock: NODE_CLOCK, reference: 'gate-release', deadline_ms: ACK_MS, release_at: null, commit_not_before: null, observed_at: null, late_observed_at: null };
+        record.gate_receipt = null;
+        // The ledger's collection bound covers the executor bound plus its own settlement wait.
+        receipts.begin(action.step, { deadlineAt: record.node_window.from + timeoutMs + RECEIPT_SETTLE_MS });
+        receiptOpen = true;
+      }
       started = true;
       record.execution.started = true;
+      if (receipts) {
+        let outcome = null, release = null, seen = null, until = null;
+        // Run the executor without awaiting it, so page and speech are read while it settles.
+        bounded('action', async context => {
+          try { return await execute(copy(action), context); }
+          finally { executionSettled = true; }
+        }).then(() => { outcome = { error: null }; }, error => { outcome = { error }; });
+        for (;;) {
+          await readSpeech(record);
+          await readPage(record);
+          const observed = now();
+          // Timeliness is the Node time this read returned; the event's page-clock t is never used.
+          const keyErrors = judgeKeys(record.page.events.filter(e => e.type === 'keydown'), keys[index]);
+          // A wrong or repeated key is final (later events cannot undo it); only "none yet" keeps waiting.
+          if (keyErrors.length && !same(keyErrors, judgeKeys([], keys[index]))) throw problem('incomplete', `ack: ${keyErrors.join('; ')}`);
+          if (seen === null && !keyErrors.length) {
+            seen = { seq: record.page.events.find(e => e.type === 'keydown' && e.key === keys[index].key)?.seq ?? null, at: observed };
+          }
+          const current = gateRelease(record, action.step, keys[index], observed);
+          if (release !== null && current !== release) throw problem('ambiguous', 'gate receipt: release time changed');
+          release = current;
+          if (release !== null && record.ack_seq === null) {
+            if (seen && seen.at > release + ACK_MS) {
+              record.ack_timing.late_observed_at = seen.at;
+              throw problem('incomplete', `ack: page key observed after ${ACK_MS} ms of gate release`);
+            }
+            if (seen && seen.at < record.ack_timing.commit_not_before) throw problem('ambiguous', 'ack: page key observed before the gate commit window');
+            if (seen) { record.ack_seq = seen.seq; record.ack_timing.observed_at = seen.at; }
+            else if (observed >= release + ACK_MS) throw problem('incomplete', `ack: not observed within ${ACK_MS} ms of gate release`);
+          }
+          if (outcome && until === null) {
+            if (outcome.error) throw outcome.error;
+            record.execution.settled = executionSettled;
+            receiptOpen = false;
+            const receipt = await receipts.finish(action.step, { settleTimeoutMs: RECEIPT_SETTLE_MS });
+            record.gate_receipt = copy(receipt);
+            if (receipt.complete !== true) throw problem('failed', `gate receipt incomplete: ${receipt.errors.join('; ') || 'no release receipt'}`);
+            if (release !== null && receipt.released_at !== release) throw problem('ambiguous', 'gate receipt: release time changed');
+            until = now() + observationMs;
+            continue; // Read once more after settlement; a release first seen here gets its deadline checked.
+          }
+          if (until === null && observed - record.node_window.from >= timeoutMs) throw problem('failed', 'action: timed out');
+          if (until !== null && record.ack_seq !== null && now() >= until) break;
+          const beforeWait = now();
+          let nextRead = beforeWait + pollMs;
+          // Each bound below is still ahead of `observed` (else the checks above ended the loop), so this
+          // only skips the wait when the clock itself moved; the next read then re-applies those checks.
+          if (until === null) nextRead = Math.min(nextRead, record.node_window.from + timeoutMs);
+          else if (record.ack_seq !== null) nextRead = Math.min(nextRead, until);
+          if (release !== null && record.ack_seq === null) nextRead = Math.min(nextRead, release + ACK_MS);
+          if (nextRead <= beforeWait) continue;
+          await bounded('observation wait', context => clock.wait(nextRead - beforeWait, context));
+          if (now() <= beforeWait) throw problem('incomplete', 'observation clock did not advance');
+        }
+      } else {
       await bounded('action', async context => {
         try { return await execute(copy(action), context); }
         finally { executionSettled = true; }
@@ -152,6 +248,7 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
         await bounded('observation wait', context => clock.wait(Math.min(pollMs, nextRead - beforeWait), context));
         if (now() <= beforeWait) throw problem('incomplete', 'observation clock did not advance');
       }
+      }
       record.node_window.to = now();
       const keydowns = record.page.events.filter(e => e.type === 'keydown');
       const errors = judgeKeys(keydowns, keys[index]);
@@ -164,6 +261,14 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
       record.execution.settled = executionSettled;
       record.execution.cancellation_requested = started && !executionSettled;
       controller.abort(); // Request promptly; no assertion that an injected executor has stopped.
+      if (receiptOpen) {
+        // Record the cancellation in the ledger (which stops the gate), then keep its bounded final state.
+        receiptOpen = false;
+        try { receipts.expire(action.step); } catch (secondary) { record.reasons.push(`recovery: ${secondary.message}`); }
+        try { record.gate_receipt = copy(await receipts.finish(action.step, { settleTimeoutMs: RECEIPT_SETTLE_MS })); }
+        catch (secondary) { record.reasons.push(`recovery: ${secondary.message}`); }
+      }
+      for (const reason of record.gate_receipt?.errors ?? []) if (!record.reasons.some(r => r.includes(reason))) record.reasons.push(`gate ${reason}`);
       // Preserve any readable partial evidence. A secondary read cannot clear the original failure.
       if (started && error.status !== 'ambiguous') {
         for (const read of [() => readSpeech(record), () => readPage(record)]) {
@@ -172,13 +277,15 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
       }
       try { record.node_window.to = now(); } catch (secondary) { record.reasons.push(secondary.message); }
       result.reasons.push(...record.reasons.map(reason => `${action.step}: ${reason}`));
-      return copy(result);
+      return done();
     }
   }
   // A second boundary read catches arrivals between the final speech sample and page snapshot.
   try { await readSpeech(null, true); await readPage(null, true); }
-  catch (error) { result.reasons.push(`final boundary: ${error.message}`); controller.abort(); return copy(result); }
+  catch (error) { result.reasons.push(`final boundary: ${error.message}`); controller.abort(); return done(); }
+  // Every receipt the ledger expects must be complete, not just the ones this journey asked for.
+  if (receipts && receipts.read().complete !== true) { result.reasons.push('final boundary: gate receipt ledger journey incomplete'); return done(); }
   result.completed = true;
   result.outcome = 'COMPLETE';
-  return copy(result);
+  return done();
 }

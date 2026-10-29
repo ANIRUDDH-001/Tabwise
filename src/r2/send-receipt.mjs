@@ -7,6 +7,9 @@ import {withTimeout} from '../speech/capture.mjs';
 import {SUPPORTED_PRESS} from '../../scripts/tabwise/input-policy.mjs';
 
 const installed = new WeakSet();
+// Ledgers this module built. Lets a consumer refuse a ledger-shaped object it did not get from here.
+const ledgers = new WeakSet();
+export const isSendReceiptLedger = value => ledgers.has(value);
 const copy = value => structuredClone(value);
 const same = (a,b) => JSON.stringify(a) === JSON.stringify(b);
 const count = n => Number.isSafeInteger(n) && n >= 0;
@@ -163,7 +166,7 @@ export function createSendReceiptLedger({gate,getGate,ackReader,onIntent,actions
   };
   gate.setAck(Object.freeze(wrapped));installed.add(gate);
 
-  return Object.freeze({
+  const ledger=Object.freeze({
     begin(step,{deadlineAt}={}) {
       if(active)throw refuse('concurrent active actions');
       if(failed||journey[next]?.step!==step)throw refuse('action identity/order mismatch');
@@ -212,4 +215,5 @@ export function createSendReceiptLedger({gate,getGate,ackReader,onIntent,actions
       guarded_execution_verified:false,physical_delivery_verified:false,quiescence:'UNVERIFIED',r2_page_ack_verified:false,
       complete:!failed&&receipts.length===journey.length&&receipts.every(r=>r.complete),receipts,errors}),
   });
+  ledgers.add(ledger);return ledger;
 }
