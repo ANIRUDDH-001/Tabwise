@@ -1,0 +1,67 @@
+{
+  "schema": "tabwise-r2-fixtures/1",
+  "spec": "PLAN.md F-03; Day-1 R2 row (frozen)",
+  "split": "development",
+  "split_note": "Written and inspected by Claude while building the contract. Development data only: never scored as withheld evaluation (PLAN Totals note). Page hashes are registered in development-hashes.json, and assertEvaluable refuses them under any split.",
+  "authored_by": "claude",
+  "hash": "sha256 of UTF-8 text, CRLF normalised to LF",
+  "locus_note": "locus is the author's intended defect location (step id + element id). It is not a scoring label; scoring uses an independent labels file.",
+  "expected_note": "expected_at is the expected screen-reader behaviour, written before any NVDA run. It is not observed speech.",
+  "pairs": [
+    {
+      "id": "validation",
+      "barrier": "silent-validation-error",
+      "healthy": { "file": "validation/healthy.html", "sha256": "f22a2f22be578e0609f990564acb703bab40bd8bf770079acc090775d79e9555" },
+      "broken": { "file": "validation/broken.html", "sha256": "4d1d06db6d4b88401042ae32d5c48361d90d5845c528a8777e8eee998d4c5f2a" },
+      "defect": { "healthy": "<p id=\"email-error\" role=\"alert\"></p>", "broken": "<p id=\"email-error\"></p>", "change": "Error container loses role=alert, so inserting the error text is not announced. Visible text, aria-invalid and aria-describedby are identical." },
+      "task": [
+        { "step": "to-email", "press": "Tab", "expect_focus": "email" },
+        { "step": "to-submit", "press": "Tab", "expect_focus": "submit" },
+        { "step": "submit", "press": "Enter", "expect_focus": "submit", "expect_app": "validation-error" }
+      ],
+      "locus": { "step": "submit", "element": "email-error" },
+      "expected_at": {
+        "healthy": "After submit, NVDA announces the error text (assertive live region); focus stays on Subscribe.",
+        "broken": "After submit, the error text is not announced; focus stays on Subscribe, so a speech-only user hears no reason the form did not submit.",
+        "speech_hypothesis": { "healthy": { "all": ["enter your email address"] }, "broken": { "none": ["enter your email address"] } }
+      }
+    },
+    {
+      "id": "dialog-focus",
+      "barrier": "focus-lost-after-dialog",
+      "healthy": { "file": "dialog-focus/healthy.html", "sha256": "6f5fde727262e59a0e14cbb750724b3c6a1a97b0f7ffcb75f3fce9b5b39b81f2" },
+      "broken": { "file": "dialog-focus/broken.html", "sha256": "4e6269f3b0cc6c9eefa6f1f05544ed48cbaa0a2b97a4f889af678bd8390915f0" },
+      "defect": { "healthy": "actions.replaceChildren(fresh); fresh.focus();", "broken": "actions.replaceChildren(fresh);", "change": "After the dialog closes the toolbar re-renders, removing the focused opener. Healthy focuses the new opener; broken does not, so focus falls to the document body." },
+      "task": [
+        { "step": "to-opener", "press": "Tab", "expect_focus": "open-dialog" },
+        { "step": "open", "press": "Enter", "expect_app": "dialog-opened" },
+        { "step": "close", "press": "Enter", "expect_app": "dialog-closed", "expect_focus": { "healthy": "open-dialog", "broken": "body" } },
+        { "step": "after-close", "press": "Tab" }
+      ],
+      "locus": { "step": "close", "element": "open-dialog" },
+      "expected_at": {
+        "healthy": "After Cancel, focus returns to the re-rendered Delete draft button and NVDA announces it.",
+        "broken": "After Cancel, focus is on the document body; NVDA announces no focused control, and the next Tab starts from a browser-defined point.",
+        "speech_hypothesis": { "healthy": { "all": ["delete draft"] }, "broken": { "none": ["delete draft"] } }
+      }
+    },
+    {
+      "id": "status",
+      "barrier": "unannounced-status-update",
+      "healthy": { "file": "status/healthy.html", "sha256": "722443d940d81e12e38a500e479114e7a4164ad34636f6e0e958d7133386315b" },
+      "broken": { "file": "status/broken.html", "sha256": "08070ff20307b78a7a57dd21d7068ac0f4a425b5ddd2024deef06d53c74593ba" },
+      "defect": { "healthy": "<div id=\"save-status\" role=\"status\"></div>", "broken": "<div id=\"save-status\"></div>", "change": "Status container loses role=status, so the visible Settings saved message is not announced." },
+      "task": [
+        { "step": "to-checkbox", "press": "Tab", "expect_focus": "weekly" },
+        { "step": "to-save", "press": "Tab", "expect_focus": "save" },
+        { "step": "save", "press": "Enter", "expect_focus": "save", "expect_app": "status-updated" }
+      ],
+      "locus": { "step": "save", "element": "save-status" },
+      "expected_at": {
+        "healthy": "After Save settings, NVDA announces Settings saved (polite live region).",
+        "broken": "After Save settings, the message appears visually but is not announced.",
+        "speech_hypothesis": { "healthy": { "all": ["settings saved"] }, "broken": { "none": ["settings saved"] } }
+      }
+    }
+  ]
+}

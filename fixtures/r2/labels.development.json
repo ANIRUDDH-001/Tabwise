@@ -1,0 +1,14 @@
+{
+  "labeler": "claude",
+  "independent": false,
+  "reviewed_by": null,
+  "note": "Self-authored development labels by the fixture author. Not independent and not reviewable as evaluation; assertEvaluable refuses them. Withheld labels must be written by someone other than the runner, reviewed by a second non-runner, and hashed before the run.",
+  "pages": {
+    "validation/healthy": { "barrier": false },
+    "validation/broken": { "barrier": true, "kind": "silent-validation-error", "locus": { "step": "submit", "element": "email-error" } },
+    "dialog-focus/healthy": { "barrier": false },
+    "dialog-focus/broken": { "barrier": true, "kind": "focus-lost-after-dialog", "locus": { "step": "close", "element": "open-dialog" } },
+    "status/healthy": { "barrier": false },
+    "status/broken": { "barrier": true, "kind": "unannounced-status-update", "locus": { "step": "save", "element": "save-status" } }
+  }
+}

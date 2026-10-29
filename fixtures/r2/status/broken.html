@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Notification settings</title>
+</head>
+<body>
+<main>
+<h1>Notification settings</h1>
+<label><input id="weekly" type="checkbox"> Weekly summary email</label>
+<button id="save" type="button">Save settings</button>
+<div id="save-status"></div>
+</main>
+<script>
+const r2 = (() => {
+  // Deterministic page evidence: one ordered log of keydown, focus and app events (seq is the order; t is page-local only).
+  const events = window.__r2Events = [];
+  let seq = 0;
+  const id = (el) => (el && el !== document.body && el !== document.documentElement ? el.id || el.tagName.toLowerCase() : "body");
+  const log = (type, detail) => events.push({ seq: ++seq, t: performance.now(), type, ...detail });
+  document.addEventListener("keydown", (e) => log("keydown", { key: e.key, shift: e.shiftKey, target: id(e.target) }), true);
+  document.addEventListener("focusin", (e) => log("focus", { target: id(e.target) }), true);
+  return { app: (name, detail = {}) => log("app", { name, active: id(document.activeElement), ...detail }) };
+})();
+document.getElementById("save").addEventListener("click", () => {
+  document.getElementById("save-status").textContent = "Settings saved";
+  r2.app("status-updated", { region: "save-status" });
+});
+</script>
+</body>
+</html>

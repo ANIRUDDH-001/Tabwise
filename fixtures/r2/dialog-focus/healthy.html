@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Drafts</title>
+</head>
+<body>
+<main>
+<h1>Drafts</h1>
+<p>Quarterly report draft, last edited today.</p>
+<div id="draft-actions"><button id="open-dialog" type="button">Delete draft</button></div>
+<a id="all-drafts" href="#drafts">Back to all drafts</a>
+<dialog id="confirm" aria-labelledby="confirm-title">
+<h2 id="confirm-title">Delete this draft?</h2>
+<button id="cancel" type="button">Cancel</button>
+<button id="delete" type="button">Delete</button>
+</dialog>
+</main>
+<script>
+const r2 = (() => {
+  // Deterministic page evidence: one ordered log of keydown, focus and app events (seq is the order; t is page-local only).
+  const events = window.__r2Events = [];
+  let seq = 0;
+  const id = (el) => (el && el !== document.body && el !== document.documentElement ? el.id || el.tagName.toLowerCase() : "body");
+  const log = (type, detail) => events.push({ seq: ++seq, t: performance.now(), type, ...detail });
+  document.addEventListener("keydown", (e) => log("keydown", { key: e.key, shift: e.shiftKey, target: id(e.target) }), true);
+  document.addEventListener("focusin", (e) => log("focus", { target: id(e.target) }), true);
+  return { app: (name, detail = {}) => log("app", { name, active: id(document.activeElement), ...detail }) };
+})();
+const dialog = document.getElementById("confirm");
+const actions = document.getElementById("draft-actions");
+actions.addEventListener("click", (e) => {
+  if (e.target.id === "open-dialog") { dialog.showModal(); r2.app("dialog-opened"); }
+});
+document.getElementById("cancel").addEventListener("click", () => dialog.close("cancel"));
+document.getElementById("delete").addEventListener("click", () => dialog.close("delete"));
+dialog.addEventListener("close", () => {
+  // The draft toolbar re-renders after the dialog closes, replacing the button that had focus.
+  const fresh = actions.firstElementChild.cloneNode(true);
+  actions.replaceChildren(fresh); fresh.focus();
+  r2.app("dialog-closed", { result: dialog.returnValue });
+});
+</script>
+</body>
+</html>

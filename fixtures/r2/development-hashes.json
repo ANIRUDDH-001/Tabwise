@@ -1,0 +1,11 @@
+{
+  "note": "Append-only registry of development page hashes (sha256, CRLF normalised to LF). A page listed here can never be scored as withheld. Never remove entries.",
+  "sha256": [
+    "f22a2f22be578e0609f990564acb703bab40bd8bf770079acc090775d79e9555",
+    "4d1d06db6d4b88401042ae32d5c48361d90d5845c528a8777e8eee998d4c5f2a",
+    "6f5fde727262e59a0e14cbb750724b3c6a1a97b0f7ffcb75f3fce9b5b39b81f2",
+    "4e6269f3b0cc6c9eefa6f1f05544ed48cbaa0a2b97a4f889af678bd8390915f0",
+    "722443d940d81e12e38a500e479114e7a4164ad34636f6e0e958d7133386315b",
+    "08070ff20307b78a7a57dd21d7068ac0f4a425b5ddd2024deef06d53c74593ba"
+  ]
+}
