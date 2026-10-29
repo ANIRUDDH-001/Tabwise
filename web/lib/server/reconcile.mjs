@@ -25,10 +25,10 @@ export async function reconcileRun(run,api){
  if(run.status==='dispatched'){await api.transition(run.id,'dispatched','running',null);run={...run,status:'running'};}
  if(status.status!=='completed')return run;
  if(status.conclusion!=='success'){
-  let diagnostic_evidence_available=false;
-  try{const partial=await api.ingestPartial?.(run);diagnostic_evidence_available=partial?.diagnostic_only===true;}catch{ /* Preserve original failure; an untrusted partial upload is never promoted. */ }
+  let diagnostic_evidence_available=false,artifact_cleanup_pending=false;
+  try{const partial=await api.ingestPartial?.(run);diagnostic_evidence_available=partial?.diagnostic_only===true;}catch(error){artifact_cleanup_pending=error.artifact_cleanup_pending===true;}
   await api.transition(run.id,run.status,'failed','worker_failed');await api.infrastructureFailure?.(run);
-  return {...run,status:'failed',reason:'worker_failed',evidence_status:'incomplete',diagnostic_evidence_available};
+  return {...run,status:'failed',reason:'worker_failed',evidence_status:'incomplete',diagnostic_evidence_available,artifact_cleanup_pending};
  }
  if(run.status==='running'){await api.transition(run.id,'running','uploading',null);run={...run,status:'uploading'};}
  await api.transition(run.id,'uploading','ingesting',null);
@@ -38,7 +38,7 @@ export async function reconcileRun(run,api){
   if(!ingested?.complete)throw Error('incomplete evidence');
  }catch(error){
   await api.transition(run.id,'ingesting','failed','evidence_integrity');await api.downgrade?.('evidence_integrity');
-  return {...run,status:'failed',reason:'evidence_integrity',evidence_status:'incomplete'};
+  return {...run,status:'failed',reason:'evidence_integrity',evidence_status:'incomplete',artifact_cleanup_pending:error.artifact_cleanup_pending===true};
  }
  await api.transition(run.id,'ingesting','completed',null);
  let artifact_cleanup_pending=false;

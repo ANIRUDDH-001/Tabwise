@@ -23,6 +23,17 @@ export async function reconcileLive(run:Run){
  const store=async(path:string,bytes:Uint8Array,kind:string)=>{const {error}=await db.storage.from('tabwise-evidence').upload(path,bytes,{contentType:kind==='screenshot'?'image/webp':'application/json',upsert:false});if(error)throw new HttpError(500,'artifact_store_failed');};
  type Manifest={files:{path:string,sha256:string,bytes:number,kind:string}[]};
  const record=async(row:Run,manifest:Manifest)=>{const {error}=await db.from('artifacts').insert(manifest.files.map(f=>({run_id:row.id,...f})));if(error)throw new HttpError(500,'artifact_metadata_failed');};
+ const compensation=(row:Run)=>({
+  cleanup:async(prefix:string,paths:string[])=>{
+   if((prefix!==row.id&&!prefix.startsWith(`${row.id}/diagnostics/`))||paths.some(path=>!path.startsWith(`${prefix}/`)))throw new HttpError(409,'invalid_cleanup_scope');
+   const results=await Promise.allSettled([db.storage.from('tabwise-evidence').remove(paths),db.from('artifacts').delete().eq('run_id',row.id).in('path',paths.map(path=>path.slice(row.id.length+1)))]);
+   if(results.some(result=>result.status==='rejected'||result.value.error))throw new HttpError(500,'artifact_cleanup_pending');
+  },
+  recordCleanup:async(evidence:{artifact_cleanup_pending:boolean,prefix:string,paths:string[]})=>{
+   const {error}=await db.from('audit_log').insert({actor:'reconciler',action:evidence.artifact_cleanup_pending?'artifact_cleanup_pending':'artifact_cleanup_complete',subject:row.id,detail:evidence});
+   if(error)throw new HttpError(500,'cleanup_evidence_unavailable');
+  },
+ });
  return reconcileRun(run,{
   transition,
   claim:async(id:string)=>{const {data,error}=await db.rpc('claim_reconcile',{p_run:id});return !error&&data===true;},
@@ -35,13 +46,13 @@ export async function reconcileLive(run:Run){
   downgrade:async(reason:string)=>{await db.from('system_flags').update({dispatch_mode:'owner_only',note:reason});await db.from('audit_log').insert({actor:'reconciler',action:'automatic_downgrade',subject:run.id,detail:{reason}});},
   ingest:async(row:Run)=>{
    const {remote,artifact,archive}=await archiveFor(row);
-   await ingestArchive({archive,remoteRun:remote,expected:{actor,sha:row.gh_head_sha,run_id:row.id,spec_sha256:row.spec_sha256},workerReview:flags.worker_review_verdict,store,
+   await ingestArchive({archive,remoteRun:remote,expected:{actor,sha:row.gh_head_sha,run_id:row.id,spec_sha256:row.spec_sha256},workerReview:flags.worker_review_verdict,store,...compensation(row),
     record:async(manifest:Manifest)=>{await record(row,manifest);const {error}=await db.from('runs').update({evidence_status:'complete'}).eq('id',row.id).eq('status','ingesting');if(error)throw new HttpError(500,'evidence_status_failed');}
    });return {complete:true,artifact_id:String(artifact.id)};
   },
   ingestPartial:async(row:Run)=>{
    const {remote,archive}=await archiveFor(row);
-   return ingestDiagnosticArchive({archive,remoteRun:remote,expected:{actor,sha:row.gh_head_sha,run_id:row.id,spec_sha256:row.spec_sha256},workerReview:flags.worker_review_verdict,store,record:async(manifest:Manifest)=>record(row,manifest)});
+   return ingestDiagnosticArchive({archive,remoteRun:remote,expected:{actor,sha:row.gh_head_sha,run_id:row.id,spec_sha256:row.spec_sha256},workerReview:flags.worker_review_verdict,store,...compensation(row),record:async(manifest:Manifest)=>record(row,manifest)});
   },
   deleteArtifact:async(id:string)=>{if(!/^\d+$/.test(id))throw new HttpError(409,'invalid_artifact');await github(`/actions/artifacts/${id}`,{method:'DELETE'});},
  });

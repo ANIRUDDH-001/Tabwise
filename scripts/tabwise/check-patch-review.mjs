@@ -38,8 +38,8 @@ try{
   await context.close();
  }
  const context=await browser.newContext(),page=await context.newPage();
- await page.route(`**/api/runs/${id}`,route=>route.fulfill({json:{run_id:id,status:'failed',reason:'worker_failed',evidence_status:'incomplete',diagnostic_evidence_available:true,patches:[],stages:[]}}));
+ await page.route(`**/api/runs/${id}`,route=>route.fulfill({json:{run_id:id,status:'failed',reason:'worker_failed',evidence_status:'incomplete',diagnostic_evidence_available:true,artifact_cleanup_pending:true,patches:[],stages:[]}}));
  await page.goto(`${base}/runs/${id}`);await page.getByText('Partial diagnostics were retained. They are INCONCLUSIVE and cannot establish a repair.',{exact:true}).waitFor();
- assert.equal((await new AxeBuilder({page}).analyze()).violations.length,0,'retained failed-run diagnostics');await context.close();
+ await page.getByText('Some diagnostic files still need cleanup. Evidence remains incomplete.',{exact:true}).waitFor();assert.equal((await new AxeBuilder({page}).analyze()).violations.length,0,'retained failed-run diagnostics');await context.close();
  console.log('PASS synthetic local patch review: keyboard approve/reject, stale refusal, unavailable/failed-diagnostics states, axe0 and mobile; no dispatch');
 }finally{await browser.close();}
