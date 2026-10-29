@@ -3,7 +3,7 @@
 // The workflow admits the qualify job only while TABWISE_OBSERVER_APPROVED_REVISION equals the run SHA. GitHub
 // evaluates that condition after accepting the dispatch (INFERENCE from D72 run 40826157539, skipped after an
 // immediate deletion), so the variable is kept until the job is observed started or terminal, bounded by deadlines.
-import {readFileSync} from 'node:fs';
+import {readFileSync,readdirSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {resolve,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -76,8 +76,14 @@ export function runTerminal({code,body}){return code===0&&parse(body)?.status===
 export function dispatchRunId(out){return /\/actions\/runs\/([1-9][0-9]*)/.exec(String(out??''))?.[1]??null;}
 
 export async function artifactEvidence({dir}){
- const {verifyQualificationArtifact}=await import('./qualification-evidence.mjs'),checked=verifyQualificationArtifact(dir);
- let result=null;try{result=JSON.parse(readFileSync(join(dir,'result.json'),'utf8'));}catch{}
+ const {verifyQualificationArtifact}=await import('./qualification-evidence.mjs');
+ let source=dir;
+ try{
+  const entries=readdirSync(dir,{withFileTypes:true});
+  if(entries.length===1&&entries[0].isDirectory()&&/^[1-9]\d*-[1-9]\d*$/.test(entries[0].name))source=join(dir,entries[0].name);
+ }catch(error){return {ok:false,errors:[error.message],candidate_pass:false};}
+ const checked=verifyQualificationArtifact(source);
+ let result=null;try{result=JSON.parse(readFileSync(join(source,'result.json'),'utf8'));}catch{}
  return {ok:checked.ok,errors:checked.errors,candidate_pass:checked.ok&&result?.candidate_pass===true};
 }
 

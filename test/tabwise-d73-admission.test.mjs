@@ -218,3 +218,20 @@ test('owner orchestration: normal path and every reported failure path against m
   }finally{rmSync(r.sim,{recursive:true,force:true,maxRetries:5,retryDelay:200});}
  })));
 });
+
+test('D74 artifact evidence accepts one run-attempt subdirectory but rejects ambiguous contents',async()=>{
+ const {artifactEvidence}=await import('../scripts/tabwise/observer-dispatch.mjs');
+ const {createQualificationWriter}=await import('../scripts/tabwise/qualification-evidence.mjs');
+ const root=mkdtempSync(join(tmpdir(),'tw-d74-artifact-'));
+ try{
+  const nested=join(root,'40884258062-1');
+  createQualificationWriter(nested,{test:true}).finish({candidate_pass:true,full_worker_ready:false,reasons:[]});
+  assert.deepEqual(await artifactEvidence({dir:nested}),{ok:true,errors:[],candidate_pass:true});
+  assert.deepEqual(await artifactEvidence({dir:root}),{ok:true,errors:[],candidate_pass:true});
+  mkdirSync(join(root,'unexpected'));
+  assert.equal((await artifactEvidence({dir:root})).ok,false);
+  rmSync(join(root,'unexpected'),{recursive:true,force:true});
+  writeFileSync(join(nested,'result.json'),'{"candidate_pass":true}');
+  assert.equal((await artifactEvidence({dir:root})).ok,false);
+ }finally{rmSync(root,{recursive:true,force:true});}
+});
