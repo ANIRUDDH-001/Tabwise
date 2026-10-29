@@ -30,7 +30,7 @@ export function createGuardedPressExecutor({steps,nvda,guard,checkForeground,per
    state.underlying_started=true;
    try{await nvda.press(expected.key,{capture:false});}
    finally{state.underlying_settled=true;}
-  }catch(error){stop(`executor: ${error.message}`,'send');throw error;}
+  }catch(error){stop(`executor: ${error.message}`,state.underlying_started?'send':'pre');throw error;}
   finally{
    guard.disarm();
    await new Promise(resolve=>setImmediate(resolve));
