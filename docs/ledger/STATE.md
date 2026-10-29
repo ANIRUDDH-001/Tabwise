@@ -1,15 +1,17 @@
-# STATE — D69 reviewed commits; authorization packet only
-Updated: 2026-10-29T03:50:20Z · Codex · run_id tw-d69-20261029
+# STATE — D70 reviewed product consolidation; execution BLOCKED
+Updated: 2026-10-29T04:03:27Z · Codex · run_id tw-d70-20261029
 
-- Canonical D:/Projects/Meta AI/app, feat/TW-01-contracts. Local commits:326b8cd qualification;8dbb3d7 cleanup/runbook;f423e13 workspace;80e81bd evidence;96145c7 historical print;1bb687c diagnostic export;150f713 fixture timeout. No push.
-- Claude D67: B1 FIXED,34/34 independently passed, preparation clearance only. Original120-file snapshot and outbox preserved;15 guarded-content files unchanged, digest a639387a0a8ccd701b7765afcd420b27dfb71c81a2303450f88aef90cc717efb.
-- LOW fixes: os.tmpdir unique roots+t.after cleanup; separately named exclusive timing evidence; committed mandatory immediate revision-variable deletion after one dispatch, including failure. Minimal independent reviews cleared final changes.
-- Independent product review cleared workspace/account-save/report print; found two P2 issues then cleared lifecycle-aware diagnostic refresh and loaded-origin-only citation links. Focused diagnostic export review also cleared.
-- Verification: root357/357, web47/47, contracts21/21/build/TypeScript/preflight/frozen PASS. Initial root harness10s timeout retained; full rerun passed with the independently reviewed fixture-only30s allowance; frozen100ms per-send bound unchanged.
-- Windows actual validation50 samples324 files: median12.700/p9514.700/max15.204ms; cleanup confirmed, no physical transport/live timing clearance. Named results in cache/d69; original D67 evidence untouched.
-- Product: account versions/workspace/catalog and stored lanes/claims connected; private diagnostic JSON export now generated from owned hash-checked source with verification pending/null. Real user session/populated storage/model/rerun still unexercised.
-- D69 checkpoint and committed observer runbook in docs/engineering. Exact final preparation revision and review deltas will be captured in ignored cache/d69/execution-authorization after documentation commit.
-- Current qualification enabled=false/BLOCK with refs null; full worker independently BLOCKED. No publication, activation, dispatch, NVDA, credentials, Meta/Baseten calls, deployment or spending. R2/R3/R7 NOT RUN.
+- Canonical D:/Projects/Meta AI/app; feat/TW-01-contracts. Prior D66-D69 commits preserved, no history rewrite/push. New a997e66 identity/outage; e467c8b immutable versions/owned nav;5edf01f printable private report;ff6c918 pending verification relationships.
+- Read approved Claude D67/D68 outbox reports; scopes reconciled in docs/engineering/Tabwise-D70-checkpoint.md. New product diff received focused independent read-only review, no remaining blocker.
+- D2 journey equality enforced; D4 initial run database error503 vs absent/foreign404; D3 owned navigation and exact saved-version links fixed. D1 bounded optimization evaluated/deferred: repeated full-bundle download cost remains, no integrity weakening/cache claim.
+- Saved-version owner-only API/UI validates approved steps, displays original stored hash scope honestly. Report viewer checks private export hash/run identity before showing5 lanes and print. Verification reads owned stored relationships but remains pending/null, even if a stored output says FIXED.
+- Verification stale pending-route state was corrected and cleared in focused review before commit. No public successful report or model-predicted repair asserted.
+- MEASURED root357/web55/contracts21/build/TypeScript/preflight/full frozen PASS;13 standard routes axe0;4 new synthetic-state axe scans0; keyboard version/nav/print and mobile checks PASS. No actual authenticated session/populated run/NVDA/Spark integration exercised.
+- Original D67 sealed120-file source and outbox unchanged;15 guarded files match reviewed copies. Digest a639387a0a8ccd701b7765afcd420b27dfb71c81a2303450f88aef90cc717efb unchanged.
+- Existing LOW fixes committed8dbb3d7/150f713: disposable temp fixtures+cleanup, exclusive named evidence, fixture-only30s total allowance, committed immediate one-dispatch revision-variable deletion runbook. Frozen100ms unchanged.
+- Exact final local preparation SHA and updated acceptance/review/config metadata are captured after documentation commit in ignored cache/d70/execution-authorization. New activation SHA remains owner-controlled, not assigned here.
+- Qualification disabled/BLOCK refs null; full worker BLOCK. No publication/activation/dispatch/NVDA/credentials/model calls/deploy/spend. Meta caps60local/40hosted unchanged. Only dedicated Tabwise project may ever be accessed.
+- R1 ledger scoped historical A15 PASS; FEATURES false/null discrepancy remains. R2/R3/R7 NOT RUN as actual evaluations. Code-review passes do not change these outcomes.
 
 ## Handoff
-Owner-only remaining steps: separately approve activation/configuration and exact new execution revision, publish/main integration, one dispatch, immediate variable revocation. No permission inferred from preparation clearance. Continue independent P0 saved-version detail, auth wiring and real verification/public report lifecycle without changing guarded scope unnecessarily.
+Continue productive product work against genuine persisted data when owner auth and qualified evidence exist. Remaining full journey requires auth/provider configuration, separate execution authorization, full worker qualification, real evidence/Spark diagnosis, human patch review, actual rerun/released verification and public immutable result report. D1 egress optimization remains open. Owner alone publishes/activates/dispatches and immediately revokes approval variable.
