@@ -1,0 +1,5 @@
+# R1 A15 PASS: 0c93fa73e0c111a2df65302adfe0006d63f50a39 (run 40716824856).
+# Git blob bytes; check script accepts Git's CRLF checkout conversion for text.
+e1353c1dc5460d0e8569499239dcb7e87443896b18909ffff47ad604f131355c  .github/workflows/r1.yml
+3f5e82940ecc656406f9adc7237c5e2421716066c3def338f8509210b94b1335  scripts/r1.mjs
+2f4a4e9f30fbe994995c1c4291eb02a09e89ff58ff12b143623cc270ff515ef4  package-lock.json

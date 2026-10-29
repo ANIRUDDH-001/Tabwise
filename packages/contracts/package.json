@@ -1,0 +1,9 @@
+{
+  "name": "@tabwise/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {".": "./index.mjs", "./schemas": "./schemas.mjs", "./palette": "./palette.mjs", "./limits": "./limits.mjs"},
+  "scripts": {"test": "node --test --test-timeout=10000 test/*.test.mjs"},
+  "devDependencies": {"ajv": "8.17.1"}
+}

@@ -14,6 +14,10 @@ __pycache__/
 
 # Node
 node_modules/
+web/.next/
+web/tsconfig.tsbuildinfo
+web/next-env.d.ts
+supabase/.temp/
 
 # Caches and replay data that may hold API responses
 .cache/
