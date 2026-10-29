@@ -35,3 +35,7 @@ Even a candidate PASS is scoped to that controlled title observation. Actual bro
 - `test/tabwise-review-{input,integrity,approval,network}.test.mjs` and headless network test: supporting refusals and isolation checks.
 
 A press-only executor candidate now exists in `scripts/tabwise/executor.mjs`; the production loader/binding and all typing remain absent. Four fake-boundary tests cover whole-journey refusal, literal capture:false, persisted intent/foreground refusal, abort stopping once while the underlying send remains unsettled, and late executor settlement failing the independent R2 deadline. They do not qualify the actual frozen transport. Production tests must still establish exact guard ownership and separate real R1/R2 acknowledgement readers. Frozen R1 behavior and the R2 1000 ms observation cap remain unchanged.
+
+## D-65 superseding implementation status
+
+The narrow observer qualification loader/providers/title core/writer/workflow now exist and are offline-tested; see [D-65 review map](Tabwise-D65-review-map.md). This supersedes the earlier missing-loader preparation status above. Both qualification status and manual input remain default-disabled/BLOCK. No actual NVDA session or dispatch took place. All complete-worker/typing/real Spark qualifications remain open.
