@@ -1,0 +1,3 @@
+import {HttpError,assertSameOrigin} from './core.mjs';
+export async function endpoint(request:Request,work:()=>Promise<Response>,write=false){try{if(write)assertSameOrigin(request);return await work();}catch(error){const e=error as InstanceType<typeof HttpError>;return Response.json({reason:e.reason??'request_failed'},{status:e.status??500,headers:{'Cache-Control':'no-store'}});}}
+export async function body(request:Request,max=60000){if(Number(request.headers.get('content-length')??0)>max)throw new HttpError(413,'input_too_large');const raw=await request.text();if(new TextEncoder().encode(raw).length>max)throw new HttpError(413,'input_too_large');try{return JSON.parse(raw);}catch{throw new HttpError(400,'invalid_json');}}
