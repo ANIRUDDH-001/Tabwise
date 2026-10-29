@@ -118,3 +118,11 @@ Review the local diff and this report. No push, merge, PR update or hosted rerun
 An independent reviewer reproduced a fail-open coverage-accounting case in the original CI-H1 supervisor: a Node test file with no registered tests, or with all tests skipped, exits with code 0 and was incorrectly classified PASS. A narrow correction to `scripts/offline-tests.mjs` now requests TAP output and requires complete nonzero per-file test totals with zero failures, cancellations, skips and TODOs before marking PASS. `test/ci-offline-selection.test.mjs` adds zero-test/skipped/passing regressions.
 
 These probes passed 5/5 in an isolated Node 22.16.0 sandbox with synthetic files; **this does not establish Node 24.22.1 Windows or full 47-file profile qualification**. The earlier 478/478 profile results are historical, prior to this correction. Re-run ordinary and stress profiles locally on the pinned Node 24.22.1 to refresh the counts and handoff before publication.
+
+## CI-H2 proposed follow-up — hosted mixed stress watchdog (pending owner approval/verification)
+
+MEASURED: PR #4 run `40927125615` at CI-H1 revision `f59bb5550d31bbbc42d829627c20b1e863e0cd95` completed ordinary and early stress profiles. The `mixed/speech.test.mjs` child was terminated by the 60,000 ms process watchdog after 79/122 passing subtests. The same file completed 122/122 under `stall-40` and `slow-fs-100`; subsequent mixed files also passed. Final source locks and clean checkout passed. Artifact: `offline-preflight-40927125615-1`, ID `12922400064`. Cause of the previous CI-H1 browser hang remains independently unproven.
+
+PROPOSED: grant **only** `mixed/speech.test.mjs` a 120,000 ms process watchdog, still capped by the remaining 180,000 ms whole-profile budget. All other file watchdogs remain 60,000 ms. The existing `--test-timeout=10000` (per-test) and frozen R1 timings are unchanged. Test `ci-offline-selection` asserts the exact exception, unchanged defaults, and remaining-profile cap. A slower genuine hang must still be reported as TIMEOUT/PROFILE_TIMEOUT/FAIL.
+
+Do not claim CI-H2 PASS based on the local CI-H1 run. Owner approval of this follow-up, pinned Node 24 local regressions/stress, frozen checks and another hosted PR #4 preflight are required before clearance.

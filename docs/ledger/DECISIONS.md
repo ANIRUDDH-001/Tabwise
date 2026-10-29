@@ -316,3 +316,10 @@ User answer: "Approve CI-H1 as scoped (Recommended) — permits the requested lo
 Consequence: local fix/tabwise-ci-preflight-hang from bb8008b; preflight CI edits authorized; no installs, browser, NVDA, physical input, API spend, dispatch or publication.
 Acceptance: safe subset and CI regressions pass; frozen R1/safety digests match; separate excluded-coverage report.
 Reversal: review/revert this branch's bounded CI-H1 diff; no R2 readiness or qualification status change.
+## D-76 2026-10-29T18:37:34Z — CI-H2 publication authorization
+Question: Approve publication of the narrowly scoped mixed/speech offline watchdog correction?
+User answer: "APPROVE CI-H2 PUBLICATION" (entered directly in the owner-operated publication command).
+Scope: 120-second process watchdog for mixed/speech only; default 60 seconds, 180-second profile budget and per-test deadlines unchanged.
+Verification: nine local profiles each 480/480 PASS; R1 baseline, preflight and diff checks PASS.
+Limits: zero spend; no installs, browser, NVDA, physical input, live qualification or merge.
+Note: Publication approval recorded after local implementation; no retrospective pre-edit approval claimed.

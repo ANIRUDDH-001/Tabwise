@@ -312,3 +312,12 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Rollback: revert reviewed CI-H1 diff on the local branch; preserve baseline/history.
 - R2 qualification remains BLOCKED; FEATURES unchanged.
 - MEASURED CI-H1-20261029: ordinary and all eight stress profiles each478/478 (47 admitted files); all205 R2 tests PASS; excluded9 files separately recorded; frozen/preflight/qualification integrity PASS; uncommitted pending independent review.
+### F-03 / CI-H2 — mixed speech watchdog correction (D-76)
+- Goal: Bound the mixed/speech stress profile without misclassifying slow progress as a deadlock.
+- Files: scripts/offline-tests.mjs; test/ci-offline-selection.test.mjs; docs/engineering/CI-H1-preflight-hang.md; normal governance ledgers.
+- Acceptance: six selection regressions; ordinary and eight stress profiles each 480/480; frozen R1 baseline, preflight and diff checks PASS.
+- Cost ceiling: $0; no dependency installations or hosted execution during local validation.
+- Out of scope: frozen R1, other watchdog limits, browser/NVDA runs, qualification activation, M2D, merge or deployment.
+- Rollback: revert the CI-H2 commit on the review branch.
+- MEASURED locally: 9/9 profiles, 4320/4320 executions PASS; 47 admitted files, nine excluded.
+- Hosted Windows verification pending; R2 qualification remains BLOCKED.

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync, readdirSync, mkdtempSync, writeFileSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {selectTests, profilePlan, runFile} from '../scripts/offline-tests.mjs';
+import {selectTests, profilePlan, runFile, fileWatchdogMs} from '../scripts/offline-tests.mjs';
 
 test('ordinary and every stress profile share a fail-closed offline allowlist', () => {
   const names = readdirSync('test').filter(name => name.endsWith('.test.mjs'));
@@ -57,4 +57,19 @@ test('a file with no registered tests or only skips cannot be counted as PASS', 
       if(kind==='skipped')assert.equal(result.test_totals?.skipped,1);
     }
   } finally {rmSync(dir,{recursive:true,force:true});}
+});
+
+// CI-H2: the hosted mixed stress file was making progress when the 60s process cap
+// terminated it. The exception must not affect any other file or fault profile.
+test('only mixed speech gets 120s and the 180s profile remainder still wins', () => {
+  for(const profile of profilePlan('125615')) {
+    for(const file of profile.files) {
+      const cap=fileWatchdogMs(profile.name,file,180000);
+      assert.equal(cap,profile.name==='mixed'&&file==='speech.test.mjs'?120000:60000,`${profile.name}/${file}`);
+    }
+  }
+  assert.equal(fileWatchdogMs('mixed','speech.test.mjs',45000),45000);
+  assert.equal(fileWatchdogMs('mixed','speech.test.mjs',120000),120000);
+  assert.equal(fileWatchdogMs('mixed','sendguard.test.mjs',180000),60000);
+  assert.throws(()=>fileWatchdogMs('mixed','speech.test.mjs',0),/remainder/);
 });
