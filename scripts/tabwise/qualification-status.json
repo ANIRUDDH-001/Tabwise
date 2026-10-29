@@ -1,11 +1,27 @@
 {
-  "enabled": false,
-  "verdict": "BLOCK",
-  "reviewer": null,
-  "review_ref": null,
-  "owner_approval_ref": null,
-  "actor": null,
-  "reviewed_files": [],
-  "reviewed_sha256": null,
-  "reason": "Reset after D-73 (run 40849425253 admitted at activation 0d1eefca3d685c5c054afcc6e9d2949132955768; approval variable revoked after 35 s; precheck refused before runtime with 'R1 baseline mismatch: package-lock.json'; cause: windows-2025 autocrlf checkout wrote the unchanged LF lockfile blob as CRLF; no NVDA, browser or observer step ran and no evidence artifact was uploaded). D-73 is consumed and retired and must never be retried. A new attempt requires an independent review of the changed check-r1-baseline.mjs, a recomputed digest, a separate owner decision and a status-only activation commit. Full Tabwise worker remains BLOCKED."
+    "enabled":  true,
+    "verdict":  "PASS",
+    "reviewer":  "Claude (Opus 5.5)",
+    "review_ref":  "Claude D67 narrow review 2026-10-29T03:29:32Z; sha256=cd4b1dbdad280ddc04d15a80ed801e72424829b20cc2332c36740828badd0231",
+    "owner_approval_ref":  "D-74",
+    "actor":  "ANIRUDDH-001",
+    "reviewed_files":  [
+                           ".github/workflows/tabwise-observer.yml",
+                           ".gitignore",
+                           "packages/contracts/limits.mjs",
+                           "scripts/check-r1-baseline.mjs",
+                           "scripts/tabwise-observer.mjs",
+                           "scripts/tabwise/network.mjs",
+                           "scripts/tabwise/observer-qualification.mjs",
+                           "scripts/tabwise/observer.mjs",
+                           "scripts/tabwise/qualification-core.mjs",
+                           "scripts/tabwise/qualification-crash.mjs",
+                           "scripts/tabwise/qualification-evidence.mjs",
+                           "scripts/tabwise/qualification-integrity.mjs",
+                           "scripts/tabwise/qualification-loader.mjs",
+                           "scripts/tabwise/qualification-policy.mjs",
+                           "scripts/tabwise/qualification-providers.mjs"
+                       ],
+    "reviewed_sha256":  "6972c311a6e9302856ff9bb9195aa73cf106a15da8caf91ac32b781f8909f328",
+    "reason":  "D-74 narrow hosted observer qualification preparation only. D-73 run 40849425253 retired. One separately owner-authorized initial hosted attempt; existing admission-timed revocation protocol and safety limits. No general worker clearance. Full Tabwise worker remains BLOCKED. D67 reviewer/ref identify the original guarded scope only; supplementary changed-file review of the D-73 CRLF repair and regression tests was conducted by ChatGPT GPT-6 on 2026-10-29 under D-74. The updated reviewed-content digest is bound separately."
 }
