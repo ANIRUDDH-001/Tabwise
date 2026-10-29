@@ -302,3 +302,11 @@ Verification: Claude reports 386/386 tests passing twice; source bundle inspecte
 Safety: Qualification remains disabled/BLOCK. Full worker remains BLOCKED.
 Limitations: One-shot dispatch cannot be guaranteed during the bounded approval window. Actual hosted admission and NVDA behavior remain unverified.
 Authorization: This decision permits recovery publication only. D73 activation and hosted execution require separate explicit approval.
+## D-74 2026-10-29T13:31:54Z - Narrow hosted observer qualification preparation
+Owner response: "approved".
+Scope: Prepare one new hosted NVDA observer qualification using the D-73 CRLF repair published at 99d3a49560f97c779328b8a4ebd2f066e8dc0cc1.
+Reviewed content digest: 6972c311a6e9302856ff9bb9195aa73cf106a15da8caf91ac32b781f8909f328.
+Independent changed-file review: ChatGPT GPT-6 on 2026-10-29; original D67 clearance retained for unchanged scope.
+Limits: Existing guarded title-report scope only. Full worker remains BLOCKED. No additional paid inference.
+Authorization: Preparation and activation publication only. Actual hosted dispatch requires separate explicit owner confirmation.
+D-72 and D-73 are retired and must not be reused.
