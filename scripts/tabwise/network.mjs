@@ -14,6 +14,7 @@ export async function createIsolatedContext(browser,{port,source}){
     delete globalThis[name];
     Object.defineProperty(globalThis,name,{value:undefined,writable:false,configurable:false});
    }
+   Object.defineProperty(globalThis,'__tabwiseNetworkRestricted',{value:true,writable:false,configurable:false});
   });
   if(typeof context.routeWebSocket!=='function')throw Error('WebSocket routing required');
   await context.routeWebSocket('**/*',socket=>socket.close({code:1008,reason:'Tabwise network isolation'}));

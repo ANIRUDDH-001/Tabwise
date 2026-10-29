@@ -8,7 +8,7 @@ export async function createSpeechObserver({NVDAClient,guard,getGate,relayOwnerP
  if(!Number.isInteger(startupReceipt?.pid)||startupReceipt.pid<=0||startupReceipt.relay_pid!==startupReceipt.pid||startupReceipt.reset_confirmed!==true||guard.isStopped()||!Number.isFinite(deadlineMs)||now()>=deadlineMs)throw Error('observer ownership/deadline not established');
  const client=new NVDAClient(),session=randomUUID(),phrases=[],journal=[];
  let connected=false,closed=false,failed=false,used=0,last=-Infinity;
- const fail=reason=>{if(failed||closed)return;failed=true;connected=false;guard.stop(`observer: ${reason}`,'send');};
+ const fail=reason=>{if(failed||closed)return;failed=true;connected=false;guard.stop(`observer: ${reason}`,guard.status?.().sends>0?'send':'pre');};
  const registered=()=>{try{if(getGate()!==guard)throw Error('registered guard identity changed');return true;}catch(error){fail(error.message);return false;}};
  const speech=text=>{
   if(closed||failed)return;
