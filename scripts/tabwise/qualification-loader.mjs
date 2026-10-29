@@ -22,7 +22,7 @@ export async function loadQualificationRuntime({root=ROOT,additionalIntegrity=()
  const mods={r1Gate,NVDAClient:require('./lib/windows/NVDA/NVDAClient.js').NVDAClient,runVbsScript:require('./lib/windows/runVbsScript.js'),sendKeys:require('./lib/windows/sendKeys.js'),teardown:require('./lib/teardown.js'),KeyCodes:require('./lib/windows/KeyCodes.js').KeyCodes,Modifiers:require('./lib/windows/Modifiers.js').Modifiers,Key:require('./lib/windows/Key.js').Key,keyCodeCommands:require('./lib/windows/NVDA/keyCodeCommands.js').keyCodeCommands};
  const start=require('./lib/windows/NVDA/start.js');
  const inspect=()=>{
-  const errors=[...checkFrozenIntegrity(root).errors,...tree.vendorIntegrity({mods,nvda:nvdaJs,gate:guard,getGate:r1Gate.getGate,cache:require.cache,root,vendor})];
+  const errors=[...tree.vendorIntegrity({mods,nvda:nvdaJs,gate:guard,getGate:r1Gate.getGate,cache:require.cache,root,vendor})];
   if(require.cache[resolve(vendor,'lib/windows/NVDA/NVDA.js')]?.exports!==nvdaJs||Object.getPrototypeOf(nvda)!==nvdaJs.NVDA.prototype)errors.push('NVDA instance/cache identity');
   if(require.cache[resolve(vendor,'lib/windows/NVDA/NVDAClient.js')]?.exports?.NVDAClient!==mods.NVDAClient||r1Gate.getGate()!==guard)errors.push('observer class/registered guard identity');
   const extra=additionalIntegrity();if(!Array.isArray(extra))errors.push('missing reviewed content integrity');else errors.push(...extra);

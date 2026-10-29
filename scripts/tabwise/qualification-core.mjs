@@ -17,7 +17,7 @@ export async function runObserverQualification({runtime,browser,foreground,write
   const operation=Promise.resolve().then(fn);active.add(label);operation.then(()=>active.delete(label),()=>active.delete(label));
   const out=await withTimeout(operation,ms);if(out.timedOut){stop(`${label}: timed out`,'timeout');throw Error(`${label}: timed out`);}if(out.error)throw Error(`${label}: ${out.error}`);return out.value;
  };
- const live=()=>{runtime.assertAuthentic();if(runtime.getGate()!==guard||guard.isStopped()||signal?.aborted)throw Error('qualification guard identity/stopped');};
+ const live=()=>{if(runtime.getGate()!==guard||guard.isStopped()||signal?.aborted)throw Error('qualification guard identity/stopped');};
  const check=async context=>{
   live();const verdict=await foreground.check(),errors=foregroundMismatch(verdict,{pid:page?.pid,nonce});
   writer.append('focus',{...verdict,context:context??null,errors,observed_ms:clock.now()});return errors;
@@ -34,7 +34,7 @@ export async function runObserverQualification({runtime,browser,foreground,write
   if(observer){result.final_observer=observer.read();result.observer_journal=observer.journal();}
  },observer:{close:async()=>{try{await observer?.close();}finally{foreground.close();}}},browser:{close:()=>bounded('browser close',()=>page?.close(),cfg.cleanup_timeout_ms)},nvda:{stop:()=>bounded('NVDA stop',()=>nvda.stop(),cfg.cleanup_timeout_ms)}});
  try{
-  if(signal?.aborted)abort();live();writer.append('events',{phase:'start',t:clock.now()});
+  runtime.assertAuthentic();if(signal?.aborted)abort();live();writer.append('events',{phase:'start',t:clock.now()});
   receipt=await bounded('NVDA startup',()=>nvda.start({settings:structuredClone(cfg.nvda_settings)}),cfg.load_timeout_ms*2);live();
   if(!Number.isInteger(receipt?.pid)||receipt.pid<=0||receipt.relay_pid!==receipt.pid||receipt.reset_confirmed!==true)throw Error('owned NVDA receipt missing');result.startup_receipt=receipt;
   const settings=nvda.getSettings(),readback=Object.fromEntries(Object.entries(cfg.nvda_settings).flatMap(([section,values])=>Object.keys(values).map(key=>[`${section}.${key}`,settings?.[section]?.[key]??null])));
@@ -49,12 +49,12 @@ export async function runObserverQualification({runtime,browser,foreground,write
   const relayBefore=await bounded('relay before',()=>runtime.relayOwnerPid(),cfg.load_timeout_ms);if(relayBefore!==receipt.pid)throw Error('relay ownership mismatch');
   observer=await createSpeechObserver({NVDAClient:runtime.NVDAClient,guard,getGate:runtime.getGate,relayOwnerPid:runtime.relayOwnerPid,startupReceipt:receipt,deadlineMs:clock.now()+cfg.load_timeout_ms,now:clock.now});
   before=observer.read();result.observer_before=before;if(!before.connected||!before.complete||before.phrases.length)throw Error('pre-action observer speech/incomplete');
-  errors=await check();if(errors.length)throw Error(errors.join('; '));live();
+  errors=await check();if(errors.length)throw Error(errors.join('; '));runtime.assertAuthentic();live();
   writer.append('events',{phase:'action-intent',action:'NVDA-T',capture:true,note:'Frozen capture:true internally uses guarded Control; no standalone stop-speech action',t:clock.now()});
   if(!guard.arm('observer:NVDA-T'))throw Error('title arm refused');actionStarted=clock.now();result.timings.title_requested_ms=actionStarted;titleStarted=true;
   try{await bounded('guarded title',()=>nvda.perform(nvda.keyboardCommands.reportTitle,{capture:true}),cfg.action_timeout_ms);}
   finally{guard.disarm();await new Promise(resolve=>setImmediate(resolve));const quiet=await guard.idle(1000);if(!quiet.quiet)stop('title send still running','timeout');}
-  live();primary=await bounded('primary title phrase',()=>nvda.lastSpokenPhrase(),cfg.action_timeout_ms);result.timings.primary_returned_ms=clock.now();
+  runtime.assertAuthentic();live();primary=await bounded('primary title phrase',()=>nvda.lastSpokenPhrase(),cfg.action_timeout_ms);result.timings.primary_returned_ms=clock.now();
   after=observer.read();const relayAfter=await bounded('relay after',()=>runtime.relayOwnerPid(),cfg.load_timeout_ms);
   assessment=assessObserverQualification({before,after,journal:observer.journal(),action_started_ms:actionStarted,primary_phrase:primary,owned_pid:receipt.pid,relay_pid_before:relayBefore,relay_pid_after:relayAfter});
   // Nonce identity must occur in one original observer phrase within the exact matched primary span.

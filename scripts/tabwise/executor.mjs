@@ -14,7 +14,7 @@ export function createGuardedPressExecutor({steps,nvda,guard,checkForeground,per
   const expected=journey[cursor];
   if(busy||!expected||action?.step!==String(expected.step)||action?.press!==expected.key)throw Error('executor sequence or press mismatch');
   if(guard.isStopped())throw Error('executor guard stopped');
-  busy=true;cursor++;
+  busy=true;cursor++;const sendsBefore=guard.status?.().sends??0;
   Object.assign(state,{underlying_started:false,underlying_settled:false,cancellation_requested:false});
   const abort=()=>{state.cancellation_requested=true;stop('R2 executor cancellation requested','timeout');};
   signal?.addEventListener('abort',abort,{once:true});
@@ -30,7 +30,7 @@ export function createGuardedPressExecutor({steps,nvda,guard,checkForeground,per
    state.underlying_started=true;
    try{await nvda.press(expected.key,{capture:false});}
    finally{state.underlying_settled=true;}
-  }catch(error){stop(`executor: ${error.message}`,state.underlying_started?'send':'pre');throw error;}
+  }catch(error){stop(`executor: ${error.message}`,(guard.status?.().sends??0)>sendsBefore?'send':'pre');throw error;}
   finally{
    guard.disarm();
    await new Promise(resolve=>setImmediate(resolve));

@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {ciGuardErrors,workflowGuardErrors} from '../../src/speech/runguard.mjs';
 const ROOT=fileURLToPath(new URL('../../',import.meta.url));
 export const QUALIFICATION_FILES=Object.freeze([
- '.github/workflows/tabwise-observer.yml','scripts/tabwise-observer.mjs','scripts/check-r1-baseline.mjs',
+ '.gitignore','packages/contracts/limits.mjs','.github/workflows/tabwise-observer.yml','scripts/tabwise-observer.mjs','scripts/check-r1-baseline.mjs','scripts/tabwise/qualification-integrity.mjs','scripts/tabwise/qualification-crash.mjs',
  'scripts/tabwise/qualification-policy.mjs','scripts/tabwise/qualification-loader.mjs','scripts/tabwise/qualification-providers.mjs','scripts/tabwise/qualification-core.mjs','scripts/tabwise/qualification-evidence.mjs',
  'scripts/tabwise/network.mjs','scripts/tabwise/observer.mjs','scripts/tabwise/observer-qualification.mjs',
 ].sort());
