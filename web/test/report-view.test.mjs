@@ -1,0 +1,4 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {verifyDiagnosticExport} from '../lib/report-view.mjs';
+async function sample(){const snapshot={schema:'tabwise-diagnostic-report/1',run_id:'r1',verification:{status:'pending',verdict:null}};const sha256=Buffer.from(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(snapshot)))).toString('hex');return {snapshot,sha256};}
+test('report presentation verifies the exact exported snapshot and owner-route run identity',async()=>{const value=await sample();assert.deepEqual(await verifyDiagnosticExport(value,'r1'),value.snapshot);await assert.rejects(()=>verifyDiagnosticExport(value,'r2'));value.snapshot.verification.verdict='FIXED';await assert.rejects(()=>verifyDiagnosticExport(value,'r1'));});
