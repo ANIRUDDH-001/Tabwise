@@ -321,6 +321,7 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Rollback: revert the CI-H2 commit on the review branch.
 - MEASURED locally: 9/9 profiles, 4320/4320 executions PASS; 47 admitted files, nine excluded.
 - Hosted Windows verification pending; R2 qualification remains BLOCKED.
+- Post-merge (R2-L0): committed f59bb55 + 1965e21, merged by PR #4 (1988f86), reached main via PR #3 (78cf379). Owner-reported: independent CI-H1/H2 review PASS; combined hosted offline preflight PASS, run 41016516810 (pre-merge).
 ### F-03 / R2-M2D — premature speech attribution hardening (D-77)
 - Goal: speech seen before an established gate-release boundary is never action evidence; keep it as diagnostics; fail closed.
 - Baseline: 1988f867c73915e373bbf87dbac2a77ab85b81f4 (review/tabwise-m2b-m2c).
@@ -330,6 +331,7 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Out of scope: M1 live-gate stop, silence-window anchoring (M2E candidate), frozen R1, CI, FEATURES/qualification status.
 - Rollback: reverse-apply the M2D patch; M2A/M2B/M2C/CI-H1/H2 untouched.
 - MEASURED (Linux, Node 22.22.0): RED 20/22 + 1/1 at baseline; GREEN 44/44 and 12/12 ×10; R2 228/228; offline profiles 498/503 with 5 environmental ENOENT failures identical at baseline; random profile unsupported on Node 22. Windows pending. R2 qualification remains BLOCKED.
+- Post-merge (R2-L0): committed 2754e6b on review/tabwise-m2b-m2c, reached main via PR #3 (78cf379). Later Windows Node 24.22.1 results for the combined R2 tree are in the M2E and post-final-stop handoffs.
 ### F-03 / R2-M2E - release-relative observation accounting (D-78)
 - Baseline: 2754e6b687b0e5735f18324a57ae5cdfb16bab33; branch: fix/tabwise-r2-m2e.
 - Scope: receipt observation/silence timing, test-fixture corrections, handoff and ledgers.
@@ -339,6 +341,7 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Next: hosted offline CI and owner integration decision.
 - Excluded: frozen R1 changes, live execution, qualification and spending.
 - Rollback: revert isolated M2E commit.
+- Post-merge (R2-L0): committed 0412f69, merged by PR #5 (ef3b8ed), reached main via PR #3 (78cf379); the "Next" item above is resolved by those merges and the owner-reported combined hosted preflight run 41016516810.
 ### F-03 / R2 post-finalization gate stop (D-79)
 - Goal: an owned gate stopped after receipt finalization never yields a completed or model-eligible capture; keep the original stop kind and reason.
 - Baseline: ef3b8eda9797029e95be0626771112fbe0144ecd; branch: fix/tabwise-r2-post-final-stop.
@@ -347,3 +350,11 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Excluded: frozen R1, CI inventory/thresholds, live execution, qualification and spending.
 - Rollback: reverse-apply the uncommitted diff; M2A-M2E untouched otherwise.
 - D-80 correction: boundary fixtures use observable lifecycle (test-owned ack-reader entry, fake clock, provider order); binding-return check covered by a scratch probe only; tests 4/5 now RED on baseline with the stop firing.
+- Post-merge (R2-L0, 2026-10-30T07:50:13Z): committed as a3a9ad4, merged by PR #6 into review/tabwise-m2b-m2c (46749e0), then PR #3 into main (78cf379; tree equal to 46749e0). Owner-reported: independent D-79/D-80 review PASS. R2 qualification remains BLOCKED.
+### F-03 / R2-L0 — post-merge reconciliation and production-binding readiness (docs only)
+- Baseline: 78cf37953702998dc87a9eb61cae6e7c64ec339f; branch: chore/tabwise-r2-post-merge.
+- Scope: reconcile STATE/PLAN/LOG and the M2E, post-final-stop and CI-H1 handoffs to the merged state; source-grounded binding gap table and R2-L1 spec in docs/engineering/Tabwise-worker-binding-blocker.md.
+- Hosted CI: owner-reported combined offline preflight PASS, run 41016516810, before the PR #3 merge. No post-merge main-branch run is recorded.
+- Excluded: code, tests, CI, frozen R1, qualification/review status, thresholds, dependencies, live execution, commits.
+- Next: independent review of the R2-L0 docs diff; owner decision on R2-L1.
+- Revision (2026-10-30T08:04:41Z, after independent review CONDITIONAL PASS): the R2-L1 gate-wiring helper was withdrawn. R2-L1 is now an offline page-journal compatibility adapter over injected synthetic data: one source feeds both an R2 snapshot view and a pageAck keydown view, with explicit completeness, sequence, focus and modifier checks, and writer use of the existing `page` lane only. Guard/executor/receipt composition is deferred to R2-L2, behind an independently reviewed production loader and separate authorization. Hosted observer history corrected (D-72 skipped, D-73 refused pre-runtime, D-74 the only runtime observation). Reconciliation facts unchanged.

@@ -126,3 +126,19 @@ MEASURED: PR #4 run `40927125615` at CI-H1 revision `f59bb5550d31bbbc42d829627c2
 PROPOSED: grant **only** `mixed/speech.test.mjs` a 120,000 ms process watchdog, still capped by the remaining 180,000 ms whole-profile budget. All other file watchdogs remain 60,000 ms. The existing `--test-timeout=10000` (per-test) and frozen R1 timings are unchanged. Test `ci-offline-selection` asserts the exact exception, unchanged defaults, and remaining-profile cap. A slower genuine hang must still be reported as TIMEOUT/PROFILE_TIMEOUT/FAIL.
 
 Do not claim CI-H2 PASS based on the local CI-H1 run. Owner approval of this follow-up, pinned Node 24 local regressions/stress, frozen checks and another hosted PR #4 preflight are required before clearance.
+
+## Post-merge status (R2-L0, appended 2026-10-30T07:50:13Z)
+
+The sections above are kept as written. Statements in them such as "pending owner approval/verification", "Independent cross-tool diff review remains outstanding" and "hosted pending" describe the state at that time. Current state:
+
+| Item | State | Basis |
+|---|---|---|
+| CI-H1 commit | `f59bb5550d31bbbc42d829627c20b1e863e0cd95` | MEASURED: `git log` |
+| CI-H2 commit | `1965e2152c40159575734273ce681eb634b94e29` | MEASURED: `git log` |
+| PR #4 | merged into `review/tabwise-m2b-m2c` as `1988f867c73915e373bbf87dbac2a77ab85b81f4` | MEASURED: `git log` |
+| PR #3 | merged into `main` as `78cf379` (tree equal to the PR head `46749e0`) | MEASURED: `git rev-parse <commit>^{tree}` |
+| Independent CI-H1/H2 review | PASS | owner-reported; not re-checked here |
+| Hosted offline preflight | the CI-H1 run `40927125615` result above is unchanged. Owner-reported: combined hosted offline preflight PASS, run `41016516810`, on the integration PR before the merge | run head SHA not re-checked here |
+| Post-merge `main` CI | none recorded | no run is claimed |
+
+The admitted inventory is unchanged at 47 selected and 9 excluded files. The last local Windows counts for the combined R2 tree are 518/518 per profile, recorded in `R2-post-final-stop.md`. The CI-H1 root cause of the original hosted hang is still not established. Browser and process-bearing exclusions still need separate owner-approved verification.

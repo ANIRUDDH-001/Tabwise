@@ -4,6 +4,8 @@ Status: **offline engineering change, locally verified 2026-10-30 (see Local res
 
 _Status corrected 2026-10-30 (post-final-stop correction); the historical results below are unchanged._
 
+_Post-merge update 2026-10-30T07:50:13Z (R2-L0): `review/tabwise-m2b-m2c`, including M2E (`0412f69`, PR #5) and the post-final-stop correction (`a3a9ad4`, PR #6), was merged into `main` by PR #3 (`78cf379`). The "not `main`" note above was true when written. Owner-reported: a combined hosted offline preflight passed in run `41016516810` before that merge. No post-merge `main` CI run is claimed. Qualification status is unchanged._
+
 Baseline: `2754e6b687b0e5735f18324a57ae5cdfb16bab33` on a new isolated `fix/tabwise-r2-m2e` branch. Patch created without editing the baseline repository.
 
 ## Problem
