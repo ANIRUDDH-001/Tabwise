@@ -301,3 +301,49 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Files: new scripts/tabwise qualification helpers/entry; existing observer/network/executor and web artifact helpers; new regression/fake integration tests; one .github/workflows qualification file explicitly requested; normal review/ledger/CODEMAP.
 - Acceptance: per-finding red/green, fake loader/provider/title/teardown/artifact integration, full root/contracts/web/build and R1/private preservation. No live dispatch/input/calls/credentials/spend/deploy/push; no dependencies.
 - MEASURED D65: N1–N5 red/green; root353/353, web26/26/build, local keyboard/axe/mobile and original65/private checks PASS. Offline harness and default-disabled manual workflow complete; executable35e74ff; actual relay/VM timing/egress remain unverified. Review map and local commits in docs/engineering/Tabwise-D65-*.
+
+### F-03 / CI-H1 — hanging offline preflight (D-75)
+- Goal: bounded offline preflight with explicit coverage and cleanup on rejected browser setup.
+- Baseline: bb8008b0857f2148c5c808e951fac2a64fc2647b; clean review/tabwise-m2b-m2c; branch fix/tabwise-ci-preflight-hang.
+- Files: .github/workflows/preflight.yml; ci/offline-tests.json; scripts/offline-tests.mjs; test/{fernway,tabwise-network-browser,ci-browser-cleanup,ci-offline-selection}.test.mjs; test/helpers/reject-browser.mjs; engineering handoff and normal ledgers/CODEMAP.
+- Acceptance: node --test test/ci-browser-cleanup.test.mjs test/ci-offline-selection.test.mjs; node scripts/offline-tests.mjs --profile ordinary --out cache/ci-h1; node scripts/offline-tests.mjs --profile stress --seed 172785 --out cache/ci-h1; node scripts/check-r1-baseline.mjs; node scripts/preflight.mjs; checkFrozenIntegrity and unchanged qualificationDigest.
+- Cost ceiling: $0; no installs or live execution; bounded to CI-H1 in this session.
+- Out of scope: complete npm test, real browser/NVDA/input, third-party writes, hosted execution, M2D, frozen source/locks/status changes.
+- Rollback: revert reviewed CI-H1 diff on the local branch; preserve baseline/history.
+- R2 qualification remains BLOCKED; FEATURES unchanged.
+- MEASURED CI-H1-20261029: ordinary and all eight stress profiles each478/478 (47 admitted files); all205 R2 tests PASS; excluded9 files separately recorded; frozen/preflight/qualification integrity PASS; uncommitted pending independent review.
+### F-03 / CI-H2 — mixed speech watchdog correction (D-76)
+- Goal: Bound the mixed/speech stress profile without misclassifying slow progress as a deadlock.
+- Files: scripts/offline-tests.mjs; test/ci-offline-selection.test.mjs; docs/engineering/CI-H1-preflight-hang.md; normal governance ledgers.
+- Acceptance: six selection regressions; ordinary and eight stress profiles each 480/480; frozen R1 baseline, preflight and diff checks PASS.
+- Cost ceiling: $0; no dependency installations or hosted execution during local validation.
+- Out of scope: frozen R1, other watchdog limits, browser/NVDA runs, qualification activation, M2D, merge or deployment.
+- Rollback: revert the CI-H2 commit on the review branch.
+- MEASURED locally: 9/9 profiles, 4320/4320 executions PASS; 47 admitted files, nine excluded.
+- Hosted Windows verification pending; R2 qualification remains BLOCKED.
+### F-03 / R2-M2D — premature speech attribution hardening (D-77)
+- Goal: speech seen before an established gate-release boundary is never action evidence; keep it as diagnostics; fail closed.
+- Baseline: 1988f867c73915e373bbf87dbac2a77ab85b81f4 (review/tabwise-m2b-m2c).
+- Files: src/r2/capture.mjs; test/r2-capture-receipts.test.mjs; test/r2-capture-receipts-failclosed.test.mjs; docs/engineering/R2-M2D-speech-boundary.md; normal ledgers/CODEMAP.
+- Acceptance: red-before-green M2D regressions; node --test test/r2*.test.mjs; check-r1-baseline; preflight unchanged vs baseline; offline ordinary/stress profiles; git diff --check.
+- Cost ceiling: $0; no installs, API, browser, NVDA, input, dispatch or publication.
+- Out of scope: M1 live-gate stop, silence-window anchoring (M2E candidate), frozen R1, CI, FEATURES/qualification status.
+- Rollback: reverse-apply the M2D patch; M2A/M2B/M2C/CI-H1/H2 untouched.
+- MEASURED (Linux, Node 22.22.0): RED 20/22 + 1/1 at baseline; GREEN 44/44 and 12/12 ×10; R2 228/228; offline profiles 498/503 with 5 environmental ENOENT failures identical at baseline; random profile unsupported on Node 22. Windows pending. R2 qualification remains BLOCKED.
+### F-03 / R2-M2E - release-relative observation accounting (D-78)
+- Baseline: 2754e6b687b0e5735f18324a57ae5cdfb16bab33; branch: fix/tabwise-r2-m2e.
+- Scope: receipt observation/silence timing, test-fixture corrections, handoff and ledgers.
+- Acceptance: focused and full R2, ordinary/stress, frozen R1, preflight.
+- Local verification: focused62, R2 234, ordinary509, stress 8x509 PASS.
+- First stall-40 speech timeout retained; final rerun passed.
+- Next: hosted offline CI and owner integration decision.
+- Excluded: frozen R1 changes, live execution, qualification and spending.
+- Rollback: revert isolated M2E commit.
+### F-03 / R2 post-finalization gate stop (D-79)
+- Goal: an owned gate stopped after receipt finalization never yields a completed or model-eligible capture; keep the original stop kind and reason.
+- Baseline: ef3b8eda9797029e95be0626771112fbe0144ecd; branch: fix/tabwise-r2-post-final-stop.
+- Files: src/r2/{capture,binding,send-receipt}.mjs; test/r2-capture-receipts-failclosed.test.mjs (appended); docs/engineering/R2-post-final-stop.md; M2E handoff status; ledgers/CODEMAP.
+- Acceptance: RED then GREEN regressions; focused and full R2; frozen R1; preflight; git diff --check; ordinary and eight stress profiles.
+- Excluded: frozen R1, CI inventory/thresholds, live execution, qualification and spending.
+- Rollback: reverse-apply the uncommitted diff; M2A-M2E untouched otherwise.
+- D-80 correction: boundary fixtures use observable lifecycle (test-owned ack-reader entry, fake clock, provider order); binding-return check covered by a scratch probe only; tests 4/5 now RED on baseline with the stop firing.

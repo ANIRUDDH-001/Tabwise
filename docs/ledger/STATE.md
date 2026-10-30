@@ -1,13 +1,22 @@
-# STATE — D-73 consumed (FAILED pre-runtime); CRLF lockfile fix local, uncommitted; qualification BLOCK
-Updated: 2026-10-29T13:13:06Z · Claude (Opus 5.5) · run_id tw-d73-crlf-20261029
-
-- Canonical D:/Projects/Meta AI/app; feat/TW-01-contracts at 0d1eefc (D-73 activation). No commit/push/dispatch/variable/NVDA/API call by Claude.
-- D-73 run 40849425253 (job 123364901929): admitted, variable revoked after 35 s, `--check-only` refused: `BLOCK: R1 baseline mismatch: package-lock.json`. No NVDA/browser/observer step, no artifact. Local evidence cache/d73/execution/20261029T092429Z: 25/25 hashes match, hashes.json sha256 0a5901d3…29ecd5, unchanged.
-- Root cause MEASURED: package-lock.json blob 29eab6cf… identical at R1 0c93fa7 and 0d1eefc; LF blob sha256 2f4a4e9f… (= manifest); same blob with autocrlf=true checkout = 2306bb99… . `git -c core.autocrlf=true checkout 0d1eefc` reproduces the exact hosted message (exit 2); LF checkout passes all of `--check-only`. check-r1-baseline.mjs compared the lockfile raw while normalizing the other files.
-- Escaped locally (MEASURED): dev worktree lockfile is LF (`git ls-files --eol`: i/lf w/lf) though core.autocrlf=true; tests copied those LF bytes. INFERENCE: npm rewrote it LF locally; windows-2025 Git has autocrlf=true.
-- Fix: scripts/check-r1-baseline.mjs undoes only a uniform CRLF conversion of package-lock.json (lone CR/LF or mixed endings still mismatch); trusted hashes and manifest unchanged. New test/r1-baseline-eol.test.mjs (7 tests).
-- scripts/tabwise/qualification-status.json reset to disabled/BLOCK with D-73 retirement reason. D-73 never reused. Full worker BLOCKED.
-- Last verification: `npm test` 393/393 pass exit 0; check-r1-baseline exit 0; preflight exit 0; observer --check-only refuses disabled (exit 2).
-
+# STATE - D-79 regression-quality correction done locally; uncommitted for final review
+Updated: 2026-10-30T06:23:50Z
+Branch: fix/tabwise-r2-post-final-stop
+Baseline: ef3b8eda9797029e95be0626771112fbe0144ecd (M2E merge, PR #5, review/tabwise-m2b-m2c)
+- D-79 fix: stop after receipt finalization fails closed (capture, binding, payload).
+- D-80: boundary tests now trigger from test-owned ack-reader entry, fake clock, provider order.
+- No stack traces, production names or call counts in fixtures; production code unchanged by D-80.
+- Final speech/page tests: stop fires on baseline, which then returns completed:true (genuine RED).
+- Between-actions test is a control (baseline already refused).
+- Binding-return test removed; scratch probe only (no observable boundary reaches it).
+- Baseline: 15 pass / 6 fail x5. Corrected: 21/21 x20.
+- Focused 71/71; send-receipt 41/41; R2 243/243; R1 ok; preflight ok; diff --check clean.
+- Ordinary 47/47, 518/518 (PARTIAL SUITE 47/9); stress 8 x 518/518, exit 0.
+- M1, timing, provenance, CI inventory, deps and qualification unchanged.
+## Now / next / blocked
+- Now: uncommitted diff awaiting final independent review.
+- Next: owner review and commit; hosted offline CI on the PR.
+- Blocked: R2 qualification, live NVDA and full worker.
+## Last verification
+node scripts/offline-tests.mjs --profile stress --seed 172785 --out cache/r2-post-final-stop/final/stress -> exit 0
 ## Handoff
-Next: independent review of check-r1-baseline.mjs diff + new test; owner commits and publishes by exact SHA (runbook step 2). New attempt needs new D-number, recomputed reviewed_sha256 (check-r1-baseline.mjs is in reviewed scope; D67 digest a639387a… no longer matches), status-only activation commit, owner dispatch script. A local PASS is not hosted qualification.
+docs/engineering/R2-post-final-stop.md
