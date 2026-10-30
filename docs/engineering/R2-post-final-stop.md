@@ -1,8 +1,10 @@
 # R2 — post-finalization gate stop correction
 
-Status: **offline engineering correction, locally verified 2026-10-30, uncommitted for independent review**. Not an R2 qualification PASS, and not a physical-send or NVDA attestation. R2 qualification and the full worker remain BLOCKED.
+Status: **offline engineering correction, locally verified 2026-10-30; committed as `a3a9ad4`, merged by PR #6 into `review/tabwise-m2b-m2c` (`46749e0`) and by PR #3 into `main` (`78cf379`)**. Not an R2 qualification PASS, and not a physical-send or NVDA attestation. R2 qualification and the full worker remain BLOCKED. See "Post-merge status" at the end.
 
-Baseline: `ef3b8eda9797029e95be0626771112fbe0144ecd` on `fix/tabwise-r2-post-final-stop` (M2E merge into `review/tabwise-m2b-m2c`). Nothing committed, pushed or merged.
+_Status corrected 2026-10-30T07:50:13Z (R2-L0 post-merge reconciliation). It previously read "uncommitted for independent review". The results below are unchanged._
+
+Baseline: `ef3b8eda9797029e95be0626771112fbe0144ecd` on `fix/tabwise-r2-post-final-stop` (M2E merge into `review/tabwise-m2b-m2c`). At handoff time nothing was committed, pushed or merged. This changed later; see "Post-merge status".
 
 ## Defect (HIGH, from independent review)
 
@@ -135,3 +137,16 @@ Logs: `cache/r2-post-final-stop/` (`red-baseline.txt`, `green-failclosed.txt`, `
 ## Independent review required
 
 Review the three source hunks and the ten appended tests. Re-run the commands above on a clean checkout. Commit and publication remain owner-controlled.
+
+## Post-merge status (R2-L0, appended 2026-10-30T07:50:13Z)
+
+| Item | State | Basis |
+|---|---|---|
+| Commit | `a3a9ad48257b9cd218c8b6a2dab522eb39db4595` `fix(r2): reject gate stops after receipt finalization` | MEASURED: `git log` |
+| PR #6 | merged into `review/tabwise-m2b-m2c` as `46749e037d4720e0083edb79f4dbdbce5ba477ad` | MEASURED: merge commit in `git log` |
+| PR #3 | merged into `main` as `78cf37953702998dc87a9eb61cae6e7c64ec339f`; tree `2af46092d6a4a796be82c0e55450b8f31944a605`, the same as `46749e0` | MEASURED: `git rev-parse <commit>^{tree}` |
+| Independent D-79/D-80 review | PASS | owner-reported; not re-checked here |
+| Combined hosted offline preflight | PASS, run `41016516810`, before the PR #3 merge | owner-reported; run head SHA not re-checked here |
+| Post-merge `main` CI | none recorded | no run is claimed |
+
+The verification tables above are still the last local results: R2 243/243, and ordinary plus eight stress profiles at 518/518 each. They were measured on the uncommitted tree before `a3a9ad4`. R2-L0 did not re-run them. The "Remaining limits" section still applies unchanged. The "Independent review required" section is satisfied by the owner-reported review PASS. Commit and publication happened under owner control.
