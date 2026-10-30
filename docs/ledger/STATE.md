@@ -1,31 +1,31 @@
-# STATE - R2-L2 production binding design (docs only); uncommitted
-Updated: 2026-10-30T10:33:38Z
-Branch: design/tabwise-r2-l2-boundaries
-Baseline: a8232fefa431f449be2f0de398966b6eb68504cc (main after PR #8)
-## R2-L1 reconciliation (replaces the stale "uncommitted" status)
-- R2-L1 page-journal adapter + D-82 correction committed as 2d00793 on
-  feat/tabwise-r2-l1-page-journal; PR #8 merged into main as a8232fe at 2026-10-30T09:48:03Z
-  (MEASURED: public GitHub PR page/API via WebFetch).
-- Hosted offline-preflight run 41034293062 (preflight.yml, pull_request, head 2d00793,
-  attempt 1) conclusion success. No post-merge main run recorded for a8232fe.
-- Stamp note: earlier R2-L1 STATE/LOG/doc stamps (14:09-14:55 "Z") are later than the merge
-  time and were very likely IST labelled Z. Left as written (append-only history).
+# STATE - R2-L2 S1 + S2 implemented offline; uncommitted
+Updated: 2026-10-30T12:31:56Z
+Branch: feat/tabwise-r2-l2-s1-s2-offline (base main merge 45bcd804)
 ## Now / next / blocked
-- Now: uncommitted docs/engineering/R2-L2-production-binding-design.md revision 3
-  (2026-10-30T10:33:38Z): findings 1-10 (§0.1) plus H1/H2/M1/M2 (§0.2). One process
-  per page, title-nonce served transform, bounded Shift accounting, step map, delta evidence,
-  attribute/text-only state, authentic-only session + fake compose seam, C-3 speech payload. Awaiting re-review.
-- Next: owner decisions O-1..O-9 (O-4 silence rule and O-9 visual granularity pending);
-  then S1, S3, S4, C-1 in parallel; S2; S5a; S5b; C-3; S6; S7 owner-gated.
-- Blocked: R2 qualification, live NVDA, physical input, full worker. liveGate throws;
-  review-status BLOCK; qualification-status enabled:false/BLOCK; D-72/73/74 retired.
-## Last verification
-- git diff --check: see LOG entry for this handoff. No code/test changed, so no test run.
-- Previous code verification (R2-L1): r2* 314/314, ordinary 589/589, digest 6972c311...f328.
+- Now: S1 src/r2/page-recorder.mjs and S2 src/r2/page-source.mjs (new, untracked) plus
+  598 appended lines in test/r2-page-provider.test.mjs (S1-*, S2-*). No caller wired; nothing committed.
+- Next: independent S1/S2 review PASS (offline scope); owner commit/PR targeting main. S3, S4 and C-1 remain next; O-1..O-9 pending.
+- Blocked: R2 qualification, live NVDA, physical input, real Chromium (P-1/P-2/P-3 unmeasured).
+  liveGate throws; review-status BLOCK; qualification-status enabled:false/BLOCK.
+## Last verification (MEASURED, this session, Node v24.22.1)
+- node --test test/r2-page-provider.test.mjs: pass 172, fail 0.
+- node --test test/r2*.test.mjs: tests 373, pass 373, fail 0 (was 314 at R2-L1).
+- node scripts/offline-tests.mjs --profile ordinary --seed 1 (out in scratch): exit 0, 47/47 files PASS, 9 excluded.
+- git diff --check: clean. Mutation checks: 12 mutations each fail >=1 test (M9, M11, M12 only after
+  3 added tests). TDD deviation: code written before tests, so no recorded RED; mutations substitute.
+## Design deviations / additions (review these)
+- Page source API beyond {read,pending}: intents() input, prefixes(), markFinal(), flush(), writer.put().
+- Delta record adds header, state_same, shift_prefix; unchanged-run record fields read_first/read_last.
+- page_reported_overflow flag (64 KB); non-prefix page_reported stored from index 0, not refused.
+- Recorder byte cap counts events only; whole-read cap stays with the adapter (refuses, fail-closed).
+- SHIFT_PENDING_MS=2000 defined locally (capture.mjs constants not exported).
+## Residual risks
+- Recorder is not a sandbox: pre-install patches, Array.prototype, DOM data are page-controlled.
+- Real focus order/activeElement in focusout/removal without focusout (P-1), isTrusted under NVDA
+  (P-2), NVDA-synthesized Control/Insert (P-3): all unmeasured; shim only.
+- A hung view call blocks the serial queue (callers must bound); page-rejected.json size cap left to S3.
 ## Handoff
-- Design: docs/engineering/R2-L2-production-binding-design.md (read §0.1, §10, §14 first).
-- Key findings: journal reads must be serialized (design §3.6); R2-only contract changes are
-  C-1 alignTimeline keys, C-3 speech payload, C-2 capture hook (only if O-9); no R1 change.
-- Commit files: docs/engineering/R2-L2-production-binding-design.md,
-  docs/ledger/{STATE.md,LOG.jsonl,PLAN.md}. Suggested message:
-  "docs(r2): R2-L2 production binding design (rev 3) and R2-L1 merge reconciliation".
+- Files: src/r2/page-recorder.mjs, src/r2/page-source.mjs, test/r2-page-provider.test.mjs,
+  docs/CODEMAP.md, docs/ledger/{STATE.md,LOG.jsonl}. Frozen R1, vendor, workflows, status unchanged.
+- Suggested owner commit: "feat(r2): R2-L2 S1 page recorder and S2 page source (offline)".
+  Independent offline review PASS; live R2 qualification remains BLOCKED.
