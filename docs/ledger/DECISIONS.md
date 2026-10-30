@@ -328,3 +328,9 @@ Owner instruction: the task message "TABWISE — OVERNIGHT M2D IMPLEMENTATION, H
 Scope: src/r2/capture.mjs; test/r2-capture-receipts{,-failclosed}.test.mjs; docs/engineering/R2-M2D-speech-boundary.md; STATE/PLAN/DECISIONS/LOG/CODEMAP.
 Limits: zero spend; no installs, API calls, browser, NVDA, physical input, dispatch, commit, push, merge or status change. Frozen R1, CI-H1/H2 and workflows untouched.
 Note: no separate AskUserQuestion spec approval was held; the owner's message itself states the spec, acceptance and rollback and asks for autonomous execution. Commit/publication still requires the owner.
+## D-78 2026-10-30T04:34:09Z - M2E publication
+Owner authorization: PUBLISH M2E entered in PowerShell.
+Scope: release-relative observation and silence, regression fixtures, handoff and ledgers.
+Local evidence: focused 62/62, R2 234/234, ordinary 509/509, eight stress profiles 509/509 on rerun.
+Caveat: first stall-40/speech.test.mjs timeout retained.
+Limits: isolated branch publication only; no merge, live NVDA, qualification activation or spending.

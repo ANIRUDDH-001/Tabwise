@@ -324,7 +324,8 @@ for(const hook of ['persistActionIntent','checkForeground'])test(`M2D-02: speech
 });
 
 test('M2D-03: speech first seen after a valid release is associated with the action observationally only',async()=>{
-  const f=rig({transport:sendAnd(null,async({later,phrases})=>{later(25,()=>phrases.push('Submit button'));})});
+  let f;
+  f=rig({r1:atRelease(()=>f.later(25,()=>f.phrases.push('Submit button')))});
   const result=await captureOfflineJourney(f.options);
   const record=result.records[0], phrase=speechOf(result,'Submit button');
   assert.equal(result.completed,true,reasons(result));assert.equal(record.capture_status,'speech');
@@ -391,7 +392,7 @@ test('M2D-06: speech, page key and gate release visibility are separate timing d
 
 test('M2D-06: slow intent, foreground and post-send settlement do not taint speech seen after release',async()=>{
   let f;
-  f=rig({intentMs:300,foregroundMs:200,releaseMs:20,r1:atRelease(()=>f.later(100,()=>f.phrases.push('Saved'))),
+  f=rig({intentMs:300,foregroundMs:200,releaseMs:20,observationMs:200,r1:atRelease(()=>f.later(100,()=>f.phrases.push('Saved'))),
     check:async(context,{sleep})=>{if(context.phase==='post')await sleep(800);return [];}});
   const result=await captureOfflineJourney(f.options);
   const record=result.records[0], phrase=speechOf(result,'Saved');
@@ -401,11 +402,12 @@ test('M2D-06: slow intent, foreground and post-send settlement do not taint spee
 });
 
 test('M2D-07: early speech in a later action never leaks into it or an earlier action, and stops the journey',async()=>{
-  const f=rig({actions:[{step:'a01',press:'Tab'},{step:'a02',press:'Enter'},{step:'a03',press:'Space'}]});
+  let f, fired=false;
+  // 'first' follows a01's release entry only (the first release), within its release-relative window.
+  f=rig({actions:[{step:'a01',press:'Tab'},{step:'a02',press:'Enter'},{step:'a03',press:'Space'}],
+    r1:atRelease(()=>{if(!fired){fired=true;f.later(20,()=>f.phrases.push('first'));}})});
   let intents=0;
   f.options.executorBindings.persistActionIntent=async()=>{if(++intents===2)f.phrases.push('stray');};
-  const press=f.executorBindings.nvda.press;
-  f.executorBindings.nvda.press=async p=>{await press(p);if(p==='Tab')f.later(20,()=>f.phrases.push('first'));};
   const result=await captureOfflineJourney(f.options);
   assertPremature(result,'stray','a02');
   assert.equal(result.records[0].text,'first');assert.equal(result.records[0].capture_status,'speech');
@@ -435,7 +437,9 @@ test('M2D-09: the M1 path without receipts keeps attributing execution-window sp
 test('M2D-10: the model payload refuses premature speech and carries no attribution diagnostics',async()=>{
   const bad=await captureOfflineJourney(rig({transport:sendAnd(async({phrases,sleep})=>{phrases.push('early');await sleep(30);})}).options);
   assert.throws(()=>speechModelPayload(bad),/incomplete/);
-  const good=await captureOfflineJourney(rig({transport:sendAnd(null,async({later,phrases})=>{later(25,()=>phrases.push('Submit button'));})}).options);
+  let f;
+  f=rig({r1:atRelease(()=>f.later(25,()=>f.phrases.push('Submit button')))});
+  const good=await captureOfflineJourney(f.options);
   assert.equal(good.completed,true,reasons(good));
   const text=JSON.stringify(speechModelPayload(good));
   assert.ok(text.includes('Submit button'));
@@ -497,8 +501,84 @@ test('M2D-12: equal Node timestamps are not an ordering: a read requested at the
 });
 
 test('M2D: duplicate post-release phrases keep distinct sequence numbers and attribution',async()=>{
-  const f=rig({transport:sendAnd(null,async({later,phrases})=>{later(25,()=>phrases.push('same','same'));})});
+  // M2E: anchored at the release entry, not transport settlement (which lands a variable 0-60 ms later).
+  let f;
+  f=rig({r1:atRelease(()=>f.later(25,()=>f.phrases.push('same','same')))});
   const result=await captureOfflineJourney(f.options);
   assert.equal(result.completed,true,reasons(result));
   assert.deepEqual(result.records[0].raw_seq,[1,2]);assert.equal(result.records[0].text,'same\nsame');
+});
+
+
+// M2E — receipt-relative silence and speech-window accounting, in the already admitted file.
+test('M2E: silence starts at release, not the slow executor request',async()=>{
+  const f=rig({intentMs:600,foregroundMs:401,observationMs:50});
+  const result=await captureOfflineJourney(f.options), record=result.records[0];
+  assert.equal(result.completed,true,reasons(result));
+  const release=record.ack_timing.release_at;
+  assert.ok(release>=1001);
+  assert.deepEqual(record.silence,{transport_live:true,from:release,to:release+50,unit:'node-monotonic-ms'});
+  assert.deepEqual(record.observation_window,{clock:'node-monotonic-ms',reference:'gate-release',from:release,to:release+50,policy_ms:50});
+  assert.ok(record.node_window.from<release);
+  assert.ok(record.node_window.to>=record.silence.to);
+});
+
+test('M2E: a slow post-send check does not extend the reported silence window',async()=>{
+  const f=rig({observationMs:50,timeoutMs:4000,
+    check:async(context,{sleep})=>{if(context.phase==='post')await sleep(3000);return [];}});
+  const result=await captureOfflineJourney(f.options), record=result.records[0];
+  assert.equal(result.completed,true,reasons(result));
+  assert.equal(record.capture_status,'observed-silence');
+  assert.equal(record.silence.from,record.ack_timing.release_at);
+  assert.equal(record.silence.to-record.silence.from,50);
+  assert.ok(record.gate_receipt.finished_at-record.silence.to>2500);
+  assert.ok(record.node_window.to>record.silence.to,'execution timeline extends beyond speech window');
+});
+
+test('M2E: legitimate speech within the release-relative window still counts',async()=>{
+  let f;
+  f=rig({observationMs:50,r1:atRelease(()=>f.later(25,()=>f.phrases.push('Within window')))});
+  const result=await captureOfflineJourney(f.options),record=result.records[0];
+  assert.equal(result.completed,true,reasons(result));
+  assert.equal(record.capture_status,'speech');
+  assert.equal(record.text,'Within window');
+  assert.equal(record.observation_window.from,record.ack_timing.release_at);
+  assert.equal(record.observation_window.to,record.ack_timing.release_at+50);
+  assert.ok(speechOf(result,'Within window').received.t<=record.observation_window.to);
+});
+
+test('M2E: speech beyond the release-relative window is diagnostic, never action evidence',async()=>{
+  let f;
+  f=rig({observationMs:50,timeoutMs:4000,
+    r1:atRelease(()=>f.later(100,()=>f.phrases.push('Outside window'))),
+    check:async(context,{sleep})=>{if(context.phase==='post')await sleep(500);return [];}});
+  const result=await captureOfflineJourney(f.options),record=result.records[0];
+  assert.equal(result.completed,false);
+  assert.equal(result.outcome,'INSUFFICIENT_EVIDENCE');
+  assert.equal(record.capture_status,'ambiguous');
+  assert.match(reasons(result),/gate-release observation window/);
+  assert.deepEqual(record.raw_seq,[]);
+  assert.equal(record.text,'');
+  assert.equal(strayOf(result,'Outside window').step,'a01');
+  assert.ok(strayOf(result,'Outside window').received.t>strayOf(result,'Outside window').observation_until);
+  assert.equal(f.gate.isStopped(),true);
+});
+
+test('M2E: absent release does not create an observation window or a silence claim',async()=>{
+  const f=rig({transport:async(press,{key})=>key(press)});
+  const result=await captureOfflineJourney(f.options),record=result.records[0];
+  assert.equal(result.completed,false);
+  assert.equal(record.observation_window,undefined);
+  assert.equal(record.silence,undefined);
+});
+
+test('M2E: M1 silence remains executor-request anchored and has no new receipt window',async()=>{
+  const f=rig({observationMs:50});delete f.options.receiptBindings;
+  f.gate.setAck(f.ackReader);
+  const result=await captureOfflineJourney(f.options),record=result.records[0];
+  assert.equal(result.completed,true,reasons(result));
+  assert.equal(record.capture_status,'observed-silence');
+  assert.equal(record.observation_window,undefined);
+  assert.equal(record.silence.from,record.node_window.from);
+  assert.equal(record.silence.to,record.node_window.to);
 });
