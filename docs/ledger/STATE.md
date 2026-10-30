@@ -1,22 +1,22 @@
-# STATE - R2-L2 S3 review fixes (H1-H3, M1-M3) applied offline; uncommitted
-Updated: 2026-10-30T13:42:01Z
+# STATE - R2-L2 S3 + S4 + C-1 implemented offline; PR pending
+Updated: 2026-10-30T14:12:18Z
 Branch: feat/tabwise-r2-l2-s3-evidence-offline (HEAD 91744678, S1+S2 merged)
 ## Now / next / blocked
-- Now: S3 r2-evidence.mjs + test/r2-evidence.test.mjs (untracked) revised for the independent review:
+- Now: S3 evidence verifier, S4 approval policy and C-1 key semantics integrated offline; R2 remains disabled/BLOCK.
   H1 completeness, H2 captureJourney contract, H3 mutation-backed state, M1 intent VKs/Shift prefixes, M2 cap tests.
-- Next: re-review of the revised S3; owner commit/PR. Then S4, S5a/S5b, S6, C-1, C-3.
+- Next: owner PR and hosted CI; then C-3, S5a/S5b, S6 and S7. Windows NVDA qualification remains blocked.
 - Blocked: R2 qualification, live NVDA, physical input. P-1 was provisionally exercised in real Chromium 153
   via a separate Cloud session (not this session); pinned Chromium 156 and Windows NVDA remain unverified;
   P-1 is NOT fully qualified. P-2/P-3 unmeasured. genuine-unqualified/qualified unreachable until S5b/S6.
-## Last verification (MEASURED, this session, Node v24.22.1)
-- node --test test/r2-evidence.test.mjs: tests 36 (10 positive, 26 negative), pass 36, fail 0.
-- Before concurrent S4 edits: r2*.test.mjs 408/408; ordinary offline exit 0, 48/48 files PASS.
-- After concurrent S4 edits (another session, ~13:38Z: capture.mjs, contract.mjs, r2-review/r2 tests,
-  r2-policy.mjs, r2-status.json): r2*.test.mjs 420/421, the 1 fail is S4 "CRLF checkout is the same text"
-  in r2-review.test.mjs; ordinary offline exit 1, 47/48 (r2-review FAIL). Not S3; S3 did not touch them.
-- node scripts/check-r1-baseline.mjs: ok true, errors []. git diff --check: clean (LF->CRLF warnings only).
-- Mutations: 63 one-at-a-time edits of r2-evidence.mjs (32 Phase 1 + 35 review, 4 superseded), 62 fail
-  >=1 test; survivor = lane-cap backstop (encodeBounded enforces it first). Restored, sha256 d7688804.
+## Last verification (MEASURED, owner Windows Node v24.22.1)
+- R2 regression: 421/421 PASS; exit 0.
+- Ordinary offline profile: 48/48 selected files PASS, 9 excluded; exit 0.
+- Frozen R1 baseline: ok true, errors []; exit 0.
+- Git diff --check: exit 0; informational LF-to-CRLF warnings only.
+- S4 CRLF test corrected; R2_FILES includes the S3 evidence writer.
+- Chromium 153 P-1 provisional; pinned Chromium 156 and Windows NVDA unverified.
+- R2 qualification remains disabled/BLOCK.
+
 ## Review fixes (review these)
 - H1: no accepted page read -> reason; no capture.json -> reason; intents/keys/records short of the step map
   -> reasons. Empty writer seals incomplete (S3-N20).
