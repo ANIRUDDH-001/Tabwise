@@ -15,6 +15,36 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const problem = (status, message) => Object.assign(new Error(message), { status });
 const positive = n => Number.isFinite(n) && n > 0;
 
+// Post-finalization gate revalidation (ledger.gateState(), the ledger's own gate). Only a registered, readable,
+// unstopped gate is live; anything else fails closed. The original stop kind/reason is copied, never rewritten.
+export const gateLive = state => state?.registered === true && state?.valid === true && state?.stopped === false;
+const describeStop = state => `owned gate ${state?.registered === true && state?.valid === true ? 'stopped' : 'state unverifiable'} after receipt finalization` +
+  (state?.reason ? ` (${state.kind ?? 'unknown'}: ${state.reason})` : '');
+const stopRecord = (where, state) => ({ where, registered: state?.registered === true, valid: state?.valid === true,
+  kind: state?.kind ?? null, reason: state?.reason ?? null, misdelivered: state?.misdelivered ?? null });
+
+/**
+ * Invalidate a capture whose owned gate is no longer live after finalization: never completed or model-eligible.
+ * The last record's success claim (speech/observed-silence) is demoted to failed; its prior status and silence
+ * claim are kept under record.invalidated as diagnostics only. Raw observations are left untouched.
+ */
+export function invalidateForGateStop(capture, where, state) {
+  const reason = `${where}: ${describeStop(state)}`;
+  capture.gate_stop ??= stopRecord(where, state);
+  const record = capture.records?.at(-1);
+  if (record && ['speech', 'observed-silence'].includes(record.capture_status)) {
+    record.invalidated = { by: 'gate-stop', where, prior_capture_status: record.capture_status,
+      ...(record.silence ? { prior_silence: record.silence } : {}) };
+    delete record.silence;
+    record.capture_status = 'failed';
+    record.reasons.push(reason);
+  }
+  capture.reasons.push(reason);
+  capture.completed = false;
+  capture.outcome = 'INSUFFICIENT_EVIDENCE';
+  return capture;
+}
+
 function expectedKey(press) {
   if (typeof press !== 'string' || !press || /^(Control|Alt|Meta|Insert|Shift)$/.test(press)) throw Error('unsupported press');
   const shift = press.startsWith('Shift+');
@@ -56,6 +86,16 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
     evidence_scope: 'injected transport; no hosted provenance attestation', guarded_execution_verified: false, completed: false,
     outcome: 'INSUFFICIENT_EVIDENCE', preexisting_phrases: 0, records: [], raw: [], unattributed: [], unattributed_page: [], reasons: [] };
   let previousSpeech = null, previousPage = null, lastNow = -Infinity;
+  // True from a complete receipt finish until the next begin(): the gate must stay live through every later read.
+  let finalized = false;
+  // Synchronous revalidation; called right after each asynchronous read returns and at completion boundaries.
+  function gateStop(where, always = false) {
+    if (!receipts || (!finalized && !always)) return null;
+    const state = receipts.gateState();
+    if (gateLive(state)) return null;
+    result.gate_stop ??= stopRecord(where, state);
+    return Object.assign(problem('failed', `${where}: ${describeStop(state)}`), { gate_state: state });
+  }
   const now = () => {
     const t = clock.now();
     if (!Number.isFinite(t) || t < lastNow) throw problem('incomplete', 'Node monotonic clock regressed');
@@ -78,6 +118,7 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
     if (!sample) throw problem('missing', 'speech capture missing');
     if (sample.connected !== true) throw problem('disconnected', 'speech transport disconnected');
     if (sample.complete !== true || typeof sample.session !== 'string' || !sample.session || !Array.isArray(sample.phrases) || sample.phrases.some(p => typeof p !== 'string')) throw problem('incomplete', 'speech snapshot incomplete');
+    const stop = gateStop('speech read');
     if (previousSpeech && (sample.session !== previousSpeech.session || sample.source !== previousSpeech.source || sample.phrases.length < previousSpeech.phrases.length || previousSpeech.phrases.some((p,i) => p !== sample.phrases[i]))) throw problem('incomplete', 'speech session/log reset or prefix rewritten');
     let early = [];
     if (!previousSpeech) {
@@ -91,6 +132,9 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
       }));
       result.raw.push(...delta);
       if (boundary) result.unattributed.push(...copy(delta));
+      // Speech read after a gate stop is diagnostics only: never action text, even inside the window.
+      else if (stop) result.unattributed.push(...delta.map(p => ({ ...copy(p), ...(record ? { step: record.step } : {}),
+        invalidated_by: 'gate-stop' })));
       else if (record) {
         let accepted = delta;
         if (receipts) {
@@ -107,10 +151,12 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
         record.text = result.raw.filter(p => record.raw_seq.includes(p.seq)).map(p => p.text).join('\n');
       }
       previousSpeech = sample;
+      if (stop) throw stop;
       if (boundary && delta.length) throw problem('ambiguous', 'unattributed speech outside a closed action window');
     }
     previousSpeech = sample;
     previousSpeechFloor = floor;
+    if (stop) throw stop;
     if (early.length) {
       const release = record?.ack_timing?.release_at ?? null;
       const late = release !== null && early.some(p => p.arrived_after.t > release && p.received.t > release + observationMs);
@@ -135,9 +181,10 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
     const delta = previousPage ? events.slice(previousPage.events.length) : [];
     const snapshot = { session: sample.session, clock: PAGE_CLOCK, t: sample.t, active: sample.active, state: sample.state, cursor: events.length, node_received: { clock: NODE_CLOCK, t: now() } };
     previousPage = sample;
-    if (boundary && delta.length) {
-      result.unattributed_page.push({ snapshot: copy(snapshot), events: copy(delta) });
-      throw problem('ambiguous', 'page events outside a closed action window');
+    const stop = gateStop('page read');
+    if (stop || (boundary && delta.length)) {
+      result.unattributed_page.push({ snapshot: copy(snapshot), events: copy(delta), ...(stop ? { invalidated_by: 'gate-stop' } : {}) });
+      throw stop ?? problem('ambiguous', 'page events outside a closed action window');
     }
     if (record) {
       record.page.before ??= copy(snapshot);
@@ -192,6 +239,7 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
         // The ledger's collection bound covers the executor bound plus its own settlement wait.
         receipts.begin(action.step, { deadlineAt: record.node_window.from + timeoutMs + RECEIPT_SETTLE_MS });
         receiptOpen = true;
+        finalized = false;
       }
       started = true;
       record.execution.started = true;
@@ -239,6 +287,7 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
             record.gate_receipt = copy(receipt);
             if (receipt.complete !== true) throw problem('failed', `gate receipt incomplete: ${receipt.errors.join('; ') || 'no release receipt'}`);
             if (release !== null && receipt.released_at !== release) throw problem('ambiguous', 'gate receipt: release time changed');
+            finalized = true;
             continue; // Recheck speech, page and release after settlement before completing.
           }
           // Executor settlement is still mandatory even if the speech window has elapsed.
@@ -286,6 +335,8 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
       const keydowns = record.page.events.filter(e => e.type === 'keydown');
       const errors = judgeKeys(keydowns, keys[index]);
       if (errors.length) throw problem('incomplete', `ack: ${errors.join('; ')}`);
+      const stopped = gateStop('action completion', true);
+      if (stopped) throw stopped;
       record.capture_status = record.raw_seq.length ? 'speech' : 'observed-silence';
       if (!record.raw_seq.length) record.silence = { transport_live: true,
         from: receipts ? record.observation_window.from : record.node_window.from,
@@ -293,6 +344,7 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
     } catch (error) {
       record.capture_status = error.status ?? 'failed';
       record.reasons.push(error.message);
+      if (error.gate_state) record.invalidated = { by: 'gate-stop', where: result.gate_stop?.where ?? null, prior_capture_status: null };
       record.execution.settled = executionSettled;
       record.execution.cancellation_requested = started && !executionSettled;
       controller.abort(); // Request promptly; no assertion that an injected executor has stopped.
@@ -317,9 +369,21 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
   }
   // A second boundary read catches arrivals between the final speech sample and page snapshot.
   try { await readSpeech(null, true); await readPage(null, true); }
-  catch (error) { result.reasons.push(`final boundary: ${error.message}`); controller.abort(); return done(); }
+  catch (error) {
+    controller.abort();
+    // Re-read rather than trust which error won: a stop alongside another read failure still demotes the record.
+    const state = receipts ? receipts.gateState() : null;
+    if (error.gate_state || (receipts && !gateLive(state))) {
+      if (!error.gate_state) result.reasons.push(`final boundary: ${error.message}`);
+      invalidateForGateStop(result, 'final boundary', error.gate_state ?? state);
+    } else result.reasons.push(`final boundary: ${error.message}`);
+    return done();
+  }
   // Every receipt the ledger expects must be complete, not just the ones this journey asked for.
   if (receipts && receipts.read().complete !== true) { result.reasons.push('final boundary: gate receipt ledger journey incomplete'); return done(); }
+  // Last check, with no await between it and the return. A stop after this is the binding's (or caller's) to see.
+  const stopped = gateStop('completion', true);
+  if (stopped) { invalidateForGateStop(result, 'final boundary: completion', stopped.gate_state); return done(); }
   result.completed = true;
   result.outcome = 'COMPLETE';
   return done();

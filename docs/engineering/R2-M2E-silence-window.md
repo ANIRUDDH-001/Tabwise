@@ -1,6 +1,8 @@
 # R2 M2E — gate-release-relative silence and observation windows
 
-Status: **offline engineering change, locally verified 2026-10-30 (see Local results); owner review and hosted CI pending**. Not an R2 qualification PASS, not a physical-send or NVDA attestation. Full worker remains BLOCKED.
+Status: **offline engineering change, locally verified 2026-10-30 (see Local results); published under D-78 and merged by PR #5 into `review/tabwise-m2b-m2c` (merge `ef3b8ed`, per `git log` and local remote-tracking refs; not `main`)**. The owner reports that the integration Draft PR's hosted offline CI passed; this was not re-checked from the correction session. A later independent review found one HIGH post-finalization gate-stop defect in receipt mode, corrected in `R2-post-final-stop.md`. Not an R2 qualification PASS, not a physical-send or NVDA attestation. Full worker remains BLOCKED.
+
+_Status corrected 2026-10-30 (post-final-stop correction); the historical results below are unchanged._
 
 Baseline: `2754e6b687b0e5735f18324a57ae5cdfb16bab33` on a new isolated `fix/tabwise-r2-m2e` branch. Patch created without editing the baseline repository.
 
@@ -91,4 +93,4 @@ The offline runner covers only part of the root test suite. It reports `PARTIAL 
 - `observation_window` stays on failed records as diagnostic policy scope. Consumers must gate on `capture_status` / `completed`, never on the window field alone.
 - The loop has no executor timeout after receipt settlement. It terminates because an authenticated ledger's `complete:true` implies `released_at`, which predates M2E. A forged ledger is already refused by `isSendReceiptLedger`.
 - `stall-40/speech.test.mjs` runs with about 7 s of headroom under its 60 s watchdog on this machine. That is outside M2E scope.
-- Status: local evidence only. No hosted CI run, owner review or ledger entry exists for M2E yet. R2 qualification remains BLOCKED.
+- Status (as written at M2E handoff, now superseded): "local evidence only", with no hosted CI, owner review or ledger entry at that time. Since then: D-78 publication, PR #5 merge into `review/tabwise-m2b-m2c` (`ef3b8ed`) and an owner-reported hosted offline CI pass. The independent review's HIGH finding (post-finalization gate stop) is addressed in `R2-post-final-stop.md`. R2 qualification remains BLOCKED.

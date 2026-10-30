@@ -30,6 +30,8 @@ const vks = press => press === 'Shift+Tab' ? [VK.Shift,VK.Tab] : [{Tab:VK.Tab,En
  * wait is NOT the acknowledgement deadline or proof of physical quiescence.
  * expire(step) records an
  * external timeout/cancellation. read() returns detached, serializable diagnostics.
+ * gateState() is a read-only, synchronous snapshot of THIS ledger's owned gate (and its registration) for
+ * post-finalization revalidation; it never stops, refuses, records or accepts an external status object.
  * No commit/send/release/arm call is performed by this module.
  */
 export function createSendReceiptLedger({gate,getGate,ackReader,onIntent,actions,now}) {
@@ -209,6 +211,15 @@ export function createSendReceiptLedger({gate,getGate,ackReader,onIntent,actions
       // A failed clock can leave finished_at unknown; never substitute a fake time.
       r.finishing=false;active=null;next++;if(r.gate_finished)lastSends=r.gate_finished.sends;
       return copy(r);
+    },
+    gateState() {
+      // Unreadable or malformed state is reported as not valid; the consumer fails closed on it.
+      try {
+        const registered=getGate()===gate,s=gate.status(),stopped=gate.isStopped();
+        const valid=!!s&&typeof s.stopped==='boolean'&&typeof s.misdelivered==='boolean'&&typeof stopped==='boolean';
+        return {registered,valid,stopped:valid?s.stopped||stopped:null,kind:typeof s?.kind==='string'?s.kind:null,
+          reason:typeof s?.reason==='string'?s.reason:null,misdelivered:valid?s.misdelivered:null};
+      } catch { return {registered:false,valid:false,stopped:null,kind:null,reason:null,misdelivered:null}; }
     },
     read:()=>copy({schema:'r2-gate-release-receipts/1',clock:'node-monotonic-ms',
       provenance:{kind:'synthetic',attestation:'UNATTESTED',scope:'owned gate callbacks and counters; no physical boundary attestation'},

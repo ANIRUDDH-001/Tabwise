@@ -334,3 +334,14 @@ Scope: release-relative observation and silence, regression fixtures, handoff an
 Local evidence: focused 62/62, R2 234/234, ordinary 509/509, eight stress profiles 509/509 on rerun.
 Caveat: first stall-40/speech.test.mjs timeout retained.
 Limits: isolated branch publication only; no merge, live NVDA, qualification activation or spending.
+## D-79 2026-10-30T05:29:42Z - R2 post-finalization gate stop correction (owner task message)
+Owner instruction: the task message "TABWISE — R2 Post-Finalization Gate Stop Correction", which says "Your assignment is to fix that defect completely, with regression evidence, and prepare a reviewable handoff." and "Do not commit, push, merge, switch branches, change qualification status, or activate any live functionality."
+Scope: src/r2/{capture,binding,send-receipt}.mjs; appended tests in test/r2-capture-receipts-failclosed.test.mjs; docs/engineering/R2-post-final-stop.md; M2E handoff status correction; STATE/PLAN/DECISIONS/LOG/CODEMAP.
+Test placement: tests appended to an admitted file instead of a new file, because a new file would need a ci/offline-tests.json classification (gated CI config) and would change the required 47-selected/9-excluded disclosure. Same approach as M2E.
+Limits: zero spend; no installs, API calls, browser, NVDA, physical input, dispatch, commit, push, merge, branch switch or status change. Frozen R1, vendor, workflows, manifests and CI thresholds untouched.
+Note: no separate AskUserQuestion spec approval was held. The owner's message states the defect, scope, acceptance order and limits, and asks for completion through handoff (as D-77). Commit and publication remain with the owner.
+## D-80 2026-10-30T06:13:14Z - D-79 regression-quality correction (owner task message)
+Owner instruction: the task message "TABWISE D-79 — FINAL REGRESSION-QUALITY CORRECTION", which says "Replace these triggers with deterministic test-controlled synchronization based on observable provider/executor lifecycle boundaries, not production function names, stack traces, polling counts or real elapsed time." and "If a scenario cannot be reproduced reliably using existing observable boundaries, say so, retain the independent scratch reproduction as separate evidence and do not invent a passing regression."
+Disposition: final speech and final page boundary tests re-triggered from the test-owned ack-reader entry, fake clock and provider order; between-actions kept as a control; binding-return test removed (no observable boundary reaches it), retained as scratch probe evidence.
+Production code: unchanged by this correction.
+Limits: as D-79; no CI, dependency, workflow, R1, policy or status change; nothing committed.
