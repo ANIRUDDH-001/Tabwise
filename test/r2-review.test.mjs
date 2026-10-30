@@ -50,7 +50,7 @@ test('R2 review: an acknowledgement of the wrong key is insufficient when a pres
 });
 
 // S4 (R2-L2 §11): R2 policy and status. Ships disabled/BLOCK; every approval field must agree; D-72..D-74 refused.
-import { readFileSync as readS4, mkdtempSync as tmpS4, mkdirSync as mkdirS4, copyFileSync as copyS4, writeFileSync as writeS4, rmSync as rmS4, existsSync as existsS4 } from 'node:fs';
+import { readFileSync as readS4, mkdtempSync as tmpS4, mkdirSync as mkdirS4, copyFileSync as copyS4, chmodSync as chmodS4, writeFileSync as writeS4, rmSync as rmS4, existsSync as existsS4 } from 'node:fs';
 import { tmpdir as tmpdirS4 } from 'node:os';
 import { join as joinS4, dirname as dirnameS4 } from 'node:path';
 import { createHash as hashS4 } from 'node:crypto';
@@ -139,10 +139,15 @@ test('S4 policy: retired D-72, D-73 and D-74 are refused even when status and en
   }
 });
 
+const copyWritableS4 = (from, to) => {
+  copyS4(from, to);
+  chmodS4(to, 0o666);
+};
+
 test('S4 policy: forged or changed source content refuses (R2 scope and qualification scope)', () => {
   const tmp = tmpS4(joinS4(tmpdirS4(), 'tabwise-r2-policy-'));
   try {
-    for (const file of new Set([...R2_FILES, ...QUALIFICATION_FILES])) { mkdirS4(dirnameS4(joinS4(tmp, file)), { recursive: true }); copyS4(file, joinS4(tmp, file)); }
+    for (const file of new Set([...R2_FILES, ...QUALIFICATION_FILES])) { mkdirS4(dirnameS4(joinS4(tmp, file)), { recursive: true }); copyWritableS4(file, joinS4(tmp, file)); }
     const status = s4Status(process.cwd());
     assert.equal(s4Check({ status, root: tmp }).ok, true, 'byte-identical copy passes');
     writeS4(joinS4(tmp, 'src/r2/contract.mjs'), readS4('src/r2/contract.mjs', 'utf8').replace(/\r?\n/g, '\r\n'));
@@ -150,11 +155,11 @@ test('S4 policy: forged or changed source content refuses (R2 scope and qualific
     writeS4(joinS4(tmp, 'src/r2/contract.mjs'), readS4('src/r2/contract.mjs', 'utf8') + '\n// tampered\n');
     let r = s4Check({ status, root: tmp });
     assert.equal(r.ok, false); assert.match(r.errors.join('\n'), /R2 content changed/);
-    copyS4('src/r2/contract.mjs', joinS4(tmp, 'src/r2/contract.mjs'));
+    copyWritableS4('src/r2/contract.mjs', joinS4(tmp, 'src/r2/contract.mjs'));
     writeS4(joinS4(tmp, 'scripts/tabwise/qualification-core.mjs'), '// forged\n');
     r = s4Check({ status, root: tmp });
     assert.equal(r.ok, false); assert.match(r.errors.join('\n'), /qualification content changed/);
-    copyS4('scripts/tabwise/qualification-core.mjs', joinS4(tmp, 'scripts/tabwise/qualification-core.mjs'));
+    copyWritableS4('scripts/tabwise/qualification-core.mjs', joinS4(tmp, 'scripts/tabwise/qualification-core.mjs'));
     rmS4(joinS4(tmp, 'src/r2/capture.mjs'));
     r = s4Check({ status, root: tmp });
     assert.equal(r.ok, false); assert.match(r.errors.join('\n'), /R2 content unavailable/);

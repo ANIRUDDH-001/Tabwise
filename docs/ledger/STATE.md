@@ -1,16 +1,16 @@
-# STATE - R2-L2 S3 + S4 + C-1 implemented offline; PR pending
-Updated: 2026-10-30T14:12:18Z
-Branch: feat/tabwise-r2-l2-s3-evidence-offline (HEAD 91744678, S1+S2 merged)
+# STATE - R2-L2 PR11 corrections validated locally; hosted CI pending
+Updated: 2026-10-30T16:12:48Z
+Branch: feat/tabwise-r2-l2-s3-evidence-offline (PR #11, corrective commit pending)
 ## Now / next / blocked
-- Now: S3 evidence verifier, S4 approval policy and C-1 key semantics integrated offline; R2 remains disabled/BLOCK.
+- Now: S3/S4/C1 integrated; Windows CI test-harness corrections validated locally; R2 disabled/BLOCK.
   H1 completeness, H2 captureJourney contract, H3 mutation-backed state, M1 intent VKs/Shift prefixes, M2 cap tests.
-- Next: owner PR and hosted CI; then C-3, S5a/S5b, S6 and S7. Windows NVDA qualification remains blocked.
+- Next: owner corrective push, hosted Windows preflight and independent review; then C-3/S5a/S5b/S6/S7.
 - Blocked: R2 qualification, live NVDA, physical input. P-1 was provisionally exercised in real Chromium 153
   via a separate Cloud session (not this session); pinned Chromium 156 and Windows NVDA remain unverified;
   P-1 is NOT fully qualified. P-2/P-3 unmeasured. genuine-unqualified/qualified unreachable until S5b/S6.
 ## Last verification (MEASURED, owner Windows Node v24.22.1)
-- R2 regression: 421/421 PASS; exit 0.
-- Ordinary offline profile: 48/48 selected files PASS, 9 excluded; exit 0.
+- R2 regression: 422/422 PASS; exit 0. Receipt 22/22; S4 review 14/14.
+- Ordinary: 48/48 PASS. Stress: 8 profiles, 48/48 each PASS, seed 113262; 9 excluded.
 - Frozen R1 baseline: ok true, errors []; exit 0.
 - Git diff --check: exit 0; informational LF-to-CRLF warnings only.
 - S4 CRLF test corrected; R2_FILES includes the S3 evidence writer.
@@ -34,6 +34,6 @@ Branch: feat/tabwise-r2-l2-s3-evidence-offline (HEAD 91744678, S1+S2 merged)
 - Shift+Tab coverage uses a test-only approved task over the validation fixture bytes (no Shift+Tab pair exists).
 - S1/S2, capture.mjs and frozen R1 source unchanged; timeout/ack semantics unchanged.
 ## Handoff
-- Files: scripts/tabwise/r2-evidence.mjs, test/r2-evidence.test.mjs (untracked), ci/offline-tests.json,
-  docs/CODEMAP.md, docs/ledger/{STATE.md,LOG.jsonl}. Frozen R1, vendor, workflows, statuses unchanged.
-- Suggested owner commit: "feat(r2): R2-L2 S3 evidence writer and independent verifier (offline)".
+- Corrections: test/r2-review.test.mjs and test/r2-capture-receipts-failclosed.test.mjs.
+- Cause: read-only Windows fixture copies and mixed real/fake timer scheduling.
+- Owner action: commit and push PR #11 fixes; await hosted CI; R2 remains BLOCKED.

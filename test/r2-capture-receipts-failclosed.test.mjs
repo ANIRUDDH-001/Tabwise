@@ -51,22 +51,6 @@ test('M2C: an R2-only acknowledgement failure after a complete receipt stops the
   assert.deepEqual(f.presses,['Tab']);
 });
 
-test('M2C: a duplicate key after the receipt is finalized still stops the gate',async()=>{
-  let later=null;
-  const f=rig({actions:[{step:'a01',press:'Tab'}],transport:async(press,{gate,key})=>{
-    const token=await gate.admit(info(press));assert.equal(gate.commit(token),true);key(press);
-    await gate.release(token,{ended:true});later=()=>key(press);
-  }});
-  // The repeat lands on the page several reads after the transport returned: the executor has settled and the
-  // ledger has finished the receipt by then (asserted below), inside the 50ms post-settlement observation.
-  const read=f.options.page.read;let after=0;
-  f.options.page={read:async()=>{if(later&&++after===4){later();later=null;}return read();}};
-  const result=await captureOfflineJourney(f.options);
-  assert.equal(result.completed,false);assert.match(result.reasons.join(';'),/saw 2/);
-  assert.equal(result.records[0].gate_receipt.complete,true);assert.equal(result.gate_receipts.complete,true);
-  assert.equal(f.gate.isStopped(),true);assert.match(f.gate.status().reason,/R2 capture incomplete/);
-});
-
 test('M2C: a complete receipt capture leaves the gate as the caller supplied it',async()=>{
   const f=rig();
   const result=await captureOfflineJourney(f.options);
@@ -124,14 +108,22 @@ for(const [name,mutate] of Object.entries(failures))test(`M2C evidence invariant
 const STOP = 'synthetic external stop';
 
 // hooks: {at:{ms:fn}} absolute fake-clock events; speechRead/pageRead(n, env) run INSIDE the nth read,
-// before it returns. env.prev is the previous provider event ('speech', 'page' or 'wait' for a clock wait);
+// before it returns; onWait(env) runs inside a clock wait, after the fake clock advanced (between reads).
+// env.prev is the previous provider event ('speech', 'page' or 'wait' for a clock wait);
 // env.releases records the fake time at which the test's own R1 ack reader was entered for each action.
-function stopRig({actions=[{step:'a01',press:'Tab'}], receipts=true, observationMs=200, at={}, speechRead, pageRead} = {}) {
-  let time=0, speechReads=0, pageReads=0, last=null;const releases=[];
+// Lifecycle sync: the frozen gate settles a release on real timers (sendguard delay(settleMs), waitFor polls),
+// which a coarse OS timer (hosted Windows, ~15.6 ms) stretches over many setImmediate turns. A clock wait
+// therefore never advances fake time while a send is in flight, so receipt finalization lands at a fake time
+// fixed by the capture's own lifecycle, not by real timer resolution.
+function stopRig({actions=[{step:'a01',press:'Tab'}], receipts=true, observationMs=200, at={}, speechRead, pageRead, onWait} = {}) {
+  let time=0, speechReads=0, pageReads=0, last=null, sending=0;const releases=[];
   const scheduled=Object.entries(at).map(([ms,fn])=>({at:Number(ms),fn})), phrases=[], presses=[];
   const advance = ms => {const end=time+ms;scheduled.sort((a,b)=>a.at-b.at);
     while(scheduled[0]?.at<=end){const item=scheduled.shift();time=item.at;item.fn(env);}time=end;};
-  const clock = {now:()=>time,wait:async ms=>{last='wait';advance(ms);await turn();}};
+  const settled = async () => {const t0=performance.now();
+    while(sending){if(performance.now()-t0>5000)throw Error('rig: send did not settle');await new Promise(r=>setTimeout(r,1));}
+    await turn();};
+  const clock = {now:()=>time,wait:async ms=>{await settled();last='wait';advance(ms);onWait?.(env);await turn();}};
   const page = createPageInstrumentation({session:'page',now:()=>9000+time,snapshot:()=>({active:'body',state:{}})});
   const key = press => page.record('keydown',{...pageKey(press),target:'body'});
   const gate = sendGate({settleMs:0,now:()=>time});gate.setIntegrity(()=>[]);gate.setCheck(async()=>[]);
@@ -140,9 +132,9 @@ function stopRig({actions=[{step:'a01',press:'Tab'}], receipts=true, observation
   const env = {gate,page,key,phrases,presses,releases,observationMs,prev:null,now:()=>time,stop:()=>gate.stop(STOP,'stop')};
   const executorBindings = {guard:gate,persistActionIntent:async()=>{},checkForeground:async()=>[],
     nvda:{press:async press=>{
-      presses.push(press);
-      const token=await gate.admit(info(press));if(!gate.commit(token))throw Error('commit refused');
-      key(press);await gate.release(token,{ended:true});
+      presses.push(press);sending++;
+      try{const token=await gate.admit(info(press));if(!gate.commit(token))throw Error('commit refused');
+        key(press);await gate.release(token,{ended:true});}finally{sending--;}
     }}};
   const speech = {read:async()=>{speechReads++;env.prev=last;speechRead?.(speechReads,env);last='speech';
     return {source:'synthetic',session:'speech',connected:true,complete:true,phrases:[...phrases]};}};
@@ -170,11 +162,35 @@ function assertInvalidated(f, result, {record=result.records.at(-1)}={}) {
   assert.deepEqual(JSON.parse(JSON.stringify(result)),result,'serializable evidence');
 }
 
+// Post-finalization locator, from observable provider lifecycle only. Inside action k's observation loop
+// every iteration ends with a clock wait, except the immediate re-read after the ledger finalizes the receipt.
+// So a speech read directly after a page read, once action k released and before its window ends, is the
+// first read after finalization. Callers still assert the order from the evidence (assertPostFinal).
+const postFinal = (env, k=1) => env.prev === 'page' && env.releases.length === k &&
+  env.now() < env.releases[k-1] + env.observationMs;
+// Arms at the first post-finalization read, fires fn in the next clock wait (between reads, inside the window).
+function afterFinalization(fn) {
+  const s={fired:null, armed:false};
+  s.speechRead=(n,env)=>{if(!s.armed&&postFinal(env))s.armed=true;};
+  s.onWait=env=>{if(s.armed&&!s.fired){s.fired={t:env.now(),releases:[...env.releases],presses:[...env.presses]};fn(env);}};
+  return s;
+}
+// Phase order from the evidence: a stop before finalization would make the ledger's finish refuse
+// ('gate stopped, timeout or unfinished operation'), so complete===true proves finalization came first.
+function assertPostFinal(fired, record) {
+  assert.ok(fired,'the injected event fired');
+  assert.deepEqual([fired.presses,fired.releases.length],[['Tab'],1]);
+  assert.equal(record.gate_receipt.complete,true,'receipt finalized complete, so before the stop');
+  assert.ok(record.gate_receipt.finished_at<=fired.t,'receipt finalized before the event');
+  assert.ok(fired.t<record.observation_window.to,'event inside the open observation window');
+}
+
 test('post-final stop: external stop after receipt finalization, before the observation window ends',async()=>{
-  const f=stopRig({at:{100:env=>env.stop()}});
+  const sync=afterFinalization(env=>env.stop());
+  const f=stopRig({speechRead:sync.speechRead,onWait:sync.onWait});
   const result=await captureOfflineJourney(f.options);
   const record=result.records[0];
-  assert.ok(record.gate_receipt.finished_at<100,'receipt finalized before the stop');
+  assertPostFinal(sync.fired,record);
   assert.equal(record.gate_receipt.complete,true,'receipt diagnostics stay as recorded');
   assertInvalidated(f,result);
   assert.equal(record.capture_status,'failed');
@@ -186,9 +202,11 @@ test('post-final stop: external stop after receipt finalization, before the obse
 
 test('post-final stop: speech after the stop is never attributed or admitted to the model payload',async()=>{
   // Speech introduced after cancellation, present in the first read that follows the stop.
-  const f=stopRig({at:{100:env=>{env.stop();env.phrases.push('after cancel');}}});
+  const sync=afterFinalization(env=>{env.stop();env.phrases.push('after cancel');});
+  const f=stopRig({speechRead:sync.speechRead,onWait:sync.onWait});
   const result=await captureOfflineJourney(f.options);
   const record=result.records[0];
+  assertPostFinal(sync.fired,record);
   assertInvalidated(f,result);
   assert.deepEqual(record.raw_seq,[]);assert.equal(record.text,'');
   assert.ok(result.raw.some(p=>p.text==='after cancel'),'raw diagnostic kept');
@@ -196,8 +214,11 @@ test('post-final stop: speech after the stop is never attributed or admitted to 
 });
 
 test('post-final stop: stop and new speech inside the same post-receipt speech read',async()=>{
-  const f=stopRig({speechRead:(n,env)=>{if(env.now()>=100&&!env.gate.isStopped()){env.stop();env.phrases.push('during read');}}});
+  let fired=null;
+  const f=stopRig({speechRead:(n,env)=>{if(!fired&&postFinal(env)){
+    fired={t:env.now(),releases:[...env.releases],presses:[...env.presses]};env.stop();env.phrases.push('during read');}}});
   const result=await captureOfflineJourney(f.options);
+  assertPostFinal(fired,result.records[0]);
   assertInvalidated(f,result);
   assert.deepEqual(result.records[0].raw_seq,[]);
   assert.ok(result.unattributed.some(p=>p.text==='during read'));
@@ -222,6 +243,35 @@ function assertPhase(fired, record, {where, presses=['Tab']}) {
   assert.ok(record.gate_receipt?.finished_at<=fired.t,'receipt finalized before the stop');
   assert.ok(record.observation_window.to<=fired.t,'observation window ended before the stop');
 }
+
+// M2C: a repeated key is rejected whenever it lands. Inside the open window after finalization it is the
+// action's own ack judgement ('saw 2'); after the window closes it is the final boundary's page check.
+test('M2C: a duplicate key after the receipt is finalized, inside the open window, still stops the gate',async()=>{
+  let fired=null;
+  const f=stopRig({speechRead:(n,env)=>{if(!fired&&postFinal(env)){
+    fired={t:env.now(),releases:[...env.releases],presses:[...env.presses]};env.key('Tab');}}});
+  const result=await captureOfflineJourney(f.options);
+  assertPostFinal(fired,result.records[0]);
+  assert.equal(result.completed,false);assert.match(result.reasons.join(';'),/saw 2/);
+  assert.equal(result.records[0].gate_receipt.complete,true);assert.equal(result.gate_receipts.complete,true);
+  assert.equal(f.gate.isStopped(),true);assert.match(f.gate.status().reason,/R2 capture incomplete/);
+  assert.throws(()=>speechModelPayload(result),/incomplete|invalidated/);
+});
+
+test('M2C: a duplicate key after the observation window closes is rejected at the final boundary and stops the gate',async()=>{
+  let fired=null;
+  const f=stopRig({speechRead:(n,env)=>{if(!fired&&afterWindow(env,1)){fired={t:env.now()};env.key('Tab');}}});
+  const result=await captureOfflineJourney(f.options);
+  const record=result.records[0];
+  assert.ok(fired,'the duplicate was injected');
+  assert.equal(record.gate_receipt.complete,true);assert.ok(record.gate_receipt.finished_at<=fired.t);
+  assert.ok(record.observation_window.to<=fired.t,'duplicate after the window closed');
+  assert.equal(result.completed,false);assert.equal(result.outcome,'INSUFFICIENT_EVIDENCE');
+  assert.match(reasons(result),/final boundary: page events outside a closed action window/);
+  assert.equal(result.unattributed_page.at(-1).events.filter(e=>e.type==='keydown').length,1,'duplicate kept as diagnostics');
+  assert.equal(f.gate.isStopped(),true);assert.match(f.gate.status().reason,/R2 capture incomplete/);
+  assert.throws(()=>speechModelPayload(result),/incomplete|invalidated/);
+});
 
 test('post-final stop: stop during the final speech boundary read',async()=>{
   let fired=null;
@@ -279,8 +329,10 @@ test('post-final stop: a successful multi-action capture with no stop still comp
 });
 
 test('post-final stop: an invalidated capture is refused by the model payload even if completed is forged',async()=>{
-  const f=stopRig({at:{100:env=>env.stop()}});
+  const sync=afterFinalization(env=>env.stop());
+  const f=stopRig({speechRead:sync.speechRead,onWait:sync.onWait});
   const result=await captureOfflineJourney(f.options);
+  assertPostFinal(sync.fired,result.records[0]);
   const forged=structuredClone(result);forged.completed=true;forged.outcome='COMPLETE';
   assert.throws(()=>speechModelPayload(forged),/invalidated/);
   const recordOnly=structuredClone(forged);delete recordOnly.gate_stop;
