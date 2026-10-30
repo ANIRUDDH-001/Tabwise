@@ -330,3 +330,12 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Out of scope: M1 live-gate stop, silence-window anchoring (M2E candidate), frozen R1, CI, FEATURES/qualification status.
 - Rollback: reverse-apply the M2D patch; M2A/M2B/M2C/CI-H1/H2 untouched.
 - MEASURED (Linux, Node 22.22.0): RED 20/22 + 1/1 at baseline; GREEN 44/44 and 12/12 ×10; R2 228/228; offline profiles 498/503 with 5 environmental ENOENT failures identical at baseline; random profile unsupported on Node 22. Windows pending. R2 qualification remains BLOCKED.
+### F-03 / R2-M2E - release-relative observation accounting (D-78)
+- Baseline: 2754e6b687b0e5735f18324a57ae5cdfb16bab33; branch: fix/tabwise-r2-m2e.
+- Scope: receipt observation/silence timing, test-fixture corrections, handoff and ledgers.
+- Acceptance: focused and full R2, ordinary/stress, frozen R1, preflight.
+- Local verification: focused62, R2 234, ordinary509, stress 8x509 PASS.
+- First stall-40 speech timeout retained; final rerun passed.
+- Next: hosted offline CI and owner integration decision.
+- Excluded: frozen R1 changes, live execution, qualification and spending.
+- Rollback: revert isolated M2E commit.

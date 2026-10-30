@@ -94,12 +94,14 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
       else if (record) {
         let accepted = delta;
         if (receipts) {
-          // M2D: only speech provably first present after the established release entry joins the action.
-          // Anything else may or may not follow the send; keep it as diagnostics and refuse attribution.
+          // M2D/M2E: a phrase must have been absent after release and *observed* no later
+          // than the release-relative policy deadline. A late read cannot backdate speech.
           const release = record.ack_timing.release_at ?? null;
-          accepted = delta.filter(p => release !== null && p.arrived_after.t > release);
+          const end = release === null ? null : release + observationMs;
+          accepted = delta.filter(p => release !== null && p.arrived_after.t > release && p.received.t <= end);
           early = delta.filter(p => !accepted.includes(p));
-          result.unattributed.push(...early.map(p => ({ ...copy(p), step: record.step, release_at: release })));
+          result.unattributed.push(...early.map(p => ({ ...copy(p), step: record.step, release_at: release,
+            observation_until: end })));
         }
         record.raw_seq.push(...accepted.map(p => p.seq));
         record.text = result.raw.filter(p => record.raw_seq.includes(p.seq)).map(p => p.text).join('\n');
@@ -109,7 +111,13 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
     }
     previousSpeech = sample;
     previousSpeechFloor = floor;
-    if (early.length) throw problem('ambiguous', 'speech observed before an established gate-release boundary');
+    if (early.length) {
+      const release = record?.ack_timing?.release_at ?? null;
+      const late = release !== null && early.some(p => p.arrived_after.t > release && p.received.t > release + observationMs);
+      throw problem('ambiguous', late
+        ? 'speech not established within the gate-release observation window'
+        : 'speech observed before an established gate-release boundary');
+    }
   }
 
   async function readPage(record, boundary = false) {
@@ -188,7 +196,7 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
       started = true;
       record.execution.started = true;
       if (receipts) {
-        let outcome = null, release = null, seen = null, until = null;
+        let outcome = null, release = null, seen = null, until = null, receiptFinished = false;
         // Run the executor without awaiting it, so page and speech are read while it settles.
         bounded('action', async context => {
           try { return await execute(copy(action), context); }
@@ -208,6 +216,11 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
           const current = gateRelease(record, action.step, keys[index], observed);
           if (release !== null && current !== release) throw problem('ambiguous', 'gate receipt: release time changed');
           release = current;
+          if (release !== null && until === null) {
+            until = release + observationMs; // Set once, not after the executor settles.
+            record.observation_window = { clock: NODE_CLOCK, reference: 'gate-release', from: release,
+              to: until, policy_ms: observationMs };
+          }
           if (release !== null && record.ack_seq === null) {
             if (seen && seen.at > release + ACK_MS) {
               record.ack_timing.late_observed_at = seen.at;
@@ -217,25 +230,26 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
             if (seen) { record.ack_seq = seen.seq; record.ack_timing.observed_at = seen.at; }
             else if (observed >= release + ACK_MS) throw problem('incomplete', `ack: not observed within ${ACK_MS} ms of gate release`);
           }
-          if (outcome && until === null) {
+          if (outcome && !receiptFinished) {
             if (outcome.error) throw outcome.error;
             record.execution.settled = executionSettled;
             receiptOpen = false;
             const receipt = await receipts.finish(action.step, { settleTimeoutMs: RECEIPT_SETTLE_MS });
+            receiptFinished = true;
             record.gate_receipt = copy(receipt);
             if (receipt.complete !== true) throw problem('failed', `gate receipt incomplete: ${receipt.errors.join('; ') || 'no release receipt'}`);
             if (release !== null && receipt.released_at !== release) throw problem('ambiguous', 'gate receipt: release time changed');
-            until = now() + observationMs;
-            continue; // Read once more after settlement; a release first seen here gets its deadline checked.
+            continue; // Recheck speech, page and release after settlement before completing.
           }
-          if (until === null && observed - record.node_window.from >= timeoutMs) throw problem('failed', 'action: timed out');
-          if (until !== null && record.ack_seq !== null && now() >= until) break;
+          // Executor settlement is still mandatory even if the speech window has elapsed.
+          // Keep the original executor-request timeout, rather than letting release mask a hang.
+          if (!receiptFinished && observed - record.node_window.from >= timeoutMs) throw problem('failed', 'action: timed out');
+          if (receiptFinished && until !== null && record.ack_seq !== null && now() >= until) break;
           const beforeWait = now();
           let nextRead = beforeWait + pollMs;
-          // Each bound below is still ahead of `observed` (else the checks above ended the loop), so this
-          // only skips the wait when the clock itself moved; the next read then re-applies those checks.
-          if (until === null) nextRead = Math.min(nextRead, record.node_window.from + timeoutMs);
-          else if (record.ack_seq !== null) nextRead = Math.min(nextRead, until);
+          if (!receiptFinished) nextRead = Math.min(nextRead, record.node_window.from + timeoutMs);
+          // If the window ended during settlement, do not spin on a past deadline.
+          if (receiptFinished && record.ack_seq !== null && until > beforeWait) nextRead = Math.min(nextRead, until);
           if (release !== null && record.ack_seq === null) nextRead = Math.min(nextRead, release + ACK_MS);
           if (nextRead <= beforeWait) continue;
           await bounded('observation wait', context => clock.wait(nextRead - beforeWait, context));
@@ -273,7 +287,9 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
       const errors = judgeKeys(keydowns, keys[index]);
       if (errors.length) throw problem('incomplete', `ack: ${errors.join('; ')}`);
       record.capture_status = record.raw_seq.length ? 'speech' : 'observed-silence';
-      if (!record.raw_seq.length) record.silence = { transport_live: true, from: record.node_window.from, to: record.node_window.to, unit: NODE_CLOCK };
+      if (!record.raw_seq.length) record.silence = { transport_live: true,
+        from: receipts ? record.observation_window.from : record.node_window.from,
+        to: receipts ? record.observation_window.to : record.node_window.to, unit: NODE_CLOCK };
     } catch (error) {
       record.capture_status = error.status ?? 'failed';
       record.reasons.push(error.message);
