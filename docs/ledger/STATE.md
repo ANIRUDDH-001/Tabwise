@@ -1,13 +1,18 @@
-# STATE — CI-H2 locally verified; hosted validation pending; R2 BLOCKED
-Updated: 2026-10-29T18:37:34Z · owner · branch fix/tabwise-ci-preflight-hang
-- CI-H1 listener cleanup and explicit offline test selection published in f59bb55.
-- CI-H2 targets mixed/speech only: 120-second process watchdog; other watchdogs unchanged.
-- Local evidence: ordinary plus eight stress profiles, 480/480 each, zero test failures.
-- Coverage remains partial: 47 admitted files; nine explicitly excluded.
-- Frozen R1 baseline, preflight integrity and diff checks PASS.
-- Owner authorized CI-H2 publication under D-76.
-- PR #4 remains Draft; hosted Windows validation is pending.
-- No R2/R3/R7 live clearance; qualification and full worker remain BLOCKED.
+# STATE — R2-M2D implemented offline (uncommitted); R2 BLOCKED
+Updated: 2026-10-29T19:39:41Z · claude · branch review/tabwise-m2b-m2c (working copy only, base 1988f86)
+- M2D (D-77): receipt-mode speech joins an action only if first present after the validated released_at.
+- Earlier or unordered speech stays in raw/unattributed and fails the action ambiguous (INSUFFICIENT_EVIDENCE).
+- Only src/r2/capture.mjs changed in source; M1 path, M2A ledger, M2B ack, M2C stop, allowlist unchanged.
+- 22 regressions + 1 M2C-table row; RED 20/22 + 1/1 on baseline capture.mjs, GREEN after.
+- Handoff: docs/engineering/R2-M2D-speech-boundary.md; patch artifact in cache/r2-m2d/ (git-ignored).
+- Environment: Linux, Node 22.22.0, no node_modules; preflight/3 offline files fail environmentally as at baseline.
+- No browser/NVDA/input/API/spend/install/commit/push. FEATURES and qualification unchanged.
+## Now / next / blocked
+- Now: uncommitted M2D diff (4 files + ledgers) awaiting independent review.
+- Next: Windows Node 24.22.1 verification (commands in the M2D doc); second-agent diff review; owner commit.
+- Blocked: R2 qualification, full worker, live NVDA; PR #3 head not inspected (no GitHub access).
+## Last verification
+- node --test --test-timeout=20000 test/r2*.test.mjs → exit 0, 228/228.
+- node scripts/check-r1-baseline.mjs → exit 0; git diff --check → exit 0.
 ## Handoff
-Inspect the new GitHub Actions run triggered by the CI-H2 branch publication.
-Do not merge PR #4 or #3 until hosted verification and integration review.
+Review the M2D diff and doc; run the Windows commands; owner decides commit and PR #3 integration.

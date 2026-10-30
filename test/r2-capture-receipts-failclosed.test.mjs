@@ -96,6 +96,9 @@ const failures = {
   'R1 before-call stray':f=>{f.options.receiptBindings.ackReader=Object.freeze(Object.assign(async()=>({ack:true,reasons:[]}),{before:async()=>['stray']}));},
   'wrong page key':f=>{f.options.executorBindings.nvda.press=async press=>{f.presses.push(press);
     const token=await f.gate.admit(info(press));f.gate.commit(token);f.page.record('keydown',{key:'Enter',shift:false,target:'body'});await f.gate.release(token,{ended:true});};},
+  // M2D: speech that appears before the release entry is refused as ambiguous, with the same gate invariants.
+  'speech before the gate-release boundary':f=>{f.options.executorBindings.nvda.press=async press=>{f.presses.push(press);
+    const token=await f.gate.admit(info(press));f.gate.commit(token);f.key(press);f.phrases.push('early');await f.gate.release(token,{ended:true});};},
   'page journal loses events':f=>{const read=f.options.page.read;let k=0;
     f.options.page={read:async()=>{const value=await read();if(f.presses.length&&++k===2)f.page.markIncomplete('synthetic loss');return value;}};},
 };

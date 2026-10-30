@@ -321,3 +321,12 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Rollback: revert the CI-H2 commit on the review branch.
 - MEASURED locally: 9/9 profiles, 4320/4320 executions PASS; 47 admitted files, nine excluded.
 - Hosted Windows verification pending; R2 qualification remains BLOCKED.
+### F-03 / R2-M2D — premature speech attribution hardening (D-77)
+- Goal: speech seen before an established gate-release boundary is never action evidence; keep it as diagnostics; fail closed.
+- Baseline: 1988f867c73915e373bbf87dbac2a77ab85b81f4 (review/tabwise-m2b-m2c).
+- Files: src/r2/capture.mjs; test/r2-capture-receipts.test.mjs; test/r2-capture-receipts-failclosed.test.mjs; docs/engineering/R2-M2D-speech-boundary.md; normal ledgers/CODEMAP.
+- Acceptance: red-before-green M2D regressions; node --test test/r2*.test.mjs; check-r1-baseline; preflight unchanged vs baseline; offline ordinary/stress profiles; git diff --check.
+- Cost ceiling: $0; no installs, API, browser, NVDA, input, dispatch or publication.
+- Out of scope: M1 live-gate stop, silence-window anchoring (M2E candidate), frozen R1, CI, FEATURES/qualification status.
+- Rollback: reverse-apply the M2D patch; M2A/M2B/M2C/CI-H1/H2 untouched.
+- MEASURED (Linux, Node 22.22.0): RED 20/22 + 1/1 at baseline; GREEN 44/44 and 12/12 ×10; R2 228/228; offline profiles 498/503 with 5 environmental ENOENT failures identical at baseline; random profile unsupported on Node 22. Windows pending. R2 qualification remains BLOCKED.

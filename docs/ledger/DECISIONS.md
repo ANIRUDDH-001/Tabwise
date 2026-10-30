@@ -323,3 +323,8 @@ Scope: 120-second process watchdog for mixed/speech only; default 60 seconds, 18
 Verification: nine local profiles each 480/480 PASS; R1 baseline, preflight and diff checks PASS.
 Limits: zero spend; no installs, browser, NVDA, physical input, live qualification or merge.
 Note: Publication approval recorded after local implementation; no retrospective pre-edit approval claimed.
+## D-77 2026-10-29T19:39:41Z — R2-M2D premature speech attribution hardening (owner task message)
+Owner instruction: the task message "TABWISE — OVERNIGHT M2D IMPLEMENTATION, HARDENING, TESTING AND HANDOFF", which says "This assignment authorizes M2D implementation, its direct regression coverage, local/cloud synthetic verification and normal task documentation only. It does not authorize subsequent live qualification." and "Proceed through the phases autonomously within these boundaries."
+Scope: src/r2/capture.mjs; test/r2-capture-receipts{,-failclosed}.test.mjs; docs/engineering/R2-M2D-speech-boundary.md; STATE/PLAN/DECISIONS/LOG/CODEMAP.
+Limits: zero spend; no installs, API calls, browser, NVDA, physical input, dispatch, commit, push, merge or status change. Frozen R1, CI-H1/H2 and workflows untouched.
+Note: no separate AskUserQuestion spec approval was held; the owner's message itself states the spec, acceptance and rollback and asks for autonomous execution. Commit/publication still requires the owner.

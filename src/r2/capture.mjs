@@ -35,6 +35,8 @@ function expectedKey(press) {
  * speech are read while the executor is still settling, and a missing, invalid, late, expired or contradictory
  * receipt fails the action. Timeliness is the Node time a page read returned, never a page-clock timestamp.
  * The R1 acknowledgement stays in gate_receipt only; R2's ack_seq comes from its own page reads.
+ * M2D: with receipts, a phrase joins the action only if the speech read that last saw it absent was requested
+ * strictly after the validated released_at. Otherwise it stays in raw/unattributed and the action is ambiguous.
  */
 export async function captureJourney({ fixture_id, actions, speech, page, execute,
   observationMs, pollMs = 10, timeoutMs = 1000,
@@ -67,12 +69,17 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
     return copy(read.value);
   };
 
+  // M2D: Node time no later than the previous speech read's request. A phrase absent from that snapshot
+  // arrived strictly after it; this is a lower bound only, never the phrase's emission or physical-send time.
+  let previousSpeechFloor = null;
   async function readSpeech(record, boundary = false) {
+    const floor = lastNow;
     const sample = await bounded('speech read', context => speech.read(context));
     if (!sample) throw problem('missing', 'speech capture missing');
     if (sample.connected !== true) throw problem('disconnected', 'speech transport disconnected');
     if (sample.complete !== true || typeof sample.session !== 'string' || !sample.session || !Array.isArray(sample.phrases) || sample.phrases.some(p => typeof p !== 'string')) throw problem('incomplete', 'speech snapshot incomplete');
     if (previousSpeech && (sample.session !== previousSpeech.session || sample.source !== previousSpeech.source || sample.phrases.length < previousSpeech.phrases.length || previousSpeech.phrases.some((p,i) => p !== sample.phrases[i]))) throw problem('incomplete', 'speech session/log reset or prefix rewritten');
+    let early = [];
     if (!previousSpeech) {
       result.source = sample.source ?? 'unattested';
       result.preexisting_phrases = sample.phrases.length;
@@ -80,17 +87,29 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
       const delta = sample.phrases.slice(previousSpeech.phrases.length).map((text, i) => ({
         seq: previousSpeech.phrases.length + i + 1, source: result.source, text,
         received: { clock: NODE_CLOCK, t: now() },
+        ...(receipts ? { arrived_after: { clock: NODE_CLOCK, t: previousSpeechFloor } } : {}),
       }));
       result.raw.push(...delta);
       if (boundary) result.unattributed.push(...copy(delta));
       else if (record) {
-        record.raw_seq.push(...delta.map(p => p.seq));
+        let accepted = delta;
+        if (receipts) {
+          // M2D: only speech provably first present after the established release entry joins the action.
+          // Anything else may or may not follow the send; keep it as diagnostics and refuse attribution.
+          const release = record.ack_timing.release_at ?? null;
+          accepted = delta.filter(p => release !== null && p.arrived_after.t > release);
+          early = delta.filter(p => !accepted.includes(p));
+          result.unattributed.push(...early.map(p => ({ ...copy(p), step: record.step, release_at: release })));
+        }
+        record.raw_seq.push(...accepted.map(p => p.seq));
         record.text = result.raw.filter(p => record.raw_seq.includes(p.seq)).map(p => p.text).join('\n');
       }
       previousSpeech = sample;
       if (boundary && delta.length) throw problem('ambiguous', 'unattributed speech outside a closed action window');
     }
     previousSpeech = sample;
+    previousSpeechFloor = floor;
+    if (early.length) throw problem('ambiguous', 'speech observed before an established gate-release boundary');
   }
 
   async function readPage(record, boundary = false) {

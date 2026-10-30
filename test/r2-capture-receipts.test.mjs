@@ -281,3 +281,224 @@ test('M2B: a capture cannot complete while the receipt ledger journey is incompl
   assert.equal(result.completed,false);assert.equal(result.outcome,'INSUFFICIENT_EVIDENCE');
   assert.match(reasons(result),/receipt ledger journey incomplete/);
 });
+
+// M2D: speech observed before an established gate-release boundary is diagnostic only, never action evidence.
+// A phrase is attributable only when the speech read that last saw it absent began strictly after released_at.
+const speechOf = (result,text) => result.raw.find(p=>p.text===text);
+const strayOf = (result,text) => result.unattributed.find(p=>p.text===text);
+const sendAnd = (between,after) => async(press,env) => {
+  const token=await env.gate.admit(info(press));assert.equal(env.gate.commit(token),true);env.key(press);
+  await between?.(env);await env.gate.release(token,{ended:true});await after?.(env);
+};
+function assertPremature(result,text,step='a01') {
+  const record=result.records.find(r=>r.step===step), stray=strayOf(result,text);
+  assert.equal(result.completed,false,'never a complete capture');assert.equal(result.outcome,'INSUFFICIENT_EVIDENCE');
+  assert.ok(speechOf(result,text),'kept in the raw diagnostic stream');
+  assert.ok(stray,'kept as unattributed diagnostic speech');assert.equal(stray.step,step);
+  assert.ok(!result.records.some(r=>r.raw_seq.includes(stray.seq)),'never attributed to any action');
+  assert.ok(!result.records.some(r=>r.text.includes(text)));
+  assert.notEqual(record.capture_status,'speech');
+  assert.ok(stray.release_at===null||stray.arrived_after.t<=stray.release_at,'only unordered speech is refused');
+  assert.deepEqual(JSON.parse(JSON.stringify(result)),result,'serializable evidence');
+  return {record,stray};
+}
+
+test('M2D-01: speech that appears after commit but before the gate-release entry is not action evidence',async()=>{
+  const f=rig({transport:sendAnd(async({phrases,sleep})=>{phrases.push('early');await sleep(30);})});
+  const result=await captureOfflineJourney(f.options);
+  const {record,stray}=assertPremature(result,'early');
+  assert.equal(record.capture_status,'ambiguous');assert.match(reasons(result),/gate-release boundary/);
+  assert.equal(stray.release_at,null,'refused before any release was observed');
+  assert.equal(f.gate.isStopped(),true);assert.equal(result.provenance.attestation,'UNATTESTED');
+});
+
+for(const hook of ['persistActionIntent','checkForeground'])test(`M2D-02: speech during ${hook} stays untrusted and the press is cancelled`,async()=>{
+  const f=rig();
+  f.options.executorBindings[hook]=async()=>{f.phrases.push(`during ${hook}`);await f.sleep(100);return [];};
+  const result=await captureOfflineJourney(f.options);
+  const {record}=assertPremature(result,`during ${hook}`);
+  assert.equal(record.capture_status,'ambiguous');assert.equal(record.execution.cancellation_requested,true);
+  assert.equal(record.gate_receipt.released_at,null);assert.equal(record.gate_receipt.expired,true);
+  f.advance(200);await turn();await turn();
+  assert.deepEqual(f.presses,[],'no send after the refusal');assert.equal(f.gate.isStopped(),true);
+});
+
+test('M2D-03: speech first seen after a valid release is associated with the action observationally only',async()=>{
+  const f=rig({transport:sendAnd(null,async({later,phrases})=>{later(25,()=>phrases.push('Submit button'));})});
+  const result=await captureOfflineJourney(f.options);
+  const record=result.records[0], phrase=speechOf(result,'Submit button');
+  assert.equal(result.completed,true,reasons(result));assert.equal(record.capture_status,'speech');
+  assert.deepEqual(record.raw_seq,[phrase.seq]);assert.equal(record.text,'Submit button');
+  assert.deepEqual(result.unattributed,[]);
+  assert.equal(phrase.arrived_after.clock,'node-monotonic-ms');
+  assert.ok(phrase.arrived_after.t>record.ack_timing.release_at,'absent from a read that began after release');
+  assert.equal(record.association,'observation-window-only');assert.equal(record.execution.quiescence,'UNVERIFIED');
+  assert.equal(result.provenance.attestation,'UNATTESTED');assert.equal(result.guarded_execution_verified,false);
+});
+
+// Runs at the ledger's release entry: the wrapper stamps released_at, then calls this R1 reader synchronously.
+const atRelease = fn => frozen => Object.assign(token=>{fn();return frozen(token);},{before:token=>frozen.before(token)});
+
+test('M2D-04: a delayed speech read revealing early and release-time phrases together cannot launder the early one',async()=>{
+  let f;
+  f=rig({r1:atRelease(()=>f.phrases.push('later')),transport:sendAnd(async({phrases,sleep})=>{phrases.push('early');await sleep(30);})});
+  const read=f.options.speech.read;let held=false;
+  f.options.speech={read:async context=>{
+    if(!held&&f.phrases.includes('early')){held=true;f.advance(30);await turn();await turn();}
+    return read(context);
+  }};
+  const result=await captureOfflineJourney(f.options);
+  assertPremature(result,'early');assertPremature(result,'later');
+  const releasedAt=result.gate_receipts.receipts[0].released_at;
+  assert.ok(Number.isFinite(releasedAt),'the gate did release inside the delayed read');
+  assert.ok(strayOf(result,'later').arrived_after.t<releasedAt,'the read interval spans the release');
+  assert.deepEqual(result.unattributed.map(p=>p.text),['early','later'],'order and both entries preserved');
+  assert.match(reasons(result),/gate-release boundary/);
+});
+
+const noRelease = {
+  'transport fails after commit':async(press,{gate,key,phrases})=>{
+    const token=await gate.admit(info(press));gate.commit(token);key(press);phrases.push('orphan');throw Error('synthetic write failure');
+  },
+  'gate refuses the send':async(press,{gate,phrases})=>{phrases.push('orphan');gate.stop('synthetic refusal','stop');await gate.admit(info(press));},
+};
+for(const [name,transport] of Object.entries(noRelease))test(`M2D-05: without a release receipt (${name}) observed speech is never action evidence`,async()=>{
+  const f=rig({transport});
+  const result=await captureOfflineJourney(f.options);
+  assertPremature(result,'orphan');
+  assert.equal(result.records[0].gate_receipt.released_at,null);assert.equal(result.records[0].gate_receipt.complete,false);
+  assert.equal(f.gate.isStopped(),true);
+});
+
+test('M2D-05: an expired (late) release does not admit speech seen before it',async()=>{
+  const f=rig({releaseMs:5000,timeoutMs:2000});
+  const press=f.executorBindings.nvda.press;
+  f.executorBindings.nvda.press=async p=>{f.later(100,()=>f.phrases.push('while waiting'));return press(p);};
+  const result=await captureOfflineJourney(f.options);
+  assertPremature(result,'while waiting');
+});
+
+test('M2D-06: speech, page key and gate release visibility are separate timing domains',async()=>{
+  // Key journaled at commit, speech 10ms later, gate release 40ms later. Neither page time nor key visibility
+  // establishes the release; the phrase is refused even though the R2 page key was already visible.
+  const f=rig({transport:sendAnd(async({phrases,later,sleep})=>{later(10,()=>phrases.push('racing'));await sleep(40);})});
+  const result=await captureOfflineJourney(f.options);
+  const {record,stray}=assertPremature(result,'racing');
+  assert.ok(record.page.events.some(e=>e.type==='keydown'),'page key was visible');
+  assert.equal(stray.release_at,null);
+  assert.ok(record.gate_receipt.released_at===null||stray.received.t<record.gate_receipt.released_at);
+});
+
+test('M2D-06: slow intent, foreground and post-send settlement do not taint speech seen after release',async()=>{
+  let f;
+  f=rig({intentMs:300,foregroundMs:200,releaseMs:20,r1:atRelease(()=>f.later(100,()=>f.phrases.push('Saved'))),
+    check:async(context,{sleep})=>{if(context.phase==='post')await sleep(800);return [];}});
+  const result=await captureOfflineJourney(f.options);
+  const record=result.records[0], phrase=speechOf(result,'Saved');
+  assert.equal(result.completed,true,reasons(result));assert.equal(record.text,'Saved');
+  assert.ok(record.ack_timing.release_at>=500);assert.ok(phrase.arrived_after.t>record.ack_timing.release_at);
+  assert.ok(record.gate_receipt.finished_at>phrase.received.t,'speech seen while settlement was still pending');
+});
+
+test('M2D-07: early speech in a later action never leaks into it or an earlier action, and stops the journey',async()=>{
+  const f=rig({actions:[{step:'a01',press:'Tab'},{step:'a02',press:'Enter'},{step:'a03',press:'Space'}]});
+  let intents=0;
+  f.options.executorBindings.persistActionIntent=async()=>{if(++intents===2)f.phrases.push('stray');};
+  const press=f.executorBindings.nvda.press;
+  f.executorBindings.nvda.press=async p=>{await press(p);if(p==='Tab')f.later(20,()=>f.phrases.push('first'));};
+  const result=await captureOfflineJourney(f.options);
+  assertPremature(result,'stray','a02');
+  assert.equal(result.records[0].text,'first');assert.equal(result.records[0].capture_status,'speech');
+  assert.equal(result.records.length,2,'no later action after a terminal receipt-mode failure');
+  assert.ok(!f.presses.includes('Space'));assert.equal(f.gate.isStopped(),true);
+});
+
+test('M2D-08: a gate stopped before premature speech keeps its original stop reason and kind',async()=>{
+  const f=rig({transport:async(press,{gate,key,phrases,sleep})=>{
+    const token=await gate.admit(info(press));gate.commit(token);key(press);
+    gate.stop('synthetic external stop','stop');phrases.push('after stop');await sleep(30);await gate.release(token,{ended:true});
+  }});
+  const result=await captureOfflineJourney(f.options);
+  assertPremature(result,'after stop');
+  assert.equal(f.gate.status().reason,'synthetic external stop');assert.equal(f.gate.status().kind,'stop');
+});
+
+test('M2D-09: the M1 path without receipts keeps attributing execution-window speech unchanged',async()=>{
+  const f=rig({transport:sendAnd(async({phrases})=>{phrases.push('m1 speech');})});
+  delete f.options.receiptBindings;f.gate.setAck(f.ackReader);
+  const result=await captureOfflineJourney(f.options);
+  assert.equal(result.completed,true,reasons(result));assert.equal(result.records[0].text,'m1 speech');
+  assert.equal(result.records[0].ack_timing.reference,'executor-request');
+  assert.equal('arrived_after' in speechOf(result,'m1 speech'),false);assert.deepEqual(result.unattributed,[]);
+});
+
+test('M2D-10: the model payload refuses premature speech and carries no attribution diagnostics',async()=>{
+  const bad=await captureOfflineJourney(rig({transport:sendAnd(async({phrases,sleep})=>{phrases.push('early');await sleep(30);})}).options);
+  assert.throws(()=>speechModelPayload(bad),/incomplete/);
+  const good=await captureOfflineJourney(rig({transport:sendAnd(null,async({later,phrases})=>{later(25,()=>phrases.push('Submit button'));})}).options);
+  assert.equal(good.completed,true,reasons(good));
+  const text=JSON.stringify(speechModelPayload(good));
+  assert.ok(text.includes('Submit button'));
+  for(const word of ['arrived_after','unattributed','release','received','node-monotonic','raw_seq','gate'])assert.equal(text.includes(word),false,word);
+});
+
+const integrity = {
+  disconnected:value=>{value.connected=false;},
+  incomplete:value=>{value.complete=false;},
+  'session reset':value=>{value.session='speech-2';},
+  'prefix rewritten':value=>{value.phrases[0]='rewritten';},
+};
+for(const [name,mutate] of Object.entries(integrity))test(`M2D-11: ${name} while premature speech is visible cannot be recovered into attribution`,async()=>{
+  const f=rig({transport:sendAnd(async({phrases,sleep})=>{phrases.push('early');await sleep(30);})});
+  const read=f.options.speech.read;let broken=false;
+  f.options.speech={read:async context=>{const value=await read(context);
+    if(!broken&&value.phrases.includes('early')){broken=true;mutate(value);}return value;}};
+  const result=await captureOfflineJourney(f.options);
+  const record=result.records[0];
+  assert.equal(result.completed,false);assert.notEqual(record.capture_status,'speech');
+  assert.deepEqual(record.raw_seq,[],'recovery read cannot attribute pre-release speech');assert.equal(record.text,'');
+  assert.ok(!result.raw.some(p=>p.text==='early')||strayOf(result,'early'));
+  assert.equal(f.gate.isStopped(),true);
+});
+
+test('M2D-11: a clock regression while premature speech is visible cannot be recovered into attribution',async()=>{
+  const f=rig({transport:sendAnd(async({phrases,sleep})=>{phrases.push('early');await sleep(30);})});
+  const now=f.clock.now;let regressed=false;
+  f.options.clock={...f.clock,now:()=>{if(!regressed&&f.phrases.includes('early')){regressed=true;return -1;}return now();}};
+  const result=await captureOfflineJourney(f.options);
+  const record=result.records[0];
+  assert.equal(result.completed,false);assert.match(reasons(result),/clock/);
+  assert.deepEqual(record.raw_seq,[]);assert.equal(f.gate.isStopped(),true);
+});
+
+test('M2D-12: speech emitted at the release entry, first seen by a read that began before it, is unordered',async()=>{
+  let f;
+  f=rig({r1:atRelease(()=>f.phrases.push('edge'))});
+  const result=await captureOfflineJourney(f.options);
+  const {record,stray}=assertPremature(result,'edge');
+  assert.equal(record.capture_status,'ambiguous');
+  const releasedAt=result.gate_receipts.receipts[0].released_at;
+  assert.ok(Number.isFinite(releasedAt));
+  assert.ok(stray.arrived_after.t<=releasedAt,'arrival interval includes the release instant; no ordering is invented');
+});
+
+test('M2D-12: equal Node timestamps are not an ordering: a read requested at the release instant cannot admit speech',async()=>{
+  // The speech read starts after the release entry at the same clock value; the phrase lands just after that
+  // read's snapshot. Its floor then equals released_at, and equality must not be read as "after release".
+  let f, released=false, pushed=false;
+  f=rig({r1:atRelease(()=>{released=true;})});
+  const speechRead=f.options.speech.read;
+  f.options.speech={read:async context=>{const after=released, value=await speechRead(context);
+    if(after&&!pushed){pushed=true;f.phrases.push('same instant');}return value;}};
+  const result=await captureOfflineJourney(f.options);
+  const {stray}=assertPremature(result,'same instant');
+  assert.equal(stray.arrived_after.t,result.gate_receipts.receipts[0].released_at,'floor equals the release entry');
+  assert.equal(stray.release_at,stray.arrived_after.t,'release was established when the phrase was refused');
+});
+
+test('M2D: duplicate post-release phrases keep distinct sequence numbers and attribution',async()=>{
+  const f=rig({transport:sendAnd(null,async({later,phrases})=>{later(25,()=>phrases.push('same','same'));})});
+  const result=await captureOfflineJourney(f.options);
+  assert.equal(result.completed,true,reasons(result));
+  assert.deepEqual(result.records[0].raw_seq,[1,2]);assert.equal(result.records[0].text,'same\nsame');
+});
