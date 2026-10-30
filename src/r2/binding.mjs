@@ -1,6 +1,6 @@
 // M1 offline composition ONLY. All injected boundaries must be synthetic.
 // No loader, browser launch, NVDA client, physical-send path or model call here.
-import {captureJourney} from './capture.mjs';
+import {captureJourney, gateLive, invalidateForGateStop} from './capture.mjs';
 import {createPageProvider} from './page-provider.mjs';
 import {createGuardedPressExecutor} from '../../scripts/tabwise/executor.mjs';
 import {SUPPORTED_PRESS} from '../../scripts/tabwise/input-policy.mjs';
@@ -50,6 +50,10 @@ export async function captureOfflineJourney({fixture_id, actions, speech, page, 
   }};
   const result = await captureJourney({fixture_id, actions:journey, speech:observedSpeech, page:observedPage,
     execute:executor.execute, clock, observationMs, pollMs, timeoutMs, receipts});
+  // A stop that became visible after captureJourney's last synchronous check (between its return and this
+  // continuation) still invalidates the capture. Read-only: the original stop kind and reason are kept.
+  const gateState = receipts && result.completed === true ? receipts.gateState() : null;
+  if (gateState && !gateLive(gateState)) invalidateForGateStop(result, 'binding return boundary', gateState);
   // M2C: an R2 failure after the ledger already finalized its receipt (late, missing or repeated page key,
   // final boundary) leaves no open receipt to expire. Stop the gate so no caller gets it back live. 'protocol',
   // not 'ack': R2's observation does not claim R1 misdelivery. An earlier stop keeps its own kind and reason.
@@ -66,10 +70,14 @@ export async function captureOfflineJourney({fixture_id, actions, speech, page, 
 // Local diagnostic evidence contains page state/events; model-facing data must
 // cross this explicit allowlist. No raw capture object is passed to a model.
 export function speechModelPayload(capture) {
+  if (capture?.gate_stop !== undefined || (Array.isArray(capture?.records) && capture.records.some(r => r?.invalidated !== undefined))) {
+    throw Error('capture invalidated by a gate stop');
+  }
   if (capture?.completed !== true || capture.source !== SOURCE || capture.guarded_execution_verified !== false ||
     capture.provenance?.kind !== 'synthetic' || capture.provenance?.attestation !== 'UNATTESTED') throw Error('incomplete or non-synthetic offline capture');
   if (!fixtureId(capture.fixture_id) || !Array.isArray(capture.records) || !capture.records.length ||
     capture.records.some(r => typeof r?.text !== 'string' || !actionId(r.step) ||
+      !['speech','observed-silence'].includes(r.capture_status) ||
       !SUPPORTED_PRESS.includes(r.press) || !Number.isSafeInteger(r.seq) || r.seq <= 0)) throw Error('invalid speech payload record');
   if (new Set(capture.records.map(r => r.step)).size !== capture.records.length) throw Error('invalid speech payload action identifiers');
   return buildArmPayload('speech', {fixture_id:capture.fixture_id, speech:capture.records,

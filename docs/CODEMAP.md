@@ -80,3 +80,4 @@ Read this before opening source files. One line per file or folder. If a line is
 | `scripts/offline-tests.mjs`, `ci/offline-tests.json`, `test/ci-*.test.mjs`, `test/helpers/reject-browser.mjs`, `docs/engineering/CI-H1-preflight-hang.md` | CI-H1 fail-closed partial selection, bounded profiles, synthetic engine rejection and handoff | `selectTests`, `profilePlan`, `runFile` | CI harness regressions; no real browser |
 
 | `docs/engineering/R2-M2E-silence-window.md` | Receipt-relative speech/silence policy and verification | `src/r2/capture.mjs` | `test/r2-capture-receipts.test.mjs` |
+| `docs/engineering/R2-post-final-stop.md` | Post-finalization owned-gate revalidation; fail closed on a stop after receipt finalization | `ledger.gateState`, `gateLive`, `invalidateForGateStop`, `speechModelPayload` | `test/r2-capture-receipts-failclosed.test.mjs` (post-final stop rows) |

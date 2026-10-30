@@ -339,3 +339,11 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Next: hosted offline CI and owner integration decision.
 - Excluded: frozen R1 changes, live execution, qualification and spending.
 - Rollback: revert isolated M2E commit.
+### F-03 / R2 post-finalization gate stop (D-79)
+- Goal: an owned gate stopped after receipt finalization never yields a completed or model-eligible capture; keep the original stop kind and reason.
+- Baseline: ef3b8eda9797029e95be0626771112fbe0144ecd; branch: fix/tabwise-r2-post-final-stop.
+- Files: src/r2/{capture,binding,send-receipt}.mjs; test/r2-capture-receipts-failclosed.test.mjs (appended); docs/engineering/R2-post-final-stop.md; M2E handoff status; ledgers/CODEMAP.
+- Acceptance: RED then GREEN regressions; focused and full R2; frozen R1; preflight; git diff --check; ordinary and eight stress profiles.
+- Excluded: frozen R1, CI inventory/thresholds, live execution, qualification and spending.
+- Rollback: reverse-apply the uncommitted diff; M2A-M2E untouched otherwise.
+- D-80 correction: boundary fixtures use observable lifecycle (test-owned ack-reader entry, fake clock, provider order); binding-return check covered by a scratch probe only; tests 4/5 now RED on baseline with the stop firing.
