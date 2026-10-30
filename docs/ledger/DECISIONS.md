@@ -345,3 +345,15 @@ Owner instruction: the task message "TABWISE D-79 — FINAL REGRESSION-QUALITY C
 Disposition: final speech and final page boundary tests re-triggered from the test-owned ack-reader entry, fake clock and provider order; between-actions kept as a control; binding-return test removed (no observable boundary reaches it), retained as scratch probe evidence.
 Production code: unchanged by this correction.
 Limits: as D-79; no CI, dependency, workflow, R1, policy or status change; nothing committed.
+
+## D-81 2026-10-30T14:15:32Z - R2-L1 offline page-journal adapter (owner task message)
+Owner instruction: the task message "TABWISE — R2-L1 Implementation", which says "Implement R2-L1: offline page-journal compatibility adapter exactly as specified in: docs/engineering/Tabwise-worker-binding-blocker.md" and "This milestone closes G1 only. Do not begin R2-L2."
+Role: the memory rule (Codex implements, Claude reviews) conflicted with this message. Asked by AskUserQuestion; the owner chose "Claude implements it". This applies to this task only.
+Scope: new src/r2/page-journal.mjs; J-P1-J-P4 and J-N1-J-N11 appended to the admitted test/r2-page-provider.test.mjs (spec decision 1, recommended option); new docs/engineering/R2-L1-page-journal.md; CODEMAP, STATE, LOG, DECISIONS.
+Spec decisions taken as the message directs: all five keydown flags required (spec decision 2, stricter option); NVDA Control keydown left to R2-L2 (decision 3).
+Interpretation: an accepted call performs exactly one source.read(); a call refused before reading (overlap or latched failure) performs none.
+Limits: zero spend; no installs, API calls, browser, NVDA, physical input, dispatch, commit, push, merge, branch switch or status change. Existing source, qualification files, frozen R1, vendor, workflows, CI inventory and package files untouched. The pasted message was truncated at "Verification: Run t"; the spec's acceptance commands were used.
+## D-82 2026-10-30T14:55:00Z - R2-L1 async writer review correction (owner task message)
+Owner instruction: the task message "TABWISE R2-L1 — Independent Review Correction", which says "the adapter does not await the result of writer.append()" and "Fix this narrowly." and "Do not delegate to Codex."
+Disposition: success write awaited with a latch re-check; diagnostic write handled without delaying the refusal (rejection kept as cause). 5 regression tests appended; RED 108/5 on the prior adapter, GREEN 113/113.
+Limits: same seven-file scope as D-81; no existing production module, R1, CI config, workflow or status change; nothing committed or pushed.

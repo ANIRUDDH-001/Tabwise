@@ -1,27 +1,29 @@
-# STATE - R2-L0 post-merge reconciliation; R2-L1 spec revised; docs only, uncommitted
-Updated: 2026-10-30T08:04:41Z (reconciliation facts from 07:50:13Z unchanged)
-Branch: chore/tabwise-r2-post-merge
-Baseline: 78cf37953702998dc87a9eb61cae6e7c64ec339f (main; merge of PR #3, review/tabwise-m2b-m2c)
-- MEASURED (git): 78cf379 tree 2af46092... equals PR head 46749e0 tree. First parent dbb5a6d.
-- Merged into main through PR #3: M2B/M2C, CI-H1/H2 (PR #4), M2D, M2E (PR #5), D-79/D-80 (PR #6).
-- Owner-reported, not re-checked here: independent D-79/D-80 review PASS; independent CI-H1/H2
-  review PASS; combined hosted offline preflight PASS, run 41016516810 (pre-merge PR CI).
-- No post-merge main-branch CI run is recorded or claimed.
-- Last local results (D-80 session, uncommitted tree before PR #6): R2 243/243; ordinary and
-  8 stress profiles 518/518 each; frozen R1 and preflight ok. Not re-run in R2-L0.
-- All R2 evidence synthetic/UNATTESTED. FEATURES, qualification-status (enabled:false, BLOCK)
-  and review-status (BLOCK) unchanged.
-- R2-L0 changes are docs only: ledgers, three engineering handoffs, binding-blocker R2-L1 spec.
-- Revised after ChatGPT CONDITIONAL PASS: R2-L1 = offline page-journal compatibility adapter
-  (injected synthetic data; one source for R2 snapshot + pageAck key view; writer `page` lane
-  only). Gate/executor/receipt composition deferred to R2-L2 (reviewed production loader,
-  separate authorization). Hosted observer history corrected (D-72, D-73, D-74).
+# STATE - R2-L1 page-journal adapter + async-writer review correction; uncommitted
+Updated: 2026-10-30T14:55:00Z
+Branch: feat/tabwise-r2-l1-page-journal
+Baseline: eedfdcbe8e45013a023dda3cd3bcc17f29721733 (main)
+- New src/r2/page-journal.mjs `createPageJournal({source,writer,maxEvents,maxBytes})` -> frozen
+  {snapshot(),keys(cursor)} over one injected synthetic source; reuses createPageProvider;
+  writer `page` lane only; imports only ./page-provider.mjs; no caller in src/ or scripts/.
+- D-82 (ChatGPT review MEDIUM): success writes are awaited and the latch is re-checked; the
+  diagnostic write is handled (cause) without delaying the refusal. 5 regression tests added.
+- 71 J-tests appended to admitted test/r2-page-provider.test.mjs (D-81, D-82).
+- All R2 evidence synthetic/UNATTESTED. FEATURES, qualification-status (enabled:false, BLOCK),
+  review-status (BLOCK), liveGate throw, workflows, CI inventory and frozen R1 unchanged.
 ## Now / next / blocked
-- Now: revised uncommitted R2-L0 docs diff awaiting independent ChatGPT review.
-- Next: owner commit of R2-L0; owner decisions on R2-L1 (test placement: append to admitted
-  test/r2-page-provider.test.mjs; require all five keydown flags; NVDA Control keydown -> R2-L2).
-- Blocked: R2 qualification, live NVDA, physical input, full worker (liveGate still throws).
-## Last verification
-git diff --check -> see R2-L0 handoff (docs only; no tests run in this task)
+- Now: uncommitted R2-L1 diff (with correction) awaiting ChatGPT re-review.
+- Next: owner commit after review PASS. R2-L2 not started (reviewed production loader,
+  separate authorization; NVDA Control keydown treatment is an owner decision there).
+- Blocked: R2 qualification, live NVDA, physical input, full worker.
+## Last verification (MEASURED, Node v24.22.1)
+- Correction RED 14:38:04Z: 113 tests, 108 pass / 5 fail on prior adapter (data returned
+  despite rejected write; unhandledRejection). GREEN: r2-page-provider 113/113.
+- test/r2*.test.mjs 314/314 (243 + 71); check-r1-baseline exit 0; preflight exit 0;
+  qualification digest 6972c311...f328 unchanged.
+- offline ordinary 47 selected / 9 excluded, 589/589; stress seed 172785 exit 0, all 8 profiles
+  589/589 (out cache/r2-l1-fix). Earlier session stall-40 TIMEOUT kept in cache/r2-l1.
+- Mutation re-run 14:39:47Z: 34/36 detected; 2 redundant latch-check subsets disclosed.
 ## Handoff
-docs/engineering/Tabwise-worker-binding-blocker.md (R2-L0 gap table and R2-L1 spec)
+docs/engineering/R2-L1-page-journal.md (invariants, RED/GREEN, mutation, review correction)
+Commit files: src/r2/page-journal.mjs, test/r2-page-provider.test.mjs,
+docs/engineering/R2-L1-page-journal.md, docs/CODEMAP.md, docs/ledger/{STATE.md,LOG.jsonl,DECISIONS.md}
