@@ -1,39 +1,30 @@
-# STATE - R2-L2 PR11 corrections validated locally; hosted CI pending
-Updated: 2026-10-30T16:12:48Z
-Branch: feat/tabwise-r2-l2-s3-evidence-offline (PR #11, corrective commit pending)
+# STATE - R2-L2 C-3 + S5a: Windows accepted; integration PR pending
+Updated: 2026-10-30T18:22:15Z
+Base: main 015128ba (PR #11 merge). Owner Windows acceptance complete; integration PR pending.
 ## Now / next / blocked
-- Now: S3/S4/C1 integrated; Windows CI test-harness corrections validated locally; R2 disabled/BLOCK.
-  H1 completeness, H2 captureJourney contract, H3 mutation-backed state, M1 intent VKs/Shift prefixes, M2 cap tests.
-- Next: owner corrective push, hosted Windows preflight and independent review; then C-3/S5a/S5b/S6/S7.
-- Blocked: R2 qualification, live NVDA, physical input. P-1 was provisionally exercised in real Chromium 153
-  via a separate Cloud session (not this session); pinned Chromium 156 and Windows NVDA remain unverified;
-  P-1 is NOT fully qualified. P-2/P-3 unmeasured. genuine-unqualified/qualified unreachable until S5b/S6.
-## Last verification (MEASURED, owner Windows Node v24.22.1)
-- R2 regression: 422/422 PASS; exit 0. Receipt 22/22; S4 review 14/14.
-- Ordinary: 48/48 PASS. Stress: 8 profiles, 48/48 each PASS, seed 113262; 9 excluded.
-- Frozen R1 baseline: ok true, errors []; exit 0.
-- Git diff --check: exit 0; informational LF-to-CRLF warnings only.
-- S4 CRLF test corrected; R2_FILES includes the S3 evidence writer.
-- Chromium 153 P-1 provisional; pinned Chromium 156 and Windows NVDA unverified.
-- R2 qualification remains disabled/BLOCK.
-
-## Review fixes (review these)
-- H1: no accepted page read -> reason; no capture.json -> reason; intents/keys/records short of the step map
-  -> reasons. Empty writer seals incomplete (S3-N20).
-- H2: capture.json checked against the real src/r2/capture.mjs shape; positive tests now run the real
-  captureJourney on a fake Node clock. Completed capture needs COMPLETE outcome, success statuses, judgeKeys
-  acknowledgement, exact ack_seq, contiguous associated events, >=2 samples, no reasons/invalidation/gate_stop,
-  and exactly one unrecorded boundary read. Incomplete captures keep diagnostics as reasons (S3-N8, N21, N22).
-- H3: a changed state needs a mutation event in the same read; an app event alone is refused (S3-N12, N23).
-- M1: intents exactly {action, keys} with the press VKs; wrong key/shift -> reason; Shift outside Shift+Tab or
-  not followed by shifted Tab -> error; trailing Shift -> reason; shift_prefix recomputed exactly (S3-P9, N24, N25).
-- M2: 12 MB unchanged. 3 and 4 actions at pollMs 20 fit; 3 and 4 at pollMs 10 refused (S3-P10, N1).
-  Note: captureJourney's default pollMs is 10, so a caller must pass pollMs >= 15 (3 actions) / 20 (4).
-## Residual risks
-- A forger rewriting every delta, hash, lane and capture consistently is undetectable offline: class synthetic.
-- Shift+Tab coverage uses a test-only approved task over the validation fixture bytes (no Shift+Tab pair exists).
-- S1/S2, capture.mjs and frozen R1 source unchanged; timeout/ack semantics unchanged.
+- Now: independent review returned CHANGES REQUIRED on patch 320430eb...6e38; both corrections applied:
+  A (C-3): redactNonce refuses nonce-sanitization-ambiguous when any sanitized record still holds the complete
+    nonce (any case), e.g. prefix3f9a0c1bsuffix, account-3f9a0c1bZ, hello 3f9a0c1b7 next. Old test that allowed it replaced.
+  B (S5a): the final jsonOnly(result) is inside a fail-closed boundary: failure stops the gate (protocol,
+    "R2 compose result refused: ...") and throws; no result escapes.
+- Next: owner commit/push and hosted Windows CI; then S5b/S6 (handoff §12). S7 remains owner-gated.
+- Blocked: genuine C-3 positive (S3 class never genuine-unqualified until S5b/S6). R2 qualification, live
+  NVDA, physical input. R2 disabled/BLOCK; FEATURES.json and thresholds unchanged.
+## Verification (MEASURED; Cloud Linux Node 22 and owner Windows Node 24.22.1)
+- RED: payload-context + binding 154 tests, 10 fail (all new/corrected tests); GREEN 154/154.
+- Mutations M24-M29: 6/6 killed, hash-verified restore (total 29/29 meaningful killed).
+- node --test --test-timeout=20000 test/r2*.test.mjs: 561/561 PASS, exit 0.
+- offline-tests ordinary seed 1: 45/48; 3 FAIL environmental (qualification-loader, review-integrity,
+  vendor: no node_modules/@guidepup), identical at baseline.
+- offline-tests stress seed 113262: 7 profiles 45/48 each (same 3); random-113262 cannot run on Node 22
+  (bad option --test-randomize). No R2 file failed anywhere.
+- check-r1-baseline: ok true, errors [], exit 0. git diff --check: exit 0.
+- Owner Windows Node 24.22.1: R2 561/561; ordinary 48/48; stress 8 profiles x 48/48.
+- Frozen R1 ok true, errors []; git diff --check exit 0; R2 disabled/BLOCK.
+## Review focus
+- speech-payload.mjs redactNonce complete-nonce check; r2-compose.mjs final try/catch.
+- Residual (disclosed, O-12): contiguous partial (3f9a) or nonce split across records/phrases unspaced.
 ## Handoff
-- Corrections: test/r2-review.test.mjs and test/r2-capture-receipts-failclosed.test.mjs.
-- Cause: read-only Windows fixture copies and mixed real/fake timer scheduling.
-- Owner action: commit and push PR #11 fixes; await hosted CI; R2 remains BLOCKED.
+- Record: docs/engineering/R2-L2-C3-S5a-handoff.md (§2, §3, §6, §7, §8, §9, §11, §14 updated).
+- New patch in Claude scratchpad (R2-L2-C3-S5a-r2.patch); old checksum superseded.
+- Owner action: review, Windows run, commit per handoff §15; R2 BLOCKED.

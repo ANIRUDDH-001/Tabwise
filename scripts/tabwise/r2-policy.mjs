@@ -11,12 +11,12 @@ export const R2_STATUS_SCHEMA='tabwise-r2-status/1';
 export const R2_WORKFLOW='.github/workflows/tabwise-r2.yml';
 // D-72, D-73 and D-74 are retired (R2-L2 design §9) and can never authorize R2.
 export const RETIRED_APPROVALS=Object.freeze(['D-72','D-73','D-74']);
-// R2 source scope at R2-L2 S4/C-1. Later slices (S3, S5a, S5b, S6, C-3) must be added when they land; the status file is excluded.
+// R2 source scope at R2-L2 S5a/C-3. Later slices (S5b, S6) must be added when they land; the status file is excluded.
 export const R2_FILES=Object.freeze([
- 'scripts/tabwise/r2-evidence.mjs',
+ 'scripts/tabwise/r2-compose.mjs','scripts/tabwise/r2-evidence.mjs',
  'scripts/tabwise/r2-policy.mjs',
  'src/r2/binding.mjs','src/r2/capture.mjs','src/r2/contract.mjs','src/r2/page-journal.mjs','src/r2/page-provider.mjs',
- 'src/r2/page-recorder.mjs','src/r2/page-source.mjs','src/r2/preparation.mjs','src/r2/send-receipt.mjs',
+ 'src/r2/page-recorder.mjs','src/r2/page-source.mjs','src/r2/preparation.mjs','src/r2/send-receipt.mjs','src/r2/speech-payload.mjs',
 ].sort());
 const STATUS_KEYS=new Set(['schema','enabled','verdict','reviewer','review_ref','owner_approval_ref','actor','reviewed_files','reviewed_sha256','qualification_sha256','plan_sha256','reason']);
 const SHA256=/^[a-f0-9]{64}$/;
