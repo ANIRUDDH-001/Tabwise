@@ -54,6 +54,17 @@ export function assertEvaluable({ manifest, labels, runner, devHashes }) {
   return errors;
 }
 
+// Chromium KeyboardEvent semantics for a declared press (C-1): Space -> key ' ', Shift+Tab -> key 'Tab' with shiftKey,
+// any other press -> key equal to the press without shift. Shared by alignTimeline and captureJourney.
+export function expectedKey(press) {
+  if (typeof press !== 'string' || !press || /^(Control|Alt|Meta|Insert|Shift)$/.test(press)) throw Error('unsupported press');
+  const shift = press.startsWith('Shift+');
+  const key = shift ? press.slice(6) : press;
+  if (key.includes('+') || !key) throw Error('unsupported press');
+  return { key: key === 'Space' ? ' ' : key, shift };
+}
+const keyMatches = (event, want) => event?.key === want.key && event.shift === want.shift && !event.ctrl && !event.alt && !event.meta && !event.repeat;
+
 // One timeline per page. Node-side speech is grouped per action by the capture records; page events are ordered by
 // page seq and assigned to the action whose acknowledged keydown (ack_seq) most recently precedes them.
 // Raw clocks from different processes are never subtracted or compared.
@@ -67,7 +78,11 @@ export function alignTimeline({ actions, speech, page }) {
     else if (!keydowns.has(a.ack_seq)) insufficient.push(`${a.step}: ack seq ${a.ack_seq} is not a page keydown`);
     else if (a.ack_seq <= last) insufficient.push(`${a.step}: acknowledgements out of order`);
     else last = a.ack_seq;
-    if (a.press && events.find((e) => e.seq === a.ack_seq)?.key !== a.press) insufficient.push(`${a.step}: acknowledged key differs from declared press`);
+    if (a.press != null) {
+      let want = null;
+      try { want = expectedKey(a.press); } catch { insufficient.push(`${a.step}: unsupported declared press`); }
+      if (want && !keyMatches(events.find((e) => e.seq === a.ack_seq), want)) insufficient.push(`${a.step}: acknowledged key differs from declared press`);
+    }
     if (!speech.some((s) => s.step === a.step)) insufficient.push(`${a.step}: no speech record`);
   }
   for (let i = 1; i < events.length; i++) if (!(events[i].seq > events[i - 1].seq)) insufficient.push(`page seq not strictly increasing at ${events[i].seq}`);

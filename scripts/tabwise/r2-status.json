@@ -1,0 +1,14 @@
+{
+  "schema": "tabwise-r2-status/1",
+  "enabled": false,
+  "verdict": "BLOCK",
+  "reviewer": null,
+  "review_ref": null,
+  "owner_approval_ref": null,
+  "actor": null,
+  "reviewed_files": [],
+  "reviewed_sha256": null,
+  "qualification_sha256": null,
+  "plan_sha256": null,
+  "reason": "R2-L2 S4: R2 ships disabled/BLOCK (O-2). Activation needs independent review of S1-S6, S5a/S5b, C-1 and C-3, then a new owner decision naming the exact SHA, R2_FILES, R2 digest, run plan, actor and workflow, committed as a status-only change. D-72, D-73 and D-74 are retired and cannot authorize R2. Qualification stays disabled/BLOCK."
+}

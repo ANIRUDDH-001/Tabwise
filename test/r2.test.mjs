@@ -201,3 +201,46 @@ test('R2 run verdict: not evaluable, over cap, bad arms or missing healthy evide
   const b = run(); for (const p of b.pages) if (p.label.barrier) p.insufficient = ['x'];
   assert.equal(judgeR2(b).outcome, 'INSUFFICIENT_EVIDENCE');
 });
+
+// C-1 (R2-L2 §10): alignTimeline compares the acknowledged keydown with Chromium KeyboardEvent semantics:
+// Space -> key ' ', Shift+Tab -> key 'Tab' with shiftKey, other presses -> key === press without shift.
+const ackOnly = (press, event) => alignTimeline({
+  actions: [{ step: 's1', press, ack_seq: 1 }], speech: [{ step: 's1', text: '' }], page: [{ seq: 1, type: 'keydown', target: 'x', ...event }],
+}).insufficient;
+
+test('C-1 timeline: Tab, Space, Shift+Tab and Enter acknowledgements with Chromium key semantics are accepted', () => {
+  assert.deepEqual(ackOnly('Tab', { key: 'Tab', shift: false }), []);
+  assert.deepEqual(ackOnly('Space', { key: ' ', shift: false }), []);
+  assert.deepEqual(ackOnly('Shift+Tab', { key: 'Tab', shift: true }), []);
+  assert.deepEqual(ackOnly('Enter', { key: 'Enter', shift: false }), []);
+});
+
+test('C-1 timeline: wrong shift state, literal key names and modified chords are mismatches', () => {
+  const cases = [
+    ['Tab', { key: 'Tab', shift: true }],
+    ['Tab', { key: 'Tab' }],
+    ['Shift+Tab', { key: 'Tab', shift: false }],
+    ['Shift+Tab', { key: 'Shift+Tab', shift: true }],
+    ['Space', { key: 'Space', shift: false }],
+    ['Space', { key: ' ', shift: true }],
+    ['Space', { key: 'Spacebar', shift: false }],
+    ['Enter', { key: 'Enter', shift: true }],
+    ['Tab', { key: 'Tab', shift: false, ctrl: true }],
+    ['Tab', { key: 'Tab', shift: false, alt: true }],
+    ['Tab', { key: 'Tab', shift: false, meta: true }],
+    ['Tab', { key: 'Tab', shift: false, repeat: true }],
+  ];
+  for (const [press, event] of cases) assert.deepEqual(ackOnly(press, event), ['s1: acknowledged key differs from declared press'], `${press} vs ${JSON.stringify(event)}`);
+});
+
+test('C-1 timeline: an unsupported declared press is insufficient evidence, never a thrown error', () => {
+  for (const press of ['Shift', 'Control', 'Ctrl+Tab', 'Shift+', 'Shift+Ctrl+Tab', ''])
+    assert.match(ackOnly(press, { key: 'Tab', shift: false }).join(), /unsupported declared press|differs from declared press/, JSON.stringify(press));
+  assert.deepEqual(ackOnly('Control', { key: 'Control', shift: false }), ['s1: unsupported declared press']);
+});
+
+test('C-1 timeline and capture share one expectedKey helper', () => {
+  const capture = readFileSync(new URL('../src/r2/capture.mjs', import.meta.url), 'utf8');
+  assert.doesNotMatch(capture, /function expectedKey\b/);
+  assert.match(capture, /import \{[^}]*\bexpectedKey\b[^}]*\} from '\.\/contract\.mjs';/);
+});

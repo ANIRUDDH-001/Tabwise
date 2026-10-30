@@ -3,6 +3,7 @@
 import { withTimeout } from '../speech/capture.mjs';
 import { judgeKeys } from '../speech/sendguard.mjs';
 import { isSendReceiptLedger } from './send-receipt.mjs';
+import { expectedKey } from './contract.mjs';
 
 const NODE_CLOCK = 'node-monotonic-ms';
 const PAGE_CLOCK = 'page-monotonic-ms';
@@ -43,14 +44,6 @@ export function invalidateForGateStop(capture, where, state) {
   capture.completed = false;
   capture.outcome = 'INSUFFICIENT_EVIDENCE';
   return capture;
-}
-
-function expectedKey(press) {
-  if (typeof press !== 'string' || !press || /^(Control|Alt|Meta|Insert|Shift)$/.test(press)) throw Error('unsupported press');
-  const shift = press.startsWith('Shift+');
-  const key = shift ? press.slice(6) : press;
-  if (key.includes('+') || !key) throw Error('unsupported press');
-  return { key: key === 'Space' ? ' ' : key, shift };
 }
 
 /**
