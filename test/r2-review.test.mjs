@@ -182,3 +182,71 @@ test('S4 policy: r2-policy.mjs imports only Node built-ins, runguard and the qua
   assert.deepEqual(imports, ['../../src/speech/runguard.mjs', './qualification-policy.mjs', 'node:crypto', 'node:fs', 'node:path', 'node:url']);
   assert.doesNotMatch(code, /\bimport\s*\(/);
 });
+
+// ---- R2-L2 S5a / C-3 static boundaries (CLOUD-R2-L2-04): import graph, exports, reviewed scope ----
+import { readdirSync as readdirS5a } from 'node:fs';
+import { resolve as resolveS5a, dirname as dirnameS5a, relative as relativeS5a } from 'node:path';
+const S5A_IMPORT = /^\s*(?:import|export)\b[^'"]*?\bfrom\s*['"]([^'"]+)['"]|^\s*import\s*['"]([^'"]+)['"]/gm;
+const importsOf = file => [...readS4(file, 'utf8').matchAll(S5A_IMPORT)].map((m) => m[1] ?? m[2]);
+function closureS5a(entry) {
+  const files = new Set(), builtins = new Set(), packages = new Set(), dynamic = [];
+  const walk = (file) => {
+    const rel = relativeS5a(process.cwd(), file).replace(/\\/g, '/');
+    if (files.has(rel)) return;
+    files.add(rel);
+    if (/\bimport\s*\(/.test(readS4(file, 'utf8'))) dynamic.push(rel);
+    for (const spec of importsOf(file)) {
+      if (spec.startsWith('node:')) builtins.add(spec);
+      else if (spec.startsWith('.')) walk(resolveS5a(dirnameS5a(file), spec));
+      else packages.add(spec);
+    }
+  };
+  walk(resolveS5a(entry));
+  return { files: [...files].sort(), builtins: [...builtins].sort(), packages: [...packages].sort(), dynamic };
+}
+
+test('S5a static: r2-compose imports exactly the reviewed capability-free modules and exports only composeR2Page', () => {
+  const code = readS4('scripts/tabwise/r2-compose.mjs', 'utf8');
+  assert.deepEqual(importsOf('scripts/tabwise/r2-compose.mjs').sort(), ['../../src/r2/capture.mjs', '../../src/r2/page-journal.mjs', '../../src/r2/page-source.mjs',
+    '../../src/r2/send-receipt.mjs', '../../src/r2/speech-payload.mjs', '../../src/speech/sendguard.mjs', './r2-evidence.mjs']);
+  assert.doesNotMatch(code, /\bimport\s*\(/, 'no dynamic import');
+  assert.doesNotMatch(code, /\brequire\s*\(|createRequire|process\.binding|globalThis\[/, 'no other loading path');
+  for (const forbidden of ['playwright', '@axe-core', 'child_process', 'node:net', 'node:fs', 'qualification-loader', 'loadQualificationRuntime', 'isQualificationRuntime',
+    'network.mjs', 'observer.mjs', 'executor.mjs', 'foreground.mjs', 'vendor/', 'guidepup', 'createR2EvidenceWriter', 'sealR2Run', 'owned-vendored-runtime', 'genuine-unqualified'])
+    assert.equal(code.includes(forbidden), false, `r2-compose.mjs must not name ${forbidden}`);
+  assert.deepEqual([...code.matchAll(/^export\s+(?:async\s+)?(?:function|const|let|class)\s+(\w+)/gm)].map((m) => m[1]), ['composeR2Page']);
+  assert.match(code, /import \{buildR2StepMap, planR2EvidenceCaps\} from '\.\/r2-evidence\.mjs'/, 'only the pure step map and cap planner from S3');
+});
+
+test('S5a static: transitive closure reaches no browser, loader, observer, executor, network, vendor or package module (measured)', () => {
+  const graph = closureS5a('scripts/tabwise/r2-compose.mjs');
+  assert.deepEqual(graph.packages, [], 'no package import anywhere in the closure');
+  assert.deepEqual(graph.dynamic, [], 'no dynamic import anywhere in the closure');
+  for (const file of graph.files) assert.doesNotMatch(file, /qualification-|network\.mjs|observer\.mjs|executor\.mjs|tabwise-r2\.mjs|r2-session\.mjs|^vendor\//, file);
+  // Disclosed, pre-existing: src/r2/capture.mjs takes withTimeout from frozen src/speech/capture.mjs, whose module graph
+  // includes foreground.mjs (child_process) and node:http. r2-compose calls none of them. Pinned so a change is reviewed.
+  assert.deepEqual(graph.files, ['packages/contracts/palette.mjs', 'scripts/tabwise/input-policy.mjs', 'scripts/tabwise/r2-compose.mjs', 'scripts/tabwise/r2-evidence.mjs',
+    'src/r2/capture.mjs', 'src/r2/contract.mjs', 'src/r2/page-journal.mjs', 'src/r2/page-provider.mjs', 'src/r2/page-source.mjs', 'src/r2/preparation.mjs',
+    'src/r2/send-receipt.mjs', 'src/r2/speech-payload.mjs', 'src/speech/capture.mjs', 'src/speech/foreground.mjs', 'src/speech/sendguard.mjs', 'src/speech/validate.mjs']);
+  assert.deepEqual(graph.builtins, ['node:child_process', 'node:crypto', 'node:fs', 'node:fs/promises', 'node:http', 'node:os', 'node:path', 'node:url']);
+});
+
+test('S5a static: no entry or production module imports r2-compose; C-3 imports no runtime or capability module', () => {
+  const sources = [];
+  const walk = (dir) => { for (const e of readdirS5a(dir, { withFileTypes: true })) {
+    const p = `${dir}/${e.name}`;
+    if (e.isDirectory() && !['node_modules', '.git', 'vendor', 'web', 'test'].includes(e.name)) walk(p);
+    else if (e.isFile() && /\.(mjs|js|ts)$/.test(e.name)) sources.push(p);
+  } };
+  walk('scripts'); walk('src');
+  const importers = sources.filter((f) => f !== 'scripts/tabwise/r2-compose.mjs' && importsOf(f).some((s) => s.endsWith('r2-compose.mjs')));
+  assert.deepEqual(importers, []);
+  assert.deepEqual(importsOf('src/r2/speech-payload.mjs').sort(), ['../../scripts/tabwise/r2-evidence.mjs', './contract.mjs', './preparation.mjs', 'node:crypto', 'node:fs', 'node:path']);
+  assert.doesNotMatch(readS4('src/r2/speech-payload.mjs', 'utf8'), /\bimport\s*\(|playwright|child_process|qualification-loader|fetch\(|respond\(/);
+});
+
+test('S5a/C-3 scope: R2_FILES covers r2-compose and speech-payload; the shipped R2 status stays disabled/BLOCK', () => {
+  for (const file of ['scripts/tabwise/r2-compose.mjs', 'src/r2/speech-payload.mjs']) assert.ok(R2_FILES.includes(file), file);
+  const shipped = readR2Status();
+  assert.deepEqual([shipped.enabled, shipped.verdict, shipped.reviewed_sha256], [false, 'BLOCK', null]);
+});

@@ -663,3 +663,47 @@ test('S3-P10 realistic 3- and 4-action plans fit at a 20 ms poll; 10 ms plans fa
   for (const actions of [3, 4]) assert.throws(() => planR2EvidenceCaps({...SPEC, actions, pollMs: 10}), /exceeds the 12000000-byte page cap/);
   assert.equal(TOTAL_CAP, 12_000_000);
 });
+
+// ---- R2-L2 C-3 production boundary over sealed S3 directories (CLOUD-R2-L2-04) ----
+// openVerifiedR2SpeechEvidence runs this file's verifier and requires 'genuine-unqualified', which S3 cannot assign
+// before S5b/S6. Every sealed directory is therefore refused; the authentic-positive case is pending S5b/S6.
+import {openVerifiedR2SpeechEvidence, buildR2SpeechPayload} from '../src/r2/speech-payload.mjs';
+const c3Open = (dir, inputs = INPUTS) => openVerifiedR2SpeechEvidence(dir, inputs);
+
+test('C3-S1 a sealed, verifying synthetic directory is refused: genuine evidence required, attestation unavailable', async () => {
+  const {dir, result} = await sealed();
+  assert.equal(result.class, 'synthetic');
+  assert.equal((await verifyR2PageEvidence(dir, INPUTS)).ok, true, 'S3 verifier unchanged: synthetic verifies');
+  await assert.rejects(c3Open(dir), err => /genuine evidence required; verifier class is synthetic/.test(err.message) && err.message.includes(ATTESTATION_UNAVAILABLE));
+});
+
+test('C3-S2 incomplete, forged-class, forged-provenance, unsealed, altered and wrong-fixture directories are refused', async () => {
+  const cases = [
+    ['incomplete', async () => (await sealed({incomplete: ['session refusal']})).dir, /verifier class is incomplete/],
+    ['forged genuine class', async () => { const {dir} = await sealed(); reseal(dir, m => { m.class = 'genuine-unqualified'; }); return dir; }, /does not verify/],
+    ['forged provenance and class', async () => { const {dir} = await sealed(); reseal(dir, m => { m.class = 'genuine-unqualified'; m.provenance = {kind: 'owned-vendored-runtime'}; }); return dir; }, /does not verify/],
+    ['provenance claim sealed by the writer', async () => (await sealed({provenance: {kind: 'owned-vendored-runtime', class: 'genuine-unqualified'}})).dir, /verifier class is incomplete/],
+    ['missing seal', async () => { const {dir} = await sealed(); unlinkSync(join(dir, 'manifest.sha256')); return dir; }, /does not verify/],
+    ['altered capture', async () => { const {dir} = await sealed(); writeFileSync(join(dir, 'capture.json'), '{}'); return dir; }, /does not verify/],
+    ['altered speech lane', async () => { const {dir} = await sealed(); writeFileSync(join(dir, 'speech.jsonl'), '{"phrases":["forged"]}\n'); return dir; }, /does not verify/],
+  ];
+  for (const [name, make, pattern] of cases) {
+    const dir = await make();
+    await assert.rejects(c3Open(dir), pattern, name);
+  }
+  const {dir} = await sealed();
+  const other = manifest.pairs.find(p => p.id === 'status');
+  await assert.rejects(c3Open(dir, {fixture: readFileSync(new URL(`../fixtures/r2/${other.healthy.file}`, import.meta.url)), approved: APPROVED}), /does not verify/, 'wrong approved fixture');
+});
+
+test('C3-S3 no verified handle exists after a refusal; caller objects never authorize the production builder', async () => {
+  const {dir} = await sealed();
+  const manifestJson = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8'));
+  const capture = JSON.parse(readFileSync(join(dir, 'capture.json'), 'utf8'));
+  await assert.rejects(c3Open(dir));
+  for (const forged of [manifestJson, {...manifestJson, class: 'genuine-unqualified'}, {manifest_sha256: sha256(readFileSync(join(dir, 'manifest.json')))},
+    Object.freeze({verified: true, class: 'genuine-unqualified'})]) {
+    assert.throws(() => buildR2SpeechPayload({capture, stepMap: manifestJson.step_map, manifest: forged, fixture_id: 'f-ab12'}),
+      /independently verified genuine evidence handle/);
+  }
+});
