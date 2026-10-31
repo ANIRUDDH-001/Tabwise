@@ -1012,3 +1012,84 @@ test('O10-14 the policy digest covers every owner field; rebinding child_process
   assert.equal(r.simulated, true, 'a spawn rebound after load is still an injected seam');
   assert.throws(() => readVerifiedHostedProvenance(r.handle), /simulated/);
 });
+
+// ---- R2 S7 (A-3): --verify-run re-verification from disk. Synthetic sealed runs only; nothing here is genuine evidence. ----
+const s7Run = () => import('../scripts/tabwise/r2-run.mjs');
+// A gate-shaped object as checkR2Entry returns it (plan, approved pages, hash-bound fixtures); never a real gate.
+const s7Gate = (ids = ['p1', 'p2']) => ({plan: {pages: ids.map(id => ({id, task: APPROVED.task}))},
+  pages: ids.map(id => ({id, fixture_sha256: APPROVED.fixture_sha256})), fixtures: new Map(ids.map(id => [id, FIXTURE]))});
+async function s7Sealed(gate, exits = gate.pages.map(() => 0)) {
+  const {r2RunInputs} = await s7Run();
+  const run = temp(), {plan, inputs} = r2RunInputs(gate);
+  for (const [i] of exits.entries()) { const h = harness(join(run, gate.pages[i].id)); await journey(h); await h.writer.seal(); }
+  const sealedRun = await sealR2Run(run, {enabled: true, plan, pages: exits.map((exit_code, i) => ({id: gate.pages[i].id, exit_code})), inputs});
+  return {run, plan, inputs, sealedRun};
+}
+
+test('S7-V1 verifyR2Run reports the digest of the exact verified run-manifest bytes, and null whenever it refuses', async () => {
+  const {run, plan, inputs, sealedRun} = await s7Sealed(s7Gate());
+  const v = await verifyR2Run(run, {plan, inputs});
+  assert.deepEqual([v.ok, v.manifest_sha256], [true, sealedRun.manifest_sha256]);
+  assert.equal(v.manifest_sha256, sha256(readFileSync(join(run, 'run-manifest.json'))));
+  writeFileSync(join(run, 'p2', 'events.jsonl'), readFileSync(join(run, 'p2', 'events.jsonl'), 'utf8') + '{}\n');
+  const tampered = await verifyR2Run(run, {plan, inputs});
+  assert.deepEqual([tampered.ok, tampered.manifest_sha256], [false, null]);
+  const missing = await verifyR2Run(join(run, 'absent'), {plan, inputs});
+  assert.deepEqual([missing.ok, missing.manifest_sha256], [false, null]);
+});
+
+test('S7-V2 r2RunInputs derives the approved inputs from the gate exactly as the run step seals them', async () => {
+  const {r2RunInputs} = await s7Run();
+  const gate = s7Gate(['p1']), {plan, inputs} = r2RunInputs(gate);
+  assert.deepEqual(plan, gate.plan); assert.notEqual(plan, gate.plan, 'a copy; the frozen gate plan is never handed out');
+  assert.deepEqual(inputs, {p1: {fixture: FIXTURE, approved: {fixture_sha256: APPROVED.fixture_sha256, task: APPROVED.task}}});
+});
+
+test('S7-V3 r2VerifyRun: a complete verified run exits 0 with its digest; tampered, missing, stopped and failed runs exit 2', async () => {
+  const {r2VerifyRun} = await s7Run();
+  const gate = s7Gate(), good = await s7Sealed(gate);
+  const ok = await r2VerifyRun(gate, good.run);
+  assert.equal(ok.code, 0);
+  assert.deepEqual(ok.summary, {schema: 'tabwise-r2-verify/1', ok: true, complete: true, run_class: 'synthetic', errors: [],
+    run_manifest_sha256: good.sealedRun.manifest_sha256, genuine_evidence: false});
+  const refused = async (summary, code, why) => {
+    assert.equal(code, 2, why);
+    assert.equal(summary.schema, 'tabwise-r2-verify/1', why); assert.equal(summary.complete, false, why); assert.equal(summary.genuine_evidence, false, why);
+    assert.ok(summary.errors.length > 0, why);
+  };
+  const stopped = await s7Sealed(gate, [1]);
+  let r = await r2VerifyRun(gate, stopped.run);
+  await refused(r.summary, r.code, 'stopped after a failing page');
+  assert.equal(r.summary.ok, true, 'the stopped run itself verifies; it is just not complete');
+  const lastFailed = await s7Sealed(gate, [0, 3]);
+  r = await r2VerifyRun(gate, lastFailed.run);
+  await refused(r.summary, r.code, 'last page failed');
+  r = await r2VerifyRun(gate, join(good.run, 'absent'));
+  await refused(r.summary, r.code, 'missing run directory');
+  assert.deepEqual([r.summary.ok, r.summary.run_manifest_sha256], [false, null]);
+  writeFileSync(join(good.run, 'run-manifest.sha256'), `${'0'.repeat(64)}  run-manifest.json\n`);
+  r = await r2VerifyRun(gate, good.run);
+  await refused(r.summary, r.code, 'digest file swapped');
+  assert.deepEqual([r.summary.ok, r.summary.run_manifest_sha256, r.summary.run_class], [false, null, 'incomplete']);
+  const other = await s7Sealed(s7Gate(['p1']));
+  r = await r2VerifyRun(gate, other.run);
+  await refused(r.summary, r.code, 'a run sealed under a different plan');
+});
+
+test('S7-V4 r2VerifyOutcome trusts nothing but a verified result with a digest and a complete, all-zero run', async () => {
+  const {r2VerifyOutcome} = await s7Run();
+  const page = {id: 'p1', dir: 'p1', manifest_sha256: 'a'.repeat(64), exit_code: 0, class: 'synthetic'};
+  const v = (over = {}, manifest = {}) => ({ok: true, run_class: 'synthetic', errors: [], manifest_sha256: 'b'.repeat(64), manifest: {pages: [page], ...manifest}, ...over});
+  assert.equal(r2VerifyOutcome(v()).code, 0);
+  for (const [why, input] of [['not ok', v({ok: false, errors: ['x']})], ['ok is truthy, not true', v({ok: 1})], ['no digest', v({manifest_sha256: null})],
+    ['uppercase digest', v({manifest_sha256: 'B'.repeat(64)})], ['stopped', v({}, {stopped_after: 'p1'})], ['failed page', v({}, {pages: [{...page, exit_code: 2}]})],
+    ['unsealed page', v({}, {pages: [{...page, manifest_sha256: null}]})], ['no pages', v({}, {pages: []})], ['no manifest', v({manifest: null})],
+    ['null', null], ['string', 'ok']]) {
+    const r = r2VerifyOutcome(input);
+    assert.equal(r.code, 2, why); assert.equal(r.summary.complete, false, why); assert.ok(r.summary.errors.length > 0, why);
+    if (!r.summary.ok) assert.deepEqual([r.summary.run_class, r.summary.run_manifest_sha256], ['incomplete', null], `${why}: nothing of a refused verification is reported`);
+  }
+  const r = r2VerifyOutcome(v({ok: false, errors: Array.from({length: 100}, () => 'e'.repeat(2000))}));
+  assert.ok(r.summary.errors.length <= 64 && r.summary.errors.every(e => e.length <= 512), 'errors are capped');
+  assert.equal(r.summary.run_manifest_sha256, null, 'no digest is reported for a refused run');
+});

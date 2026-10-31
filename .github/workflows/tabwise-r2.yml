@@ -1,0 +1,245 @@
+# R2_WORKFLOW (scripts/tabwise/r2-policy.mjs). Static policy: test/r2-review.test.mjs S7-W1..W3. Owner approval A-1..A-3 (2026-10-31).
+# R2 S7: hosted R2 causal smoke on a disposable GitHub-hosted Windows VM, then a SLSA build-provenance
+# attestation over the sealed and independently re-verified run manifest.
+# - Manual dispatch on main, initial attempt only; one R2 run at a time.
+# - Job r2 has a read-only token and NO id-token permission. Page, browser and NVDA code never see an OIDC token.
+# - Every R2 step goes through scripts/tabwise-r2.mjs, whose checkR2Entry/checkR2Approval read the COMMITTED
+#   scripts/tabwise/r2-status.json. While it is disabled/BLOCK the gate step fails, nothing runs, and attest is skipped.
+# - Job attest runs only after r2 succeeded AND re-verification reported verified=true. It recomputes the digest
+#   before signing. Nothing here can enable R2; the committed status file is the only authority.
+# - The attestation is a workflow-origin claim only (O-10). It is not NVDA, runtime or physical-input qualification.
+# - Dispatch inputs reach scripts only through env, never interpolated into run: bodies (script-injection guard).
+# - Process custody (R-1/R-2, D-87) is the coordinator's: every page child's tree is reaped and confirmed by OS snapshots
+#   (docs/engineering/R2-R1R2-process-custody-handoff.md). The quiescence steps here (D-88) are read-only GLOBAL checks:
+#   no NVDA image and no 6837 listener on the VM. They terminate, clean and launch nothing, and global absence never shows
+#   that every page descendant was identified. The VM is disposed after the job.
+# - Evidence (D-88): the sealed run directory tabwise-r2/<run>-1 is verified by --verify-run, and its run-manifest.json is
+#   the only attested subject. tabwise-r2/diagnostics/ (the coordinator run summary with per-page custody, and the
+#   quiescence snapshots) is uploaded in the same artifact as supplementary diagnostics, not attested and not in the manifest.
+# - Budget (D-88): R2 run timeout-minutes is R2_RUN_STEP_BUDGET_MS (the r2-run helpers); checkR2Entry refuses a
+#   plan whose worst case (900 s per page plus 240 s reserves) exceeds it, so at most 2 pages, before any page starts.
+# - Actions are pinned to full commit SHAs. attest and download-artifact were verified 2026-10-31 (PROVENANCE.md).
+name: tabwise-r2
+run-name: tabwise-r2 ${{ github.run_id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      approved_revision:
+        description: Owner-approved 40-hex commit (must equal GITHUB_SHA and the status-approved revision)
+        required: true
+        type: string
+      owner_approval:
+        description: Owner decision id (D-n) named in r2-status.json owner_approval_ref
+        required: true
+        type: string
+      plan_path:
+        description: Committed run plan path (fixtures/r2/plans/<id>.json)
+        required: true
+        type: string
+      plan_sha256:
+        description: SHA-256 of the exact plan bytes (must equal r2-status.json plan_sha256)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tabwise-r2
+  cancel-in-progress: false
+
+jobs:
+  r2:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.run_attempt == '1'
+    runs-on: windows-2025
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    outputs:
+      verified: ${{ steps.verify.outputs.verified }}
+      run_manifest_sha256: ${{ steps.verify.outputs.run_manifest_sha256 }}
+    env:
+      TABWISE_R2_APPROVED_REVISION: ${{ inputs.approved_revision }}
+      TABWISE_R2_OWNER_APPROVAL: ${{ inputs.owner_approval }}
+      TABWISE_R2_PLAN_SHA256: ${{ inputs.plan_sha256 }}
+      TABWISE_R2_PLAN_PATH: ${{ inputs.plan_path }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.22.1
+      - name: Validate dispatch inputs (shape only; authority comes from r2-status.json)
+        shell: pwsh
+        # \z, not $: .NET $ also matches before a trailing newline (measured).
+        run: |
+          if ($env:TABWISE_R2_APPROVED_REVISION -cnotmatch '^[0-9a-f]{40}\z') { throw 'approved_revision must be 40 lowercase hex' }
+          if ($env:TABWISE_R2_APPROVED_REVISION -cne $env:GITHUB_SHA) { throw 'approved_revision is not GITHUB_SHA' }
+          if ($env:TABWISE_R2_OWNER_APPROVAL -cnotmatch '^D-[0-9]+\z') { throw 'owner_approval must be D-n' }
+          if ($env:TABWISE_R2_PLAN_SHA256 -cnotmatch '^[0-9a-f]{64}\z') { throw 'plan_sha256 must be 64 lowercase hex' }
+          if ($env:TABWISE_R2_PLAN_PATH -cnotmatch '^fixtures/r2/plans/[a-z][a-z0-9-]{0,63}\.json\z') { throw 'plan_path outside fixtures/r2/plans' }
+      - name: Install dependencies from the lockfile (no install scripts)
+        run: npm ci --ignore-scripts
+      - name: Prepare the VM for screen-reader automation (Guidepup)
+        run: npx --no-install guidepup setup --ci
+      - name: Install NVDA (Guidepup assets)
+        run: npx --no-install guidepup install nvda
+      - name: Install Chromium (Playwright)
+        run: npx --no-install playwright install chromium
+      - name: Make the checkout read-only
+        shell: pwsh
+        run: |
+          foreach ($f in (git ls-files)) { Set-ItemProperty -LiteralPath $f -Name IsReadOnly -Value $true }
+      - name: Offline tests
+        run: npm test
+      # Gate first, with no runtime: refuses while r2-status.json is disabled/BLOCK (expected today, exit 2).
+      - name: R2 gate (check-only)
+        id: gate
+        shell: pwsh
+        env:
+          TABWISE_R2_ENABLED: 'true'
+        run: |
+          node scripts/tabwise-r2.mjs --check-only --plan $env:TABWISE_R2_PLAN_PATH
+          if ($LASTEXITCODE -ne 0) { throw "R2 gate refused (exit $LASTEXITCODE)" }
+      # Read-only global quiescence before the run (the coordinator also takes a baseline before every page).
+      - name: Pre-run process quiescence
+        timeout-minutes: 2
+        shell: pwsh
+        env:
+          TABWISE_R2_QUIESCENCE_PHASE: pre
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $diag = Join-Path $env:RUNNER_TEMP 'tabwise-r2/diagnostics'
+          New-Item -ItemType Directory -Force -Path $diag | Out-Null
+          $rows = @(Get-CimInstance -ClassName Win32_Process -Property ProcessId,ParentProcessId,Name,CreationDate | ForEach-Object { [ordered]@{pid = [int64]$_.ProcessId; ppid = [int64]$_.ParentProcessId; name = [string]$_.Name; created = $(if ($_.CreationDate) { [string]$_.CreationDate.ToFileTimeUtc() } else { $null })} })
+          $nvda = @($rows | Where-Object { $_.name -match '^nvda(_[a-z0-9]+)?\.exe\z' })
+          $listen = @(Get-NetTCPConnection -State Listen | Where-Object { $_.LocalPort -eq 6837 } | ForEach-Object { [int64]$_.OwningProcess } | Sort-Object -Unique)
+          $q = [ordered]@{schema = 'tabwise-r2-quiescence/1'; phase = $env:TABWISE_R2_QUIESCENCE_PHASE; scope = 'global'; page_custody = 'not claimed: see run-summary.json pages[].custody'; quiescent = ($nvda.Count -eq 0 -and $listen.Count -eq 0); nvda_processes = $nvda; nvda_listeners = $listen; processes = $rows}
+          ConvertTo-Json -InputObject $q -Depth 4 -Compress | Set-Content -LiteralPath (Join-Path $diag "quiescence-$($env:TABWISE_R2_QUIESCENCE_PHASE).json") -Encoding utf8NoBOM
+          ConvertTo-Json -InputObject ([ordered]@{phase = $q.phase; scope = $q.scope; quiescent = $q.quiescent; nvda_processes = $nvda; nvda_listeners = $listen}) -Depth 4 -Compress
+          if (-not $q.quiescent) { throw "R2 $($q.phase)-run quiescence refused: an NVDA process or 6837 listener is present (global check; nothing was terminated)" }
+      # Runs every page through the same gate; seals and verifies the run manifest; exit 0 only if all pages are accepted and verified.
+      # The summary (per-page custody) goes to the uploaded diagnostics directory, beside and never inside the sealed run.
+      - name: R2 run
+        id: run
+        timeout-minutes: 40
+        shell: pwsh
+        env:
+          TABWISE_R2_ENABLED: 'true'
+        run: |
+          $diag = Join-Path $env:RUNNER_TEMP 'tabwise-r2/diagnostics'
+          New-Item -ItemType Directory -Force -Path $diag | Out-Null
+          $out = Join-Path $diag 'run-summary.json'
+          node scripts/tabwise-r2.mjs --run --plan $env:TABWISE_R2_PLAN_PATH > $out
+          $code = $LASTEXITCODE
+          Get-Content -LiteralPath $out
+          if ($code -ne 0) { throw "R2 run did not complete (exit $code)" }
+      # Read-only global quiescence after the run, on every path once it started. It adds a failure and never clears one.
+      - name: Post-run process quiescence
+        if: always() && steps.run.outcome != 'skipped'
+        timeout-minutes: 2
+        shell: pwsh
+        env:
+          TABWISE_R2_QUIESCENCE_PHASE: post
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $diag = Join-Path $env:RUNNER_TEMP 'tabwise-r2/diagnostics'
+          New-Item -ItemType Directory -Force -Path $diag | Out-Null
+          $rows = @(Get-CimInstance -ClassName Win32_Process -Property ProcessId,ParentProcessId,Name,CreationDate | ForEach-Object { [ordered]@{pid = [int64]$_.ProcessId; ppid = [int64]$_.ParentProcessId; name = [string]$_.Name; created = $(if ($_.CreationDate) { [string]$_.CreationDate.ToFileTimeUtc() } else { $null })} })
+          $nvda = @($rows | Where-Object { $_.name -match '^nvda(_[a-z0-9]+)?\.exe\z' })
+          $listen = @(Get-NetTCPConnection -State Listen | Where-Object { $_.LocalPort -eq 6837 } | ForEach-Object { [int64]$_.OwningProcess } | Sort-Object -Unique)
+          $q = [ordered]@{schema = 'tabwise-r2-quiescence/1'; phase = $env:TABWISE_R2_QUIESCENCE_PHASE; scope = 'global'; page_custody = 'not claimed: see run-summary.json pages[].custody'; quiescent = ($nvda.Count -eq 0 -and $listen.Count -eq 0); nvda_processes = $nvda; nvda_listeners = $listen; processes = $rows}
+          ConvertTo-Json -InputObject $q -Depth 4 -Compress | Set-Content -LiteralPath (Join-Path $diag "quiescence-$($env:TABWISE_R2_QUIESCENCE_PHASE).json") -Encoding utf8NoBOM
+          ConvertTo-Json -InputObject ([ordered]@{phase = $q.phase; scope = $q.scope; quiescent = $q.quiescent; nvda_processes = $nvda; nvda_listeners = $listen}) -Depth 4 -Compress
+          if (-not $q.quiescent) { throw "R2 $($q.phase)-run quiescence refused: an NVDA process or 6837 listener is present (global check; nothing was terminated)" }
+      # A fresh process re-checks every gate and runs verifyR2Run from disk. No loader, session, child or runtime.
+      - name: Re-verify sealed run from disk
+        id: verify
+        timeout-minutes: 5
+        shell: pwsh
+        env:
+          TABWISE_R2_ENABLED: 'true'
+        run: |
+          $json = node scripts/tabwise-r2.mjs --verify-run --plan $env:TABWISE_R2_PLAN_PATH
+          if ($LASTEXITCODE -ne 0) { throw "R2 re-verification refused (exit $LASTEXITCODE)" }
+          $v = $json | ConvertFrom-Json
+          # Exact types: -ne $true would accept the string "true" or the number 1 (measured).
+          if ($v.schema -isnot [string] -or $v.schema -cne 'tabwise-r2-verify/1' -or $v.ok -isnot [bool] -or -not $v.ok -or $v.complete -isnot [bool] -or -not $v.complete -or $v.run_manifest_sha256 -isnot [string] -or $v.run_manifest_sha256 -cnotmatch '^[0-9a-f]{64}\z') { throw 'verification output refused' }
+          "verified=true" >> $env:GITHUB_OUTPUT
+          "run_manifest_sha256=$($v.run_manifest_sha256)" >> $env:GITHUB_OUTPUT
+      - name: Upload sealed run evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tabwise-r2-run-${{ github.run_id }}-1
+          path: ${{ runner.temp }}/tabwise-r2/
+          if-no-files-found: ignore
+          retention-days: 30
+      # Once the run step started, a run directory must exist (evidence kept either way; checked after upload).
+      - name: Evidence contract
+        if: always() && steps.run.outcome != 'skipped'
+        timeout-minutes: 1
+        shell: pwsh
+        run: |
+          $dir = Join-Path $env:RUNNER_TEMP ("tabwise-r2/{0}-1" -f $env:GITHUB_RUN_ID)
+          if (-not (Test-Path -LiteralPath $dir -PathType Container)) { throw 'R2 started but left no run directory' }
+
+  attest:
+    needs: r2
+    if: needs.r2.result == 'success' && needs.r2.outputs.verified == 'true' && github.ref == 'refs/heads/main' && github.run_attempt == '1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Download sealed run evidence
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: tabwise-r2-run-${{ github.run_id }}-1
+          path: ${{ runner.temp }}/attest-in
+          digest-mismatch: error
+      - name: Recompute run manifest digest
+        id: subject
+        shell: bash
+        env:
+          EXPECTED: ${{ needs.r2.outputs.run_manifest_sha256 }}
+        run: |
+          set -euo pipefail
+          dir="$RUNNER_TEMP/attest-in/${GITHUB_RUN_ID}-1"
+          test -f "$dir/run-manifest.json" && test ! -L "$dir/run-manifest.json"
+          actual="$(sha256sum "$dir/run-manifest.json" | cut -d' ' -f1)"
+          [[ "$EXPECTED" =~ ^[0-9a-f]{64}$ ]] || { echo 'expected digest malformed'; exit 1; }
+          [ "$actual" = "$EXPECTED" ] || { echo 'run manifest digest differs from the verified job output'; exit 1; }
+          [ "$(cat "$dir/run-manifest.sha256")" = "$actual  run-manifest.json" ] || { echo 'digest file differs'; exit 1; }
+          echo "path=$dir/run-manifest.json" >> "$GITHUB_OUTPUT"
+      - name: Attest sealed run manifest (SLSA build provenance; workflow-origin only)
+        id: attest
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2 (immutable release)
+        with:
+          subject-path: ${{ steps.subject.outputs.path }}
+          show-summary: true
+      - name: Export bundle for offline O-10 verification
+        shell: bash
+        env:
+          BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+        run: |
+          set -euo pipefail
+          test -f "$BUNDLE"
+          mkdir -p "$RUNNER_TEMP/attestation"
+          cp "$BUNDLE" "$RUNNER_TEMP/attestation/run-manifest.sigstore.jsonl"
+          # Same layout as run-manifest.sha256 ("<hex>  <name>"), with no runner path in it.
+          printf '%s  run-manifest.sigstore.jsonl\n' "$(sha256sum < "$RUNNER_TEMP/attestation/run-manifest.sigstore.jsonl" | cut -d' ' -f1)" > "$RUNNER_TEMP/attestation/bundle.sha256"
+      - name: Upload attestation bundle
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tabwise-r2-attestation-${{ github.run_id }}-1
+          path: ${{ runner.temp }}/attestation/
+          if-no-files-found: error
+          retention-days: 30

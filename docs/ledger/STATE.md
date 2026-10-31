@@ -1,32 +1,30 @@
-# STATE - R-1/R-2 coordinator-held process custody: review + publication prep (F-03/R2-L2, D-87)
-Updated: 2026-10-31T06:49:35Z
-Branch: feat/tabwise-r2-custody (worktree app-r2-custody); base 8dac551 (O-12/O-10). Uncommitted; R2 disabled/BLOCK.
+# STATE - S7 + R-1/R-2 custody final integration (F-03/R2-L2, D-88)
+Updated: 2026-10-31T07:56:52Z
+Branch: feat/tabwise-r2-s7 (worktree app-r2-s7). Owner-run `git merge --no-commit --no-ff origin/main` (30ad3b13) is still uncommitted. The index still shows UU until the owner stages. R2 disabled/BLOCK.
 ## Now
-- Cloud R-1/R-2 patch + owner-applied CI inventory entry reviewed on Windows 11 local (handoff §12).
-- CR-1 FIXED (owner "Fix now, test-first"): sample() coalesced (1 in flight + 1 queued); PT-R6 RED->GREEN; M18 killed.
-- Local read-only measures: snapshot 351 procs ~1 s; 202/202 CIM µs == StartTime grain; libuv grandchild survives.
-- S7 09cfd1f overlap: entry, r2-run, r2-policy; 4 keep-both hunks; combined tree r2 693/693 (scratch only).
+- 6 conflicts resolved keep-both (custody handoff §13.1). Nothing from S7 (09cfd1f) or custody (30ad3b13) is lost; diff-reviewed against both.
+- Workflow (D-88): read-only global pre/post quiescence (W15); run summary under the uploaded tabwise-r2/diagnostics (W16); run timeout = R2_RUN_STEP_BUDGET_MS (W17).
+- Budget: 900 s per page worst case + 240 s reserves; 40-min step allows at most 2 pages; checkR2Entry refuses larger plans in every mode, before git.
+- R2_FILES = 18 files (S7 workflow + r2-proctree); r2Digest bc468ed1...2ed7 (recompute at activation).
 ## Next / blocked
-- Owner: re-run stress seed 426136 on these bytes (sources changed after the owner's run), then commit.
-- Owner decision: vector-2 double pid reuse residual (handoff §12.3.1); job object (§8.2); result-time census (§8.3).
-- S7 workflow changes REPORTED, not made (§12.5): run/job timeouts ~15 min/page, always() quiescence, upload summary.
-- Hosted windows-2025 qualification (§9.1) not authorized: kill path, handle pinning, Ctrl-C to helpers, uiAccess.
+- Owner: review, `git add` the resolved files, commit the merge, push PR #15. Claude made no git writes.
+- Hosted windows-2025 dress rehearsal, not authorized: pwsh 7 quiescence on the image, setup ≤ 10 min, seal/verify vs the 120 s reserve, custody §9.1 kill path.
+- Pending: A-4 O-11, A-5 run plan (≤ 2 pages), A-6 activation, A-7 first authentic run + O-10 verify; custody owner decisions §12.3/§8.2/§8.3.
 ## Verification (Windows Node 24.22.1, 2026-10-31)
-- r2-proctree + r2-review 85/85; R2 681/681; ordinary 49/49 files 956/956 (cache/custody-review-ordinary2).
-- check-r1-baseline ok:true errors:[]; git diff --check exit 0; --check-only and --run refuse: BLOCK (exit 2).
-- Owner-reported before CR-1: ordinary + 8 stress profiles PASS; snapshot 343 procs quiescent=true.
-## Prior checkpoint (O-12/O-10, D-85; committed in 8dac551, documentation unchanged)
-- O-12 nonce-redact/2 and O-10 offline verifier: docs/engineering/R2-O12-O10-handoff.md (residual risks R-1..R-9 there).
-- Its verification: payload-context 132/132; r2-evidence 53/53; R2 652/652; ordinary 927/927; stress 8 profiles PASS.
-- Still pending from it: O-10 authentic signed-artifact verification; stray app/fx-wPC4q4/ for the owner to remove.
-- Full prior STATE text: `git show 8dac551:docs/ledger/STATE.md`.
+- RED first: S7-W1, S7-W2, S7-B1, S7-B2 -> GREEN. test/r2*.test.mjs 696/696 (review 67, proctree 29, evidence 57).
+- Workflow mutations 55/55 refused; budget source mutations 12/13 killed (1 equivalent: no integer page count sits on the boundary).
+- Ordinary seed 1: 49/49 files, 971/971 tests, exit 0 (cache/d88-ordinary).
+- Stress seed 426136: 8 profiles x 49/49 files, 971/971 tests each, exit 0 (cache/d88-stress).
+- check-r1-baseline ok:true; preflight 6/6 ok; all four modes refuse BLOCK (exit 2); status and lockfiles unchanged vs both parents.
+- Quiescence script ran under Windows PowerShell 5.1 (surrogate): 361 rows, quiescent. pwsh 7 not run locally.
+## Prior checkpoints
+- S7 (D-86): docs/engineering/R2-S7-handoff.md; `git show 09cfd1f:docs/ledger/STATE.md`.
+- Custody (D-87): docs/engineering/R2-R1R2-process-custody-handoff.md §12; `git show 30ad3b1:docs/ledger/STATE.md`.
+- O-12/O-10 (D-85): docs/engineering/R2-O12-O10-handoff.md; `git show 8dac551:docs/ledger/STATE.md`.
 ## Handoff
-Uncommitted (M): scripts/tabwise/r2-run.mjs, scripts/tabwise-r2.mjs, scripts/tabwise/r2-policy.mjs, ci/offline-tests.json.
-Uncommitted (new): scripts/tabwise/r2-proctree.mjs, test/r2-proctree.test.mjs, docs/engineering/R2-R1R2-process-custody-handoff.md.
-Uncommitted (M): docs/CODEMAP.md; docs/ledger/{DECISIONS,PLAN,STATE}.md, LOG.jsonl (D-87, plan section, 3 log lines).
-Not in repo: cache/custody-review-ordinary{,2} (ignored); review scratch in the session scratchpad.
-Verified by: PLAN.md "F-03 / R2-L2 / R-1 + R-2" acceptance commands; results above.
-Proposed commit 1: ci(F-03): classify r2-proctree offline test in the inventory (R-1/R-2)
-Proposed commit 2: feat(F-03): coordinator-held process custody for R2 page children (R-1/R-2)
-Push: safe after owner review (no secrets; no workflow/status change; R2 BLOCK). Merge with S7: resolve 4 hunks per §12.4.
-Review needed from: user (Cloud reviewed the original; this session reviewed the patch and added CR-1).
+Resolved (UU, owner stages): scripts/tabwise-r2.mjs, scripts/tabwise/r2-run.mjs, scripts/tabwise/r2-policy.mjs, docs/ledger/{DECISIONS,PLAN,STATE}.md.
+Unstaged edits: .github/workflows/tabwise-r2.yml, test/r2-review.test.mjs, docs/CODEMAP.md, docs/ledger/{PROVENANCE.md,LOG.jsonl}, both handoffs.
+Staged by the merge (unchanged by Claude): ci/offline-tests.json, scripts/tabwise/r2-proctree.mjs, test/r2-proctree.test.mjs.
+Verified by: PLAN.md "S7 + R-1/R-2 - final integration" acceptance commands; results above.
+Proposed commit: Merge origin/main (custody #16) into feat/tabwise-r2-s7; integrate quiescence, budget and evidence retention (D-88).
+Push: safe after owner review (no secrets; dispatch-only workflow refuses under BLOCK). Review needed from: user.

@@ -54,7 +54,7 @@ import { readFileSync as readS4, mkdtempSync as tmpS4, mkdirSync as mkdirS4, cop
 import { tmpdir as tmpdirS4 } from 'node:os';
 import { join as joinS4, dirname as dirnameS4 } from 'node:path';
 import { createHash as hashS4 } from 'node:crypto';
-import { checkR2Approval, r2Digest, r2PlanDigest, readR2Status, R2_FILES, R2_STATUS_SCHEMA, RETIRED_APPROVALS } from '../scripts/tabwise/r2-policy.mjs';
+import { checkR2Approval, r2Digest, r2PlanDigest, readR2Status, R2_FILES, R2_STATUS_SCHEMA, R2_WORKFLOW, RETIRED_APPROVALS } from '../scripts/tabwise/r2-policy.mjs';
 import { qualificationDigest, QUALIFICATION_FILES } from '../scripts/tabwise/qualification-policy.mjs';
 
 const S4_HEAD = 'b'.repeat(40);
@@ -885,4 +885,333 @@ test('FIX1 containment uses native canonical identity for non-link Windows alias
     assert.throws(()=>m.r2RunDir({RUNNER_TEMP:outside,GITHUB_RUN_ID:'42',GITHUB_RUN_ATTEMPT:'1'},root),/BLOCK: R2 run directory/);
     assert.ok(nativeCalls>=2);
   } finally {delete globalThis.__r2ReviewFs;rmS4(dir,{recursive:true,force:true});}
+});
+
+// ---- R2 S7 (A-1..A-3): --verify-run entry mode and the hosted workflow static policy ----
+test('S7-A1 strict CLI accepts --verify-run --plan only; combinations with another mode or a page refuse', async () => {
+  const { parseR2Args } = await runModule();
+  assert.deepEqual(parseR2Args(['--verify-run', '--plan', 'p.json']), { mode: 'verify-run', page: null, plan: 'p.json' });
+  assert.deepEqual(parseR2Args(['--plan', 'C:\\a b\\p.json', '--verify-run']), { mode: 'verify-run', page: null, plan: 'C:\\a b\\p.json' });
+  for (const argv of [['--verify-run'], ['--verify-run', '--run', '--plan', 'p'], ['--verify-run', '--check-only', '--plan', 'p'], ['--verify-run', '--verify-run', '--plan', 'p'],
+    ['--verify-run', '--page', 'a', '--plan', 'p'], ['--page', 'a', '--verify-run', '--plan', 'p'], ['--verify-run=1', '--plan', 'p'], ['--verify', '--plan', 'p'], ['--VERIFY-RUN', '--plan', 'p']])
+    assert.throws(() => parseR2Args(argv), /^Error: R2 usage:/, JSON.stringify(argv));
+});
+
+test('S7-G1 --verify-run passes through every gate: the shipped BLOCK refuses before git; a passing gate needs a clean approved checkout', async () => {
+  const { checkR2Entry } = await runModule();
+  assert.throws(() => checkR2Entry({ argv: ['--verify-run', '--plan', '/nonexistent/p.json'], env: { TABWISE_R2_ENABLED: 'true' }, execArgv: [], root: process.cwd(), platform: 'win32',
+    git: () => { throw Error('git must not run'); }, frozen: () => { throw Error('frozen must not run'); }, readStatus: () => readR2Status() }), /^Error: BLOCK: R2 status is disabled\/BLOCK$/);
+  const off = s6Gate({ env: { TABWISE_R2_ENABLED: undefined }, readStatus: () => { throw Error('status must not be read'); } });
+  try { off.input.argv = ['--verify-run', '--plan', off.path]; assert.throws(() => checkR2Entry(off.input), /^Error: BLOCK: R2 disabled by default/); }
+  finally { rmS4(off.dir, { recursive: true, force: true }); }
+  const ok = s6Gate();
+  try {
+    ok.input.argv = ['--verify-run', '--plan', ok.path];
+    const gate = checkR2Entry(ok.input);
+    assert.deepEqual([gate.mode, gate.page, gate.pages.map((p) => p.id)], ['verify-run', null, ['validation-healthy', 'validation-broken']]);
+    assert.deepEqual(ok.gitCalls, ['rev-parse HEAD', 'status --porcelain --untracked-files=all']);
+  } finally { rmS4(ok.dir, { recursive: true, force: true }); }
+  for (const [name, over, pattern] of [['dirty tree', { dirty: '?? x' }, /checkout is not clean/], ['wrong R2 digest', { status: { reviewed_sha256: '0'.repeat(64) } }, /R2 content changed/],
+    ['wrong HEAD', { head: 'c'.repeat(40) }, /revision/], ['hooks', { env: { NODE_OPTIONS: '--import x' } }, /inherited runtime hooks/]]) {
+    const g = s6Gate(over);
+    try { g.input.argv = ['--verify-run', '--plan', g.path]; assert.throws(() => checkR2Entry(g.input), pattern, name); }
+    finally { rmS4(g.dir, { recursive: true, force: true }); }
+  }
+});
+
+test('S7-E1 the real entry refuses --verify-run under the shipped BLOCK status and loads no runtime, session or browser module', async () => {
+  for (const env of [{}, { TABWISE_R2_ENABLED: 'true' }, { TABWISE_R2_ENABLED: 'true', RUNNER_TEMP: tmpdirS4(), GITHUB_RUN_ID: '1', GITHUB_RUN_ATTEMPT: '1' }]) {
+    const r = await s6Worker({ file: S6_ENTRY, argv: ['--verify-run', '--plan', '/nonexistent plan/p.json'], env });
+    assert.equal(r.error, null); assert.equal(r.code, 2, JSON.stringify(env)); assert.equal(r.out, '', 'no verification summary under BLOCK');
+    assert.match(r.err, /R2 refused: BLOCK: /);
+    assert.deepEqual(r.seen.filter((s) => ENTRY_RUNTIME_SPEC.test(s)), []);
+  }
+});
+
+test('S7-S1 static: --verify-run is read-only; it never seals, spawns, writes, or reaches the loader, session or a runtime', () => {
+  const code = readS4(S6_ENTRY, 'utf8').replace(/\r\n/g, '\n');
+  assert.match(code, /if \(gate\.mode === 'verify-run'\) return verifyRun\(gate\);/);
+  const start = code.indexOf('async function verifyRun('), end = code.indexOf('\n}\n', start);
+  assert.ok(start > 0 && end > start, 'verifyRun is declared');
+  const body = code.slice(start, end);
+  for (const forbidden of ['import(', 'spawn', 'mkdirSync', 'writeFile', 'sealR2Run', 'runPage', 'runAll', 'runR2Pages', 'loadQualificationRuntime', 'r2PageCommand', 'r2ChildEnv'])
+    assert.equal(body.includes(forbidden), false, `verifyRun must not use ${forbidden}`);
+  assert.match(body, /r2VerifyRun\(gate, r2RunDir\(process\.env, root\)\)/);
+  // The entry cannot run past BLOCK offline, so its print-and-return is pinned statically.
+  assert.match(body, /\n  console\.log\(JSON\.stringify\(summary\)\);\n  return code;$/);
+  assert.ok(code.indexOf("if (gate.mode === 'verify-run')") < code.indexOf("if (gate.mode === 'page')"), 'dispatched before any runtime-capable mode');
+  const run = readS4(S6_RUN, 'utf8').replace(/\r\n/g, '\n'), at = run.indexOf('export async function r2VerifyRun(');
+  assert.ok(at > 0, 'r2VerifyRun is declared');
+  const v = run.slice(at, run.indexOf('\n}\n', at));
+  for (const forbidden of ['sealR2Run', 'writeFile', 'mkdir', 'spawn']) assert.equal(v.includes(forbidden), false, `r2VerifyRun must not use ${forbidden}`);
+});
+
+// Text-level invariants over the committed workflow (indentation-scoped; no YAML dependency). Ported from R2-S7/validate-proposed-workflow.mjs.
+const S7_WORKFLOW = '.github/workflows/tabwise-r2.yml';
+const S7_PINS = new Map([
+  ['actions/checkout', '3d3c42e5aac5ba805825da76410c181273ba90b1'],
+  ['actions/setup-node', '949feb2413d6458794dcd2491c4babbbce0c15c1'],
+  ['actions/upload-artifact', 'cf430e030ddbb5b0abf93d22962f4752f3646cd9'],
+  ['actions/download-artifact', '9000827ccba6bdab643e8b6fd33ac0654aef8333'],
+  ['actions/attest', '1e69f48acb82d1966a394da916b4c1698aa569d6'],
+]);
+function s7Jobs(text) {
+  const lines = text.split('\n'), start = lines.indexOf('jobs:');
+  if (start < 0) return null;
+  const out = new Map();
+  let name = null;
+  for (const line of lines.slice(start + 1)) {
+    const m = /^  ([a-z][a-z0-9-]*):\s*$/.exec(line);
+    if (m) { name = m[1]; out.set(name, []); continue; }
+    if (/^\S/.test(line)) break;
+    if (name) out.get(name).push(line);
+  }
+  return new Map([...out].map(([k, v]) => [k, v.join('\n')]));
+}
+function s7RunBodies(text) {
+  const lines = text.split('\n'), bodies = [];
+  for (let i = 0; i < lines.length; i++) {
+    const m = /^(\s*)(?:- )?run:\s*(\|)?\s*(.*)$/.exec(lines[i]);
+    if (!m) continue;
+    if (!m[2]) { bodies.push(m[3]); continue; }
+    const indent = m[1].length, body = [];
+    for (i++; i < lines.length && (lines[i].trim() === '' || lines[i].search(/\S/) > indent); i++) body.push(lines[i]);
+    i--;
+    bodies.push(body.join('\n'));
+  }
+  return bodies;
+}
+// One step of a job body: from its '- name:' line to the next step (indentation-scoped, like s7Jobs).
+function s7Step(job, name) {
+  const at = job.indexOf(`      - name: ${name}\n`);
+  if (at < 0) return null;
+  const next = job.indexOf('\n      - name: ', at + 1);
+  return job.slice(at, next < 0 ? job.length : next);
+}
+const s7Minutes = (step) => Number(/\n        timeout-minutes: ([0-9]+)\n/.exec(step ?? '')?.[1] ?? NaN);
+// budgetMs is R2_RUN_STEP_BUDGET_MS from r2-run.mjs: the R2 run step timeout and the plan budget gate share it (W17).
+function s7CheckWorkflow(text, budgetMs) {
+  const errors = [], err = (m) => errors.push(m);
+  if (!/^on:\n  workflow_dispatch:/m.test(text)) err('W1 trigger must be workflow_dispatch only');
+  if (/pull_request|push:|schedule:|workflow_run|repository_dispatch|workflow_call/.test(text)) err('W1 non-manual trigger present');
+  if (!/^permissions:\n  contents: read\n\n/m.test(text)) err('W2 top-level permissions must be exactly contents: read');
+  if (/secrets\./.test(text)) err('W3 secrets referenced');
+  if (!/concurrency:\n  group: tabwise-r2\n  cancel-in-progress: false/.test(text)) err('W4 single non-cancelling concurrency group');
+  const uses = [...text.matchAll(/uses:\s*([^@\s]+)@(\S+)/g)];
+  if (uses.length !== (text.match(/uses:/g) ?? []).length) err('W5 every uses: must name owner/action@sha');
+  for (const m of uses) {
+    if (!S7_PINS.has(m[1])) err(`W5 unreviewed action ${m[1]}`);
+    else if (m[2] !== S7_PINS.get(m[1])) err(`W5 ${m[1]} not pinned to the verified SHA`);
+  }
+  for (const body of s7RunBodies(text)) if (/\$\{\{/.test(body)) err(`W6 expression inside run body: ${body.trim().slice(0, 60)}`);
+  const j = s7Jobs(text);
+  if (!j || !j.has('r2') || !j.has('attest') || j.size !== 2) { err('W7 exactly jobs r2 and attest'); return errors; }
+  const r2 = j.get('r2'), at = j.get('attest');
+  if (!/runs-on: windows-2025\n/.test(r2 + '\n')) err('W8 r2 must run on GitHub-hosted windows-2025');
+  if (!/runs-on: ubuntu-24\.04\n/.test(at + '\n')) err('W8 attest must run on GitHub-hosted ubuntu-24.04');
+  for (const [n, b] of [['r2', r2], ['attest', at]])
+    if (!/github\.ref == 'refs\/heads\/main'/.test(b) || !/github\.run_attempt == '1'/.test(b)) err(`W8 ${n} must be main and initial attempt only`);
+  if (/id-token|attestations:|artifact-metadata/.test(r2)) err('W9 r2 must not hold id-token/attestations permissions');
+  if (!/permissions:\n      contents: read\n    outputs:/.test(r2)) err('W9 r2 job permissions must be exactly contents: read');
+  for (const p of ['id-token: write', 'attestations: write', 'artifact-metadata: write', 'contents: read']) if (!at.includes(p)) err(`W9 attest needs ${p}`);
+  if ((text.match(/id-token: write/g) ?? []).length !== 1) err('W9 id-token: write must appear exactly once');
+  const gate = r2.indexOf('--check-only'), run = r2.indexOf('--run --plan'), verify = r2.indexOf('--verify-run'), upload = r2.indexOf('name: Upload sealed run evidence');
+  if (!(gate > 0 && gate < run && run < verify && verify < upload)) err('W10 r2 order must be gate -> run -> verify -> upload');
+  if ((text.match(/TABWISE_R2_ENABLED: 'true'/g) ?? []).length !== 3 || (text.match(/TABWISE_R2_ENABLED/g) ?? []).length !== 3) err('W10 TABWISE_R2_ENABLED only on the three gated steps');
+  if (/TABWISE_R2_ENABLED/.test(r2.slice(0, Math.max(0, r2.indexOf('steps:'))))) err('W10 opt-in must not be job-wide');
+  for (const s of ['scripts/tabwise-r2.mjs --check-only', 'scripts/tabwise-r2.mjs --run', 'scripts/tabwise-r2.mjs --verify-run']) if (!r2.includes(s)) err(`W10 missing ${s}`);
+  if (/r2-session|r2-compose|qualification-loader|r2-run\.mjs|r2-evidence\.mjs/.test(text)) err('W10 workflow must reach R2 only through scripts/tabwise-r2.mjs');
+  if (!/verified=true/.test(r2) || !/steps\.verify\.outputs\.verified/.test(r2)) err('W10 verified output must come from the verify step');
+  // PowerShell -ne $true accepts "true" and 1; .NET $ accepts a trailing newline (both measured offline, S7).
+  for (const need of ["$v.schema -isnot [string] -or $v.schema -cne 'tabwise-r2-verify/1'", '$v.ok -isnot [bool] -or -not $v.ok', '$v.complete -isnot [bool] -or -not $v.complete',
+    "$v.run_manifest_sha256 -isnot [string] -or $v.run_manifest_sha256 -cnotmatch '^[0-9a-f]{64}\\z'"])
+    if (!r2.includes(need)) err(`W10 verify step must require exact types: ${need}`);
+  if (/-c?(?:not)?match '[^']*\$'/.test(text) || (text.match(/-cnotmatch '\^[^']*\\z'/g) ?? []).length !== 5) err('W14 every PowerShell shape check is anchored with \\z');
+  if (!/needs: r2\n/.test(at)) err('W11 attest must need r2');
+  if (!/needs\.r2\.result == 'success'/.test(at) || !/needs\.r2\.outputs\.verified == 'true'/.test(at)) err('W11 attest only after r2 success and verified=true');
+  if (/always\(\)|failure\(\)|cancelled\(\)|continue-on-error/.test(at)) err('W11 attest job must not run on failure paths');
+  const dl = at.indexOf('actions/download-artifact'), rec = at.indexOf('name: Recompute run manifest digest'), att = at.indexOf('actions/attest@'),
+    exp = at.indexOf('steps.attest.outputs.bundle-path'), up = at.indexOf('name: Upload attestation bundle');
+  if (!(dl > 0 && dl < rec && rec < att && att < exp && exp < up)) err('W11 attest order must be download -> recompute -> attest -> export -> upload');
+  if (!/digest-mismatch: error/.test(at)) err('W11 artifact digest mismatch must be an error');
+  if (!/EXPECTED: \$\{\{ needs\.r2\.outputs\.run_manifest_sha256 \}\}/.test(at) || !/\[ "\$actual" = "\$EXPECTED" \]/.test(at)) err('W11 recomputed digest must equal the verified job output');
+  if (!/test ! -L "\$dir\/run-manifest\.json"/.test(at) || !/\[ "\$\(cat "\$dir\/run-manifest\.sha256"\)" = "\$actual  run-manifest\.json" \]/.test(at)) err('W11 subject must be a regular file matching its digest file');
+  if (!/subject-path: \$\{\{ steps\.subject\.outputs\.path \}\}/.test(at)) err('W11 subject must be the recomputed run manifest');
+  if (/predicate|sbom-path|push-to-registry: true/.test(at.replace(/SLSA build provenance; workflow-origin only/, ''))) err('W11 no custom predicate, SBOM or registry push');
+  if (!/if-no-files-found: error/.test(at)) err('W12 bundle upload must fail if no bundle');
+  if (!at.includes(`printf '%s  run-manifest.sigstore.jsonl\\n' "$(sha256sum < "$RUNNER_TEMP/attestation/run-manifest.sigstore.jsonl" | cut -d' ' -f1)" > "$RUNNER_TEMP/attestation/bundle.sha256"`))
+    err('W12 bundle digest file must be "<hex>  run-manifest.sigstore.jsonl" with no runner path');
+  if (!/workflow-origin claim only/.test(text) || !/not NVDA, runtime or physical-input qualification/.test(text)) err('W13 header must state the O-10 claim boundary');
+  // W15 (D-88): read-only GLOBAL quiescence before and after the run. It terminates, cleans and launches nothing, fails the
+  // job when NVDA or a 6837 listener is present, and never claims page custody (that is the coordinator's run summary).
+  const pre = s7Step(r2, 'Pre-run process quiescence'), post = s7Step(r2, 'Post-run process quiescence');
+  if (!pre || !post) err('W15 pre-run and post-run quiescence steps required');
+  else {
+    const iPre = r2.indexOf('name: Pre-run process quiescence'), iPost = r2.indexOf('name: Post-run process quiescence');
+    if (!(gate < iPre && iPre < run && run < iPost && iPost < verify)) err('W15 order must be gate -> pre-quiescence -> run -> post-quiescence -> verify');
+    if (/\n        if:/.test(pre)) err('W15 pre-run quiescence runs only on the success path');
+    if (!post.includes("\n        if: always() && steps.run.outcome != 'skipped'\n")) err('W15 post-run quiescence must run always() once the run step started');
+    for (const [phase, step] of [['pre', pre], ['post', post]]) {
+      if (s7Minutes(step) !== 2) err(`W15 ${phase} quiescence must be bounded (timeout-minutes: 2)`);
+      if (!step.includes(`TABWISE_R2_QUIESCENCE_PHASE: ${phase}\n`)) err(`W15 ${phase} quiescence must record its phase`);
+      for (const need of ["$ErrorActionPreference = 'Stop'", 'Get-CimInstance -ClassName Win32_Process', "-match '^nvda(_[a-z0-9]+)?\\.exe\\z'",
+        'Get-NetTCPConnection -State Listen', '$_.LocalPort -eq 6837', "scope = 'global'", "page_custody = 'not claimed", "'tabwise-r2/diagnostics'",
+        'quiescence-$($env:TABWISE_R2_QUIESCENCE_PHASE).json', 'if (-not $q.quiescent) { throw'])
+        if (!step.includes(need)) err(`W15 ${phase} quiescence must include: ${need}`);
+      if (/Stop-Process|taskkill|\.Kill\(|Kill\(|Remove-Item|Start-Process|Invoke-WebRequest|guidepup|playwright|chromium|npx|npm|node |TABWISE_R2_ENABLED|continue-on-error/i.test(step))
+        err(`W15 ${phase} quiescence must be read-only (no termination, cleanup, launch or R2 opt-in)`);
+    }
+  }
+  if (/continue-on-error/.test(r2)) err('W15 no r2 step may mask a failure with continue-on-error');
+  // W16 (D-88): the coordinator summary (per-page custody) is written under the uploaded tabwise-r2/ directory, beside and
+  // never inside the sealed run directory; upload runs always(). Sealed and supplementary evidence are named in the header.
+  const runStep = s7Step(r2, 'R2 run') ?? '', upStep = s7Step(r2, 'Upload sealed run evidence') ?? '';
+  if (!runStep.includes("$diag = Join-Path $env:RUNNER_TEMP 'tabwise-r2/diagnostics'") || !runStep.includes("$out = Join-Path $diag 'run-summary.json'")
+    || !runStep.includes('--run --plan $env:TABWISE_R2_PLAN_PATH > $out\n') || /tabwise-r2-summary/.test(text)) err('W16 run summary must be written to tabwise-r2/diagnostics/run-summary.json');
+  if (!upStep.includes('\n        if: always()\n') || !upStep.includes('path: ${{ runner.temp }}/tabwise-r2/\n')) err('W16 upload must run always() over all of tabwise-r2/');
+  if (!/only attested subject/.test(text) || !/supplementary diagnostics, not attested/.test(text)) err('W16 header must separate attested evidence from supplementary diagnostics');
+  // W17 (D-88): the R2 run step timeout is the plan budget; the job holds it plus every bounded later step and a setup reserve.
+  const runMin = s7Minutes(runStep), jobMin = Number(/\n    timeout-minutes: ([0-9]+)\n/.exec(r2)?.[1] ?? NaN);
+  if (!(Number.isSafeInteger(budgetMs) && runMin * 60_000 === budgetMs)) err('W17 R2 run timeout-minutes must equal R2_RUN_STEP_BUDGET_MS');
+  const later = ['Post-run process quiescence', 'Re-verify sealed run from disk', 'Evidence contract'].map((n) => s7Minutes(s7Step(r2, n)));
+  if (later.some((m) => !Number.isSafeInteger(m)) || jobMin !== 60 || runMin + (pre ? s7Minutes(pre) : NaN) + later.reduce((a, b) => a + b, 0) > jobMin - 10)
+    err('W17 job timeout must hold the run step, bounded quiescence/verify/contract steps and a 10-minute setup reserve');
+  return errors;
+}
+const S7_MUTATIONS = [
+  ['trigger on push', (t) => t.replace('on:\n  workflow_dispatch:', 'on:\n  push:\n  workflow_dispatch:')],
+  ['reusable workflow_call', (t) => t.replace('on:\n  workflow_dispatch:', 'on:\n  workflow_call:\n  workflow_dispatch:')],
+  ['top-level id-token', (t) => t.replace('permissions:\n  contents: read\n\n', 'permissions:\n  contents: read\n  id-token: write\n\n')],
+  ['r2 job gets id-token', (t) => t.replace('    permissions:\n      contents: read\n    outputs:', '    permissions:\n      contents: read\n      id-token: write\n    outputs:')],
+  ['attest tag instead of SHA', (t) => t.replace('actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6', 'actions/attest@v4')],
+  ['download-artifact other SHA', (t) => t.replace('actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333', 'actions/download-artifact@' + '1'.repeat(40))],
+  ['unreviewed action', (t) => t.replace('actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333', 'someone/download@9000827ccba6bdab643e8b6fd33ac0654aef8333')],
+  ['local action', (t) => t.replace('uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6', 'uses: ./local-attest')],
+  ['input interpolated into run', (t) => t.replace('node scripts/tabwise-r2.mjs --check-only --plan $env:TABWISE_R2_PLAN_PATH', 'node scripts/tabwise-r2.mjs --check-only --plan ${{ inputs.plan_path }}')],
+  ['gate step removed', (t) => t.replace(/      # Gate first[\s\S]*?throw "R2 gate refused \(exit \$LASTEXITCODE\)" \}\n/, '')],
+  ['verify step removed', (t) => t.replace(/      # A fresh process[\s\S]*?run_manifest_sha256=\$\(\$v\.run_manifest_sha256\)" >> \$env:GITHUB_OUTPUT\n/, '')],
+  ['complete check removed', (t) => t.replace(' -or $v.complete -isnot [bool] -or -not $v.complete', '')],
+  ['ok compared loosely', (t) => t.replace('$v.ok -isnot [bool] -or -not $v.ok', '$v.ok -ne $true')],
+  ['complete compared loosely', (t) => t.replace('$v.complete -isnot [bool] -or -not $v.complete', '$v.complete -ne $true')],
+  ['schema type check removed', (t) => t.replace('$v.schema -isnot [string] -or ', '')],
+  ['digest type check removed', (t) => t.replace('$v.run_manifest_sha256 -isnot [string] -or ', '')],
+  ['plan path anchored with $', (t) => t.replace("{0,63}\\.json\\z'", "{0,63}\\.json$'")],
+  ['revision anchored with $', (t) => t.replace("'^[0-9a-f]{40}\\z'", "'^[0-9a-f]{40}$'")],
+  ['verify digest anchored with $', (t) => t.replace("-cnotmatch '^[0-9a-f]{64}\\z') { throw 'verification", "-cnotmatch '^[0-9a-f]{64}$') { throw 'verification")],
+  ['bundle digest records the runner path', (t) => t.replace(/          printf '%s  run-manifest\.sigstore\.jsonl\\n'[^\n]*\n/, '          sha256sum "$RUNNER_TEMP/attestation/run-manifest.sigstore.jsonl" > "$RUNNER_TEMP/attestation/bundle.sha256"\n')],
+  ['opt-in made job-wide', (t) => t.replace('    env:\n      TABWISE_R2_APPROVED_REVISION', "    env:\n      TABWISE_R2_ENABLED: 'true'\n      TABWISE_R2_APPROVED_REVISION")],
+  ['opt-in on the test step', (t) => t.replace('      - name: Offline tests\n', "      - name: Offline tests\n        env:\n          TABWISE_R2_ENABLED: 'true'\n")],
+  ['attest runs always', (t) => t.replace("    if: needs.r2.result == 'success' && needs.r2.outputs.verified == 'true'", '    if: always()')],
+  ['attest ignores verified output', (t) => t.replace(" && needs.r2.outputs.verified == 'true'", '')],
+  ['digest compare removed', (t) => t.replace('[ "$actual" = "$EXPECTED" ] || { echo \'run manifest digest differs from the verified job output\'; exit 1; }', 'true')],
+  ['symlink check removed', (t) => t.replace(' && test ! -L "$dir/run-manifest.json"', '')],
+  ['digest file check removed', (t) => t.replace(/          \[ "\$\(cat "\$dir\/run-manifest\.sha256"\)"[^\n]*\n/, '')],
+  ['download digest mismatch tolerated', (t) => t.replace('digest-mismatch: error', 'digest-mismatch: warn')],
+  ['attest before recompute', (t) => t.replace(/(      - name: Recompute run manifest digest[\s\S]*?)(      - name: Attest sealed run manifest[\s\S]*?show-summary: true\n)/, '$2$1')],
+  ['custom predicate', (t) => t.replace('          show-summary: true', "          predicate-type: https://example.com/x\n          predicate: '{}'\n          show-summary: true")],
+  ['self-hosted runner', (t) => t.replace('runs-on: windows-2025', 'runs-on: [self-hosted, windows]')],
+  ['re-run attempts allowed', (t) => t.replace("&& github.ref == 'refs/heads/main' && github.run_attempt == '1'\n    runs-on: windows-2025", "&& github.ref == 'refs/heads/main'\n    runs-on: windows-2025")],
+  ['secret used', (t) => t.replace('          node-version: 24.22.1', '          node-version: 24.22.1\n          token: ${{ secrets.META_KEY }}')],
+  ['session reached directly', (t) => t.replace('node scripts/tabwise-r2.mjs --run --plan', 'node scripts/tabwise/r2-session.mjs --run --plan')],
+  ['bundle upload tolerates no files', (t) => t.replace(/(name: tabwise-r2-attestation-[\s\S]*?if-no-files-found: )error/, '$1ignore')],
+  ['third job added', (t) => t + '\n  extra:\n    runs-on: ubuntu-24.04\n    steps:\n      - run: echo hi\n'],
+  ['claim boundary text dropped', (t) => t.replace('It is not NVDA, runtime or physical-input qualification.', 'It qualifies R2.')],
+  ['pre-run quiescence removed', (t) => t.replace('      - name: Pre-run process quiescence\n', '      - name: Pre-run process check\n')],
+  ['post-run quiescence removed', (t) => t.replace('      - name: Post-run process quiescence\n', '      - name: Post-run process check\n')],
+  ['post-run quiescence only on success', (t) => t.replace("        if: always() && steps.run.outcome != 'skipped'\n        timeout-minutes: 2", '        timeout-minutes: 2')],
+  ['post-run quiescence masks failure', (t) => t.replace("        if: always() && steps.run.outcome != 'skipped'\n        timeout-minutes: 2", "        if: always() && steps.run.outcome != 'skipped'\n        continue-on-error: true\n        timeout-minutes: 2")],
+  ['quiescence terminates NVDA', (t) => t.replace('          if (-not $q.quiescent) { throw', '          $nvda | ForEach-Object { Stop-Process -Id $_.pid -Force }\n          if (-not $q.quiescent) { throw')],
+  ['quiescence launches NVDA', (t) => t.replace("          $ErrorActionPreference = 'Stop'\n", "          $ErrorActionPreference = 'Stop'\n          npx --no-install guidepup install nvda\n")],
+  ['quiescence ignores the relay port', (t) => t.replace(/ \| Where-Object \{ \$_\.LocalPort -eq 6837 \}/g, '')],
+  ['quiescence never fails', (t) => t.replace(/          if \(-not \$q\.quiescent\) \{ throw[^\n]*\n/g, '')],
+  ['global absence claimed as page custody', (t) => t.replace(/scope = 'global'/g, "scope = 'page'")],
+  ['quiescence errors tolerated', (t) => t.replace(/          \$ErrorActionPreference = 'Stop'\n/g, "          $ErrorActionPreference = 'Continue'\n")],
+  ['quiescence unbounded', (t) => t.replace(/(name: Pre-run process quiescence\n        )timeout-minutes: 2\n/, '$1')],
+  ['summary outside the uploaded directory', (t) => t.replace("$out = Join-Path $diag 'run-summary.json'", "$out = Join-Path $env:RUNNER_TEMP 'tabwise-r2-summary.json'")],
+  ['upload only on success', (t) => t.replace(/(      - name: Upload sealed run evidence\n)        if: always\(\)\n/, '$1')],
+  ['upload narrowed to the sealed run', (t) => t.replace('path: ${{ runner.temp }}/tabwise-r2/\n', 'path: ${{ runner.temp }}/tabwise-r2/${{ github.run_id }}-1/\n')],
+  ['evidence classes not documented', (t) => t.replace('supplementary diagnostics, not attested', 'diagnostics')],
+  ['run step timeout raised past the budget', (t) => t.replace(/(name: R2 run\n        id: run\n        timeout-minutes: )40/, '$145')],
+  ['job timeout lowered', (t) => t.replace(/(runs-on: windows-2025\n    timeout-minutes: )60/, '$145')],
+  ['verify step unbounded', (t) => t.replace(/(name: Re-verify sealed run from disk\n        id: verify\n)        timeout-minutes: 5\n/, '$1')],
+];
+
+test('S7-W1 the committed tabwise-r2 workflow satisfies the S7 static policy (W1-W17)', async () => {
+  const { R2_RUN_STEP_BUDGET_MS } = await runModule();
+  assert.deepEqual(s7CheckWorkflow(readS4(S7_WORKFLOW, 'utf8').replace(/\r\n/g, '\n'), R2_RUN_STEP_BUDGET_MS), []);
+});
+
+test('S7-W2 every named weakening of the workflow is refused by the static policy', async () => {
+  const { R2_RUN_STEP_BUDGET_MS } = await runModule();
+  const base = readS4(S7_WORKFLOW, 'utf8').replace(/\r\n/g, '\n');
+  for (const [name, mutate] of S7_MUTATIONS) {
+    const mutated = mutate(base);
+    assert.notEqual(mutated, base, `mutation applies: ${name}`);
+    assert.ok(s7CheckWorkflow(mutated, R2_RUN_STEP_BUDGET_MS).length > 0, `refused: ${name}`);
+  }
+  assert.ok(s7CheckWorkflow(base, R2_RUN_STEP_BUDGET_MS + 60_000).length > 0, 'a budget constant that disagrees with the run step timeout is refused');
+});
+
+test('S7-W4 the reviewed R2 digest binds the workflow text: R2_FILES lists it, and a one-byte edit changes r2Digest (CRLF still tolerated)', () => {
+  assert.ok(R2_FILES.includes(R2_WORKFLOW), 'R2_FILES lists the R2 workflow (owner decision R-S7-1)');
+  const tmp = tmpS4(joinS4(tmpdirS4(), 'tabwise r2 digest '));
+  try {
+    for (const file of R2_FILES) { mkdirS4(dirnameS4(joinS4(tmp, file)), { recursive: true }); copyWritableS4(file, joinS4(tmp, file)); }
+    assert.equal(r2Digest(tmp), r2Digest());
+    const wf = joinS4(tmp, R2_WORKFLOW), body = readS4(wf, 'utf8').replace(/\r\n/g, '\n');
+    writeS4(wf, body.replace(/\n/g, '\r\n'));
+    assert.equal(r2Digest(tmp), r2Digest(), 'Git CRLF checkout conversion is not a change');
+    writeS4(wf, body.replace('digest-mismatch: error', 'digest-mismatch: warn'));
+    assert.notEqual(r2Digest(tmp), r2Digest(), 'a workflow edit invalidates the reviewed digest');
+  } finally { rmS4(tmp, { recursive: true, force: true }); }
+});
+
+test('S7-W3 the workflow path is the one the R2 policy pins; the shipped status stays disabled/BLOCK', () => {
+  assert.equal(R2_WORKFLOW, S7_WORKFLOW);
+  const shipped = readR2Status();
+  assert.deepEqual([shipped.enabled, shipped.verdict, shipped.reviewed_sha256, shipped.plan_sha256], [false, 'BLOCK', null, null]);
+});
+
+// ---- S7 + R-1/R-2 custody integration (D-88) ----
+test('S7-I1 R2_FILES is exactly the union of the S7 and custody reviewed scopes; r2Digest is the CRLF-normalized per-file digest over it', () => {
+  assert.deepEqual([...R2_FILES], ['.github/workflows/tabwise-r2.yml', 'scripts/tabwise-r2.mjs', 'scripts/tabwise/r2-compose.mjs', 'scripts/tabwise/r2-evidence.mjs',
+    'scripts/tabwise/r2-policy.mjs', 'scripts/tabwise/r2-proctree.mjs', 'scripts/tabwise/r2-run.mjs', 'scripts/tabwise/r2-session.mjs', 'src/r2/binding.mjs', 'src/r2/capture.mjs',
+    'src/r2/contract.mjs', 'src/r2/page-journal.mjs', 'src/r2/page-provider.mjs', 'src/r2/page-recorder.mjs', 'src/r2/page-source.mjs', 'src/r2/preparation.mjs',
+    'src/r2/send-receipt.mjs', 'src/r2/speech-payload.mjs']);
+  // Recomputed independently here from the files on disk: no reviewed digest is pinned (the shipped status has none).
+  const outer = hashS4('sha256');
+  for (const file of R2_FILES) outer.update(`${file}\0${hashS4('sha256').update(readS4(file, 'utf8').replace(/\r\n/g, '\n')).digest('hex')}\n`);
+  assert.equal(r2Digest(), outer.digest('hex'));
+});
+
+test('S7-B1 run budget: the per-page worst case is derived from the child and custody bounds; only plans that fit the R2 step are runnable', async () => {
+  const m = await runModule(), p = await import('../scripts/tabwise/r2-proctree.mjs');
+  // baseline snapshot + child timeout + pre-kill census + kill grace + coalesced snapshot queue (CR-1) + reap rounds (snapshot + terminate each).
+  const page = p.HELPER_TIMEOUT_MS + m.CHILD_TIMEOUT_MS + m.CENSUS_MS + m.KILL_GRACE_MS + 2 * p.HELPER_TIMEOUT_MS + p.REAP_ROUNDS * 2 * p.HELPER_TIMEOUT_MS;
+  assert.equal(page, 900_000);
+  assert.equal(m.r2PageWorstCaseMs(), page);
+  assert.equal(m.R2_RUN_STEP_BUDGET_MS, 40 * 60_000);
+  const [one, two, three] = [1, 2, 3].map((n) => m.r2RunBudget(n));
+  assert.deepEqual([one.ok, two.ok, three.ok], [true, true, false]);
+  assert.equal(two.worst_ms, 2 * page + m.RUN_SETUP_RESERVE_MS + m.RUN_SEAL_RESERVE_MS);
+  assert.deepEqual([two.max_pages, two.budget_ms, two.page_worst_ms], [2, m.R2_RUN_STEP_BUDGET_MS, page]);
+  assert.ok(two.worst_ms <= two.budget_ms && three.worst_ms > three.budget_ms);
+  assert.equal(Object.isFrozen(two), true);
+  for (const bad of [0, -1, 1.5, NaN, '2', null, 65]) assert.throws(() => m.r2RunBudget(bad), /^Error: R2 run budget:/, String(bad));
+});
+
+test('S7-B2 an over-budget plan refuses in every mode right after the plan parses: no git, approval, fixture or page', async () => {
+  const { checkR2Entry } = await runModule();
+  const base = s6PlanObject(), plan = s6PlanObject({ pages: [...base.pages, { ...base.pages[0], id: 'validation-healthy-2' }] });
+  for (const mode of [['--check-only'], ['--run'], ['--verify-run'], ['--page', 'validation-healthy']]) {
+    const g = s6Gate({ plan });
+    g.input.argv = [...mode, '--plan', g.path];
+    try {
+      assert.throws(() => checkR2Entry(g.input), /^Error: BLOCK: run plan exceeds the R2 step budget: 3 pages need up to 2940 s; 2400 s allows at most 2 pages$/, mode[0]);
+      assert.deepEqual(g.gitCalls, [], mode[0]);
+    } finally { rmS4(g.dir, { recursive: true, force: true }); }
+  }
+  const ok = s6Gate();
+  ok.input.argv = ['--run', '--plan', ok.path];
+  try { assert.equal(checkR2Entry(ok.input).pages.length, 2, 'a two-page plan is within budget'); } finally { rmS4(ok.dir, { recursive: true, force: true }); }
 });

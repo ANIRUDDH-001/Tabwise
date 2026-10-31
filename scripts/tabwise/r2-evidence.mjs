@@ -685,12 +685,13 @@ export async function sealR2Run(runDir, {enabled, plan, pages, inputs} = {}) {
   return {manifest, manifest_sha256: hash};
 }
 
-/** verifyR2Run(runDir, {plan, inputs}) recomputes every page verdict and the run manifest. Exit codes are as recorded. */
+/** verifyR2Run(runDir, {plan, inputs}) recomputes every page verdict and the run manifest. Exit codes are as recorded.
+ *  Returns {ok, run_class, errors, manifest, manifest_sha256}. */
 export async function verifyR2Run(runDir, {plan, inputs} = {}) {
   const errors = [];
-  let manifest = null, recomputed = null;
+  let manifest = null, recomputed = null, bytes = null;
   try {
-    const bytes = readCapped(runDir, 'run-manifest.json', MANIFEST_CAP);
+    bytes = readCapped(runDir, 'run-manifest.json', MANIFEST_CAP);
     if (readCapped(runDir, 'run-manifest.sha256', DIGEST_FILE_CAP).toString('utf8') !== `${sha256(bytes)}  run-manifest.json\n`) fail('run manifest digest');
     manifest = parseJson(bytes, 'run-manifest.json');
     if (!object(manifest) || manifest.schema !== RUN_SCHEMA || !Array.isArray(manifest.pages)) fail('run manifest schema');
@@ -699,5 +700,6 @@ export async function verifyR2Run(runDir, {plan, inputs} = {}) {
     recomputed = await assessRun(runDir, {plan, pages: manifest.pages.map(p => ({id: p?.id, exit_code: p?.exit_code})), inputs});
     if (canonical(recomputed) !== canonical(manifest)) fail('run manifest does not recompute');
   } catch (error) { errors.push(error.message); }
-  return {ok: errors.length === 0, run_class: errors.length ? 'incomplete' : recomputed.run_class, errors, manifest};
+  // manifest_sha256 is the digest of the exact bytes verified here (S7 attests it), and null whenever verification refused.
+  return {ok: errors.length === 0, run_class: errors.length ? 'incomplete' : recomputed.run_class, errors, manifest, manifest_sha256: errors.length ? null : sha256(bytes)};
 }

@@ -347,3 +347,40 @@ Sections 1-11 above are the Cloud record and are kept as written. This section i
 3. **Upload custody evidence.** The run summary carrying the per-page `custody` is written to `RUNNER_TEMP/tabwise-r2-summary.json`, which is outside the uploaded `RUNNER_TEMP/tabwise-r2/`. Write it inside `tabwise-r2/` (beside, not in, the sealed run directory) or add a second upload path.
 4. **Header comment.** Replace "Windows process-tree cleanup is owned by Cloud Claude and is not designed here" with a pointer to this handoff.
 5. **No change needed:** permissions, actions, the attest gating, and `npm test` (it runs `r2-proctree.test.mjs` under the 10 s per-test timeout; the slowest PT row took 413 ms).
+
+## 13. Integration with S7 (D-88, Claude, Windows 11 local, Node 24.22.1, 2026-10-31)
+
+Context: PR #16 (this work) merged to main at `30ad3b13`; the owner ran `git merge --no-commit --no-ff origin/main` into `feat/tabwise-r2-s7` (`09cfd1f`). The merge was left uncommitted for the owner.
+
+### 13.1 Conflict resolution (all keep-both, as forecast in §12.4)
+- `scripts/tabwise-r2.mjs`: the proctree import comes before S7's widened `r2-run` import (`r2RunInputs`, `r2VerifyRun`). `runAll` keeps custody (cancel signals, crash handlers, `processes`, `protect`) and S7's `r2RunInputs`; `verifyRun`/`--verify-run` dispatch is unchanged.
+- `scripts/tabwise/r2-run.mjs`: both imports kept. S7's `r2RunInputs`, `r2VerifyRun` and `r2VerifyOutcome` come before custody's `withCustody` and `runPageChild`. S7's old `runPageChild` signature was dropped, because custody's version is a strict superset.
+- `scripts/tabwise/r2-policy.mjs`: `R2_FILES` = S7 ∪ custody (18 files, sorted); the CRLF-normalized `r2Digest` is unchanged.
+- `docs/ledger/{DECISIONS,PLAN,STATE}.md`: D-86 and D-87 both kept and D-88 added. PLAN keeps both sections and adds an integration section. STATE was rewritten.
+
+### 13.2 §12.5 items, now implemented in the workflow (owner authorization D-88)
+1. **Budget, not a raised timeout.** The worst case per page is 900 s = baseline 15 + child 720 + census 5 + grace 10 + CR-1 queue 30 + reap 4 × (15 + 15). The reserves are 120 s setup and 120 s seal/verify (INFERENCE). `r2RunBudget(n)` gives n × 900 + 240 ≤ 2400 s, so `max_pages` = 2. `checkR2Entry` refuses a larger plan in every mode, right after the plan parses, before git, approval, fixtures or any page. The step stays 40 min and the job stays 60 min. Static rule W17 ties `timeout-minutes: 40` to `R2_RUN_STEP_BUDGET_MS`. It also requires the job to hold: run 40 + pre-run quiescence 2 + post-run quiescence 2 + verify 5 + evidence contract 1, with ≥ 10 min of setup reserve.
+2. **Quiescence.** Inline read-only `pwsh` steps:
+   - **Pre-run:** runs on the success path, after the gate.
+   - **Post-run:** runs on `always() && steps.run.outcome != 'skipped'`, after the run and before the verify step.
+   - **Both:** `timeout-minutes: 2` and `$ErrorActionPreference = 'Stop'`. They look for `Win32_Process` NVDA images (the same regex as `NVDA_IMAGE`) and 6837 listeners. Each writes `tabwise-r2/diagnostics/quiescence-{pre,post}.json` with a full process list, `scope: 'global'` and `page_custody: 'not claimed…'`. Either one throws when the system is not quiescent.
+   - **Read-only:** no termination, cleanup, NVDA/browser launch or opt-in (W15). There is no `continue-on-error` in job r2, so a later step can add a failure but never clear one.
+3. **Evidence retention.**
+   - **Run summary:** the summary with per-page `custody` now goes to `RUNNER_TEMP/tabwise-r2/diagnostics/run-summary.json`. Before, it went to `RUNNER_TEMP/tabwise-r2-summary.json`, which was never uploaded.
+   - **Upload:** `always()` over all of `tabwise-r2/` is unchanged (W16). `diagnostics/` sits beside the sealed `<run>-1/`. `verifyR2Run` refuses any unexpected entry inside the run directory, so it must never be placed there.
+   - **What is attested:** only `<run>-1/run-manifest.json` (re-verified, digest-recomputed). The summary and quiescence files are supplementary diagnostics and are not attested.
+4. **Header** now points here instead of "owned by Cloud Claude".
+
+### 13.3 Verification (MEASURED, Windows 11 local, Node 24.22.1)
+- RED before the fix: S7-W1 (W15, W16 ×2, W17 against the parent workflow), S7-W2, S7-B1, S7-B2. GREEN after. S7-I1 pins the union inventory.
+- `node --test --test-timeout=20000 test/r2*.test.mjs`: 696/696 (r2-review 67, r2-proctree 29, r2-evidence 57).
+- Workflow mutations: 55/55 refused (37 S7 + 18 new), plus a budget-constant disagreement row.
+- Budget source mutations: 12/13 killed (scratch copy). The survivor `<=`→`<` is equivalent with the shipped constants, because 900 000·n + 240 000 = 2 400 000 has no integer n.
+- Ordinary `--seed 1`: 49/49 files, 971/971 tests, exit 0 (cache/d88-ordinary). Stress `--seed 426136`: 8 profiles × 49/49 files, 971/971 tests each, exit 0 (cache/d88-stress).
+- `check-r1-baseline` ok:true. `preflight.mjs` 6/6 ok. `--check-only`/`--run`/`--verify-run`/`--page` all refuse BLOCK (exit 2). `r2-status.json` is identical to both parents. Lockfiles are unchanged against both parents.
+- The quiescence script ran once locally under Windows PowerShell 5.1 as a surrogate (`utf8NoBOM` swapped for `utf8`): 361 rows, quiescent. **pwsh 7 on windows-2025 has not been executed.**
+
+### 13.4 Still not qualified (unchanged unless noted)
+- §9.1 hosted items: the kill path, handle pinning, Ctrl-C to helpers and uiAccess.
+- New: the hosted setup duration (needs ≤ 10 min in the job); pwsh 7 behaviour of the quiescence steps on the image; the real duration of seal/verify against the 120 s reserve.
+- Owner decisions open from §12.3 and §8.2/§8.3: vector-2 double pid reuse, the job object, and the result-time census.

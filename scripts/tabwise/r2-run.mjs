@@ -8,11 +8,12 @@ import {readFileSync, lstatSync, realpathSync} from 'node:fs';
 import {basename, dirname, isAbsolute, join, relative, resolve, sep} from 'node:path';
 import {pageHash} from '../../src/r2/contract.mjs';
 import {checkR2Approval, r2Digest} from './r2-policy.mjs';
-import {buildR2StepMap, planR2EvidenceCaps} from './r2-evidence.mjs';
-import {createPageCustody, processBaseline, wallMicros} from './r2-proctree.mjs';
+import {buildR2StepMap, planR2EvidenceCaps, verifyR2Run} from './r2-evidence.mjs';
+import {createPageCustody, processBaseline, wallMicros, HELPER_TIMEOUT_MS, REAP_ROUNDS} from './r2-proctree.mjs';
 
 export const PLAN_SCHEMA = 'tabwise-r2-plan/1';
 export const PAGE_EXIT_SCHEMA = 'tabwise-r2-page-exit/1';
+export const VERIFY_SCHEMA = 'tabwise-r2-verify/1';
 // One --page child is bounded by its own deadline; the coordinator allows a margin for bounded teardown and exit.
 export const PAGE_DEADLINE_MS = 600_000;
 export const CHILD_TIMEOUT_MS = PAGE_DEADLINE_MS + 120_000;
@@ -23,6 +24,11 @@ export const CUSTODY_SAMPLE_MS = 5_000;
 export const CENSUS_MS = 5_000;
 // Coordinator status recorded as the page exit code when the child's own code is not the verdict.
 export const EXIT = Object.freeze({timeout: 124, refused: 125, spawn: 126, unconfirmed: 127, signal: 128, residue: 129, cancelled: 130});
+// D-88 run budget. The hosted R2 run step (tabwise-r2.yml, timeout-minutes: 40; static policy W17) bounds the whole --run.
+// Setup (node start, the entry gates with two 30 s git calls) and seal+verify are reserved margins (INFERENCE, not measured).
+export const R2_RUN_STEP_BUDGET_MS = 40 * 60_000;
+export const RUN_SETUP_RESERVE_MS = 120_000;
+export const RUN_SEAL_RESERVE_MS = 120_000;
 
 const PAGE_ID = /^[a-z][a-z0-9-]{0,63}$/;
 const SHA256 = /^[0-9a-f]{64}$/;
@@ -73,13 +79,13 @@ function parseUniqueJson(text) {
   return parsed;
 }
 
-/** Exactly one mode (--check-only | --page <id> | --run) and exactly one --plan <path>; no other token. */
+/** Exactly one mode (--check-only | --page <id> | --run | --verify-run) and exactly one --plan <path>; no other token. */
 export function parseR2Args(argv) {
-  if (!Array.isArray(argv) || argv.length > 5) usage('expected --check-only|--page <id>|--run and --plan <path>');
+  if (!Array.isArray(argv) || argv.length > 5) usage('expected --check-only|--page <id>|--run|--verify-run and --plan <path>');
   let mode = null, page = null, plan = null;
   for (let i = 0; i < argv.length; i++) {
     const token = argv[i];
-    if (token === '--check-only' || token === '--run' || token === '--page') {
+    if (token === '--check-only' || token === '--run' || token === '--page' || token === '--verify-run') {
       if (mode !== null) usage('exactly one mode');
       mode = token.slice(2);
       if (token === '--page') {
@@ -147,7 +153,7 @@ function hookErrors(env, execArgv) {
 
 /**
  * The ordered S6 gates, before any runtime import: (1) strict arguments, (2) exact TABWISE_R2_ENABLED opt-in and no
- * inherited loader hooks, (3) R2 status, the approved plan bytes and checkR2Approval, (4) clean checkout at the approved
+ * inherited loader hooks, (3) R2 status, the approved plan bytes, the D-88 run budget and checkR2Approval, (4) clean checkout at the approved
  * revision, (5) frozen R1 integrity and the R2 reviewed digest, then the selected fixtures. git and frozen are injected
  * by the entry (real git, checkFrozenIntegrity). Throws on the first failed gate; returns a frozen record otherwise.
  */
@@ -166,6 +172,9 @@ export function checkR2Entry({argv, env, execArgv, root, platform, git, frozen, 
     planBytes = readFileSync(planPath);
   } catch (error) { block(`run plan unreadable: ${message(error)}`); }
   const plan = parseR2Plan(planBytes);
+  // D-88: a plan that cannot finish, clean up and verify inside the R2 step is refused in every mode, before any page.
+  const budget = r2RunBudget(plan.pages.length);
+  if (!budget.ok) block(`run plan exceeds the R2 step budget: ${budget.pages} pages need up to ${budget.worst_ms / 1000} s; ${budget.budget_ms / 1000} s allows at most ${budget.max_pages} pages`);
   if (args.page !== null && !plan.pages.some(p => p.id === args.page)) block(`page ${args.page} is not in the approved plan`);
   const head = git('rev-parse', 'HEAD');
   const approval = checkR2Approval({env, head, status, plan: planBytes, root, platform});
@@ -177,6 +186,23 @@ export function checkR2Entry({argv, env, execArgv, root, platform, git, frozen, 
   const pages = args.page === null ? plan.pages : plan.pages.filter(p => p.id === args.page);
   const fixtures = new Map(pages.map(p => [p.id, loadR2Fixture(planPath, p)]));
   return Object.freeze({mode: args.mode, page: args.page, planPath, planBytes, plan, pages, fixtures, head, status});
+}
+
+/**
+ * Worst case for one page under the coordinator: the pre-launch baseline snapshot, the child timeout, the bounded pre-kill
+ * census, the kill grace, draining the coalesced snapshot queue (CR-1: one in flight, one queued) and every reap round
+ * (one snapshot and one terminate helper each). Every term is a hard bound in this module or r2-proctree.mjs.
+ */
+export function r2PageWorstCaseMs() {
+  return HELPER_TIMEOUT_MS + CHILD_TIMEOUT_MS + CENSUS_MS + KILL_GRACE_MS + 2 * HELPER_TIMEOUT_MS + REAP_ROUNDS * 2 * HELPER_TIMEOUT_MS;
+}
+
+/** Whether pageCount pages, with setup and seal+verify reserves, fit the R2 run step in the worst case. */
+export function r2RunBudget(pageCount) {
+  if (!int(pageCount, 1, MAX_PAGES)) throw Error(`R2 run budget: page count must be 1..${MAX_PAGES}`);
+  const page = r2PageWorstCaseMs(), reserve = RUN_SETUP_RESERVE_MS + RUN_SEAL_RESERVE_MS, worst = pageCount * page + reserve;
+  return Object.freeze({pages: pageCount, page_worst_ms: page, setup_ms: RUN_SETUP_RESERVE_MS, seal_ms: RUN_SEAL_RESERVE_MS, worst_ms: worst,
+    budget_ms: R2_RUN_STEP_BUDGET_MS, max_pages: Math.floor((R2_RUN_STEP_BUDGET_MS - reserve) / page), ok: worst <= R2_RUN_STEP_BUDGET_MS});
 }
 
 /** RUNNER_TEMP/tabwise-r2/<run>-1, required to be outside the checkout (an evidence write must never dirty it). */
@@ -305,6 +331,32 @@ export async function runR2Pages({pages, launch, timeoutMs = CHILD_TIMEOUT_MS, k
 /** False when a child's exit was never confirmed: its directory may still change, so the run must not be sealed. */
 export function r2RunSealable(outcome) {
   return Array.isArray(outcome?.pages) && outcome.pages.every(p => p?.outcome !== 'exit-unconfirmed');
+}
+
+/** The plan copy and approved per-page inputs that --run seals with and --verify-run re-verifies with. */
+export function r2RunInputs(gate) {
+  const plan = JSON.parse(JSON.stringify(gate.plan));
+  const inputs = Object.fromEntries(gate.pages.map(p => [p.id, {fixture: gate.fixtures.get(p.id), approved: {fixture_sha256: p.fixture_sha256, task: plan.pages.find(q => q.id === p.id).task}}]));
+  return {plan, inputs};
+}
+
+/** S7 --verify-run: re-verify a sealed run from disk after every gate. Reads only; never seals, writes or starts a child. */
+export async function r2VerifyRun(gate, runDir) {
+  const {plan, inputs} = r2RunInputs(gate);
+  return r2VerifyOutcome(await verifyR2Run(runDir, {plan, inputs}));
+}
+
+/** Exit 0 only for a verified run with a digest whose every planned page ran, exited 0 and sealed. Never a genuine-evidence claim. */
+export function r2VerifyOutcome(verification) {
+  const ok = verification?.ok === true && SHA256.test(verification.manifest_sha256 ?? '');
+  const pages = ok && object(verification.manifest) && Array.isArray(verification.manifest.pages) ? verification.manifest.pages : null;
+  const complete = pages !== null && pages.length > 0 && !('stopped_after' in verification.manifest)
+    && pages.every(p => p?.exit_code === 0 && SHA256.test(p?.manifest_sha256 ?? ''));
+  const errors = [...(Array.isArray(verification?.errors) ? verification.errors : []), ...(verification?.ok === true && !ok ? ['verified run has no manifest digest'] : []),
+    ...(ok && !complete ? ['run is not complete: a planned page did not run, exit 0 and seal'] : []), ...(verification?.ok !== true && !verification?.errors?.length ? ['run not verified'] : [])]
+    .slice(0, REASONS).map(r => String(r).length > REASON_CAP ? `${String(r).slice(0, REASON_CAP - 12)} [truncated]` : String(r));
+  return {code: ok && complete ? 0 : 2, summary: {schema: VERIFY_SCHEMA, ok, complete, run_class: ok ? verification.run_class : 'incomplete', errors,
+    run_manifest_sha256: ok ? verification.manifest_sha256 : null, genuine_evidence: false}};
 }
 
 // The reap verdict over a settled child result: unconfirmed termination is never sealable; residue refuses an accepted page.
