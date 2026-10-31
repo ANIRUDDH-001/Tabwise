@@ -1,30 +1,28 @@
-# STATE - R2-L2 C-3 + S5a: Windows accepted; integration PR pending
-Updated: 2026-10-30T18:22:15Z
-Base: main 015128ba (PR #11 merge). Owner Windows acceptance complete; integration PR pending.
+# STATE - R2-L2 S5b + S6 offline integration (CLOUD-R2-L2-05): uncommitted patch for owner review
+Updated: 2026-10-30T19:14:58Z
+Base: main 063e789 (PR #12). Uncommitted working-tree changes; nothing committed or pushed. R2 disabled/BLOCK.
 ## Now / next / blocked
-- Now: independent review returned CHANGES REQUIRED on patch 320430eb...6e38; both corrections applied:
-  A (C-3): redactNonce refuses nonce-sanitization-ambiguous when any sanitized record still holds the complete
-    nonce (any case), e.g. prefix3f9a0c1bsuffix, account-3f9a0c1bZ, hello 3f9a0c1b7 next. Old test that allowed it replaced.
-  B (S5a): the final jsonOnly(result) is inside a fail-closed boundary: failure stops the gate (protocol,
-    "R2 compose result refused: ...") and throws; no result escapes.
-- Next: owner commit/push and hosted Windows CI; then S5b/S6 (handoff §12). S7 remains owner-gated.
-- Blocked: genuine C-3 positive (S3 class never genuine-unqualified until S5b/S6). R2 qualification, live
-  NVDA, physical input. R2 disabled/BLOCK; FEATURES.json and thresholds unchanged.
-## Verification (MEASURED; Cloud Linux Node 22 and owner Windows Node 24.22.1)
-- RED: payload-context + binding 154 tests, 10 fail (all new/corrected tests); GREEN 154/154.
-- Mutations M24-M29: 6/6 killed, hash-verified restore (total 29/29 meaningful killed).
-- node --test --test-timeout=20000 test/r2*.test.mjs: 561/561 PASS, exit 0.
-- offline-tests ordinary seed 1: 45/48; 3 FAIL environmental (qualification-loader, review-integrity,
-  vendor: no node_modules/@guidepup), identical at baseline.
-- offline-tests stress seed 113262: 7 profiles 45/48 each (same 3); random-113262 cannot run on Node 22
-  (bad option --test-randomize). No R2 file failed anywhere.
-- check-r1-baseline: ok true, errors [], exit 0. git diff --check: exit 0.
-- Owner Windows Node 24.22.1: R2 561/561; ordinary 48/48; stress 8 profiles x 48/48.
-- Frozen R1 ok true, errors []; git diff --check exit 0; R2 disabled/BLOCK.
+- Now: S5b runR2Session (brand-first, capabilities dynamic after it, S5a handles from the branded runtime, no
+  provenance claim, genuine_evidence:false) and S6 entry tabwise-r2.mjs + r2-run.mjs (strict CLI, plan schema
+  tabwise-r2-plan/1, ordered gates, --page only loads loader then session, --run sequential children) implemented.
+- Next: owner review + Windows acceptance (handoff §13); independent review of S5b/S6; decide O-10, O-11, O-12.
+- Blocked: authentic success path unexecuted (needs a hosted run); genuine evidence unreachable until O-10;
+  C-3 arm inputs until O-10/O-11; nonce policy O-12. S7 workflow not created. FEATURES.json and thresholds unchanged.
+## Verification (MEASURED; Cloud Linux Node 22.22.0, no node_modules; not Windows)
+- RED: r2-review 43 tests, 18 pass, 25 fail (all new); GREEN 45/45 after Phase E fixes.
+- node --test --test-timeout=20000 test/r2*.test.mjs: 588/588, exit 0 (561 + 27 new).
+- offline-tests ordinary seed 1: 45/48; 3 FAIL environmental (qualification-loader, review-integrity, vendor:
+  ENOENT node_modules/@guidepup), same as baseline. stress 113262: 7 profiles 45/48 (same 3); random not runnable
+  on Node 22 (bad option --test-randomize). r2-review under the mixed fault settings: 45/45.
+- check-r1-baseline: ok true, errors []. git diff --check: exit 0.
+- Mutations: 32 total; 30 killed; M6 survived (one-page latch, unreachable offline); M20 equivalent (not counted).
+- Repeated S6-C/E and S5b-N4: 15/15 runs, 9/9.
 ## Review focus
-- speech-payload.mjs redactNonce complete-nonce check; r2-compose.mjs final try/catch.
-- Residual (disclosed, O-12): contiguous partial (3f9a) or nonce split across records/phrases unspaced.
+- r2-session.mjs first statement; r2-run.mjs checkR2Entry order; runPage in tabwise-r2.mjs; runR2Pages.
+- Narrowed pre-existing assertion: r2-compose importers [] -> [r2-session.mjs] (design §1.2 rule).
+- O-12 measured: complete nonce passes redaction as 3f-9a-0c-1b, "3f9a, 0c1b", fullwidth, zero-width; nonce_sha256 invertible.
 ## Handoff
-- Record: docs/engineering/R2-L2-C3-S5a-handoff.md (§2, §3, §6, §7, §8, §9, §11, §14 updated).
-- New patch in Claude scratchpad (R2-L2-C3-S5a-r2.patch); old checksum superseded.
-- Owner action: review, Windows run, commit per handoff §15; R2 BLOCKED.
+- Record: docs/engineering/R2-L2-S5b-S6-handoff.md (inventory, gates, tests, mutations, O-10/O-11/O-12, §13 commands).
+- New files: scripts/tabwise/r2-session.mjs, scripts/tabwise-r2.mjs, scripts/tabwise/r2-run.mjs, the handoff.
+- Modified: scripts/tabwise/r2-policy.mjs (R2_FILES), test/r2-review.test.mjs, CODEMAP, STATE, LOG, DECISIONS (D-83).
+- Patch: exported through Cloud file transfer; checksum in the final message. Owner commits per handoff §15.
