@@ -14,7 +14,7 @@ export const RETIRED_APPROVALS=Object.freeze(['D-72','D-73','D-74']);
 // R2 source scope at R2-L2 S5b/S6 (entry, run helpers, authentic session added); the status file is excluded.
 export const R2_FILES=Object.freeze([
  'scripts/tabwise-r2.mjs','scripts/tabwise/r2-compose.mjs','scripts/tabwise/r2-evidence.mjs',
- 'scripts/tabwise/r2-policy.mjs','scripts/tabwise/r2-run.mjs','scripts/tabwise/r2-session.mjs',
+ 'scripts/tabwise/r2-policy.mjs','scripts/tabwise/r2-proctree.mjs','scripts/tabwise/r2-run.mjs','scripts/tabwise/r2-session.mjs',
  'src/r2/binding.mjs','src/r2/capture.mjs','src/r2/contract.mjs','src/r2/page-journal.mjs','src/r2/page-provider.mjs',
  'src/r2/page-recorder.mjs','src/r2/page-source.mjs','src/r2/preparation.mjs','src/r2/send-receipt.mjs','src/r2/speech-payload.mjs',
 ].sort());

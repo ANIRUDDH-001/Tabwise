@@ -79,6 +79,10 @@
     "kind": "offline",
     "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
   },
+  "r2-proctree.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
   "r2-review.test.mjs": {
     "kind": "offline",
     "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
