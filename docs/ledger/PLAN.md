@@ -379,3 +379,16 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Acceptance: node scripts/check-r1-baseline.mjs; git diff --check. All commands must exit 0; no weakened assertions or thresholds.
 - Excluded: R2 authorization/status/gates, frozen R1, vendor, workflows, dependencies, web, commits/push/merge/branch changes.
 - Rollback: owner may discard the isolated uncommitted test-fixture hunk; historical CI evidence remains documented.
+
+### F-03 / R2-L2 / O-12 + O-10 - nonce-redact/2 and offline hybrid provenance verifier
+- Owner approval: D-85. Base: main 3388107 (PR #13 merged); branch feat/tabwise-r2-o12-o10 (owner-created). Plan: ../R2-O12-O10-implementation-plan.md (verifier choice superseded by D-85 hybrid).
+- Goal A (O-12): nonce-redact/2 detects chunked/compat/zero-width/punctuated nonces on a detection copy, refuses ambiguous or residual 4+ fragments and cross-record/phrase splits, removes edits[].original and nonce_sha256, refuses nonce-redact/1, bumps builder and arm-input schema to /2.
+- Goal B (O-10, offline): argv-only adapter for `gh attestation verify` (timeout, output cap, exit code, strict JSON) + Node policy over certificate fields only; expectations from owner policy; subject digest recomputed from sealed evidence; class at most genuine-unqualified. Tests use a fake subprocess only; real gh never executed.
+- Files: src/r2/speech-payload.mjs; new src/r2/provenance.mjs; scripts/tabwise/r2-policy.mjs (R2_FILES) if needed; test/r2-payload-context.test.mjs; test/r2-evidence.test.mjs; docs/engineering handoff; ledger records.
+- Cost: $0 incremental; no install, model, browser, NVDA, gh, hosted dispatch.
+- Acceptance: node --test --test-timeout=20000 test/r2-payload-context.test.mjs (Phase A first)
+- Acceptance: node --test --test-timeout=20000 test/r2*.test.mjs
+- Acceptance: node scripts/offline-tests.mjs --profile ordinary --seed 1 --out cache/o12-o10
+- Acceptance: node scripts/offline-tests.mjs --profile stress --seed 426136 --out cache/o12-o10
+- Acceptance: node scripts/check-r1-baseline.mjs; git diff --check. All exit 0; existing tests changed only where the v1 contract is replaced (disclosed).
+- Excluded: r2-status.json, workflows, ci/offline-tests.json, frozen R1, vendor, web, dependencies, commits/push/merge/branch changes.

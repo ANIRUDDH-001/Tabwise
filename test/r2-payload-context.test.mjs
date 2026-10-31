@@ -117,18 +117,17 @@ test('C3-P4 literal nonce redacted case-insensitively; raw transcripts unchanged
   assert.equal(r.model_eligible, true, r.reasons.join('; '));
   assert.equal(r.payload.observations[0].speech, `Newsletter sign-up ${NONCE_MARKER}, email, edit text`);
   assert.equal(r.payload.observations[1].speech, `Submit ${NONCE_MARKER} button ${NONCE_MARKER}`);
-  assert.deepEqual(r.redaction, { version: REDACTION_VERSION, nonce_sha256: c3sha(C3_NONCE), edits: [
-    { seq: 1, form: 'literal', start: 19, end: 27, original: '3F9A0C1B' },
-    { seq: 2, form: 'literal', start: 7, end: 15, original: '3f9a0c1b' },
-    { seq: 2, form: 'literal', start: 23, end: 31, original: '3f9a0c1b' }] });
+  // O-12 (nonce-redact/2): edits carry offsets only; no plaintext original and no reversible sha256(nonce).
+  assert.deepEqual(r.redaction, { version: REDACTION_VERSION, edits: [
+    { seq: 1, start: 19, end: 27 }, { seq: 2, start: 7, end: 15 }, { seq: 2, start: 23, end: 31 }] });
   assert.deepEqual(e.capture, before, 'raw capture is never modified');
   assert.doesNotMatch(JSON.stringify(r.payload), /3f9a0c1b/i, 'the model payload never carries the nonce');
-  assert.doesNotMatch(JSON.stringify({ ...r, redaction: { ...r.redaction, edits: [] } }), /3f9a0c1b/i, 'only edit originals (arm-input record, never model-facing) keep it');
+  assert.doesNotMatch(JSON.stringify(r), new RegExp(`3f9a0c1b|${c3sha(C3_NONCE)}`, 'i'), 'no nonce or nonce hash anywhere in the result');
   // Replay: applying the recorded edits to the raw text reproduces the payload text.
   for (const record of e.capture.records.filter(x => x.text)) {
     let text = record.text;
     for (const edit of r.redaction.edits.filter(x => x.seq === record.seq).reverse()) {
-      assert.equal(text.slice(edit.start, edit.end), edit.original);
+      assert.equal(text.slice(edit.start, edit.end).toLowerCase(), C3_NONCE);
       text = text.slice(0, edit.start) + NONCE_MARKER + text.slice(edit.end);
     }
     assert.equal(text, r.payload.observations[record.seq - 1].speech);
@@ -142,7 +141,7 @@ test('C3-P5 NVDA-spaced nonce with whitespace and single , . - separators is red
     assert.equal(r.model_eligible, true, `${spoken}: ${r.reasons.join('; ')}`);
     assert.equal(r.payload.observations[0].speech, `Drafts 😀 ${NONCE_MARKER} edit`);
     const [edit] = r.redaction.edits;
-    assert.deepEqual(edit, { seq: 1, form, start: 10, end: 10 + spoken.length, original: spoken }, 'UTF-16 offsets (the emoji is two code units)');
+    assert.deepEqual(edit, { seq: 1, start: 10, end: 10 + spoken.length }, `UTF-16 offsets (the emoji is two code units), ${form}`);
     assert.equal(text.slice(edit.start, edit.end), spoken);
   }
 });
@@ -157,7 +156,7 @@ test('C3-P6 supplied redaction record that reproduces exactly is accepted (verif
 test('C3-P7 redactNonce is pure: no nonce present gives no edits and identical texts', () => {
   const out = redactNonce([{ seq: 1, text: 'email, edit text' }, { seq: 2, text: '' }], C3_NONCE);
   assert.deepEqual(out, { ok: true, reason: null, texts: [{ seq: 1, text: 'email, edit text' }, { seq: 2, text: '' }],
-    redaction: { version: REDACTION_VERSION, nonce_sha256: c3sha(C3_NONCE), edits: [] } });
+    redaction: { version: REDACTION_VERSION, edits: [] } });
 });
 
 test('C3-P8 speech lane record is a fixed allowlisted shape over a detached observer read', () => {
@@ -224,9 +223,10 @@ const C3_NEGATIVE = [
   ['blinded fixture id not opaque', e => { e.fixture_id = 'validation'; }, /^payload: .*fixture/],
   ['nonce transform not title-nonce-suffix/1', e => { e.transform.transform = 'other'; }, /^transform: /],
   ['nonce not 8 lowercase hex', e => { e.transform.nonce = '3F9A0C1B'; }, /^transform: /],
-  ['supplied redaction with an extra edit', e => { e.redaction = { version: REDACTION_VERSION, nonce_sha256: c3sha(C3_NONCE), edits: [{ seq: 1, form: 'literal', start: 0, end: 8, original: 'email, e' }] }; }, /^redaction: .*reproduce/],
-  ['supplied redaction for another nonce (transform mismatch)', e => { e.redaction = { version: REDACTION_VERSION, nonce_sha256: c3sha('00000000'), edits: [] }; }, /^redaction: .*reproduce/],
-  ['supplied redaction of another version', e => { e.redaction = { version: 'nonce-redact/0', nonce_sha256: c3sha(C3_NONCE), edits: [] }; }, /^redaction: .*reproduce/],
+  ['supplied redaction with an extra edit', e => { e.redaction = { version: REDACTION_VERSION, edits: [{ seq: 1, start: 0, end: 8 }] }; }, /^redaction: .*reproduce/],
+  ['supplied redaction with an extra key (nonce commitment)', e => { e.redaction = { version: REDACTION_VERSION, nonce_sha256: c3sha(C3_NONCE), edits: [] }; }, /^redaction: .*reproduce/],
+  ['supplied redaction of another version', e => { e.redaction = { version: 'nonce-redact/0', edits: [] }; }, /^redaction: .*not re-verified/],
+  ['supplied historical nonce-redact/1 record (not migrated)', e => { e.redaction = { version: 'nonce-redact/1', nonce_sha256: c3sha(C3_NONCE), edits: [] }; }, /^redaction: .*nonce-redact\/1.*not re-verified/],
   ['HTML injected as speech', e => { e.capture.raw[0].text = '<html><body>x'; e.capture.records[0].text = '<html><body>x'; e.speech[0].phrases[1] = '<html><body>x'; }, /^payload: .*visual/],
   ['image data URI injected as speech', e => { const t = 'data:image/png;base64,AAAA'; e.capture.raw[0].text = t; e.capture.records[0].text = t; e.speech[0].phrases[1] = t; }, /^payload: .*visual/],
   ['capture not an r2-capture/1 result', e => { e.capture.schema = 'r2-capture/0'; }, /^capture: /],
@@ -242,7 +242,6 @@ const C3_AMBIGUOUS = [
   ['interrupted spelling', '3 f 9 a, uh, 0 c 1 b'],
   ['digit words mixed with hex characters', 'three f nine a zero c one b'],
   ['digit words partial', 'three F nine A'],
-  ['spaced with two punctuation marks', '3 ,, f 9 a 0 c 1 b'],
   ['pre-existing marker in raw text', `Drafts ${NONCE_MARKER}`],
   ['overlapping candidate spellings', null],
 ];
@@ -257,10 +256,9 @@ for (const [name, text] of C3_AMBIGUOUS) test(`C3-A ${name}`, () => {
 });
 
 test('C3-A nonce spelled across a record boundary is ambiguous, not two clean records', () => {
+  // O-12: the contiguous 3f9a | 0c1b split was eligible under nonce-redact/1 (disclosed limitation); /2 refuses it.
   for (const texts of [['email 3 f 9 a', '0 c 1 b button', null], ['email 3f9a', '0c1b', null]]) {
-    const r = c3(null, { texts });
-    if (texts[0].includes(' 3 f')) c3Refused(r, /^nonce-sanitization-ambiguous/, texts.join('|'));
-    else assert.equal(r.model_eligible, true, 'contiguous fragments are outside nonce-redact/1 rule 1 (disclosed limitation)');
+    c3Refused(c3(null, { texts }), /^nonce-sanitization-ambiguous/, texts.join('|'));
   }
 });
 
@@ -297,7 +295,7 @@ test('C3-A a record with one redacted and one adjacent copy is refused; a standa
   c3Refused(c3(null, { texts: ['3f9a0c1b then x3f9a0c1b', 'Submit, button', null] }), /^nonce-sanitization-ambiguous: record 1 still contains/, 'mixed');
   const r = c3(null, { texts: ['code 3F9A0C1B, edit text', 'Submit, button', null] });
   assert.equal(r.model_eligible, true, r.reasons.join('; '));
-  assert.deepEqual(r.redaction.edits.map(e => [e.form, e.original]), [['literal', '3F9A0C1B']]);
+  assert.deepEqual(r.redaction.edits, [{ seq: 1, start: 5, end: 13 }]);
   assert.doesNotMatch(JSON.stringify(r.payload), /3f9a0c1b/i);
 });
 
@@ -324,4 +322,150 @@ test('C3-R1 adversarial whitespace runs between nonce characters are scanned in 
   assert.ok(performance.now() - t0 < 5000, 'bounded scan');
   assert.equal(out.ok, false, 'seven spaced nonce characters remain: ambiguous');
   assert.match(out.reason, /^nonce-sanitization-ambiguous/);
+});
+
+// ---- R2-L2 O-12: nonce-redact/2 (handoff §11 option B; D-85) ----
+// Detection runs on a normalized copy (NFKD, marks/format/default-ignorable stripped, lowercased); hex chunks join
+// across separators, observer phrase and record boundaries. Raw text is never modified; edits are raw UTF-16 offsets
+// only (no plaintext original, no reversible sha256(nonce)). Ambiguity and any residual 4-character run refuse.
+import { BUILDER_VERSION, ARM_INPUT_SCHEMA } from '../src/r2/speech-payload.mjs';
+
+// Independent leak oracle: compatibility-normalized hex characters of the model-facing text, markers removed.
+const o12Hex = text => text.split(NONCE_MARKER).join(' ').normalize('NFKD').replace(/[\p{M}\p{Cf}\p{Default_Ignorable_Code_Point}]/gu, '').toLowerCase().replace(/[^0-9a-f]/g, '');
+function o12Redacted(name, text, nonce, expected) {
+  const e = c3Evidence({ texts: [text, 'Submit, button', null] });
+  e.transform = { ...e.transform, nonce };
+  const before = structuredClone(e.capture);
+  const r = assessR2SpeechPayload(e);
+  assert.equal(r.model_eligible, true, `${name}: ${r.reasons.join('; ')}`);
+  assert.equal(r.payload.observations[0].speech, expected, name);
+  assert.equal(o12Hex(r.payload.observations[0].speech).includes(nonce), false, `${name}: no complete nonce leaks`);
+  assert.doesNotMatch(JSON.stringify(r), new RegExp(`${nonce}|${c3sha(nonce)}`, 'i'), `${name}: no nonce or nonce hash in any output`);
+  assert.deepEqual(e.capture, before, `${name}: sealed speech untouched`);
+  let replay = text;
+  for (const edit of [...r.redaction.edits].reverse()) {
+    assert.deepEqual(Object.keys(edit).sort(), ['end', 'seq', 'start'], `${name}: edit carries offsets only`);
+    assert.equal(o12Hex(text.slice(edit.start, edit.end)), nonce, `${name}: edit spans exactly one spoken nonce`);
+    replay = replay.slice(0, edit.start) + NONCE_MARKER + replay.slice(edit.end);
+  }
+  assert.equal(replay, expected, `${name}: edits replay exactly`);
+  return r;
+}
+
+test('O12-V contract versions: nonce-redact/2, builder /2, arm-input schema /2', () => {
+  assert.equal(REDACTION_VERSION, 'nonce-redact/2');
+  assert.equal(BUILDER_VERSION, 'tabwise-r2-speech-payload/2');
+  assert.equal(ARM_INPUT_SCHEMA, 'tabwise-r2-speech-arm-input/2');
+});
+
+const O12_REDACTED = [
+  ['hosted NVDA chunking (R1 qualification speech, nonce 24b3a9b5)', 'R 1 sign-up 24b 3a 9b 5 - Google Chrome for Testing', '24b3a9b5', `R 1 sign-up ${NONCE_MARKER} - Google Chrome for Testing`],
+  ['2-character chunks joined by hyphens', 'code 3f-9a-0c-1b edit', C3_NONCE, `code ${NONCE_MARKER} edit`],
+  ['2-character chunks joined by spaces', 'code 3f 9a 0c 1b edit', C3_NONCE, `code ${NONCE_MARKER} edit`],
+  ['4+4 chunks with the observer comma join', 'title 3f9a, 0c1b, dialog', C3_NONCE, `title ${NONCE_MARKER}, dialog`],
+  ['uppercase chunks', 'ID 3F9A 0C1B.', C3_NONCE, `ID ${NONCE_MARKER}.`],
+  ['spaced with two punctuation marks (refused under /1)', '3 ,, f 9 a 0 c 1 b', C3_NONCE, NONCE_MARKER],
+  ['fullwidth compatibility forms', 'title ３ｆ９ａ０ｃ１ｂ end', C3_NONCE, `title ${NONCE_MARKER} end`],
+  ['zero-width space inside', 'title 3f9a​0c1b end', C3_NONCE, `title ${NONCE_MARKER} end`],
+  ['zero-width joiner and soft hyphen inside', 'title 3f‍9a­0c1b end', C3_NONCE, `title ${NONCE_MARKER} end`],
+  ['precomposed accented hex letter', 'title 3f9á0c1b end', C3_NONCE, `title ${NONCE_MARKER} end`],
+  ['combining mark on a hex letter', 'title 3f9á0c1b end', C3_NONCE, `title ${NONCE_MARKER} end`],
+  ['superscript and circled digits', 'title ³f9a⓪c1b end', C3_NONCE, `title ${NONCE_MARKER} end`],
+  ['mathematical bold capitals (lowercase only after NFKD; adversarial review)', 'title 𝐃𝐄𝐀𝐃𝐁𝐄𝐄𝐅 end', 'deadbeef', `title ${NONCE_MARKER} end`],
+  ['squared capitals (adversarial review)', 'title 🄳🄴🄰🄳🄱🄴🄴🄵 end', 'deadbeef', `title ${NONCE_MARKER} end`],
+  ['mathematical bold digit (surrogate pair offsets)', '\u{1D7D1}f9a0c1b, edit', C3_NONCE, `${NONCE_MARKER}, edit`],
+  ['nonce followed by a one-letter hex word', 'Drafts 3f9a0c1b, a dialog', C3_NONCE, `Drafts ${NONCE_MARKER}, a dialog`],
+];
+for (const [name, text, nonce, expected] of O12_REDACTED) test(`O12-R ${name}`, () => o12Redacted(name, text, nonce, expected));
+
+const O12_REFUSED = [
+  ['partial 2-character chunks (4 of 8)', ['title 3f-9a done'], C3_NONCE],
+  ['partial spaced chunks (4 of 8)', ['title 3f 9a done'], C3_NONCE],
+  ['partial fullwidth (4 of 8)', ['title ３ｆ９ａ done'], C3_NONCE],
+  ['partial with zero-width (4 of 8)', ['title 3f​9a done'], C3_NONCE],
+  ['partial contiguous middle fragment', ['code f9a0c'], C3_NONCE],
+  ['7 of 8 characters', ['code 3f9a0c1'], C3_NONCE],
+  ['partial hosted NVDA chunking', ['R 1 sign-up 24b 3a - Chrome'], '24b3a9b5'],
+  ['fullwidth nonce glued to a letter', ['x３ｆ９ａ０ｃ１ｂ'], C3_NONCE],
+  ['two adjacent copies (no unambiguous split)', ['3f9a0c1b3f9a0c1b'], C3_NONCE],
+  ['pre-existing marker in compatibility form', ['Drafts ［run-nonce］'], C3_NONCE],
+  ['complete nonce split across records', ['code 3f9a0c', '1b button'], C3_NONCE, /crosses a record boundary/],
+  ['2+2 fragment split across records', ['end 3f', '9a start'], C3_NONCE, /4 or more nonce characters remains/],
+  ['hosted NVDA chunking split across records', ['sign-up 24b 3a', '9b 5 - Chrome'], '24b3a9b5', /crosses a record boundary/],
+  ['chunked nonce split across observer phrases', [['email 3f9a', '0c1b']], C3_NONCE, /crosses an observer phrase boundary/],
+  ['hosted NVDA chunking split across observer phrases', [['title 24b 3a', '9b 5']], '24b3a9b5', /crosses an observer phrase boundary/],
+  ['zero-width character between a letter and the nonce (invisible characters never split a token)', ['code x\u200b3f9a0c1b'], C3_NONCE, /record 1 still contains the complete nonce/],
+  ['soft hyphen between a letter and the nonce', ['code x\u00ad3F9A0C1B'], C3_NONCE, /record 1 still contains the complete nonce/],
+];
+for (const [name, texts, nonce, reason = /./] of O12_REFUSED) test(`O12-A ${name}`, () => {
+  const e = c3Evidence({ texts: [...texts, ...['Submit, button', null].slice(texts.length - 1)].slice(0, 3) });
+  e.transform = { ...e.transform, nonce };
+  const before = structuredClone(e.capture);
+  const r = assessR2SpeechPayload(e);
+  c3Refused(r, /^nonce-sanitization-ambiguous: /, name);
+  assert.match(r.reasons[0], reason, name);
+  assert.equal(r.redaction, null);
+  assert.deepEqual(e.capture, before, 'sealed speech untouched');
+  assert.doesNotMatch(JSON.stringify(r), new RegExp(`${nonce}|${c3sha(nonce)}`, 'i'), 'the refusal carries no nonce material');
+});
+
+const O12_ORDINARY = ['deaf cafe', '3 of 9 apples', 'press f 9 a', '1990 clicked', 'Page 3 of 9', 'email, edit text',
+  'heading level 2, Billing details', 'Faced a decade of added cafe fees', 'Phone 555 0123', 'December 31 2026',
+  'Accept, check box, not checked', 'Your email address is invalid, alert', 'link, Back to dashboard', 'list with 4 items'];
+test('O12-C ordinary speech is eligible and unedited for the fixed run nonce', () => {
+  for (const text of O12_ORDINARY) {
+    const r = c3(null, { texts: [text, 'Submit, button', null] });
+    assert.equal(r.model_eligible, true, `${text}: ${r.reasons.join('; ')}`);
+    assert.deepEqual(r.redaction.edits, [], text);
+    assert.equal(r.payload.observations[0].speech, text);
+  }
+});
+
+test('O12-C false refusals of ordinary speech stay rare over 3000 deterministic nonces (pre-registered <= 0.1%)', () => {
+  let refused = 0, trials = 0;
+  for (let i = 0; i < 3000; i++) {
+    const nonce = c3sha(`o12-false-positive-${i}`).slice(0, 8);
+    for (const text of O12_ORDINARY) {
+      trials++;
+      const out = redactNonce([{ seq: 1, text }], nonce);
+      if (!out.ok) { refused++; continue; }
+      assert.deepEqual(out.redaction.edits, [], `${nonce} ${text}: no spurious edit`);
+    }
+  }
+  assert.ok(refused / trials <= 0.001, `${refused}/${trials} ordinary refusals`);
+});
+
+test('O12-D redactNonce is deterministic, does not mutate its input and refuses tampered replays', () => {
+  const records = [{ seq: 1, text: 'R 1 sign-up 24b 3a 9b 5 - Chrome' }, { seq: 2, text: '' }];
+  const before = structuredClone(records);
+  const a = redactNonce(records, '24b3a9b5'), b = redactNonce(records, '24b3a9b5');
+  assert.deepEqual(a, b);
+  assert.deepEqual(records, before);
+  assert.deepEqual(a.redaction, { version: REDACTION_VERSION, edits: [{ seq: 1, start: 12, end: 23 }] });
+  const texts = ['Drafts 3f9a0c1b', 'Submit, button', null];
+  const first = c3(null, { texts });
+  for (const tamper of [r => { r.edits[0].start += 1; }, r => { r.edits[0].end -= 1; }, r => { r.edits[0].seq = 2; }, r => { r.edits = []; },
+    r => { r.edits[0].original = '3f9a0c1b'; }, r => { r.edits[0].form = 'literal'; }]) {
+    const redaction = structuredClone(first.redaction);
+    tamper(redaction);
+    c3Refused(c3(e => { e.redaction = redaction; }, { texts }), /^redaction: /, JSON.stringify(redaction));
+  }
+});
+
+test('O12-B bounded edits: 256 occurrences redact, 257 refuse', () => {
+  const ok = redactNonce([{ seq: 1, text: 'X 3f9a0c1b '.repeat(256) }], C3_NONCE);
+  assert.equal(ok.ok, true, ok.reason);
+  assert.equal(ok.redaction.edits.length, 256);
+  const over = redactNonce([{ seq: 1, text: 'X 3f9a0c1b '.repeat(257) }], C3_NONCE);
+  assert.equal(over.ok, false);
+  assert.match(over.reason, /^nonce-sanitization-ambiguous: .*256/);
+});
+
+test('O12-B linear scan over large and adversarial inputs', () => {
+  for (const text of ['a b '.repeat(100_000), '​'.repeat(200_000) + '3f9a', '３'.repeat(200_000), 'f'.repeat(400_000), '3 '.repeat(200_000)]) {
+    const t0 = performance.now();
+    const out = redactNonce([{ seq: 1, text }], C3_NONCE);
+    assert.ok(performance.now() - t0 < 5000, `bounded scan (${text.length} code units)`);
+    assert.equal(typeof out.ok, 'boolean');
+  }
 });
