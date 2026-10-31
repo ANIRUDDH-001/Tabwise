@@ -14,8 +14,9 @@ export const RETIRED_APPROVALS=Object.freeze(['D-72','D-73','D-74']);
 // R2 source scope at R2-L2 S5b/S6 (entry, run helpers, authentic session added); the status file is excluded.
 // S7 (owner decision R-S7-1): the hosted workflow is reviewed scope too, so a workflow edit invalidates reviewed_sha256.
 // O-11 (D-89): arm-input custody (src/r2/arm-inputs.mjs) derives model inputs from sealed runs, so it is reviewed scope too.
+// C2: include the producer input policy, guarded executor and their shared press palette in enforced integrity.
 export const R2_FILES=Object.freeze([
- R2_WORKFLOW,'scripts/tabwise-r2.mjs','scripts/tabwise/r2-compose.mjs','scripts/tabwise/r2-evidence.mjs',
+ R2_WORKFLOW,'packages/contracts/palette.mjs','scripts/tabwise-r2.mjs','scripts/tabwise/executor.mjs','scripts/tabwise/input-policy.mjs','scripts/tabwise/r2-compose.mjs','scripts/tabwise/r2-evidence.mjs',
  'scripts/tabwise/r2-policy.mjs','scripts/tabwise/r2-proctree.mjs','scripts/tabwise/r2-run.mjs','scripts/tabwise/r2-session.mjs',
  'src/r2/arm-inputs.mjs','src/r2/binding.mjs','src/r2/capture.mjs','src/r2/contract.mjs','src/r2/page-journal.mjs','src/r2/page-provider.mjs',
  'src/r2/page-recorder.mjs','src/r2/page-source.mjs','src/r2/preparation.mjs','src/r2/send-receipt.mjs','src/r2/speech-payload.mjs',

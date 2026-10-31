@@ -438,3 +438,49 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Acceptance: node scripts/check-r1-baseline.mjs; node scripts/preflight.mjs; git diff --check; BLOCK exit 2 in all four modes. All exit 0 otherwise.
 - Pending (not authorized): independent review, owner decision + status-only activation (A-6), first hosted run + O-10 verify (A-7), authentic-runtime class for S3 (blocker B-9), hosted dress rehearsal (B-1..B-7).
 - Excluded: r2-status.json and other status files, workflows, frozen R1, vendor, dependencies, speech-payload.mjs, commits/push/merge/branch changes.
+
+### F-03 / R2-C2 - pre-smoke integrity coverage (owner-approved 2026-10-31)
+- Goal: enforce input-policy.mjs, executor.mjs and packages/contracts/palette.mjs in R2_FILES; mutation of each must change the digest and explicitly refuse R2 approval.
+- Base: 1189a3ebb3dbeae0eeb4098bc2e9d4639a728692; local branch fix/F-03-r2-c2-integrity.
+- Files (exact allowlist): scripts/tabwise/r2-policy.mjs; test/r2-review.test.mjs; docs/CODEMAP.md; docs/engineering/R2-final-handoff.md; docs/ledger/{PLAN,DECISIONS,LOG,STATE} (existing extensions unchanged).
+- Cost ceiling: $0 external spend; two hours. No installs, dependency/source-dependency edits, B-9, provenance policy, workflow/status changes, live runs, spending or publication.
+- Tests first: three independent temporary-copy mutation regressions and expanded exact-membership assertion; RED 4/4 before policy change, focused GREEN 12/12 afterward.
+- Acceptance (portable Node v24.22.1 on PATH):
+  - node --test --test-timeout=20000 --test-name-pattern="S4 policy|S7-I1|C2-" test/r2-review.test.mjs
+  - $taskTests = @(Get-ChildItem -LiteralPath test -Filter 'r2*.test.mjs' -File | Sort-Object Name | ForEach-Object { $_.FullName }); node --test --test-timeout=20000 @taskTests
+  - node scripts/offline-tests.mjs --profile ordinary --seed 1 --out cache/r2-c2-ordinary
+  - node scripts/offline-tests.mjs --profile stress --seed 426136 --out cache/r2-c2-stress
+  - node scripts/check-r1-baseline.mjs; node scripts/preflight.mjs; git diff --check
+  - node --input-type=module -e "import {R2_FILES,r2Digest} from './scripts/tabwise/r2-policy.mjs'; console.log(JSON.stringify({files:R2_FILES.length,digest:r2Digest()}))"
+- Pass condition: all checks pass, each mutation changes digest and returns exactly R2 content changed; frozen R1 and BLOCK statuses unchanged.
+- Current result: focused 12/12 PASS; full R2 exit 1 with Windows EPERM junction creation failures (including FIX1 containment); stopped per owner instruction. Ordinary/stress NOT RUN. Frozen R1 and preflight PASS.
+- Rollback: revert only this task's eight-file diff; no commit created. Independent cross-tool diff review and complete acceptance remain required before commit approval.
+
+#### F-03/R2-C2 final owner-run evidence (2026-10-31; acceptance unchanged)
+- Final reports: cache/manual-review/r2-c2-stress-final/; source/report audit C2-final-stress-audit; no rerun.
+- Full R2 712/712, ordinary 49/49 and isolated mixed speech 122/122/vendor 26/26 PASS are supplied evidence, not new agent executions. Earlier EPERM and stress failures remain recorded.
+- Third stress attempt: six profiles 49/49 PASS each; stall-40 47/49 PASS (speech/vendor TIMEOUT); mixed 22/24 recorded PASS (speech TIMEOUT, next file PROFILE_TIMEOUT/not launched, 25 selected files without rows); overall owner-reported exit 1.
+- Stress acceptance UNSATISFIED. Final watchdog failures include profile-remainder clipping; earlier mixed speech had a distinct 10000 ms per-test D39-M01 timeout. Precise audit, report paths and uncertainties: R2-final-handoff.md J.1.
+- No acceptance threshold changed. Any limited-acceptance exception is a PENDING OWNER DECISION, not approval. A separate diagnosis task would require its own scope; no rerun, runner/test edit, commit or activation authorized here.
+
+### F-03 / CI-H3-S - registered scheduling amendment (D-90, 2026-10-31T17:55:55Z)
+- Approved base:9f8d48c760ba42d78cdff8e2a2dc29d20a417ae9; isolated fix/F-03-ci-h3-diagnostics; C2 untouched.
+- Goal: prevent measured scheduling truncation without changing functional acceptance or excusing unresolved per-test failures.
+- PRE-REGISTERED LIMITS: stall-40 and mixed profile budgets240000ms (formerly180000); all other profiles180000ms. stall-40/speech watchdog120000ms (formerly60000); mixed/speech stays120000; all other file watchdogs60000. Allocation remains capped by the current profile remainder.
+- Unchanged: per-test10000ms, F1-F4 exit/close confirmation and <=1000ms grace, selection/seed/order/faults, complete TAP validation, security/physical deadlines and statuses.
+- Exact file allowlist: scripts/offline-tests.mjs; test/ci-offline-selection.test.mjs; docs/engineering/CI-H3-stress-budgets.md (new); docs/engineering/CI-H1-preflight-hang.md; docs/CODEMAP.md; docs/ledger/PLAN.md; docs/ledger/DECISIONS.md; docs/ledger/LOG.jsonl; docs/ledger/STATE.md.
+- Mandatory contradictory evidence: Codex stall calibration80.031s,119pass/1fail/2cancelled including T12/D39-M01 per-test timeouts and serveDir failure; owner native stall TAP122/122 PASS in69263.5308ms,zero skip/cancel. Owner transcript sets stall40/every50, but TAP itself does not record environment and printed process exit code was blank. Per-test failures remain unresolved.
+- Sequence: this PLAN and D-90 registered before implementation/assertion edits; RED scheduling regressions; implementation; targeted GREEN only; independent review.
+- Acceptance command: portable Node24.22.1 --test --test-timeout=10000 test/ci-offline-selection.test.mjs; all tests pass. git diff --check; exact nine-file inventory; C2 byte comparison; state <=40 lines.
+- Tests: exact profile/file policy, changed old threshold assertions, remainder/fractional clipping, full unexecuted accounting, unchanged F1-F4 and all non-amended limits; report/header consistency.
+- Cost ceiling:$0; no installs/full speech/full stress/hosted runs/commit/merge/activation. Scheduling acceptance amended; aggregate stress remains UNSATISFIED until a separate authorized complete run passes.
+- Rollback: revert only this uncommitted scheduling diff; retain instrumentation9f8d48c and C2 bytes. No integration action authorized.
+
+- CI-H3-S execution result: RED20tests15pass/5fail -> GREEN20/20,exit0 under portableNode24.22.1. Logs cache/ci-h3-evidence/scheduling-{red,green}.txt. No full speech or stress execution. Stress UNSATISFIED; unresolved per-test failures remain disclosed. Independent review pending; engineering handoff CI-H3-stress-budgets.md.
+
+#### Integrated validation candidate (owner-authorized preparation only)
+- Exact combined source: C2 policy/R2 tests, instrumentation9f8d48c and cleared CI-H3-S scheduling; no source reinterpretation.
+- Clarification of CI-H3-S Tests line: runProfile report/allocation is tested; main log headers and partial-JSON budget fields were inspected, not independently executed/tested.
+- Three prior scheduling tests were amended, including nominal/granted fixture clock130000->190000 to retain50000ms remainder; functional/security assertions unchanged.
+- Shared CODEMAP/DECISIONS/LOG/PLAN/STATE reconciled explicitly; C2 source checkout remains untouched. Complete patch and file/blob hashes in external integration packet.
+- No stress execution/commit/merge/activation approved. Owner must approve exact candidate and one seed426136 attempt; any per-test failure remains failure.

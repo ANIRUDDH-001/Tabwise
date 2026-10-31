@@ -142,3 +142,6 @@ The sections above are kept as written. Statements in them such as "pending owne
 | Post-merge `main` CI | none recorded | no run is claimed |
 
 The admitted inventory is unchanged at 47 selected and 9 excluded files. The last local Windows counts for the combined R2 tree are 518/518 per profile, recorded in `R2-post-final-stop.md`. The CI-H1 root cause of the original hosted hang is still not established. Browser and process-bearing exclusions still need separate owner-approved verification.
+
+## CI-H3-S successor scheduling amendment (D-90, 2026-10-31)
+Historical CI-H1/H2 measurements and accepted limits above remain historical. D-90 explicitly changes stall-40/mixed profile budgets180000->240000ms and stall-40 speech60000->120000ms; every other limit and all functional/security assertions remain unchanged. New profileBudgetMs policy drives allocation/reporting; F1-F4 instrumentation is retained. See CI-H3-stress-budgets.md for contradictory Codex/owner speech observations, their caveats,20-test RED/GREEN evidence and integration plan. The unresolved10s per-test failures remain failures; stress acceptance is UNSATISFIED. No full speech/stress run or workflow/status edit was performed for this amendment.

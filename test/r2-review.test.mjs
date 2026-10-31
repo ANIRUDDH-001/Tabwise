@@ -166,6 +166,28 @@ test('S4 policy: forged or changed source content refuses (R2 scope and qualific
   } finally { rmS4(tmp, { recursive: true, force: true }); }
 });
 
+for (const file of ['scripts/tabwise/input-policy.mjs', 'scripts/tabwise/executor.mjs', 'packages/contracts/palette.mjs']) {
+  test(`C2- integrity mutation independently invalidates digest and approval: ${file}`, () => {
+    const tmp = tmpS4(joinS4(tmpdirS4(), 'tabwise-r2-c2-'));
+    try {
+      for (const source of new Set([...R2_FILES, ...QUALIFICATION_FILES, file])) {
+        mkdirS4(dirnameS4(joinS4(tmp, source)), { recursive: true });
+        copyWritableS4(source, joinS4(tmp, source));
+      }
+      const status = s4Status(tmp), before = r2Digest(tmp);
+      assert.deepEqual(s4Check({ status, root: tmp }), { ok: true, errors: [] }, 'unmodified fixture is approved');
+      const body = readS4(joinS4(tmp, file), 'utf8').replace(/\r\n/g, '\n');
+      writeS4(joinS4(tmp, file), body.replace(/\n/g, '\r\n'));
+      assert.equal(r2Digest(tmp), before, 'CRLF conversion preserves the reviewed digest');
+      assert.deepEqual(s4Check({ status, root: tmp }), { ok: true, errors: [] });
+      writeS4(joinS4(tmp, file), body + '\n// C2 mutation\n');
+      const changed = r2Digest(tmp), approval = s4Check({ status, root: tmp });
+      assert.notEqual(changed, before, `${file} mutation changes the reviewed digest`);
+      assert.deepEqual(approval, { ok: false, errors: ['R2 content changed'] }, 'explicit R2 content-integrity failure only');
+    } finally { rmS4(tmp, { recursive: true, force: true }); }
+  });
+}
+
 test('S4 policy: R2_FILES is a frozen, sorted list of existing files that covers the policy and C-1 but not the status file', () => {
   assert.equal(Object.isFrozen(R2_FILES), true);
   assert.deepEqual([...R2_FILES], [...R2_FILES].sort());
@@ -1173,9 +1195,9 @@ test('S7-W3 the workflow path is the one the R2 policy pins; the shipped status 
 });
 
 // ---- S7 + R-1/R-2 custody integration (D-88) ----
-// O-11 (D-89) adds src/r2/arm-inputs.mjs to the reviewed scope; this pinned list changed with it (disclosed).
+// O-11 (D-89) adds arm-inputs; C2 adds input-policy, executor and palette (exact-membership expansion disclosed).
 test('S7-I1 R2_FILES is exactly the union of the S7, custody and O-11 reviewed scopes; r2Digest is the CRLF-normalized per-file digest over it', () => {
-  assert.deepEqual([...R2_FILES], ['.github/workflows/tabwise-r2.yml', 'scripts/tabwise-r2.mjs', 'scripts/tabwise/r2-compose.mjs', 'scripts/tabwise/r2-evidence.mjs',
+  assert.deepEqual([...R2_FILES], ['.github/workflows/tabwise-r2.yml', 'packages/contracts/palette.mjs', 'scripts/tabwise-r2.mjs', 'scripts/tabwise/executor.mjs', 'scripts/tabwise/input-policy.mjs', 'scripts/tabwise/r2-compose.mjs', 'scripts/tabwise/r2-evidence.mjs',
     'scripts/tabwise/r2-policy.mjs', 'scripts/tabwise/r2-proctree.mjs', 'scripts/tabwise/r2-run.mjs', 'scripts/tabwise/r2-session.mjs', 'src/r2/arm-inputs.mjs', 'src/r2/binding.mjs', 'src/r2/capture.mjs',
     'src/r2/contract.mjs', 'src/r2/page-journal.mjs', 'src/r2/page-provider.mjs', 'src/r2/page-recorder.mjs', 'src/r2/page-source.mjs', 'src/r2/preparation.mjs',
     'src/r2/send-receipt.mjs', 'src/r2/speech-payload.mjs']);

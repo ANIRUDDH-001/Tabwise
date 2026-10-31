@@ -424,3 +424,84 @@ Implementation decisions (Claude, within the authorization above; owner review r
 - No CLI mode: the entry's gates require the hosted CI identity, so a gated derivation mode would be unusable offline; the builder is a library call over a downloaded, O-10-verified run (O-11a). It sends nothing and grants nothing.
 - A-5: fixtures/r2/plans/a5-validation-smoke.json (validation healthy then broken, development split, reviewed pair task, 2 pages, worst case 2040 s of 2400 s). The workflow pins plan_path to fixtures/r2/plans/ and loadR2Fixture loads only inside the plan directory, so byte-identical copies of the two registered development fixtures sit in fixtures/r2/plans/validation/. CANDIDATE only.
 Cost ceiling: $0 incremental.
+
+## F-03 / R2-C2 owner authorization (2026-10-31)
+Owner message, verbatim:
+
+**Owner authorization: APPROVED — F-03 / R2-C2 pre-smoke integrity coverage, with corrections.**
+
+Proceed with the bounded eight-file specification on `fix/F-03-r2-c2-integrity`, based on `1189a3ebb3dbeae0eeb4098bc2e9d4639a728692`.
+
+**Required corrections:**
+
+1. Reuse the already installed portable Node v24.22.1 at `%LOCALAPPDATA%\TabwiseTools\node-v24.22.1-win-x64` if accessible. Do not install or upgrade software. If unavailable, report the environment limitation and leave full verification for my PowerShell terminal.
+2. On Windows, enumerate the `test/r2*.test.mjs` files explicitly rather than relying on wildcard expansion.
+3. Mutation tests must independently establish that changing each of the three added files changes `r2Digest()` and produces an explicit R2 content-integrity approval failure.
+4. Run `node scripts/preflight.mjs` without `--clean` while task changes remain uncommitted.
+5. Append current C2 findings to the documentation and ledger; preserve historical records.
+
+**Authorization limits:** Only the approved eight files may change. The three newly included producer dependencies must remain byte-for-byte unchanged. Temporary mutation fixtures must stay outside tracked source files.
+
+External spend ceiling: **$0**. No installations, B-9 implementation, R2 activation, hosted runs, NVDA execution, Meta calls, workflow edits, commits, pushes, merges or deployments.
+
+Follow test-first development. Stop and report if critical acceptance checks fail or if work exceeds the agreed task boundary.
+
+**Deliverables:** Exact diff, changed-file inventory, focused and full test results, newly computed R2 digest, unchanged frozen-R1 verification, BLOCK status confirmation, remaining risks and proposed commit message.
+
+Do not publish the changes. I will review the complete diff before authorizing a commit.
+
+## F-03/R2-C2 final handoff authorization (2026-10-31)
+Owner message, verbatim:
+
+**F-03/R2-C2 — Final handoff after repeated stress failures**
+
+Owner's third official stress attempt, portable Node v24.22.1, seed 426136:
+
+- repeat-1, repeat-2, serial, random-426136, slow-fs-30, slow-fs-100: 49/49 PASS each.
+- stall-40: 47/49 PASS; speech.test.mjs and vendor.test.mjs TIMEOUT.
+- mixed: 22/24 recorded rows PASS, profile incomplete; speech.test.mjs TIMEOUT.
+- Overall exit 1.
+
+Earlier evidence:
+
+- Focused C2: 12/12 PASS.
+- Full R2: 712/712 PASS.
+- Ordinary: 49/49 files PASS.
+- Mixed speech isolated: 122/122 PASS.
+- Mixed vendor isolated: 26/26 PASS.
+- Frozen R1 and preflight previously PASS.
+- R2_FILES 22, digest c79bedd36ba5437e82ea20820bb33ac73555aa4ad14748dbb7bf8131d02f10ca.
+
+**Task:** Within the previously authorized eight-file C2 scope, append this evidence to the handoff and ledgers. Preserve previous failures and historical records. Describe the stress requirement as UNSATISFIED, not PASS.
+
+Perform a read-only audit of the last stress reports to classify the precise timeout mechanisms. Do not rerun the stress suite.
+
+Do not change test timeouts, assertions, runner code, source scope, workflows or activation statuses.
+
+Deliver the exact final eight-file diff, status inventory, unresolved risks and proposed commit message.
+
+No commit, push, merge or activation. If an exception to the original acceptance contract is needed, document it as an explicit pending owner decision rather than inventing approval.
+
+Disposition: documentation/report audit only. No exception to the all-checks-pass acceptance contract was requested as approval or granted. Pending owner decision: require separately scoped diagnosis and a successful unchanged-contract stress run, or explicitly authorize a limited C2 handoff/commit with stress acceptance UNSATISFIED. Neither option changes runtime authorization or BLOCK statuses; no commit is authorized.
+
+## F-03/R2-C2 final independent documentation checks (2026-10-31)
+Owner: "Independent source/diff review: the three-dependency integrity correction and mutation tests PASS. Exact eight-file scope and failure disclosure are satisfactory."
+Owner: "Consolidate it into a concise current-state handoff" and "Correct only actual source corruption"; "Stress acceptance remains UNSATISFIED. No limited-acceptance exception or commit is authorized."
+Action: consolidate STATE to at most 40 lines; retain historical evidence in existing LOG, PLAN and handoff J/J.1. Direct strict UTF-8 inspection found no reported mojibake sequences or replacement characters in the eight changed files; valid Unicode left unchanged. Untracked r2-c2-final-review.diff has 4 Gamma-C-cedilla-o-diaeresis sequences and 5 box-drawing-T/ordinal sequences, consistent with export decoding corruption; leave that owner artifact untouched and export Git stdout bytes directly outside the repository.
+No code, test, acceptance, runner, workflow, dependency or status change authorized. No tests, commit, publication or activation authorized.
+
+## D-90 2026-10-31T17:55:55Z - CI-H3-S owner-authorized scheduling acceptance amendment
+Owner: "I authorize a narrowly scoped CI-H3 scheduling amendment" based on independently reviewed instrumentation commit 9f8d48c760ba42d78cdff8e2a2dc29d20a417ae9.
+Explicit owner changes: "stall-40: profile budget 180,000 → 240,000 ms." "mixed: profile budget 180,000 → 240,000 ms." "stall-40/speech.test.mjs: file watchdog 60,000 → 120,000 ms."
+Owner: "These are registered CI scheduling acceptance changes, not merely diagnostic changes. I explicitly approve revising the existing harness assertions that enforce the old limits."
+Unchanged: all other profile budgets180000ms, other file caps60000ms except existing mixed speech120000ms, per-test10000ms, one-second exit/output confirmation ceiling, faults/order/selection/functional assertions/physical deadlines/R1/R2 boundaries.
+Owner: "State clearly that the per-test failures are unresolved and no scheduling change excuses or suppresses them."
+Owner: "Do not run the full speech suite or official eight-profile stress suite yet." "No commit, push, merge, activation, deployment, model call or spending." "Stop for independent review."
+Scope: the nine paths in PLAN CI-H3-S below; main C2 remains untouched. External spend ceiling $0. Historical logs and append-only ledger records preserved. This decision pre-registers scheduling changes before implementation and threshold-assertion edits; no stress PASS or activation authority conferred.
+
+## D-91 2026-10-31T18:07:29Z - disposable integrated C2 + CI-H3 validation candidate
+Owner: "Prepare a disposable, uncommitted integration worktree" containing the exact reviewed C2 patch, instrumentation9f8d48c, cleared scheduling amendment and reconciled documentation.
+Owner: "The main C2 checkout must remain untouched." "explicitly report and resolve any documentation conflicts, preserving both records."
+Consequence: distinct worktree at cache/c2-ci-h3-validation, base1189a3e; four reviewed code files copied byte-for-byte; five shared documents reconciled; review's documentation clarifications only. No code or thresholds amended.
+Owner: "Do not run that suite yourself or commit, push, merge, activate, deploy or spend." "Stop for owner approval of the exact candidate and the single full validation attempt."
+Execution, acceptance exception and commit remain unauthorized; stress UNSATISFIED; R2 BLOCK. External packet records patch/tree/file hashes and the one-attempt command.
