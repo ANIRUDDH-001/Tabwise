@@ -1173,9 +1173,10 @@ test('S7-W3 the workflow path is the one the R2 policy pins; the shipped status 
 });
 
 // ---- S7 + R-1/R-2 custody integration (D-88) ----
-test('S7-I1 R2_FILES is exactly the union of the S7 and custody reviewed scopes; r2Digest is the CRLF-normalized per-file digest over it', () => {
+// O-11 (D-89) adds src/r2/arm-inputs.mjs to the reviewed scope; this pinned list changed with it (disclosed).
+test('S7-I1 R2_FILES is exactly the union of the S7, custody and O-11 reviewed scopes; r2Digest is the CRLF-normalized per-file digest over it', () => {
   assert.deepEqual([...R2_FILES], ['.github/workflows/tabwise-r2.yml', 'scripts/tabwise-r2.mjs', 'scripts/tabwise/r2-compose.mjs', 'scripts/tabwise/r2-evidence.mjs',
-    'scripts/tabwise/r2-policy.mjs', 'scripts/tabwise/r2-proctree.mjs', 'scripts/tabwise/r2-run.mjs', 'scripts/tabwise/r2-session.mjs', 'src/r2/binding.mjs', 'src/r2/capture.mjs',
+    'scripts/tabwise/r2-policy.mjs', 'scripts/tabwise/r2-proctree.mjs', 'scripts/tabwise/r2-run.mjs', 'scripts/tabwise/r2-session.mjs', 'src/r2/arm-inputs.mjs', 'src/r2/binding.mjs', 'src/r2/capture.mjs',
     'src/r2/contract.mjs', 'src/r2/page-journal.mjs', 'src/r2/page-provider.mjs', 'src/r2/page-recorder.mjs', 'src/r2/page-source.mjs', 'src/r2/preparation.mjs',
     'src/r2/send-receipt.mjs', 'src/r2/speech-payload.mjs']);
   // Recomputed independently here from the files on disk: no reviewed digest is pinned (the shipped status has none).
@@ -1214,4 +1215,79 @@ test('S7-B2 an over-budget plan refuses in every mode right after the plan parse
   const ok = s6Gate();
   ok.input.argv = ['--run', '--plan', ok.path];
   try { assert.equal(checkR2Entry(ok.input).pages.length, 2, 'a two-page plan is within budget'); } finally { rmS4(ok.dir, { recursive: true, force: true }); }
+});
+
+// ---- A-5 (D-89): committed CANDIDATE run plan fixtures/r2/plans/a5-validation-smoke.json. Not approved: r2-status.json
+// names no plan_sha256, so every entry mode still refuses BLOCK. Development fixtures only (registered page hashes). ----
+const A5_PLAN = 'fixtures/r2/plans/a5-validation-smoke.json';
+const A5_PLAN_SHA256 = '8bb82898703fbaf4d8a4f70fd2223b02913a2c5f0cbbd85d7a17fedb251bc0b4';
+const a5Text = () => readS4(A5_PLAN, 'utf8').replace(/\r\n/g, '\n');
+
+test('A5-P1 the candidate plan is canonical, deterministic, two development pages within budget, and hash-bound to the registered fixtures', async () => {
+  const { parseR2Plan, loadR2Fixture, r2RunBudget } = await runModule();
+  const { pageHash } = await import('../src/r2/contract.mjs');
+  const text = a5Text(), bytes = Buffer.from(text);
+  assert.equal(r2PlanDigest(readS4(A5_PLAN)), A5_PLAN_SHA256, 'r2PlanDigest (CRLF-normalized) is the binding identity');
+  assert.equal(hashS4('sha256').update(bytes).digest('hex'), A5_PLAN_SHA256, 'the LF (git blob) bytes have the same digest');
+  assert.equal(text, JSON.stringify(JSON.parse(text), null, 2) + '\n', 'canonical bytes: 2-space JSON with one final newline');
+  const plan = parseR2Plan(bytes);
+  assert.deepEqual(plan, parseR2Plan(Buffer.from(text)), 'deterministic parse');
+  assert.equal(plan.split, 'development');
+  assert.deepEqual(plan.pages.map((p) => p.id), ['validation-healthy', 'validation-broken'], 'healthy then broken (plan-author order)');
+  const budget = r2RunBudget(plan.pages.length);
+  assert.deepEqual([budget.ok, budget.worst_ms, budget.budget_ms], [true, 2_040_000, 2_400_000]);
+  const fixtures = JSON.parse(readS4('fixtures/r2/manifest.json', 'utf8')), pair = fixtures.pairs.find((p) => p.id === 'validation');
+  const registered = JSON.parse(readS4('fixtures/r2/development-hashes.json', 'utf8')).sha256;
+  for (const [page, variant] of [[plan.pages[0], 'healthy'], [plan.pages[1], 'broken']]) {
+    assert.equal(page.fixture, `validation/${variant}.html`);
+    assert.equal(page.fixture_sha256, pair[variant].sha256, `${page.id} binds the fixture manifest hash`);
+    assert.ok(registered.includes(page.fixture_sha256), `${page.id} is a registered development page (never scored as withheld)`);
+    assert.deepEqual(page.task, pair.task.map(({ step, press }) => ({ step, press })), `${page.id} task is the reviewed pair task`);
+    const loaded = loadR2Fixture(A5_PLAN, page);
+    assert.equal(pageHash(loaded), page.fixture_sha256);
+    assert.equal(loaded.toString('utf8').replace(/\r\n/g, '\n'), readS4(`fixtures/r2/${pair[variant].file}`, 'utf8').replace(/\r\n/g, '\n'), `${page.id} copy is byte-identical to the canonical fixture`);
+  }
+  // The workflow's plan_path guard accepts exactly this path shape.
+  assert.match(A5_PLAN, /^fixtures\/r2\/plans\/[a-z][a-z0-9-]{0,63}\.json$/);
+});
+
+test('A5-N1 wrong hash, unsupported action, duplicate page, extra key and budget overflow refuse', async () => {
+  const { parseR2Plan, loadR2Fixture, checkR2Entry } = await runModule();
+  const base = JSON.parse(a5Text()), enc = (p) => Buffer.from(JSON.stringify(p));
+  const wrongHash = structuredClone(base); wrongHash.pages[0].fixture_sha256 = base.pages[1].fixture_sha256;
+  assert.throws(() => loadR2Fixture(A5_PLAN, parseR2Plan(enc(wrongHash)).pages[0]), /^Error: R2 plan: fixture validation-healthy hash differs from the approved plan$/);
+  const swapped = structuredClone(base); swapped.pages[0].fixture = 'validation/broken.html';
+  assert.throws(() => loadR2Fixture(A5_PLAN, parseR2Plan(enc(swapped)).pages[0]), /hash differs/);
+  const escape = structuredClone(base); escape.pages[0].fixture = '../validation/healthy.html';
+  assert.throws(() => parseR2Plan(enc(escape)), /relative path inside the plan directory/);
+  for (const press of ['Escape', 'ArrowDown', 'Ctrl+Enter', 'tab', '']) {
+    const bad = structuredClone(base); bad.pages[0].task[0].press = press;
+    assert.throws(() => parseR2Plan(enc(bad)), /^Error: R2 plan: page validation-healthy:/, press);
+  }
+  const dup = structuredClone(base); dup.pages[1].id = 'validation-healthy';
+  assert.throws(() => parseR2Plan(enc(dup)), /duplicate page id/);
+  const extra = structuredClone(base); extra.pages[0].label = 'healthy';
+  assert.throws(() => parseR2Plan(enc(extra)), /must be exactly/);
+  assert.throws(() => parseR2Plan(Buffer.from(a5Text().replace('"split": "development",', '"split": "development",\n  "split": "development",'))), /duplicate JSON object member/);
+  const three = structuredClone(base); three.pages.push({ ...structuredClone(base.pages[0]), id: 'validation-healthy-2' });
+  assert.equal(parseR2Plan(enc(three)).pages.length, 3, 'the schema allows it; the budget gate refuses it');
+  const g = s6Gate({ plan: three });
+  try {
+    assert.throws(() => checkR2Entry(g.input), /^Error: BLOCK: run plan exceeds the R2 step budget: 3 pages/);
+    assert.deepEqual(g.gitCalls, []);
+  } finally { rmS4(g.dir, { recursive: true, force: true }); }
+});
+
+test('A5-N2 the candidate is not approved: the shipped status names no plan and every entry mode refuses BLOCK before git', async () => {
+  const { checkR2Entry } = await runModule();
+  const shipped = readR2Status();
+  assert.deepEqual([shipped.enabled, shipped.verdict, shipped.plan_sha256, shipped.owner_approval_ref], [false, 'BLOCK', null, null]);
+  const git = () => { throw Error('git must not run'); };
+  for (const mode of [['--check-only'], ['--run'], ['--verify-run'], ['--page', 'validation-healthy']]) {
+    assert.throws(() => checkR2Entry({ argv: [...mode, '--plan', A5_PLAN], env: { TABWISE_R2_ENABLED: 'true' }, execArgv: [], root: process.cwd(), platform: 'win32', git,
+      frozen: () => { throw Error('frozen must not run'); }, readStatus: () => readR2Status() }), /^Error: BLOCK: R2 status is disabled\/BLOCK$/, mode[0]);
+  }
+  // Even a status that is otherwise approved refuses a plan digest it does not name.
+  const g = s6Gate({ planDir: { dir: tmpS4(joinS4(tmpdirS4(), 'a5 ')), path: A5_PLAN, text: a5Text() }, status: { plan_sha256: 'f'.repeat(64) } });
+  try { assert.throws(() => checkR2Entry(g.input), /run plan identity mismatch/); } finally { rmS4(g.dir, { recursive: true, force: true }); }
 });

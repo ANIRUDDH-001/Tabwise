@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Newsletter sign-up</title>
+</head>
+<body>
+<main>
+<h1>Newsletter sign-up</h1>
+<form id="signup" novalidate>
+<label for="email">Email</label>
+<input id="email" name="email" type="email" aria-describedby="email-error">
+<p id="email-error" role="alert"></p>
+<button id="submit" type="submit">Subscribe</button>
+</form>
+</main>
+<script>
+const r2 = (() => {
+  // Deterministic page evidence: one ordered log of keydown, focus and app events (seq is the order; t is page-local only).
+  const events = window.__r2Events = [];
+  let seq = 0;
+  const id = (el) => (el && el !== document.body && el !== document.documentElement ? el.id || el.tagName.toLowerCase() : "body");
+  const log = (type, detail) => events.push({ seq: ++seq, t: performance.now(), type, ...detail });
+  document.addEventListener("keydown", (e) => log("keydown", { key: e.key, shift: e.shiftKey, target: id(e.target) }), true);
+  document.addEventListener("focusin", (e) => log("focus", { target: id(e.target) }), true);
+  return { app: (name, detail = {}) => log("app", { name, active: id(document.activeElement), ...detail }) };
+})();
+document.getElementById("signup").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const email = document.getElementById("email");
+  if (/^[^@\s]+@[^@\s]+$/.test(email.value)) { r2.app("subscribed"); return; }
+  email.setAttribute("aria-invalid", "true");
+  document.getElementById("email-error").textContent = "Enter your email address, for example name@example.com";
+  r2.app("validation-error", { region: "email-error" });
+});
+</script>
+</body>
+</html>

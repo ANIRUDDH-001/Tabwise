@@ -1093,3 +1093,345 @@ test('S7-V4 r2VerifyOutcome trusts nothing but a verified result with a digest a
   assert.ok(r.summary.errors.length <= 64 && r.summary.errors.every(e => e.length <= 512), 'errors are capped');
   assert.equal(r.summary.run_manifest_sha256, null, 'no digest is reported for a refused run');
 });
+
+// ---- R2 O-11 (A-4): C-3 arm-input custody (handoff §10 option A; D-89). Synthetic sealed runs only; nothing here is genuine. ----
+// The custody manifest is a recomputation from sealed, verified evidence: verifyR2ArmInputs rebuilds every byte and
+// compares. Today every page is refused (genuine evidence unreachable before an authentic runtime attestation), so the
+// eligible path is covered only through the pure record formatter with an assessR2SpeechPayload result (no handle).
+import {symlinkSync, renameSync, cpSync} from 'node:fs';
+import {redactNonce} from '../src/r2/speech-payload.mjs';
+const o11 = () => import('../src/r2/arm-inputs.mjs');
+const O11_ATTEST = /genuine evidence required; verifier class is synthetic/;
+
+async function o11Run({ids = ['p1', 'p2'], incomplete = {}, exits} = {}) {
+  const root = temp(), run = join(root, 'run');
+  mkdirSync(run);
+  const plan = {pages: ids.map(id => ({id, task: APPROVED.task}))}, inputs = Object.fromEntries(ids.map(id => [id, INPUTS]));
+  const codes = exits ?? ids.map(() => 0);
+  for (const [i] of codes.entries()) {
+    const h = harness(join(run, ids[i])); await journey(h);
+    await h.writer.seal(incomplete[ids[i]] ? {incomplete: incomplete[ids[i]]} : undefined);
+  }
+  const sealedRun = await sealR2Run(run, {enabled: true, plan, pages: codes.map((exit_code, i) => ({id: ids[i], exit_code})), inputs});
+  return {root, run, plan, inputs, out: join(root, 'run.arm-inputs'), sealedRun};
+}
+// Every file below dir with its sha256: proves sealed directories are never written.
+function o11Tree(dir) {
+  const out = {};
+  const walk = rel => { for (const e of readdirSync(join(dir, rel), {withFileTypes: true})) {
+    const p = rel ? `${rel}/${e.name}` : e.name;
+    if (e.isDirectory()) walk(p); else out[p] = sha256(readFileSync(join(dir, p)));
+  } };
+  walk('');
+  return out;
+}
+// A forger who edits manifest.json and rewrites its digest, so only recomputation can refuse.
+function o11Reseal(out, edit) {
+  const text = edit(readFileSync(join(out, 'manifest.json'), 'utf8'));
+  writeFileSync(join(out, 'manifest.json'), text);
+  writeFileSync(join(out, 'manifest.sha256'), `${sha256(Buffer.from(text))}  manifest.json\n`);
+}
+const o11Json = (out, mutate) => o11Reseal(out, text => { const m = JSON.parse(text); mutate(m); return JSON.stringify(m, null, 2) + '\n'; });
+async function o11Refused(out, run, plan, inputs, pattern, where) {
+  const {verifyR2ArmInputs} = await o11();
+  const v = await verifyR2ArmInputs(out, run, {plan, inputs});
+  assert.equal(v.ok, false, `${where}: must refuse`);
+  assert.equal(v.manifest_sha256, null, `${where}: no digest on refusal`);
+  assert.match(v.errors.join('\n'), pattern, where);
+}
+// A fresh copy of a verified arm-input directory for one tamper case.
+function o11Copy(t, name) {
+  const copy = join(t.root, name);
+  cpSync(t.out, copy, {recursive: true});
+  return copy;
+}
+
+test('O11-P1 a sealed synthetic run gives a verified refusal-only custody manifest bound to the run, with no payload and no nonce', async () => {
+  const {buildR2ArmInputs, verifyR2ArmInputs, ARM_INPUTS_SCHEMA, BLINDING} = await o11();
+  const t = await o11Run(), before = o11Tree(t.run);
+  const built = await buildR2ArmInputs(t.run, t.out, {plan: t.plan, inputs: t.inputs});
+  assert.deepEqual(o11Tree(t.run), before, 'the sealed run and page directories are never written');
+  assert.deepEqual(readdirSync(t.out).sort(), ['manifest.json', 'manifest.sha256'], 'no payload file for a refused page');
+  const bytes = readFileSync(join(t.out, 'manifest.json')), m = JSON.parse(bytes);
+  assert.equal(readFileSync(join(t.out, 'manifest.sha256'), 'utf8'), `${sha256(bytes)}  manifest.json\n`);
+  assert.equal(built.manifest_sha256, sha256(bytes));
+  assert.equal(m.schema, ARM_INPUTS_SCHEMA); assert.equal(ARM_INPUTS_SCHEMA, 'tabwise-r2-arm-inputs/1');
+  assert.equal(m.run_manifest_sha256, t.sealedRun.manifest_sha256);
+  assert.equal(m.run_manifest_sha256, (await verifyR2Run(t.run, {plan: t.plan, inputs: t.inputs})).manifest_sha256);
+  const {r2Digest} = await import('../scripts/tabwise/r2-policy.mjs');
+  assert.deepEqual(m.builder, {arm_input_schema: 'tabwise-r2-speech-arm-input/2', blinding: BLINDING, builder_version: 'tabwise-r2-speech-payload/2',
+    r2_sha256: r2Digest(), redaction_version: 'nonce-redact/2'});
+  assert.deepEqual(Object.keys(m).sort(), ['builder', 'pages', 'run_manifest_sha256', 'schema']);
+  assert.deepEqual(m.pages.map(p => p.id), ['p1', 'p2']);
+  for (const [i, p] of m.pages.entries()) {
+    assert.deepEqual(Object.keys(p).sort(), ['id', 'model_eligible', 'page_manifest_sha256', 'payload_file', 'payload_sha256', 'reasons', 'redaction']);
+    assert.equal(p.page_manifest_sha256, t.sealedRun.manifest.pages[i].manifest_sha256);
+    assert.deepEqual([p.model_eligible, p.payload_file, p.payload_sha256, p.redaction], [false, null, null, null]);
+    assert.equal(p.reasons.length, 1); assert.match(p.reasons[0], O11_ATTEST); assert.ok(p.reasons[0].includes(ATTESTATION_UNAVAILABLE));
+  }
+  assert.doesNotMatch(bytes.toString('utf8'), /"class"\s*:|"nonce"\s*:|nonce_sha256|nonce_commitment|qualified"/, 'no class, verdict or nonce record');
+  for (const file of readdirSync(t.out)) {
+    const raw = readFileSync(join(t.out, file), 'utf8');
+    assert.equal(raw.includes(NONCE), false, `${file} holds the nonce`);
+    assert.equal(raw.includes(sha256(NONCE)), false, `${file} holds sha256(nonce)`);
+    // 64-hex digests are bound evidence identities, not speech; any other nonce fragment would be a leak.
+    const text = raw.replace(/[0-9a-f]{64}/g, 'digest');
+    assert.deepEqual(redactNonce([{seq: 1, text}], NONCE), {ok: true, reason: null, texts: [{seq: 1, text}], redaction: {version: 'nonce-redact/2', edits: []}},
+      `${file}: no nonce occurrence or 4-character nonce fragment`);
+  }
+  const v = await verifyR2ArmInputs(t.out, t.run, {plan: t.plan, inputs: t.inputs});
+  assert.deepEqual(v.errors, []);
+  assert.deepEqual([v.ok, v.manifest_sha256, v.eligible], [true, sha256(bytes), 0]);
+  // Deterministic: an independent rebuild elsewhere is byte-identical.
+  const again = join(t.root, 'again.arm-inputs');
+  await buildR2ArmInputs(t.run, again, {plan: t.plan, inputs: t.inputs});
+  for (const f of ['manifest.json', 'manifest.sha256']) assert.ok(readFileSync(join(again, f)).equals(readFileSync(join(t.out, f))), f);
+});
+
+test('O11-P2 an incomplete or failed page keeps an explicit bounded refusal record; it never becomes eligible and the run class is unchanged', async () => {
+  const {buildR2ArmInputs, verifyR2ArmInputs} = await o11();
+  const t = await o11Run({incomplete: {p2: ['session refusal: forced']}});
+  assert.equal(t.sealedRun.manifest.run_class, 'incomplete');
+  await buildR2ArmInputs(t.run, t.out, {plan: t.plan, inputs: t.inputs});
+  const m = JSON.parse(readFileSync(join(t.out, 'manifest.json'), 'utf8'));
+  assert.match(m.pages[0].reasons[0], O11_ATTEST);
+  assert.equal(m.pages[1].model_eligible, false);
+  assert.match(m.pages[1].reasons[0], /verifier class is incomplete/);
+  assert.equal((await verifyR2ArmInputs(t.out, t.run, {plan: t.plan, inputs: t.inputs})).ok, true);
+  assert.equal(JSON.parse(readFileSync(join(t.run, 'run-manifest.json'), 'utf8')).run_class, 'incomplete', 'run class untouched');
+  // A last page that exited non-zero is still a planned page: refused with a record.
+  const f = await o11Run({exits: [0, 1]});
+  await buildR2ArmInputs(f.run, f.out, {plan: f.plan, inputs: f.inputs});
+  const fm = JSON.parse(readFileSync(join(f.out, 'manifest.json'), 'utf8'));
+  assert.deepEqual(fm.pages.map(p => p.model_eligible), [false, false]);
+  assert.equal(fm.pages[1].reasons[0], 'run page exited 1 (coordinator verdict); its evidence is never model input', 'a failed page is never opened');
+  assert.match(fm.pages[0].reasons[0], O11_ATTEST);
+  for (const p of fm.pages) assert.ok(p.reasons.length >= 1 && p.reasons.length <= 8 && p.reasons.every(r => typeof r === 'string' && r.length > 0 && r.length <= 512));
+});
+
+test('O11-N1 the builder refuses an unverifiable, stopped or missing run and publishes nothing (no output, no staging residue)', async () => {
+  const {buildR2ArmInputs} = await o11();
+  const parentEntries = t => readdirSync(t.root).sort();
+  const stopped = await o11Run({exits: [1]});
+  assert.equal(stopped.sealedRun.manifest.stopped_after, 'p1');
+  await assert.rejects(buildR2ArmInputs(stopped.run, stopped.out, {plan: stopped.plan, inputs: stopped.inputs}), /every planned page|stopped/);
+  assert.deepEqual(parentEntries(stopped), ['run']);
+  const tampered = await o11Run();
+  writeFileSync(join(tampered.run, 'p2', 'events.jsonl'), readFileSync(join(tampered.run, 'p2', 'events.jsonl'), 'utf8') + '{}\n');
+  await assert.rejects(buildR2ArmInputs(tampered.run, tampered.out, {plan: tampered.plan, inputs: tampered.inputs}), /run does not verify/);
+  assert.deepEqual(parentEntries(tampered), ['run']);
+  const absent = await o11Run();
+  await assert.rejects(buildR2ArmInputs(join(absent.root, 'nope'), absent.out, {plan: absent.plan, inputs: absent.inputs}), /run/);
+  assert.deepEqual(parentEntries(absent), ['run']);
+  // Wrong plan or wrong approved inputs: the run does not verify against them.
+  await assert.rejects(buildR2ArmInputs(absent.run, absent.out, {plan: {pages: [{id: 'p2', task: APPROVED.task}, {id: 'p1', task: APPROVED.task}]}, inputs: absent.inputs}), /run does not verify/);
+  const other = manifest.pairs.find(p => p.id === 'status');
+  const wrong = {fixture: readFileSync(new URL(`../fixtures/r2/${other.healthy.file}`, import.meta.url)), approved: APPROVED};
+  await assert.rejects(buildR2ArmInputs(absent.run, absent.out, {plan: absent.plan, inputs: {p1: wrong, p2: INPUTS}}), /run does not verify/);
+  assert.deepEqual(parentEntries(absent), ['run']);
+});
+
+test('O11-N2 output placement: written once, never inside the run, never over an existing path, parent must exist', async () => {
+  const {buildR2ArmInputs} = await o11();
+  const t = await o11Run(), args = {plan: t.plan, inputs: t.inputs};
+  await assert.rejects(buildR2ArmInputs(t.run, join(t.run, 'arm-inputs'), args), /inside the run directory/);
+  await assert.rejects(buildR2ArmInputs(t.run, join(t.run, 'p1', 'arm-inputs'), args), /inside the run directory/);
+  await assert.rejects(buildR2ArmInputs(t.run, join(t.run, '..', 'run', 'x'), args), /inside the run directory/);
+  await assert.rejects(buildR2ArmInputs(t.run, join(t.root, 'missing', 'arm-inputs'), args), /parent/);
+  await assert.rejects(buildR2ArmInputs(t.run, t.run, args), /exists|inside the run directory/);
+  await assert.rejects(buildR2ArmInputs(t.run, t.root, args), /exists|contains the run directory/);
+  assert.deepEqual(o11Tree(t.run), o11Tree(t.run));
+  assert.deepEqual(readdirSync(t.run).sort(), ['p1', 'p2', 'run-manifest.json', 'run-manifest.sha256'], 'nothing written into the run');
+  await buildR2ArmInputs(t.run, t.out, args);
+  const first = readFileSync(join(t.out, 'manifest.json'));
+  await assert.rejects(buildR2ArmInputs(t.run, t.out, args), /exists/, 're-running the builder never overwrites');
+  assert.ok(readFileSync(join(t.out, 'manifest.json')).equals(first));
+  mkdirSync(join(t.root, 'empty.arm-inputs'));
+  await assert.rejects(buildR2ArmInputs(t.run, join(t.root, 'empty.arm-inputs'), args), /exists/, 'an existing empty directory is not replaced');
+  for (const bad of [undefined, '', 7, 'relative.arm-inputs', 'a\0b']) await assert.rejects(buildR2ArmInputs(t.run, bad, args), /absolute path/, String(bad));
+  await assert.rejects(buildR2ArmInputs(t.run, join(t.root, 'x'), {plan: t.plan}), /inputs/);
+});
+
+test('O11-N3 crash recovery: a partial or abandoned output never verifies, an abandoned staging directory is left alone, and a rebuild succeeds', async () => {
+  const {buildR2ArmInputs, verifyR2ArmInputs} = await o11();
+  const t = await o11Run(), args = {plan: t.plan, inputs: t.inputs};
+  // Abandoned staging from a crashed builder: not the output path, untouched, and no obstacle to a new build.
+  const stale = `${t.out}.partial-deadbeef`;
+  mkdirSync(stale); writeFileSync(join(stale, 'manifest.json'), '{}');
+  await buildR2ArmInputs(t.run, t.out, args);
+  assert.deepEqual(readdirSync(stale), ['manifest.json']);
+  assert.deepEqual(readdirSync(t.root).sort(), ['run', 'run.arm-inputs', 'run.arm-inputs.partial-deadbeef'], 'the builder leaves no staging of its own');
+  assert.equal((await verifyR2ArmInputs(stale, t.run, args)).ok, false, 'a partial directory never verifies');
+  // Partial outputs (a crash between files, a truncated digest) refuse.
+  const noDigest = o11Copy(t, 'no-digest'); unlinkSync(join(noDigest, 'manifest.sha256'));
+  await o11Refused(noDigest, t.run, t.plan, t.inputs, /manifest\.sha256/, 'missing digest');
+  const noManifest = o11Copy(t, 'no-manifest'); unlinkSync(join(noManifest, 'manifest.json'));
+  await o11Refused(noManifest, t.run, t.plan, t.inputs, /manifest\.json/, 'missing manifest');
+  const truncated = o11Copy(t, 'truncated');
+  writeFileSync(join(truncated, 'manifest.sha256'), readFileSync(join(truncated, 'manifest.sha256'), 'utf8').slice(0, 40));
+  await o11Refused(truncated, t.run, t.plan, t.inputs, /digest/, 'truncated digest');
+  const cut = o11Copy(t, 'cut'); writeFileSync(join(cut, 'manifest.json'), readFileSync(join(cut, 'manifest.json')).subarray(0, 50));
+  await o11Refused(cut, t.run, t.plan, t.inputs, /digest/, 'truncated manifest');
+  const empty = join(t.root, 'empty'); mkdirSync(empty);
+  await o11Refused(empty, t.run, t.plan, t.inputs, /manifest/, 'empty directory');
+});
+
+test('O11-N4 recomputation refuses every edited manifest, even with a matching digest', async () => {
+  const {buildR2ArmInputs} = await o11();
+  const t = await o11Run();
+  await buildR2ArmInputs(t.run, t.out, {plan: t.plan, inputs: t.inputs});
+  const cases = [
+    ['eligibility flipped', m => { m.pages[0].model_eligible = true; m.pages[0].reasons = []; }],
+    ['eligible with a payload claim', m => { Object.assign(m.pages[0], {model_eligible: true, reasons: [], payload_file: 'payload-p1.json', payload_sha256: 'a'.repeat(64), redaction: {version: 'nonce-redact/2', edits: 0}}); }],
+    ['reason edited', m => { m.pages[1].reasons = ['eligible soon']; }],
+    ['reason dropped', m => { m.pages[1].reasons = []; }],
+    ['page dropped', m => { m.pages.pop(); }],
+    ['page added', m => { m.pages.push({...m.pages[0], id: 'p3'}); }],
+    ['pages reordered', m => { m.pages.reverse(); }],
+    ['page duplicated', m => { m.pages[1] = {...m.pages[0]}; }],
+    ['run manifest digest swapped', m => { m.run_manifest_sha256 = 'b'.repeat(64); }],
+    ['page manifest digest edited', m => { m.pages[0].page_manifest_sha256 = 'c'.repeat(64); }],
+    ['old redaction version', m => { m.builder.redaction_version = 'nonce-redact/1'; }],
+    ['redaction record added', m => { m.pages[0].redaction = {version: 'nonce-redact/1', edits: 0}; }],
+    ['nonce commitment added', m => { m.pages[0].nonce_sha256 = sha256(NONCE); }],
+    ['plain nonce added', m => { m.nonce = NONCE; }],
+    ['class claim added', m => { m.pages[0].class = 'genuine-unqualified'; }],
+    ['source digest changed', m => { m.builder.r2_sha256 = 'd'.repeat(64); }],
+    ['builder version changed', m => { m.builder.builder_version = 'tabwise-r2-speech-payload/1'; }],
+    ['schema changed', m => { m.schema = 'tabwise-r2-arm-inputs/2'; }],
+  ];
+  for (const [name, mutate] of cases) {
+    const copy = o11Copy(t, name.replace(/\W+/g, '-'));
+    o11Json(copy, mutate);
+    await o11Refused(copy, t.run, t.plan, t.inputs, /does not recompute/, name);
+  }
+  // Text-level ambiguity: a duplicated key, reordered keys or compact whitespace; each resealed, each refused.
+  const text = [
+    ['duplicate key', s => s.replace('"schema": "tabwise-r2-arm-inputs/1"', '"schema": "tabwise-r2-arm-inputs/1",\n  "schema": "tabwise-r2-arm-inputs/1"')],
+    ['compact form', s => JSON.stringify(JSON.parse(s)) + '\n'],
+    ['no final newline', s => s.trimEnd()],
+    ['CRLF', s => s.replace(/\n/g, '\r\n')],
+    ['BOM', s => '﻿' + s],
+    ['malformed', s => s.slice(0, -3)],
+  ];
+  for (const [name, edit] of text) {
+    const copy = o11Copy(t, name.replace(/\W+/g, '-'));
+    o11Reseal(copy, edit);
+    await o11Refused(copy, t.run, t.plan, t.inputs, /does not recompute/, name);
+  }
+});
+
+test('O11-N5 inventory: extra, copied, renamed or oversized files and non-regular entries refuse', async () => {
+  const {buildR2ArmInputs} = await o11();
+  const t = await o11Run();
+  await buildR2ArmInputs(t.run, t.out, {plan: t.plan, inputs: t.inputs});
+  const extra = o11Copy(t, 'extra'); writeFileSync(join(extra, 'payload-p1.json'), '{"fixture_id":"f-00","actions":[],"observations":[]}');
+  await o11Refused(extra, t.run, t.plan, t.inputs, /unexpected arm-input entry payload-p1\.json/, 'payload for a refused page');
+  const stray = o11Copy(t, 'stray'); writeFileSync(join(stray, 'notes.txt'), 'x');
+  await o11Refused(stray, t.run, t.plan, t.inputs, /unexpected arm-input entry notes\.txt/, 'stray file');
+  const sub = o11Copy(t, 'sub'); mkdirSync(join(sub, 'p1'));
+  await o11Refused(sub, t.run, t.plan, t.inputs, /not a regular file/, 'subdirectory');
+  const big = o11Copy(t, 'big');
+  const pad = Buffer.alloc(1_000_001, 0x20);
+  writeFileSync(join(big, 'manifest.json'), pad); writeFileSync(join(big, 'manifest.sha256'), `${sha256(pad)}  manifest.json\n`);
+  await o11Refused(big, t.run, t.plan, t.inputs, /cap/, 'oversized manifest');
+  const many = o11Copy(t, 'many');
+  for (let i = 0; i < 70; i++) writeFileSync(join(many, `f${i}`), '');
+  await o11Refused(many, t.run, t.plan, t.inputs, /more than 66 arm-input entries/, 'too many entries');
+  const fileOut = join(t.root, 'file.arm-inputs'); writeFileSync(fileOut, 'x');
+  await o11Refused(fileOut, t.run, t.plan, t.inputs, /not a directory/, 'output path is a file');
+  await o11Refused(join(t.root, 'absent'), t.run, t.plan, t.inputs, /not a directory|ENOENT/, 'absent output');
+  // Symbolic links (file and directory); skipped where the OS refuses to create them for this user, which is reported.
+  let linked = 0;
+  for (const [name, make] of [['file-link', d => symlinkSync(join(t.out, 'manifest.json'), join(d, 'link.json'))],
+    ['dir-link', d => symlinkSync(t.run, join(d, 'run-link'), 'junction')]]) {
+    const copy = o11Copy(t, name);
+    try { make(copy); } catch (error) { if (['EPERM', 'EACCES'].includes(error.code)) continue; throw error; }
+    linked++;
+    await o11Refused(copy, t.run, t.plan, t.inputs, /not a regular file/, name);
+  }
+  const aliasRoot = join(t.root, 'alias');
+  try { symlinkSync(t.out, aliasRoot, 'junction'); linked++; await o11Refused(aliasRoot, t.run, t.plan, t.inputs, /not a directory|link/, 'aliased output directory'); }
+  catch (error) { if (!['EPERM', 'EACCES'].includes(error.code)) throw error; }
+  assert.ok(linked >= 0, `${linked} link cases ran`);
+});
+
+test('O11-N6 cross-run substitution: arm inputs bind one run; another run, a later run edit or a moved page refuses', async () => {
+  const {buildR2ArmInputs, verifyR2ArmInputs} = await o11();
+  const a = await o11Run(), b = await o11Run({ids: ['q1', 'q2']});
+  await buildR2ArmInputs(a.run, a.out, {plan: a.plan, inputs: a.inputs});
+  await buildR2ArmInputs(b.run, b.out, {plan: b.plan, inputs: b.inputs});
+  assert.notEqual(a.sealedRun.manifest_sha256, b.sealedRun.manifest_sha256);
+  await o11Refused(a.out, b.run, b.plan, b.inputs, /does not recompute/, 'A arm inputs against run B');
+  // B's manifest copied over A's (digest file too): binds B's run digest, so A's recomputation refuses.
+  const swapped = o11Copy(a, 'swapped');
+  for (const f of ['manifest.json', 'manifest.sha256']) writeFileSync(join(swapped, f), readFileSync(join(b.out, f)));
+  await o11Refused(swapped, a.run, a.plan, a.inputs, /does not recompute/, 'B manifest in A');
+  // Run evidence changed after the arm inputs were built: the run itself no longer verifies.
+  writeFileSync(join(a.run, 'p1', 'capture.json'), '{}');
+  await o11Refused(a.out, a.run, a.plan, a.inputs, /run does not verify/, 'page edited after build');
+  // A run re-sealed with different exit codes (new run manifest bytes) refuses as well.
+  const c = await o11Run();
+  await buildR2ArmInputs(c.run, c.out, {plan: c.plan, inputs: c.inputs});
+  unlinkSync(join(c.run, 'run-manifest.json')); unlinkSync(join(c.run, 'run-manifest.sha256'));
+  await sealR2Run(c.run, {enabled: true, plan: c.plan, pages: [{id: 'p1', exit_code: 0}, {id: 'p2', exit_code: 3}], inputs: c.inputs});
+  await o11Refused(c.out, c.run, c.plan, c.inputs, /does not recompute/, 're-sealed run');
+  // Output placed inside the run directory: refused before anything else (and the run would lose coverage).
+  const d = await o11Run();
+  await buildR2ArmInputs(d.run, d.out, {plan: d.plan, inputs: d.inputs});
+  const inside = join(d.run, 'arm');
+  renameSync(d.out, inside);
+  await o11Refused(inside, d.run, d.plan, d.inputs, /inside the run directory/, 'output inside run');
+  assert.equal((await verifyR2ArmInputs(inside, d.run, {plan: d.plan, inputs: d.inputs})).eligible, null);
+});
+
+test('O11-F1 page record formatter: eligibility, payload digest and redaction must agree; nonce-bearing reasons are withheld', async () => {
+  const {armInputPageRecord, payloadFileName, blindFixtureId} = await o11();
+  const page = {id: 'p1', page_manifest_sha256: 'e'.repeat(64)};
+  const refused = armInputPageRecord({...page, nonce: NONCE, result: {model_eligible: false, reasons: ['speech payload: refused'], payload: null, arm_input: {payload_sha256: null, redaction: null}}});
+  assert.deepEqual(refused, {record: {id: 'p1', page_manifest_sha256: 'e'.repeat(64), model_eligible: false, reasons: ['speech payload: refused'], payload_file: null, payload_sha256: null, redaction: null}, payload: null});
+  const payload = {fixture_id: 'f-0123', actions: [{step: 'a1', press: 'Tab'}], observations: [{step: 'a1', ref: 'speech:1', speech: 'email, edit text [run-nonce]'}]};
+  const canonicalPayload = canonical(payload);
+  const eligible = {model_eligible: true, reasons: [], payload, arm_input: {payload_sha256: sha256(canonicalPayload), redaction: {version: 'nonce-redact/2', edits: [{seq: 1, start: 17, end: 25}]}}};
+  const out = armInputPageRecord({...page, nonce: NONCE, result: eligible});
+  assert.deepEqual(out.record, {id: 'p1', page_manifest_sha256: 'e'.repeat(64), model_eligible: true, reasons: [], payload_file: 'payload-p1.json',
+    payload_sha256: sha256(canonicalPayload), redaction: {version: 'nonce-redact/2', edits: 1}});
+  assert.equal(out.payload.toString('utf8'), canonicalPayload); assert.equal(sha256(out.payload), out.record.payload_sha256);
+  assert.equal(payloadFileName('con'), 'payload-con.json', 'never a bare Windows device name');
+  for (const bad of ['../x', 'P1', '', 'a/b', 'a\\b', 'x'.repeat(65)]) assert.throws(() => payloadFileName(bad), /page id/, bad);
+  const broken = [
+    ['digest mismatch', {...eligible, arm_input: {...eligible.arm_input, payload_sha256: 'f'.repeat(64)}}],
+    ['eligible with reasons', {...eligible, reasons: ['x']}],
+    ['eligible without payload', {...eligible, payload: null}],
+    ['refused with payload', {...eligible, model_eligible: false, reasons: ['x']}],
+    ['refused without reason', {model_eligible: false, reasons: [], payload: null, arm_input: {payload_sha256: null, redaction: null}}],
+    ['old redaction', {...eligible, arm_input: {...eligible.arm_input, redaction: {version: 'nonce-redact/1', edits: []}}}],
+  ];
+  for (const [name, result] of broken) assert.throws(() => armInputPageRecord({...page, nonce: NONCE, result}), /arm inputs:/, name);
+  // Reasons: bounded, and any reason that carries the nonce or a 4-character run of it is withheld (never stored).
+  const leaky = armInputPageRecord({...page, nonce: NONCE, result: {model_eligible: false, reasons: [`saw ${NONCE}`, 'x'.repeat(5000), 'fragment 0a1b2', ...Array(20).fill('r')], payload: null, arm_input: {payload_sha256: null, redaction: null}}});
+  assert.equal(leaky.record.reasons.length, 8);
+  assert.equal(leaky.record.reasons[0], 'reason withheld: it carries run-nonce characters');
+  assert.ok(leaky.record.reasons[1].length <= 512 && leaky.record.reasons[1].endsWith('[truncated]'));
+  assert.equal(leaky.record.reasons[2], 'reason withheld: it carries run-nonce characters');
+  assert.equal(JSON.stringify(leaky).includes(NONCE), false);
+  // Blinded fixture ids: opaque, deterministic, distinct per run and page, and never the page id.
+  const run1 = '1'.repeat(64), run2 = '2'.repeat(64);
+  assert.match(blindFixtureId(run1, 'p1'), /^f-[0-9a-f]{16}$/);
+  assert.equal(blindFixtureId(run1, 'p1'), blindFixtureId(run1, 'p1'));
+  assert.notEqual(blindFixtureId(run1, 'p1'), blindFixtureId(run1, 'p2'));
+  assert.notEqual(blindFixtureId(run1, 'p1'), blindFixtureId(run2, 'p1'));
+  assert.equal(blindFixtureId(run1, 'validation-healthy').includes('healthy'), false);
+});
+
+test('O11-S1 arm-input custody is capability-free reviewed scope: no model call, network, child process, runtime or class write; R2 stays BLOCK', async () => {
+  const code = readFileSync(new URL('../src/r2/arm-inputs.mjs', import.meta.url), 'utf8');
+  const imports = [...code.matchAll(/^import\s[^;]*?from\s+'([^']+)'/gms)].map(m => m[1]).sort();
+  assert.deepEqual(imports, ['../../scripts/tabwise/r2-evidence.mjs', '../../scripts/tabwise/r2-policy.mjs', './speech-payload.mjs', 'node:crypto', 'node:fs', 'node:path']);
+  assert.doesNotMatch(code, /\bimport\s*\(|\brequire\s*\(|child_process|node:net|node:http|fetch\(|playwright|qualification-loader|respond\(|sealR2Run|createR2EvidenceWriter/);
+  assert.doesNotMatch(code, /genuine-unqualified'|class\s*:/, 'never names or writes an evidence class');
+  const {R2_FILES} = await import('../scripts/tabwise/r2-policy.mjs');
+  assert.ok(R2_FILES.includes('src/r2/arm-inputs.mjs'), 'arm-input custody is reviewed R2 scope');
+  const status = JSON.parse(readFileSync(new URL('../scripts/tabwise/r2-status.json', import.meta.url), 'utf8'));
+  assert.deepEqual([status.enabled, status.verdict, status.reviewed_sha256, status.plan_sha256], [false, 'BLOCK', null, null]);
+});
