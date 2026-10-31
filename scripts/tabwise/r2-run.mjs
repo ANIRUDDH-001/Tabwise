@@ -9,6 +9,7 @@ import {basename, dirname, isAbsolute, join, relative, resolve, sep} from 'node:
 import {pageHash} from '../../src/r2/contract.mjs';
 import {checkR2Approval, r2Digest} from './r2-policy.mjs';
 import {buildR2StepMap, planR2EvidenceCaps} from './r2-evidence.mjs';
+import {createPageCustody, processBaseline, wallMicros} from './r2-proctree.mjs';
 
 export const PLAN_SCHEMA = 'tabwise-r2-plan/1';
 export const PAGE_EXIT_SCHEMA = 'tabwise-r2-page-exit/1';
@@ -17,8 +18,11 @@ export const PAGE_DEADLINE_MS = 600_000;
 export const CHILD_TIMEOUT_MS = PAGE_DEADLINE_MS + 120_000;
 export const KILL_GRACE_MS = 10_000;
 export const MAX_CHILD_OUTPUT = 65_536;
+// R-1/R-2 custody: tree sample interval while a child runs, and the census bound before a kill.
+export const CUSTODY_SAMPLE_MS = 5_000;
+export const CENSUS_MS = 5_000;
 // Coordinator status recorded as the page exit code when the child's own code is not the verdict.
-export const EXIT = Object.freeze({timeout: 124, refused: 125, spawn: 126, unconfirmed: 127, signal: 128});
+export const EXIT = Object.freeze({timeout: 124, refused: 125, spawn: 126, unconfirmed: 127, signal: 128, residue: 129, cancelled: 130});
 
 const PAGE_ID = /^[a-z][a-z0-9-]{0,63}$/;
 const SHA256 = /^[0-9a-f]{64}$/;
@@ -258,17 +262,40 @@ export function parseR2PageExit(text, page) {
 }
 
 /**
- * Sequential coordinator. launch(page) returns a child ({stdout, stderr, on('error'|'close'), kill}); the next page is
- * launched only after the previous child emitted 'close' and its result was accepted. Stops at the first page that
+ * Sequential coordinator. launch(page) returns a child ({pid, stdout, stderr, on('error'|'close'), kill}); the next page
+ * is launched only after the previous child emitted 'close' and its result was accepted. Stops at the first page that
  * is not accepted. A child that does not close within killGraceMs after a kill is reported exit-unconfirmed.
+ *
+ * processes (R-1/R-2; the entry always supplies the Windows tools): before each launch the OS must show no NVDA image or
+ * relay listener; the child's tree is sampled while it runs and censused before any kill; after every ending (accepted,
+ * failed, timeout, overflow, spawn error, cancel) the tree is reaped and confirmed gone by a later OS snapshot. An
+ * unconfirmed reap is exit-unconfirmed (never sealed); a confirmed reap that found live descendants or any NVDA turns an
+ * accepted page into process-residue. The child's own nvda:'stopped' never substitutes for this. signal: an AbortSignal
+ * that cancels the running child the same way and launches nothing more.
  */
-export async function runR2Pages({pages, launch, timeoutMs = CHILD_TIMEOUT_MS, killGraceMs = KILL_GRACE_MS, maxOutputBytes = MAX_CHILD_OUTPUT, onStderr = null}) {
+export async function runR2Pages({pages, launch, timeoutMs = CHILD_TIMEOUT_MS, killGraceMs = KILL_GRACE_MS, maxOutputBytes = MAX_CHILD_OUTPUT, onStderr = null,
+  processes = null, signal = null, protect = [], sampleMs = CUSTODY_SAMPLE_MS, censusMs = CENSUS_MS, wallClock = Date.now}) {
   if (!Array.isArray(pages) || !pages.length || pages.length > MAX_PAGES || pages.some(p => !PAGE_ID.test(p ?? '')) || new Set(pages).size !== pages.length) throw Error('R2 run: invalid page order');
   if (typeof launch !== 'function') throw Error('R2 run: launcher missing');
-  for (const v of [timeoutMs, killGraceMs, maxOutputBytes]) if (!int(v, 1, 3_600_000)) throw Error('R2 run: invalid bound');
+  for (const v of [timeoutMs, killGraceMs, maxOutputBytes, sampleMs, censusMs]) if (!int(v, 1, 3_600_000)) throw Error('R2 run: invalid bound');
+  if (processes !== null && (typeof processes?.snapshot !== 'function' || typeof processes?.terminate !== 'function')) throw Error('R2 run: process tools need snapshot and terminate');
+  if (signal !== null && (typeof signal?.aborted !== 'boolean' || typeof signal?.addEventListener !== 'function')) throw Error('R2 run: signal must be an AbortSignal');
+  if (!Array.isArray(protect) || typeof wallClock !== 'function') throw Error('R2 run: invalid custody options');
   const results = [];
   for (const id of pages) {
-    const result = await runPageChild(id, {launch, timeoutMs, killGraceMs, maxOutputBytes, onStderr});
+    if (processes) {
+      const baseline = await processBaseline(processes);
+      if (!baseline.quiescent) {
+        results.push({id, exit_code: EXIT.residue, outcome: 'not-quiescent', reason: `not launched: ${baseline.errors.join('; ')}`, custody: baseline});
+        return {pages: results, stopped_after: id};
+      }
+    }
+    // Checked after the baseline, so a cancel that arrives while it runs still launches nothing.
+    if (signal?.aborted) {
+      results.push({id, exit_code: EXIT.cancelled, outcome: 'cancelled', reason: 'run cancelled before launch'});
+      return {pages: results, stopped_after: id};
+    }
+    const result = await runPageChild(id, {launch, timeoutMs, killGraceMs, maxOutputBytes, onStderr, processes, signal, protect, sampleMs, censusMs, wallClock});
     results.push(result);
     if (result.exit_code !== 0) return {pages: results, stopped_after: id};
   }
@@ -280,17 +307,51 @@ export function r2RunSealable(outcome) {
   return Array.isArray(outcome?.pages) && outcome.pages.every(p => p?.outcome !== 'exit-unconfirmed');
 }
 
-function runPageChild(id, {launch, timeoutMs, killGraceMs, maxOutputBytes, onStderr}) {
-  let child;
+// The reap verdict over a settled child result: unconfirmed termination is never sealable; residue refuses an accepted page.
+function withCustody(value, custody) {
+  if (!custody.confirmed) {
+    return {...value, exit_code: EXIT.unconfirmed, outcome: 'exit-unconfirmed', custody,
+      reason: `process tree termination unconfirmed (${custody.errors[0] ?? 'no confirming snapshot'}); was ${value.outcome}: ${value.reason ?? 'no reason'}`};
+  }
+  if (value.exit_code === 0 && (custody.residue.length || !custody.quiescent)) {
+    const why = custody.residue.length ? `${custody.residue.length} live process(es) in the page tree after exit` : custody.errors[0];
+    return {...value, exit_code: EXIT.residue, outcome: 'process-residue', reason: `not quiescent after page exit: ${why}`, custody};
+  }
+  return {...value, custody};
+}
+
+function runPageChild(id, {launch, timeoutMs, killGraceMs, maxOutputBytes, onStderr, processes = null, signal: abortSignal = null, protect = [], sampleMs, censusMs, wallClock = Date.now}) {
+  let child, custody = null;
+  const spawnedAfter = wallMicros(wallClock);
   try { child = launch(id); } catch (error) { return Promise.resolve({id, exit_code: EXIT.spawn, outcome: 'spawn-error', reason: message(error)}); }
+  if (processes) {
+    try { custody = createPageCustody({tools: processes, pid: Number.isSafeInteger(child?.pid) ? child.pid : null, spawnedAfter, protect, wallClock}); }
+    catch (error) { custody = {sample: () => Promise.resolve(), exited: () => {}, reap: () => Promise.resolve({confirmed: false, errors: [`custody: ${message(error)}`]})}; }
+  }
   return new Promise(done => {
     const chunks = [];
-    let bytes = 0, overflow = false, spawnError = null, timedOut = false, settled = false, grace = null;
-    const settle = value => { if (settled) return; settled = true; clearTimeout(timer); clearTimeout(grace); done(value); };
-    const kill = () => {
+    let bytes = 0, overflow = false, spawnError = null, timedOut = false, cancelled = false, settled = false, grace = null, census = null;
+    const sampler = custody ? setInterval(() => { custody.sample(); }, sampleMs) : null;
+    custody?.sample();
+    const settle = value => {
+      if (settled) return;
+      settled = true; clearTimeout(timer); clearTimeout(grace); clearInterval(sampler); abortSignal?.removeEventListener('abort', onAbort);
+      if (!custody) return done(value);
+      custody.reap().then(evidence => done(withCustody(value, evidence)));
+    };
+    const signalKill = () => {
       try { child.kill('SIGKILL'); } catch { /* exit is confirmed only by 'close' */ }
       grace ??= setTimeout(() => settle({id, exit_code: EXIT.unconfirmed, outcome: 'exit-unconfirmed', reason: 'child did not close after kill'}), killGraceMs);
     };
+    // With custody, the tree is censused (bounded) before the first kill so descendants are known while their links exist.
+    const kill = () => {
+      if (!custody) return signalKill();
+      census ??= Promise.race([custody.sample(), new Promise(ok => setTimeout(ok, censusMs))]);
+      census.then(signalKill);
+    };
+    const onAbort = () => { if (!settled) { cancelled = true; kill(); } };
+    abortSignal?.addEventListener('abort', onAbort, {once: true});
+    if (abortSignal?.aborted) onAbort();
     const timer = setTimeout(() => { if (!settled) { timedOut = true; kill(); } }, timeoutMs);
     child.stdout?.on('data', data => {
       if (settled || overflow) return;
@@ -300,9 +361,13 @@ function runPageChild(id, {launch, timeoutMs, killGraceMs, maxOutputBytes, onStd
     });
     child.stderr?.on('data', data => { if (!settled && onStderr) try { onStderr(id, data); } catch { /* diagnostics only */ } });
     child.on('error', error => { if (settled) return; spawnError ??= message(error); kill(); });
+    // Registered before 'close' handling: after the exit is observed the child's pid may be reused (see createPageCustody).
+    if (custody) child.on('exit', () => custody.exited());
     child.on('close', (code, signal) => {
+      custody?.exited();
       if (settled) return;
       if (spawnError !== null) return settle({id, exit_code: EXIT.spawn, outcome: 'spawn-error', reason: spawnError});
+      if (cancelled) return settle({id, exit_code: EXIT.cancelled, outcome: 'cancelled', reason: 'run cancelled; child killed'});
       if (timedOut) return settle({id, exit_code: EXIT.timeout, outcome: 'timeout', reason: `no exit within ${timeoutMs} ms`});
       if (overflow) return settle({id, exit_code: EXIT.refused, outcome: 'result-refused', reason: `output over ${maxOutputBytes} bytes`});
       if (code !== 0) return settle({id, exit_code: Number.isSafeInteger(code) ? code : EXIT.signal, outcome: 'failed', reason: `exit ${code} signal ${signal}`});

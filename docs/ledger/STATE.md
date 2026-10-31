@@ -1,30 +1,32 @@
-# STATE - O-12 nonce-redact/2 + O-10 offline provenance verifier (F-03/R2-L2, D-85)
-Updated: 2026-10-31T04:29:11Z
-Branch: feat/tabwise-r2-o12-o10; base HEAD 3388107 (PR13 merge). Work uncommitted; R2 disabled/BLOCK.
+# STATE - R-1/R-2 coordinator-held process custody: review + publication prep (F-03/R2-L2, D-87)
+Updated: 2026-10-31T06:49:35Z
+Branch: feat/tabwise-r2-custody (worktree app-r2-custody); base 8dac551 (O-12/O-10). Uncommitted; R2 disabled/BLOCK.
 ## Now
-- O-12 READY (offline): nonce-redact/2, builder/arm-input /2, v1 refused; review leak (bold/squared capitals) fixed.
-- O-10 OFFLINE READY: src/r2/provenance.mjs runs owner-pinned gh (argv, no shell) + owner policy; fake spawn only.
-- Review hardening: trusted root pinned by sha256, child cwd pinned, spawn captured at load, policy digest in claims.
-- O-10 authentic signed-artifact verification PENDING; S7 workflow PENDING OWNER APPROVAL; live R2 BLOCKED.
+- Cloud R-1/R-2 patch + owner-applied CI inventory entry reviewed on Windows 11 local (handoff §12).
+- CR-1 FIXED (owner "Fix now, test-first"): sample() coalesced (1 in flight + 1 queued); PT-R6 RED->GREEN; M18 killed.
+- Local read-only measures: snapshot 351 procs ~1 s; 202/202 CIM µs == StartTime grain; libuv grandchild survives.
+- S7 09cfd1f overlap: entry, r2-run, r2-policy; 4 keep-both hunks; combined tree r2 693/693 (scratch only).
 ## Next / blocked
-- Owner reviews diff and commits; Claude made no git writes, no gh, no workflow/CI/status edits.
-- Owner: remove stray untracked app/fx-wPC4q4/ (review subagent scratch; its own delete was blocked).
-- Owner: approve S7 (../R2-S7-attest-workflow-proposal.md), pin actions/attest SHA, authorize 1 authentic gh run.
-- Residual risks R-1..R-9 in docs/engineering/R2-O12-O10-handoff.md (gh JSON shape unconfirmed; R-8 0.635% numeric FP).
+- Owner: re-run stress seed 426136 on these bytes (sources changed after the owner's run), then commit.
+- Owner decision: vector-2 double pid reuse residual (handoff §12.3.1); job object (§8.2); result-time census (§8.3).
+- S7 workflow changes REPORTED, not made (§12.5): run/job timeouts ~15 min/page, always() quiescence, upload summary.
+- Hosted windows-2025 qualification (§9.1) not authorized: kill path, handle pinning, Ctrl-C to helpers, uiAccess.
 ## Verification (Windows Node 24.22.1, 2026-10-31)
-- payload-context 132/132; r2-evidence 53/53; mutations O-12 15/15, O-10 28/28 killed (source restored).
-- Full R2 652/652; ordinary 48/48 files, 927/927 tests; frozen R1 ok:true errors:[]; git diff --check exit 0.
-- Stress seed 426136 final (cache/o10-stress2.txt): 8 profiles x 48/48 files PASS, 0 FAIL, exit 0.
+- r2-proctree + r2-review 85/85; R2 681/681; ordinary 49/49 files 956/956 (cache/custody-review-ordinary2).
+- check-r1-baseline ok:true errors:[]; git diff --check exit 0; --check-only and --run refuse: BLOCK (exit 2).
+- Owner-reported before CR-1: ordinary + 8 stress profiles PASS; snapshot 343 procs quiescent=true.
+## Prior checkpoint (O-12/O-10, D-85; committed in 8dac551, documentation unchanged)
+- O-12 nonce-redact/2 and O-10 offline verifier: docs/engineering/R2-O12-O10-handoff.md (residual risks R-1..R-9 there).
+- Its verification: payload-context 132/132; r2-evidence 53/53; R2 652/652; ordinary 927/927; stress 8 profiles PASS.
+- Still pending from it: O-10 authentic signed-artifact verification; stray app/fx-wPC4q4/ for the owner to remove.
+- Full prior STATE text: `git show 8dac551:docs/ledger/STATE.md`.
 ## Handoff
-Uncommitted: src/r2/speech-payload.mjs (M) - nonce-redact/2, /2 schemas, historical-version refusal.
-Uncommitted: src/r2/provenance.mjs (new) - O-10 offline hybrid verifier.
-Uncommitted: test/r2-payload-context.test.mjs (M) - O12-* rows + disclosed v1->v2 contract changes.
-Uncommitted: test/r2-evidence.test.mjs (M) - O10-1..O10-14 (in-memory spawn fake; no process run).
-Uncommitted: docs/engineering/R2-O12-O10-handoff.md (new); docs/CODEMAP.md (M).
-Uncommitted: docs/ledger/{DECISIONS,PLAN,STATE,LOG}.md/.jsonl (M) - D-85, plan section, checkpoint.
-Outside repo: ../R2-S7-attest-workflow-proposal.md, ../R2-O12-O10-implementation-plan.md (option C superseded by D-85).
-Verified by: commands in PLAN.md F-03 O-12+O-10 section; results above.
-Proposed commit 1: fix(F-03): nonce-redact/2 for chunked and compatibility-form nonce speech (O-12)
-Proposed commit 2: feat(F-03): offline hosted-provenance verifier over gh attestation verify (O-10)
-Push: safe after owner review (no secrets, no workflow/CI/status change). Review needed from: user
-Disclosure: prior session ran `gh pr view 13` once (AGENTS.md breach); not repeated.
+Uncommitted (M): scripts/tabwise/r2-run.mjs, scripts/tabwise-r2.mjs, scripts/tabwise/r2-policy.mjs, ci/offline-tests.json.
+Uncommitted (new): scripts/tabwise/r2-proctree.mjs, test/r2-proctree.test.mjs, docs/engineering/R2-R1R2-process-custody-handoff.md.
+Uncommitted (M): docs/CODEMAP.md; docs/ledger/{DECISIONS,PLAN,STATE}.md, LOG.jsonl (D-87, plan section, 3 log lines).
+Not in repo: cache/custody-review-ordinary{,2} (ignored); review scratch in the session scratchpad.
+Verified by: PLAN.md "F-03 / R2-L2 / R-1 + R-2" acceptance commands; results above.
+Proposed commit 1: ci(F-03): classify r2-proctree offline test in the inventory (R-1/R-2)
+Proposed commit 2: feat(F-03): coordinator-held process custody for R2 page children (R-1/R-2)
+Push: safe after owner review (no secrets; no workflow/status change; R2 BLOCK). Merge with S7: resolve 4 hunks per §12.4.
+Review needed from: user (Cloud reviewed the original; this session reviewed the patch and added CR-1).

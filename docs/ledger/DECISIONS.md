@@ -375,3 +375,15 @@ O-10 verifier decision: "GitHub's maintained `gh attestation verify` performs cr
 Order: "Complete Phase A verification before beginning Phase B." "Prioritize a complete, tested O-12 fix over partially implemented O-10 work before the feature freeze."
 Limits: "Do not execute the actual GitHub CLI." "Do not install tools, fetch real attestations, publish artifacts, dispatch workflows, modify CI configuration or change approval status." "Keep `r2-status.json` disabled/BLOCK." "Do not commit, push, merge or switch branches." S7 workflow: actions/attest pinned by full SHA, proposed only, "Do not edit the workflow without separate owner approval."
 Cost ceiling: $0 incremental.
+
+## D-87 2026-10-31T06:47:15Z - R-1/R-2 process custody: final review and publication preparation (owner task message)
+Numbering: D-86 is used on feat/tabwise-r2-s7 (09cfd1f, S7). This branch takes D-87 so the two ledgers merge without a collision.
+Owner instruction: "Work only in D:\Projects\Meta AI\app-r2-custody, branch feat/tabwise-r2-custody." "The R-1/R-2 Cloud patch and CI inventory patch are applied. Windows Node 24.22.1 ordinary and all eight stress profiles passed. Frozen R1 passed. The actual Windows read-only process snapshot returned 343 processes and quiescent=true."
+Review scope: "Perform an independent security and integration review of the custody implementation. Verify process ownership, PID reuse, attribution, cancellation, termination safety, unobserved grandchildren and the coordinator contract." "Run any additional safe offline checks needed. Do not terminate unrelated processes or launch NVDA."
+Records: "Add the missing CODEMAP and ledger records based on the Cloud handoff. Preserve the existing O-12/O-10 documentation."
+S7: "Compare the custody implementation against committed S7 `09cfd1f` to identify overlapping coordinator changes, but do not merge branches or edit S7." "Inspect whether S7's workflow requires changes for the custody process checks and longer page timeouts. Report those changes separately rather than silently implementing them."
+Limits: "Do not commit, push, merge, dispatch workflows, activate R2 or install new dependencies." "R2 must remain disabled/BLOCK."
+CI inventory (handoff §8.6, gated): applied by the owner ("CI inventory patch are applied"); entry r2-proctree.test.mjs, kind offline.
+CR-1 (MCQ, 2026-10-31): asked "Should I fix it in this worktree before the commit?" (sampling backlog ahead of census and reap); owner answered "Fix now, test-first (Recommended)". Fixed in r2-proctree.mjs sample(); PT-R6 added; handoff §12.1.
+Not recorded: the Cloud workstream's own mission text is not available in this session (handoff §10 asks for it in the owner's words); owner to add it if wanted.
+Cost ceiling: $0 incremental.
