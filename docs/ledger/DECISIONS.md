@@ -409,3 +409,18 @@ Integration decisions (Claude, within the authorization above):
 - Quiescence: inline read-only pwsh steps (pre on success path; post `always() && steps.run.outcome != 'skipped'`), each timeout-minutes 2, fail the job on any NVDA image or 6837 listener, record scope 'global' and page_custody 'not claimed'. No new script, so R2_FILES is exactly the union (18 files).
 - Evidence: run summary (per-page custody) moved from RUNNER_TEMP/tabwise-r2-summary.json (not uploaded) to RUNNER_TEMP/tabwise-r2/diagnostics/run-summary.json (uploaded always(), beside the sealed run dir). Supplementary, not attested; the attested subject is unchanged.
 Cost ceiling: $0 incremental.
+
+## D-89 2026-10-31T08:35:49Z - R2 final autonomous engineering pass: O-11, A-5 candidate, final handoff (owner task message)
+Context: PR #15 and PR #16 merged; main at 71228ae2. Owner away; "Do not ask routine questions or stop unnecessarily." Worktree app-r2-final-handoff, branch feat/tabwise-r2-final-handoff: "Creating this one local worktree and branch is explicitly authorized."
+O-11: "I authorize implementing Option A for offline verification, provided your source inspection confirms it preserves the existing contracts." "If every page remains ineligible, the correct outcome is a verified refusal-only manifest with no eligible payload—not fabricated successful model input."
+A-5: "Prepare the next safe run-plan candidate using the real, existing repository schema." "At most two pages." "Do not populate `r2-status.json` or call the candidate approved."
+Limits: "No Git commits, pushes, merges, rebases or GitHub writes by Claude." No workflow dispatch, NVDA, browser/input sessions, model API, spending, installs or new dependencies. "`scripts/tabwise/r2-status.json` must remain: `enabled: false` `verdict: BLOCK`." Budget "₹0 incremental".
+Implementation decisions (Claude, within the authorization above; owner review required):
+- O-11 lives in a NEW module src/r2/arm-inputs.mjs, not speech-payload.mjs, so the pinned speech-payload import graph (S5a static test) and the S5a/S5b session closure are unchanged. It is added to R2_FILES (19 files); S7-I1's pinned list was updated with it (disclosed).
+- Custody is recomputation: verifyR2ArmInputs rebuilds manifest.json and every payload file from the sealed run and compares bytes; it never parses a stored record for a decision (duplicate keys, reordering and whitespace all refuse).
+- Pages with a coordinator exit code other than 0 (including 129 process-residue and 130 cancelled) or an unverified page manifest are refused without being opened (custody handoff §8.5). A stopped run (fewer pages than planned) refuses entirely: a missing page is never "not eligible".
+- Model-facing fixture ids are blinded (tabwise-r2-blind/1): f- + 16 hex of sha256(scheme, run-manifest digest, page id). The plan schema has no blinded id; page ids such as validation-healthy would leak the label.
+- No nonce commitment (O-11c). Stored refusal reasons are capped (8 x 512) and any reason holding the page nonce or a 4-character run of it is replaced by a fixed text.
+- No CLI mode: the entry's gates require the hosted CI identity, so a gated derivation mode would be unusable offline; the builder is a library call over a downloaded, O-10-verified run (O-11a). It sends nothing and grants nothing.
+- A-5: fixtures/r2/plans/a5-validation-smoke.json (validation healthy then broken, development split, reviewed pair task, 2 pages, worst case 2040 s of 2400 s). The workflow pins plan_path to fixtures/r2/plans/ and loadR2Fixture loads only inside the plan directory, so byte-identical copies of the two registered development fixtures sit in fixtures/r2/plans/validation/. CANDIDATE only.
+Cost ceiling: $0 incremental.

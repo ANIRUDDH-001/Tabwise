@@ -1,0 +1,52 @@
+{
+  "schema": "tabwise-r2-plan/1",
+  "split": "development",
+  "spec": {
+    "ackMs": 1000,
+    "timeoutMs": 5000,
+    "observationMs": 1500,
+    "pollMs": 50
+  },
+  "handleTimeoutMs": 10000,
+  "focusWaitMs": 5000,
+  "pages": [
+    {
+      "id": "validation-healthy",
+      "fixture": "validation/healthy.html",
+      "fixture_sha256": "f22a2f22be578e0609f990564acb703bab40bd8bf770079acc090775d79e9555",
+      "task": [
+        {
+          "step": "to-email",
+          "press": "Tab"
+        },
+        {
+          "step": "to-submit",
+          "press": "Tab"
+        },
+        {
+          "step": "submit",
+          "press": "Enter"
+        }
+      ]
+    },
+    {
+      "id": "validation-broken",
+      "fixture": "validation/broken.html",
+      "fixture_sha256": "4d1d06db6d4b88401042ae32d5c48361d90d5845c528a8777e8eee998d4c5f2a",
+      "task": [
+        {
+          "step": "to-email",
+          "press": "Tab"
+        },
+        {
+          "step": "to-submit",
+          "press": "Tab"
+        },
+        {
+          "step": "submit",
+          "press": "Enter"
+        }
+      ]
+    }
+  ]
+}

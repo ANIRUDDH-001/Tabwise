@@ -426,3 +426,15 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Acceptance: node scripts/offline-tests.mjs --profile ordinary --seed 1; node scripts/offline-tests.mjs --profile stress --seed 426136
 - Acceptance: node scripts/check-r1-baseline.mjs; node scripts/preflight.mjs; git diff --check; no conflict markers. All exit 0.
 - Pending (not authorized): hosted windows-2025 dress rehearsal (setup duration, pwsh quiescence on the image, kill path), A-4..A-7.
+
+### F-03 / R2-L2 / O-11 + A-5 - arm-input custody and candidate run plan; final handoff (D-89)
+- Owner approval: D-89 (final autonomous engineering pass, task message 2026-10-31). Base: origin/main 71228ae; branch feat/tabwise-r2-final-handoff (worktree app-r2-final-handoff). No git writes by Claude.
+- Goal: O-11 Option A, sealed sibling arm-input directory (tabwise-r2-arm-inputs/1) recomputed from a verified run; A-5 candidate plan (2 development pages, not approved); final handoff A-H.
+- Files: new src/r2/arm-inputs.mjs, fixtures/r2/plans/{a5-validation-smoke.json,README.md,validation/healthy.html,validation/broken.html}, docs/engineering/R2-final-handoff.md, docs/engineering/R2-owner-publication-checklist.md; scripts/tabwise/r2-policy.mjs (R2_FILES 19); test/r2-evidence.test.mjs (O11-*); test/r2-review.test.mjs (A5-*, S7-I1 pinned list); CODEMAP; ledger.
+- Cost: $0 incremental; npm ci --ignore-scripts from the unchanged lockfile only; no NVDA, browser, dispatch, model call, status change.
+- Acceptance: node --test --test-timeout=60000 --test-name-pattern="O11|A5-" test/r2-evidence.test.mjs test/r2-review.test.mjs
+- Acceptance: node --test --test-timeout=20000 test/r2*.test.mjs
+- Acceptance: node scripts/offline-tests.mjs --profile ordinary --seed 1; node scripts/offline-tests.mjs --profile stress --seed 426136
+- Acceptance: node scripts/check-r1-baseline.mjs; node scripts/preflight.mjs; git diff --check; BLOCK exit 2 in all four modes. All exit 0 otherwise.
+- Pending (not authorized): independent review, owner decision + status-only activation (A-6), first hosted run + O-10 verify (A-7), authentic-runtime class for S3 (blocker B-9), hosted dress rehearsal (B-1..B-7).
+- Excluded: r2-status.json and other status files, workflows, frozen R1, vendor, dependencies, speech-payload.mjs, commits/push/merge/branch changes.
