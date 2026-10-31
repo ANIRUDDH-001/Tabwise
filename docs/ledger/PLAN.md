@@ -365,3 +365,17 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Next: independent review; owner decisions O-1..O-8 in the design §12; then slices S1-S7 in dependency order, each with its own approved spec.
 - Correction (2026-10-30T10:24:01Z, after independent review CHANGES REQUIRED, findings 1-10): design revision 2. One one-shot process per page (Option A); title-nonce-suffix served transform with pre-input identity check; bounded Shift accounting; a<i>-to-task-id map; delta page-read evidence with caps checked before input; attribute/text-only page state; session imports only isQualificationRuntime (no fake brand); pre/post visual and axe evidence. R2-only contract changes C-1 (alignTimeline keys) and C-2 (capture hook, only if O-9). O-4 restated and pending; O-9 added. Docs only; nothing implemented or tested.
 - Correction (2026-10-30T10:33:38Z, after final review CHANGES REQUIRED, H1/H2/M1/M2): design revision 3. H1: runR2Session is authentic-only and refuses unbranded runtimes before creating any capability; fakes enter only through capability-free r2-compose.mjs (S5a), not reachable from the entry. H2: model speech payload only from validated captureJourney records via exact allowlist (new C-3 builder; speechModelPayload stays synthetic-only); raw speech kept for provenance checks. M1: literal and NVDA-spaced nonce redaction on a copy, edits recorded, ambiguity refuses model eligibility. M2: page isolation stated as provisional; P-11 unresolved. Docs only; nothing implemented or tested.
+
+### F-03 / R2-L2 / PR13 - hosted Windows preflight correction
+- Owner approval: D-84; task message names PR #13, run 41161426136 and job 124419603459. No new activation approval.
+- Goal: correct the hosted-only native-alias fixture failure while preserving all containment assertions and S5b/S6/FIX1/FIX2/FIX3 regressions.
+- Files: test/r2-review.test.mjs; existing R2-L2-S5b-S6-handoff.md; required STATE/PLAN/LOG/DECISIONS records. No product-source file changes required.
+- Cost: $0 incremental; no paid service, install, model, browser, NVDA or hosted dispatch.
+- Reproduction: unchanged focused native-canonical test under a temporary junction-backed TEMP; strengthened fixture RED before canonical-return correction.
+- Acceptance: node --test --test-timeout=20000 test/r2-review.test.mjs
+- Acceptance: node --test --test-timeout=20000 test/r2*.test.mjs
+- Acceptance: node scripts/offline-tests.mjs --profile ordinary --seed 1 --out cache/pr13-local
+- Acceptance: node scripts/offline-tests.mjs --profile stress --seed 426136 --out cache/pr13-local
+- Acceptance: node scripts/check-r1-baseline.mjs; git diff --check. All commands must exit 0; no weakened assertions or thresholds.
+- Excluded: R2 authorization/status/gates, frozen R1, vendor, workflows, dependencies, web, commits/push/merge/branch changes.
+- Rollback: owner may discard the isolated uncommitted test-fixture hunk; historical CI evidence remains documented.
