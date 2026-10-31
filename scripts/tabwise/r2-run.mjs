@@ -8,10 +8,11 @@ import {readFileSync, lstatSync, realpathSync} from 'node:fs';
 import {basename, dirname, isAbsolute, join, relative, resolve, sep} from 'node:path';
 import {pageHash} from '../../src/r2/contract.mjs';
 import {checkR2Approval, r2Digest} from './r2-policy.mjs';
-import {buildR2StepMap, planR2EvidenceCaps} from './r2-evidence.mjs';
+import {buildR2StepMap, planR2EvidenceCaps, verifyR2Run} from './r2-evidence.mjs';
 
 export const PLAN_SCHEMA = 'tabwise-r2-plan/1';
 export const PAGE_EXIT_SCHEMA = 'tabwise-r2-page-exit/1';
+export const VERIFY_SCHEMA = 'tabwise-r2-verify/1';
 // One --page child is bounded by its own deadline; the coordinator allows a margin for bounded teardown and exit.
 export const PAGE_DEADLINE_MS = 600_000;
 export const CHILD_TIMEOUT_MS = PAGE_DEADLINE_MS + 120_000;
@@ -69,13 +70,13 @@ function parseUniqueJson(text) {
   return parsed;
 }
 
-/** Exactly one mode (--check-only | --page <id> | --run) and exactly one --plan <path>; no other token. */
+/** Exactly one mode (--check-only | --page <id> | --run | --verify-run) and exactly one --plan <path>; no other token. */
 export function parseR2Args(argv) {
-  if (!Array.isArray(argv) || argv.length > 5) usage('expected --check-only|--page <id>|--run and --plan <path>');
+  if (!Array.isArray(argv) || argv.length > 5) usage('expected --check-only|--page <id>|--run|--verify-run and --plan <path>');
   let mode = null, page = null, plan = null;
   for (let i = 0; i < argv.length; i++) {
     const token = argv[i];
-    if (token === '--check-only' || token === '--run' || token === '--page') {
+    if (token === '--check-only' || token === '--run' || token === '--page' || token === '--verify-run') {
       if (mode !== null) usage('exactly one mode');
       mode = token.slice(2);
       if (token === '--page') {
@@ -278,6 +279,32 @@ export async function runR2Pages({pages, launch, timeoutMs = CHILD_TIMEOUT_MS, k
 /** False when a child's exit was never confirmed: its directory may still change, so the run must not be sealed. */
 export function r2RunSealable(outcome) {
   return Array.isArray(outcome?.pages) && outcome.pages.every(p => p?.outcome !== 'exit-unconfirmed');
+}
+
+/** The plan copy and approved per-page inputs that --run seals with and --verify-run re-verifies with. */
+export function r2RunInputs(gate) {
+  const plan = JSON.parse(JSON.stringify(gate.plan));
+  const inputs = Object.fromEntries(gate.pages.map(p => [p.id, {fixture: gate.fixtures.get(p.id), approved: {fixture_sha256: p.fixture_sha256, task: plan.pages.find(q => q.id === p.id).task}}]));
+  return {plan, inputs};
+}
+
+/** S7 --verify-run: re-verify a sealed run from disk after every gate. Reads only; never seals, writes or starts a child. */
+export async function r2VerifyRun(gate, runDir) {
+  const {plan, inputs} = r2RunInputs(gate);
+  return r2VerifyOutcome(await verifyR2Run(runDir, {plan, inputs}));
+}
+
+/** Exit 0 only for a verified run with a digest whose every planned page ran, exited 0 and sealed. Never a genuine-evidence claim. */
+export function r2VerifyOutcome(verification) {
+  const ok = verification?.ok === true && SHA256.test(verification.manifest_sha256 ?? '');
+  const pages = ok && object(verification.manifest) && Array.isArray(verification.manifest.pages) ? verification.manifest.pages : null;
+  const complete = pages !== null && pages.length > 0 && !('stopped_after' in verification.manifest)
+    && pages.every(p => p?.exit_code === 0 && SHA256.test(p?.manifest_sha256 ?? ''));
+  const errors = [...(Array.isArray(verification?.errors) ? verification.errors : []), ...(verification?.ok === true && !ok ? ['verified run has no manifest digest'] : []),
+    ...(ok && !complete ? ['run is not complete: a planned page did not run, exit 0 and seal'] : []), ...(verification?.ok !== true && !verification?.errors?.length ? ['run not verified'] : [])]
+    .slice(0, REASONS).map(r => String(r).length > REASON_CAP ? `${String(r).slice(0, REASON_CAP - 12)} [truncated]` : String(r));
+  return {code: ok && complete ? 0 : 2, summary: {schema: VERIFY_SCHEMA, ok, complete, run_class: ok ? verification.run_class : 'incomplete', errors,
+    run_manifest_sha256: ok ? verification.manifest_sha256 : null, genuine_evidence: false}};
 }
 
 function runPageChild(id, {launch, timeoutMs, killGraceMs, maxOutputBytes, onStderr}) {

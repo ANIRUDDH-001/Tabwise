@@ -392,3 +392,15 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Acceptance: node scripts/offline-tests.mjs --profile stress --seed 426136 --out cache/o12-o10
 - Acceptance: node scripts/check-r1-baseline.mjs; git diff --check. All exit 0; existing tests changed only where the v1 contract is replaced (disclosed).
 - Excluded: r2-status.json, workflows, ci/offline-tests.json, frozen R1, vendor, web, dependencies, commits/push/merge/branch changes.
+
+### F-03 / R2-L2 / S7 - read-only --verify-run and hosted tabwise-r2 workflow (A-1..A-3)
+- Owner approval: D-86. Base: 8dac551 (O-12/O-10); branch feat/tabwise-r2-s7 in owner-created worktree app-r2-s7. Design and offline validator: ../R2-S7/.
+- Goal: --verify-run re-runs every gate and re-verifies the sealed run from disk (exit 0 only when ok, digest, complete); two-job workflow attests only the recomputed, re-verified run-manifest digest; O-10 claim stays workflow-origin only.
+- Files: scripts/tabwise-r2.mjs, scripts/tabwise/r2-run.mjs, scripts/tabwise/r2-evidence.mjs (additive manifest_sha256), .github/workflows/tabwise-r2.yml (new), test/r2-review.test.mjs, test/r2-evidence.test.mjs, docs.
+- Cost: $0 incremental; no install, model, browser, NVDA, gh, hosted dispatch, status change.
+- Acceptance: node --test --test-timeout=20000 test/r2-review.test.mjs; node --test --test-timeout=20000 test/r2-evidence.test.mjs
+- Acceptance: node --test --test-timeout=20000 test/r2*.test.mjs
+- Acceptance: node scripts/offline-tests.mjs --profile ordinary --seed 1 --out cache/s7-ordinary; node scripts/offline-tests.mjs --profile stress --seed 426136 --out cache/s7-stress
+- Acceptance: node scripts/check-r1-baseline.mjs; git diff --check. All exit 0.
+- R2_FILES scope: adds .github/workflows/tabwise-r2.yml (owner decision R-S7-1, recorded under D-86).
+- Excluded: r2-status.json, ci/offline-tests.json, other workflows, frozen R1, vendor, web, dependencies, O-11, Windows cleanup, commits/push/merge/branch changes.
