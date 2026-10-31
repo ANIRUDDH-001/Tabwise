@@ -368,3 +368,10 @@ Owner instruction: "Investigate and fix PR #13 hosted Windows preflight failure.
 Scope: minimal test-fixture correction in test/r2-review.test.mjs; existing handoff and required STATE/PLAN/LOG/DECISIONS records. Production code and assertions retain their security semantics.
 Acceptance: targeted/full R2, ordinary, stress using hosted seed 426136, frozen R1 and diff checks; reproduce with aliased TEMP and retain hosted artifact evidence.
 Limits: "Do not commit, push, merge, change branches, deploy, start NVDA/browser, make model calls or trigger hosted dispatch." No status, gate, frozen R1, vendor, workflow, dependency or web edits.
+
+## D-85 2026-10-31T03:49:55Z - O-12 nonce-redact/2 + offline O-10 hybrid verifier (owner task message)
+Owner instruction: "PR #13 has been independently confirmed MERGED at `3388107ab9f70037892f35d49109423501da5417`." "You are explicitly authorized as the PRIMARY IMPLEMENTER for this task." Branch `feat/tabwise-r2-o12-o10` prepared by the owner.
+O-10 verifier decision: "GitHub's maintained `gh attestation verify` performs cryptographic verification." "A small Node.js policy module validates Tabwise-specific claims using the verified output." "Do NOT implement custom X.509, Sigstore or Rekor cryptography using Node's built-in crypto." "No new npm dependencies."
+Order: "Complete Phase A verification before beginning Phase B." "Prioritize a complete, tested O-12 fix over partially implemented O-10 work before the feature freeze."
+Limits: "Do not execute the actual GitHub CLI." "Do not install tools, fetch real attestations, publish artifacts, dispatch workflows, modify CI configuration or change approval status." "Keep `r2-status.json` disabled/BLOCK." "Do not commit, push, merge or switch branches." S7 workflow: actions/attest pinned by full SHA, proposed only, "Do not edit the workflow without separate owner approval."
+Cost ceiling: $0 incremental.

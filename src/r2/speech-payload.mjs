@@ -15,9 +15,9 @@ import {buildArmPayload} from './preparation.mjs';
 import {speechPayloadErrors} from './contract.mjs';
 import {verifyR2PageEvidence, buildR2StepMap, STEP_MAP_VERSION, TRANSFORM, ATTESTATION_UNAVAILABLE} from '../../scripts/tabwise/r2-evidence.mjs';
 
-export const BUILDER_VERSION = 'tabwise-r2-speech-payload/1';
-export const ARM_INPUT_SCHEMA = 'tabwise-r2-speech-arm-input/1';
-export const REDACTION_VERSION = 'nonce-redact/1';
+export const BUILDER_VERSION = 'tabwise-r2-speech-payload/2';
+export const ARM_INPUT_SCHEMA = 'tabwise-r2-speech-arm-input/2';
+export const REDACTION_VERSION = 'nonce-redact/2';
 export const SPEECH_LANE_SCHEMA = 'tabwise-r2-speech-lane/1';
 export const NONCE_MARKER = '[run-nonce]';
 export const AMBIGUOUS = 'nonce-sanitization-ambiguous';
@@ -27,11 +27,10 @@ const ACK_MS = 1000; // capture.mjs ACK_MS: page acknowledgement within 1000 ms 
 const READ_CAP = 12_000_000; // S3 TOTAL_CAP: no sealed file is larger than its page.
 const SUCCESS = new Set(['speech', 'observed-silence']);
 const DIGITS = Object.freeze({zero: '0', one: '1', two: '2', three: '3', four: '4', five: '5', six: '6', seven: '7', eight: '8', nine: '9'});
-// nonce-redact/1 separator: one or more whitespace characters, or whitespace plus at most one of , . -
-// Written so whitespace cannot be split two ways (\s+ then optional punctuation): linear, no catastrophic backtracking.
-const SEP = '(?:\\s+(?:[,.\\-]\\s*)?|[,.\\-]\\s+)';
-const EDGE_BEFORE = '(?<![\\p{L}\\p{N}])', EDGE_AFTER = '(?![\\p{L}\\p{N}])';
-const TOKEN_SPLIT = /[\s,.\-]+/u;
+const MAX_EDITS = 256; // nonce-redact/2: more occurrences than this refuse (bounded edit record).
+const IGNORABLE = /[\p{M}\p{Cf}\p{Default_Ignorable_Code_Point}]/gu;
+const WORD_CHAR = /[\p{L}\p{N}]/u;
+const BREAK = Symbol('break');
 
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const canonical = value => JSON.stringify(value, (k, v) => object(v) ? Object.fromEntries(Object.keys(v).sort().map(key => [key, v[key]])) : v);
@@ -77,69 +76,109 @@ export function speechLaneRecord(read) {
     connected: read.connected, complete: read.complete, phrases: [...read.phrases]};
 }
 
-// ---- nonce-redact/1 (§8.7) ----
-function candidates(text, nonce) {
-  const literal = new RegExp(`${EDGE_BEFORE}${nonce}${EDGE_AFTER}`, 'iuy');
-  const spaced = new RegExp(`${EDGE_BEFORE}${[...nonce].join(SEP)}${EDGE_AFTER}`, 'iuy');
-  const found = [];
-  for (let i = 0; i < text.length; i++) {
-    for (const [form, pattern] of [['literal', literal], ['spaced', spaced]]) {
-      pattern.lastIndex = i;
-      const m = pattern.exec(text);
-      if (m) found.push({form, start: i, end: i + m[0].length, original: m[0]});
+// ---- nonce-redact/2 (§8.7 as revised by O-12, D-85) ----
+// Detection copy of one record text, never written back: one entry per normalized character, mapped to the raw UTF-16
+// span of the code point it came from. Each code point is lowercased, NFKD-decomposed and stripped of marks, format and
+// default-ignorable characters (so fullwidth, superscript, circled, accented and zero-width forms of a hex character
+// fold to it). Lowercased again after NFKD: some capitals (mathematical, squared) have no lowercase mapping until decomposed. '\n' is an observer phrase boundary. Code points inside `breaks` spans (markers this pass inserted)
+// become hard breakers.
+function* detectionChars(text, breaks) {
+  let offset = 0, phrase = 0, b = 0;
+  for (const cp of text) {
+    const start = offset, end = offset + cp.length;
+    offset = end;
+    while (b < breaks.length && breaks[b][1] <= start) b++;
+    if (b < breaks.length && breaks[b][0] <= start) { yield BREAK; continue; }
+    if (cp === '\n') { yield {sep: true}; phrase++; continue; }
+    const folded = cp.charCodeAt(0) < 0x80 ? cp.toLowerCase() : cp.toLowerCase().normalize('NFKD').replace(IGNORABLE, '').toLowerCase();
+    for (const c of folded) {
+      const hex = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f');
+      yield hex ? {c, start, end, phrase} : WORD_CHAR.test(c) ? {c, start, end, phrase, letter: true} : {sep: true};
     }
   }
-  return found.sort((a, b) => a.start - b.start || a.end - b.end);
 }
-// Rule 1, on the redacted text: digit words become digits, separators drop, and any run of tokens that are each one
-// hex character or one digit word must not contain 4 or more consecutive nonce characters.
-function fragmentRun(text, nonce) {
-  let run = '';
-  const check = () => { for (let j = 0; j + 4 <= nonce.length; j++) if (run.includes(nonce.slice(j, j + 4))) return true; return false; };
-  for (const token of text.split(TOKEN_SPLIT)) {
-    const t = token.toLowerCase(), c = /^[0-9a-f]$/.test(t) ? t : DIGITS[t];
-    if (c !== undefined) { run += c; continue; }
-    if (check()) return true;
-    run = '';
+// Units over all records in order: a token (maximal run of word characters) spelling a digit word is one unit; any
+// other token gives one unit per hex character and a breaker per other letter. Separators, phrase and record
+// boundaries are transparent, so hex chunks join across them; the occurrence checks below decide what that means.
+function nonceUnits(records, breaks = []) {
+  const units = [];
+  records.forEach((r, rec) => {
+    let token = [];
+    const flush = () => {
+      if (!token.length) return;
+      const digit = token.length <= 5 ? DIGITS[token.map(t => t.c).join('')] : undefined;
+      if (digit !== undefined) units.push({u: digit, rec, phrase: token[0].phrase, start: token[0].start, end: token.at(-1).end, tokStart: true, tokEnd: true, word: true});
+      else token.forEach((t, i) => units.push(t.letter ? BREAK : {u: t.c, rec, phrase: t.phrase, start: t.start, end: t.end, tokStart: i === 0, tokEnd: i === token.length - 1}));
+      token = [];
+    };
+    for (const ch of detectionChars(r.text, breaks[rec] ?? [])) {
+      if (ch === BREAK) { flush(); units.push(BREAK); } else if (ch.sep) flush(); else token.push(ch);
+    }
+    flush();
+  });
+  return units;
+}
+// One linear pass with an 8-unit window. occurrences: the nonce spelled from a token start to a token end (so
+// never glued to adjacent hex or digits); complete: the first record holding the nonce at all; fragment: any run
+// of 4 or more consecutive nonce characters.
+function scanNonce(units, nonce) {
+  const grams = new Set(Array.from({length: nonce.length - 3}, (_, j) => nonce.slice(j, j + 4)));
+  const occurrences = [];
+  let run = [], complete = null, fragment = false;
+  for (const x of units) {
+    if (x === BREAK) { run = []; continue; }
+    run.push(x);
+    if (run.length > nonce.length) run.shift();
+    if (run.length >= 4 && grams.has(run.slice(-4).map(y => y.u).join(''))) fragment = true;
+    if (run.length === nonce.length && run.map(y => y.u).join('') === nonce) {
+      complete ??= run[0].rec;
+      if (run[0].tokStart && x.tokEnd) occurrences.push([...run]);
+    }
   }
-  return check();
+  return {occurrences, complete, fragment};
 }
 
 /**
- * redactNonce([{seq, text}], nonce) -> {ok, reason, texts:[{seq, text}], redaction:{version, nonce_sha256, edits}}.
- * Pure. Matches are found over the record texts joined in order (so a match crossing a record boundary is seen);
- * all non-overlapping literal and spaced matches are replaced left to right with NONCE_MARKER. Ambiguity refuses
- * with ok:false and no texts. Raw texts are never modified; edits carry UTF-16 offsets into each raw record text.
+ * redactNonce([{seq, text}], nonce) -> {ok, reason, texts:[{seq, text}], redaction:{version, edits:[{seq, start, end}]}}.
+ * Pure and deterministic. Each spoken nonce (any chunking, separators or compatibility form, within one observer
+ * phrase) is replaced by NONCE_MARKER at its raw UTF-16 span. Refused (ok:false, no texts) when the nonce crosses a
+ * record or phrase boundary, occurrences overlap, there are more than MAX_EDITS, a marker is already present, or the
+ * redacted texts still hold the complete nonce or any run of 4 or more nonce characters. The record carries offsets
+ * only: no plaintext original and no nonce digest (a 32-bit nonce digest is reversible by brute force).
  */
 export function redactNonce(records, nonce) {
   if (typeof nonce !== 'string' || !/^[0-9a-f]{8}$/.test(nonce)) throw Error('redaction: nonce must be 8 lowercase hex characters');
   if (!Array.isArray(records) || records.some(r => !object(r) || !int(r.seq) || typeof r.text !== 'string')) throw Error('redaction: records must be [{seq, text}]');
   const refuse = detail => ({ok: false, reason: `${AMBIGUOUS}: ${detail}`, texts: null, redaction: null});
-  const marked = records.find(r => r.text.includes(NONCE_MARKER));
+  const marked = records.find(r => r.text.normalize('NFKC').replace(IGNORABLE, '').toLowerCase().includes(NONCE_MARKER));
   if (marked) return refuse(`record ${marked.seq} raw text already contains ${NONCE_MARKER}`);
-  const starts = [];
-  let joined = '';
-  for (const [i, r] of records.entries()) { if (i) joined += '\n'; starts.push(joined.length); joined += r.text; }
-  const found = candidates(joined, nonce);
-  for (let i = 1; i < found.length; i++) if (found[i].start < found[i - 1].end) return refuse('overlapping nonce matches');
   const edits = [];
-  for (const m of found) {
-    const k = starts.findLastIndex(s => s <= m.start), r = records[k], end = starts[k] + r.text.length;
-    if (m.end > end) return refuse(`match at record ${r.seq} crosses a record boundary`);
-    if (m.original.includes('\n')) return refuse(`match in record ${r.seq} crosses an observer phrase boundary`);
-    edits.push({seq: r.seq, form: m.form, start: m.start - starts[k], end: m.end - starts[k], original: m.original});
+  let previous = null;
+  for (const o of scanNonce(nonceUnits(records), nonce).occurrences) {
+    const first = o[0], last = o.at(-1), seq = records[first.rec].seq;
+    if (previous?.includes(first)) return refuse('overlapping nonce occurrences');
+    previous = o;
+    if (o.some(u => u.word)) continue; // digit-word spellings are never redacted; the residual check refuses them
+    if (last.rec !== first.rec) return refuse(`nonce at record ${seq} crosses a record boundary`);
+    if (last.phrase !== first.phrase) return refuse(`nonce in record ${seq} crosses an observer phrase boundary`);
+    if (edits.length === MAX_EDITS) return refuse(`more than ${MAX_EDITS} nonce occurrences`);
+    edits.push({rec: first.rec, seq, start: first.start, end: last.end});
   }
-  const texts = records.map(r => {
-    let text = r.text;
-    for (const e of edits.filter(x => x.seq === r.seq).reverse()) text = text.slice(0, e.start) + NONCE_MARKER + text.slice(e.end);
-    return {seq: r.seq, text};
+  const breaks = records.map(() => []);
+  const texts = records.map((r, k) => {
+    let text = '', from = 0;
+    for (const e of edits.filter(x => x.rec === k)) {
+      text += r.text.slice(from, e.start);
+      breaks[k].push([text.length, text.length + NONCE_MARKER.length]);
+      text += NONCE_MARKER;
+      from = e.end;
+    }
+    return {seq: r.seq, text: text + r.text.slice(from)};
   });
-  // Security correction to §8.7: the literal form needs non-alphanumeric neighbours, so a nonce glued to letters or
-  // digits is not redacted. Any record that still holds the complete nonce (any case) is refused, never passed on.
-  const leaked = texts.find(t => t.text.toLowerCase().includes(nonce));
-  if (leaked) return refuse(`record ${leaked.seq} still contains the complete nonce after redaction`);
-  if (fragmentRun(texts.map(t => t.text).join('\n'), nonce)) return refuse('a run of 4 or more nonce characters remains after redaction');
-  return {ok: true, reason: null, texts, redaction: {version: REDACTION_VERSION, nonce_sha256: sha256(nonce), edits}};
+  const residual = scanNonce(nonceUnits(texts, breaks), nonce);
+  if (residual.complete !== null) return refuse(`record ${records[residual.complete].seq} still contains the complete nonce after redaction`);
+  if (residual.fragment) return refuse('a run of 4 or more nonce characters remains after redaction');
+  return {ok: true, reason: null, texts, redaction: {version: REDACTION_VERSION, edits: edits.map(({seq, start, end}) => ({seq, start, end}))}};
 }
 
 // ---- eligibility (§8.6) ----
@@ -263,7 +302,11 @@ export function assessR2SpeechPayload({capture, stepMap, speech, transform, fixt
     if (!opaqueFixture(fixture_id)) fail('payload', 'blinded fixture id is not an opaque f-<hex> identifier');
     const red = redactNonce(c.records.map(r => ({seq: r.seq, text: r.text})), t.nonce);
     if (!red.ok) return refused(red.reason);
-    if (redaction !== undefined && canonical(plainData(redaction, 'redaction')) !== canonical(red.redaction)) fail('redaction', 'supplied redaction record does not reproduce');
+    if (redaction !== undefined) {
+      const supplied = plainData(redaction, 'redaction'), version = object(supplied) ? supplied.version : undefined;
+      if (version !== REDACTION_VERSION) fail('redaction', `supplied redaction version ${JSON.stringify(version)} is not ${REDACTION_VERSION}; historical records are not re-verified or migrated`);
+      if (canonical(supplied) !== canonical(red.redaction)) fail('redaction', 'supplied redaction record does not reproduce');
+    }
     const built = buildArmPayload('speech', {fixture_id,
       speech: c.records.map((r, i) => ({seq: r.seq, step: map.actions[i].task, text: red.texts[i].text})),
       actions: map.actions.map(a => ({step: a.task, press: a.press}))});
