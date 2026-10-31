@@ -1,28 +1,28 @@
-# STATE - R2-L2 S5b + S6 offline integration (CLOUD-R2-L2-05): uncommitted patch for owner review
-Updated: 2026-10-30T19:14:58Z
-Base: main 063e789 (PR #12). Uncommitted working-tree changes; nothing committed or pushed. R2 disabled/BLOCK.
-## Now / next / blocked
-- Now: S5b runR2Session (brand-first, capabilities dynamic after it, S5a handles from the branded runtime, no
-  provenance claim, genuine_evidence:false) and S6 entry tabwise-r2.mjs + r2-run.mjs (strict CLI, plan schema
-  tabwise-r2-plan/1, ordered gates, --page only loads loader then session, --run sequential children) implemented.
-- Next: owner review + Windows acceptance (handoff §13); independent review of S5b/S6; decide O-10, O-11, O-12.
-- Blocked: authentic success path unexecuted (needs a hosted run); genuine evidence unreachable until O-10;
-  C-3 arm inputs until O-10/O-11; nonce policy O-12. S7 workflow not created. FEATURES.json and thresholds unchanged.
-## Verification (MEASURED; Cloud Linux Node 22.22.0, no node_modules; not Windows)
-- RED: r2-review 43 tests, 18 pass, 25 fail (all new); GREEN 45/45 after Phase E fixes.
-- node --test --test-timeout=20000 test/r2*.test.mjs: 588/588, exit 0 (561 + 27 new).
-- offline-tests ordinary seed 1: 45/48; 3 FAIL environmental (qualification-loader, review-integrity, vendor:
-  ENOENT node_modules/@guidepup), same as baseline. stress 113262: 7 profiles 45/48 (same 3); random not runnable
-  on Node 22 (bad option --test-randomize). r2-review under the mixed fault settings: 45/45.
-- check-r1-baseline: ok true, errors []. git diff --check: exit 0.
-- Mutations: 32 total; 30 killed; M6 survived (one-page latch, unreachable offline); M20 equivalent (not counted).
-- Repeated S6-C/E and S5b-N4: 15/15 runs, 9/9.
-## Review focus
-- r2-session.mjs first statement; r2-run.mjs checkR2Entry order; runPage in tabwise-r2.mjs; runR2Pages.
-- Narrowed pre-existing assertion: r2-compose importers [] -> [r2-session.mjs] (design §1.2 rule).
-- O-12 measured: complete nonce passes redaction as 3f-9a-0c-1b, "3f9a, 0c1b", fullwidth, zero-width; nonce_sha256 invertible.
+# STATE - PR13 hosted Windows preflight correction (F-03/R2-L2)
+Updated: 2026-10-31T03:18:26Z
+Branch: feat/tabwise-r2-s5b-s6; base HEAD 788ff7f. Correction uncommitted; R2 disabled/BLOCK.
+## Now
+- PASS local correction: native-alias mock now returns canonicalRoot; fixture always uses a real aliased parent.
+- Hosted artifact 13027981593 obtained first: only test 56 failed in all nine profiles (missing BLOCK exception).
+- Junction-backed TEMP reproduces the original failure; strengthened fixture RED -> GREEN; native mutation killed.
+- Production source, gates, frozen R1, vendor, CI, dependencies, web and authorization statuses unchanged.
+## Next / blocked
+- Owner reviews and updates PR13; no commit/push or hosted dispatch performed here.
+- Existing hosted run failed; a green hosted rerun of this correction is not claimed.
+- R2 live qualification blocked; O-10/O-11/O-12 and descendant cleanup remain pending.
+## Verification
+- Windows Node 24.22.1: targeted 56/56; aliased-TEMP targeted 56/56; full R2 599/599.
+- Ordinary 48/48 files, 874/874 tests; stress seed 426136 all 8 profiles 48/48 files, 874/874 tests each.
+- Frozen R1 ok:true/errors:[]; git diff --check exit 0. All preceding tests unchanged.
+- Evidence: handoff section 19; hosted logs cache/pr13-hosted-41161426136; local output cache/pr13-local.
 ## Handoff
-- Record: docs/engineering/R2-L2-S5b-S6-handoff.md (inventory, gates, tests, mutations, O-10/O-11/O-12, §13 commands).
-- New files: scripts/tabwise/r2-session.mjs, scripts/tabwise-r2.mjs, scripts/tabwise/r2-run.mjs, the handoff.
-- Modified: scripts/tabwise/r2-policy.mjs (R2_FILES), test/r2-review.test.mjs, CODEMAP, STATE, LOG, DECISIONS (D-83).
-- Patch: exported through Cloud file transfer; checksum in the final message. Owner commits per handoff §15.
+Uncommitted: test/r2-review.test.mjs (modified) - correct and strengthen native alias fixture.
+Uncommitted: docs/engineering/R2-L2-S5b-S6-handoff.md (modified) - hosted evidence and final acceptance.
+Uncommitted: docs/ledger/DECISIONS.md (modified) - D-84 owner instruction.
+Uncommitted: docs/ledger/PLAN.md (modified) - PR13 approved task/acceptance.
+Uncommitted: docs/ledger/LOG.jsonl (modified) - verification and handoff milestones.
+Uncommitted: docs/ledger/STATE.md (modified) - this checkpoint.
+Verified by: targeted/full R2; ordinary/stress 426136; frozen R1; git diff --check - all PASS.
+Proposed commit: test(F-03): correct native alias fixture under aliased TEMP
+  F-03/R2-L2/PR13; retain BLOCK assertion; node --test --test-timeout=20000 test/r2-review.test.mjs.
+Review needed from: user

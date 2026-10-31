@@ -505,3 +505,40 @@ SHA-256 of the final source/test bytes (MEASURED):
 - `scripts/tabwise/r2-run.mjs`: `05e5a57941ce3c9fedb7451b1a5e3bb75c8523ebfd826669764cf53842567117`
 - `scripts/tabwise/r2-session.mjs`: `9f65c4f3ba7c29d91e95b3ecc2df153a8c346055ba87a26ab1fa314512361c45`
 - `test/r2-review.test.mjs`: `a6f32327ea038035cd0bf6e6e9c75fbeef109067bd57ded60f061890de7e4a56`
+
+
+## 19. PR13 hosted Windows preflight correction (D-84)
+
+**Hosted evidence (MEASURED, run_id `41161426136`, job `124419603459`):** obtained the exact artifact before proposing a source change. Artifact `offline-preflight-41161426136-1`, id 13027981593, SHA-256 `550221215c9fe49601fdf0a435e1089a5199a738c6f7cdc157376841fc0aa72f` was downloaded and checked. All nine profile logs contain exactly one failed test: `FIX1 containment uses native canonical identity for non-link Windows aliases` (test 56). Ordinary: 55 pass / 1 fail out of 56. Error: `AssertionError [ERR_ASSERTION]: Missing expected exception.` Operator `throws`; actual: no exception (`undefined` in local replay); expected by source: `/BLOCK: R2 run directory/`. Stack: `TestContext.<anonymous> (file:///D:/a/Tabwise/Tabwise/test/r2-review.test.mjs:878:12)`, `Test.run (node:internal/test_runner/test:1409:7)`, `Test.processPendingSubtests (node:internal/test_runner/test:974:7)`.
+
+**Environment (MEASURED):** hosted PR merge SHA `1e35f8c733fa53b03390b3c6c8b10343109ea56f`, branch head `788ff7fc2c1916d814cf9dfe44c1c1e6f29a3547`; image `win25-vs2026 20261021.278.1`, 4 CPUs, Node v24.22.1, npm 11.19.1, Git 2.56.0.windows.2, core.autocrlf=true and CRLF working-tree source. Workflow sets tracked files read-only before tests; before/after source-lock checks passed. Local Node is also v24.22.1, core.autocrlf=true and CRLF working-tree source; local Windows release 10.0.26300. Locally, ordinary TEMP spelling equals realpathSync.native(TEMP).
+
+**Root cause (CITED: pre-fix test/r2-review.test.mjs:871):** the simulated native resolver returned lexical `root` for `outside`, while the real native resolver canonicalized `root` for the checkout side. These can compare as different lexical paths when the fixture's parent is reached through an alias or other noncanonical spelling, despite referring to the same directory. The assertion is correct; the native-resolver test double violated its contract. This is a test-fixture defect, not a demonstrated production containment defect or missing prerequisite. The original hosted artifacts do not record the raw/native TEMP pair, so the exact host-side alias mechanism is an INFERENCE; a real junction-backed TEMP locally reproduces the exact assertion and stack.
+
+**RED/GREEN (MEASURED, run_id `pr13-native-temp`):** the unchanged focused test under junction-backed TEMP failed with the hosted assertion, exit 1. Then strengthened the fixture to always use a real aliased parent and assert that lexical and canonical root differ; it failed on ordinary local TEMP too. Corrected only the mock's mapped return to `canonicalRoot = realFs.realpathSync.native(root)`. Original BLOCK exception and native-call assertions are unchanged. Focused test passes; full targeted file also passes 56/56 through aliased TEMP. An isolated in-memory mutation replacing native resolver calls with ordinary calls is still killed by the exact corrected test. No production file was mutated for that probe.
+
+**Correction scope:** the test now always exercises the environmental trigger, and the simulated native alias returns physical identity. No assertion normalization, skip, threshold change, source import bypass, or runtime-gate relaxation was introduced. All prior S5b/S6, FIX1/FIX2/FIX3 and CRLF checks remain. Audit copies of the artifact logs/environment and local results are under ignored `cache/pr13-hosted-41161426136/`; full local profile output is under `cache/pr13-local/`. No new dependency or third-party fixture is introduced; temporary junction data is project-authored synthetic test data.
+
+**Verification so far (MEASURED):** targeted 56/56; full R2 599/599; ordinary profile 48/48 selected files; frozen R1 ok:true/errors:[]; git diff --check exit 0. Stress seed 426136 is running; final acceptance is recorded below only after completion. R2 stays disabled/BLOCK; O-10/O-11/O-12 remain pending. No hosted rerun has been dispatched and no claim of a green hosted run is made.
+
+
+### PR13 final local acceptance
+
+MEASURED, run_id `pr13-local-426136`, Windows Node 24.22.1. Final exit codes all 0:
+
+| Command | Result |
+|---|---|
+| `node --test --test-timeout=20000 test/r2-review.test.mjs` | 56/56 |
+| `node --test --test-timeout=20000 test/r2*.test.mjs` | 599/599 |
+| `node scripts/offline-tests.mjs --profile ordinary --seed 1 --out cache/pr13-local` | 48/48 selected files; 874/874 tests |
+| `node scripts/offline-tests.mjs --profile stress --seed 426136 --out cache/pr13-local` | All 8 profiles: each 48/48 selected files and 874/874 tests; 6,992 tests in total |
+| `node scripts/check-r1-baseline.mjs` | ok:true, errors:[] |
+| `git diff --check` | exit 0 |
+
+Extra checks: full targeted file under a junction-backed TEMP 56/56; native-to-ordinary mutation killed in memory; original preceding tests unchanged after newline normalization. Hosted artifact and local comparison retain the same Node version and CRLF behavior. This correction changes no test threshold or assertion expectation. The existing 9 excluded files remain explicitly inventoried; none was newly excluded.
+
+Changed files: `test/r2-review.test.mjs`, this handoff, and the required `docs/ledger/{STATE.md,PLAN.md,DECISIONS.md,LOG.jsonl}`. No production executable, approval/status file, execution gate, frozen R1, vendor, dependency, workflow, CI inventory or web file differs from HEAD. R2 remains disabled/BLOCK and no FEATURES status was changed. No commit, push, merge, reset, branch change, deployment, real browser/NVDA, model request or hosted dispatch occurred.
+
+Disposition: PASS for local correction / safe for an owner-controlled update of PR #13 after review. The existing hosted run still records its original failure; no hosted success is claimed. An owner push and resulting hosted verification remain outside this task.
+
+Final test-file SHA-256 (MEASURED): `c16d184f6ae623669c6be732d7af6487bcd23d9a41d882fd8576dcc3fcc17da9`. Acceptance recorded at 2026-10-31T03:18:26Z.

@@ -362,3 +362,9 @@ Owner instruction: the task message "CLOUD-R2-L2-05 — S5b + S6 Offline Integra
 Scope taken: new scripts/tabwise/r2-session.mjs (S5b), scripts/tabwise-r2.mjs and scripts/tabwise/r2-run.mjs (S6); R2_FILES extended; 27 tests appended to the admitted test/r2-review.test.mjs; one S5a importer assertion narrowed to the design's rule (only r2-session imports r2-compose); handoff docs/engineering/R2-L2-S5b-S6-handoff.md with O-10, O-11, O-12 proposals (not adopted).
 Interpretations: run plan schema tabwise-r2-plan/1 passed as --plan and bound by S4 plan_sha256 (the design named no format); no nonce seed (the session draws the nonce); the session attaches no provenance claim (S3 would class it incomplete, and O-10 is undecided).
 Limits: zero spend; no install, API call, browser, NVDA, physical input, dispatch, commit, push, branch or status change; FEATURES.json, r2-status.json, workflows, CI manifest, governance, frozen R1 and vendor untouched. O-10, O-11, O-12 remain owner decisions.
+
+## D-84 2026-10-31T03:07:51Z - PR13 hosted Windows preflight correction (owner task message)
+Owner instruction: "Investigate and fix PR #13 hosted Windows preflight failure." and "FIRST obtain the exact assertion failures from the GitHub Actions artifact `offline-preflight-41161426136-1`, file `test-ordinary.txt`."
+Scope: minimal test-fixture correction in test/r2-review.test.mjs; existing handoff and required STATE/PLAN/LOG/DECISIONS records. Production code and assertions retain their security semantics.
+Acceptance: targeted/full R2, ordinary, stress using hosted seed 426136, frozen R1 and diff checks; reproduce with aliased TEMP and retain hosted artifact evidence.
+Limits: "Do not commit, push, merge, change branches, deploy, start NVDA/browser, make model calls or trigger hosted dispatch." No status, gate, frozen R1, vendor, workflow, dependency or web edits.

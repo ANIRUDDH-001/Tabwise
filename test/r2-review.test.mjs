@@ -864,10 +864,17 @@ test('FIX3 unsettled close fails closed and repeated open is refused', async () 
 
 
 test('FIX1 containment uses native canonical identity for non-link Windows aliases', async () => {
-  const dir=tmpS4(joinS4(tmpdirS4(),'r2 native alias '));const root=joinS4(dir,'checkout');const outside=joinS4(dir,'outside');
+  const dir=tmpS4(joinS4(tmpdirS4(),'r2 native alias '));
+  // Always exercise an aliased TEMP ancestor; a direct local TEMP hid the malformed native mock.
+  const physical=joinS4(dir,'physical'),parent=joinS4(dir,'alias');
+  mkdirS4(physical);symlinkS6(physical,parent,'junction');
+  const root=joinS4(parent,'checkout'),outside=joinS4(parent,'outside');
   mkdirS4(root);mkdirS4(outside);
   const realFs=await import('node:fs');let nativeCalls=0;
-  const canonical = p => p===outside ? root : realFs.realpathSync.native(p);
+  const canonicalRoot=realFs.realpathSync.native(root);
+  assert.notEqual(canonicalRoot,root,'fixture must distinguish canonical and lexical checkout paths');
+  // A native resolver returns physical identity, including when the fixture itself is reached via an alias.
+  const canonical = p => p===outside ? canonicalRoot : realFs.realpathSync.native(p);
   const ordinary=p=>realFs.realpathSync(p);
   ordinary.native=p=>{nativeCalls++;return canonical(p);};
   globalThis.__r2ReviewFs={...realFs,realpathSync:ordinary};
