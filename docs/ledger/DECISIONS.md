@@ -384,3 +384,28 @@ Interpretations: verifyR2Run gains an additive manifest_sha256 return (digest of
 Cost ceiling: $0 incremental.
 Install (D-86 follow-up, 2026-10-31T05:42:04Z): owner instruction "install and run those specifically to confirm". Ran `npm ci --ignore-scripts` in worktree app-r2-s7 only: lockfile unchanged, 58 packages (@guidepup/guidepup 0.36.4), 0 vulnerabilities; no dependency added, removed or upgraded.
 R-S7-1 (D-86 follow-up, 2026-10-31T06:09:00Z): asked "Should the workflow file be added to R2_FILES, so the reviewed digest covers it?"; owner answered "Yes, add it". R2_FILES gains .github/workflows/tabwise-r2.yml (17 files); r2Digest now 979fcac68f8d00c987adaa835adeeed23fdcf299591d7a02af56a9d7a0dc1a69.
+
+## D-87 2026-10-31T06:47:15Z - R-1/R-2 process custody: final review and publication preparation (owner task message)
+Numbering: D-86 is used on feat/tabwise-r2-s7 (09cfd1f, S7). This branch takes D-87 so the two ledgers merge without a collision.
+Owner instruction: "Work only in D:\Projects\Meta AI\app-r2-custody, branch feat/tabwise-r2-custody." "The R-1/R-2 Cloud patch and CI inventory patch are applied. Windows Node 24.22.1 ordinary and all eight stress profiles passed. Frozen R1 passed. The actual Windows read-only process snapshot returned 343 processes and quiescent=true."
+Review scope: "Perform an independent security and integration review of the custody implementation. Verify process ownership, PID reuse, attribution, cancellation, termination safety, unobserved grandchildren and the coordinator contract." "Run any additional safe offline checks needed. Do not terminate unrelated processes or launch NVDA."
+Records: "Add the missing CODEMAP and ledger records based on the Cloud handoff. Preserve the existing O-12/O-10 documentation."
+S7: "Compare the custody implementation against committed S7 `09cfd1f` to identify overlapping coordinator changes, but do not merge branches or edit S7." "Inspect whether S7's workflow requires changes for the custody process checks and longer page timeouts. Report those changes separately rather than silently implementing them."
+Limits: "Do not commit, push, merge, dispatch workflows, activate R2 or install new dependencies." "R2 must remain disabled/BLOCK."
+CI inventory (handoff §8.6, gated): applied by the owner ("CI inventory patch are applied"); entry r2-proctree.test.mjs, kind offline.
+CR-1 (MCQ, 2026-10-31): asked "Should I fix it in this worktree before the commit?" (sampling backlog ahead of census and reap); owner answered "Fix now, test-first (Recommended)". Fixed in r2-proctree.mjs sample(); PT-R6 added; handoff §12.1.
+Not recorded: the Cloud workstream's own mission text is not available in this session (handoff §10 asks for it in the owner's words); owner to add it if wanted.
+Cost ceiling: $0 incremental.
+
+## D-88 2026-10-31T07:36:19Z - S7 + R-1/R-2 custody final integration (owner task message)
+Context: custody PR #16 merged into main at 30ad3b13; PR #15 (S7, 09cfd1f) open. "The owner has already executed `git merge --no-commit --no-ff origin/main`. The merge is deliberately unfinished. Do not restart, abort, rebase or commit it."
+Owner instruction: "Produce one coherent, tested S7 + custody implementation preserving both workstreams' functional and safety invariants." "Do not merely remove Git conflict markers."
+R2_FILES: "contains the union of reviewed source files, including BOTH: `.github/workflows/tabwise-r2.yml` `scripts/tabwise/r2-proctree.mjs`". "Do not hardcode a stale reviewed digest."
+Workflow authority: "You are authorized to modify the S7 workflow and its offline tests for these specific requirements." A: "Add pre-run and post-run Windows quiescence checks." "These checks must be genuinely read-only: no termination, cleanup, browser automation or NVDA launch." "Never claim global absence proves that every descendant was identified." B: "Do not blindly raise a timeout." "If a plan exceeds the validated available runtime budget, reject it before starting any page." C: "Ensure required evidence survives the GitHub artifact upload, including failure paths." "Do not weaken existing manifest or attestation digest validation."
+Limits: "Git add, commit, push, checkout, reset, merge, abort or rebase." "Dispatching the R2 workflow." "Running actual NVDA qualification, destructive process-termination experiments or real browser sessions." "Metered API/model calls." (all prohibited); r2-status.json stays enabled:false / BLOCK; app and app-r2-custody worktrees untouched.
+Integration decisions (Claude, within the authorization above):
+- Code conflicts resolved keep-both as forecast in the custody handoff §12.4; no behavior of either side dropped.
+- Budget: per-page worst case 900 s = baseline 15 + child 720 + census 5 + grace 10 + CR-1 queue 30 + reap 4x(15+15); reserves 120 s setup + 120 s seal/verify (INFERENCE, not measured). The 40-min step allows at most 2 pages; checkR2Entry refuses larger plans in every mode, right after the plan parses. Timeouts were not raised.
+- Quiescence: inline read-only pwsh steps (pre on success path; post `always() && steps.run.outcome != 'skipped'`), each timeout-minutes 2, fail the job on any NVDA image or 6837 listener, record scope 'global' and page_custody 'not claimed'. No new script, so R2_FILES is exactly the union (18 files).
+- Evidence: run summary (per-page custody) moved from RUNNER_TEMP/tabwise-r2-summary.json (not uploaded) to RUNNER_TEMP/tabwise-r2/diagnostics/run-summary.json (uploaded always(), beside the sealed run dir). Supplementary, not attested; the attested subject is unchanged.
+Cost ceiling: $0 incremental.

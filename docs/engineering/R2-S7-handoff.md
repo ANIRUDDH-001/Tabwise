@@ -65,3 +65,10 @@ Static rows W10/W12/W14 and mutations pin each fix.
 
 ## 6. Remaining approvals
 A-4 O-11 (`../R2-S7/O11-arm-input-custody-plan.md`), A-5 committed run plan + `plan_sha256`, A-6 status activation after independent review (needs the new `r2Digest`, §3), A-7 one dispatch + one offline `gh attestation verify` through `src/r2/provenance.mjs`.
+
+## 7. Integration with process custody (D-88)
+PR #16 (R-1/R-2 custody) merged to main and was merged into this branch by the owner, uncommitted. The resolution, the workflow changes and the measured results are recorded in `R2-R1R2-process-custody-handoff.md` §13. The changes that affect S7:
+- The workflow gains read-only global pre-run and post-run quiescence (W15). The run summary moves under the uploaded `tabwise-r2/diagnostics/` (W16). The R2 run timeout is tied to the plan budget, at most 2 pages (W17).
+- The insertion point noted in §1 ("Windows process cleanup untouched") is now filled.
+- The attestation subject and the digest checks are unchanged.
+- `R2_FILES` is 18 files and includes `r2-proctree.mjs`. The r2Digest of the integrated tree is `bc468ed1119fa796c52468f3db51cc0a3f7031702e394dec0244dd5b57752ed7`; recompute it at activation, never copy it.

@@ -404,3 +404,25 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Acceptance: node scripts/check-r1-baseline.mjs; git diff --check. All exit 0.
 - R2_FILES scope: adds .github/workflows/tabwise-r2.yml (owner decision R-S7-1, recorded under D-86).
 - Excluded: r2-status.json, ci/offline-tests.json, other workflows, frozen R1, vendor, web, dependencies, O-11, Windows cleanup, commits/push/merge/branch changes.
+
+### F-03 / R2-L2 / R-1 + R-2 - coordinator-held Windows process custody (D-87)
+- Owner approval: D-87 (review and publication preparation); CI inventory entry applied by the owner (handoff §8.6). Base: 8dac551 (O-12/O-10); branch feat/tabwise-r2-custody. Design and Cloud record: docs/engineering/R2-R1R2-process-custody-handoff.md §§1-11; independent review §12.
+- Goal: OS-observed custody of every page child's tree (attribution by pid + µs creation time, census before kill, creation-checked termination, confirmation by a later snapshot, NVDA image/6837 quiescence, baseline before launch, cancellation); the child's nvda:'stopped' is required but no longer sufficient.
+- Files: new scripts/tabwise/r2-proctree.mjs, test/r2-proctree.test.mjs; scripts/tabwise/r2-run.mjs, scripts/tabwise-r2.mjs, scripts/tabwise/r2-policy.mjs (R2_FILES); ci/offline-tests.json (owner-applied); handoff; CODEMAP; ledger.
+- Cost: $0 incremental; no install, NVDA, browser, dispatch, status change.
+- Acceptance: node --test --test-timeout=20000 test/r2-proctree.test.mjs test/r2-review.test.mjs
+- Acceptance: node --test --test-timeout=20000 test/r2*.test.mjs
+- Acceptance: node scripts/offline-tests.mjs --profile ordinary --seed 1; node scripts/offline-tests.mjs --profile stress --seed 426136
+- Acceptance: node scripts/check-r1-baseline.mjs; git diff --check. All exit 0; existing r2-review rows unmodified.
+- Pending (not authorized): hosted windows-2025 qualification (handoff §9.1), S7 workflow changes (handoff §12.5), job-object closure (§8.2), result-time census (§8.3).
+- Excluded: r2-status.json, workflows, frozen R1, vendor, dependencies, commits/push/merge/branch changes.
+
+### F-03 / R2-L2 / S7 + R-1/R-2 - final integration of PR #15 with merged custody (D-88)
+- Owner approval: D-88. Merge state: owner-run `git merge --no-commit --no-ff origin/main` (30ad3b13) into feat/tabwise-r2-s7 (09cfd1f); left unfinished for the owner.
+- Goal: one coherent tree: S7 --verify-run/workflow/attestation + custody tracking/CR-1; read-only global quiescence before/after the run; plan budget refusal; custody summary uploaded.
+- Files: scripts/tabwise-r2.mjs, scripts/tabwise/r2-run.mjs, scripts/tabwise/r2-policy.mjs (6 conflicts); .github/workflows/tabwise-r2.yml; test/r2-review.test.mjs; CODEMAP; ledger; both handoffs.
+- Cost: $0 incremental; no install, NVDA, browser, dispatch, status change, git write.
+- Acceptance: node --test --test-timeout=20000 test/r2*.test.mjs
+- Acceptance: node scripts/offline-tests.mjs --profile ordinary --seed 1; node scripts/offline-tests.mjs --profile stress --seed 426136
+- Acceptance: node scripts/check-r1-baseline.mjs; node scripts/preflight.mjs; git diff --check; no conflict markers. All exit 0.
+- Pending (not authorized): hosted windows-2025 dress rehearsal (setup duration, pwsh quiescence on the image, kill path), A-4..A-7.

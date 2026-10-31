@@ -18,11 +18,14 @@ import {r2Digest, readR2Status} from './tabwise/r2-policy.mjs';
 import {sealR2Run, verifyR2Run} from './tabwise/r2-evidence.mjs';
 import {createQualificationIntegrity} from './tabwise/qualification-integrity.mjs';
 import {installQualificationCrashHandlers} from './tabwise/qualification-crash.mjs';
+import {windowsProcessTools} from './tabwise/r2-proctree.mjs';
 import {checkR2Entry, r2RunDir, r2ChildEnv, r2PageCommand, r2SessionData, r2PageExit, r2RunSealable, r2RunInputs, r2VerifyRun, runR2Pages, PAGE_DEADLINE_MS} from './tabwise/r2-run.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const entry = fileURLToPath(import.meta.url);
 const STDERR_CAP = 1_048_576;
+// Console and termination signals cancel the running page child; its tree is still reaped and confirmed (R-1/R-2).
+const CANCEL_SIGNALS = ['SIGINT', 'SIGTERM', 'SIGBREAK', 'SIGHUP'];
 const git = (...args) => execFileSync('git', args, {cwd: root, encoding: 'utf8', windowsHide: true, timeout: 30000}).trim();
 const message = error => error?.message ?? String(error);
 
@@ -67,13 +70,25 @@ async function runPage(gate) {
 // Sequential page children; never a runtime in this process. The run manifest is sealed and verified from disk.
 async function runAll(gate) {
   const runDir = r2RunDir(process.env, root), env = r2ChildEnv(process.env), forwarded = new Map();
+  // R-1/R-2: OS process custody of every page child's tree, held here and never delegated to the child's own report.
+  const processes = windowsProcessTools({spawn, env: process.env});
   mkdirSync(dirname(runDir), {recursive: true});
   mkdirSync(runDir);
-  const outcome = await runR2Pages({
-    pages: gate.pages.map(p => p.id),
-    launch: id => { const c = r2PageCommand({entry, page: id, planPath: gate.planPath, env, cwd: root}); return spawn(c.file, c.args, c.options); },
-    onStderr: (id, data) => { const used = forwarded.get(id) ?? 0; if (used < STDERR_CAP) { forwarded.set(id, used + data.length); process.stderr.write(data); } },
-  });
+  const cancel = new AbortController(), onCancel = () => cancel.abort();
+  for (const name of CANCEL_SIGNALS) process.on(name, onCancel);
+  const removeCrash = installQualificationCrashHandlers({abort: onCancel, record: event => console.error(JSON.stringify({r2_run: 'coordinator', ...event}))});
+  let outcome;
+  try {
+    outcome = await runR2Pages({
+      pages: gate.pages.map(p => p.id),
+      launch: id => { const c = r2PageCommand({entry, page: id, planPath: gate.planPath, env, cwd: root}); return spawn(c.file, c.args, c.options); },
+      onStderr: (id, data) => { const used = forwarded.get(id) ?? 0; if (used < STDERR_CAP) { forwarded.set(id, used + data.length); process.stderr.write(data); } },
+      processes, signal: cancel.signal, protect: [process.pid, process.ppid],
+    });
+  } finally {
+    for (const name of CANCEL_SIGNALS) process.off(name, onCancel);
+    removeCrash();
+  }
   // A child whose exit was never confirmed may still write its page directory: the run is not sealed over it.
   if (!r2RunSealable(outcome)) {
     console.log(JSON.stringify({schema: 'tabwise-r2-run-summary/1', run_class: 'incomplete', verified: false, errors: ['run not sealed: a page child exit is unconfirmed'],
