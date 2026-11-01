@@ -3,26 +3,26 @@ name: D97 full hosted npm test
 on:
   push:
     branches:
-      - ci/d97-fulltest-d73fix
+      - ci/d97-fulltest-d73seal
 
 permissions:
   contents: read
 
 concurrency:
-  group: d97-fulltest-d73fix
+  group: d97-fulltest-d73seal
   cancel-in-progress: false
 
-# The owner replaces CANDIDATE_SHA with the commit that carries the D73 fix before pushing this branch.
+# The owner replaces CANDIDATE_SHA with the commit that carries the D73 seal correction before pushing this branch.
 # CANDIDATE_TREE pins that commit's content: it was computed from the prepared diff on top of BASE_SHA.
 env:
-  CANDIDATE_SHA: 52c97922069a93510699d02e9ddd38a7eb3b5a6f
-  CANDIDATE_TREE: 22baac39b7dda64c22f083ae5ca93adcd7eb54a3
-  BASE_SHA: e9a62d29fc62268cf68f4d7bca0e1e0e5dff4a98
-  EXPECTED_TESTS: '1066'
+  CANDIDATE_SHA: 6867b9971810b4a676a268098ca0703418be597a
+  CANDIDATE_TREE: 2675008b6e8ffd0766e79071c90f6d779a7e9206
+  BASE_SHA: 52c97922069a93510699d02e9ddd38a7eb3b5a6f
+  EXPECTED_TESTS: '1067'
 
 jobs:
   full-test:
-    if: github.ref == 'refs/heads/ci/d97-fulltest-d73fix' && github.run_attempt == 1
+    if: github.ref == 'refs/heads/ci/d97-fulltest-d73seal' && github.run_attempt == 1
     runs-on: windows-2025
     timeout-minutes: 45
 
