@@ -484,3 +484,18 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Three prior scheduling tests were amended, including nominal/granted fixture clock130000->190000 to retain50000ms remainder; functional/security assertions unchanged.
 - Shared CODEMAP/DECISIONS/LOG/PLAN/STATE reconciled explicitly; C2 source checkout remains untouched. Complete patch and file/blob hashes in external integration packet.
 - No stress execution/commit/merge/activation approved. Owner must approve exact candidate and one seed426136 attempt; any per-test failure remains failure.
+
+### F-03/D-97 published repair — documentation-only closeout preparation
+- Published source: 6867b9971810b4a676a268098ca0703418be597a; tree2675008b6e8ffd0766e79071c90f6d779a7e9206; PR18 closed/merged by exact fast-forward, no new merge commit.
+- GitHub recorded publication/closure UTC2026-11-01T13:01:39Z; not the original authorization timestamp. Owner-supplied ChatGPT approval excerpt dated 1 November 2026 is recorded verbatim in D-97; its exact original timestamp remains UNVERIFIED.
+- Current owner authorization: documentation preparation/verification only. Proposed files: DECISIONS.md, PLAN.md, LOG.jsonl (append-only) and STATE.md (current-state replacement with original preserved in Git and packet).
+- Goal: accurately close out publication evidence without changing executable bytes, statuses, historical findings or product-worker governance.
+- Read-only revalidation: project R2/qualification/plan digests, published SHA/tree, remote status blobs, PR state and successful hosted-run metadata; no tests or smoke rerun.
+- Evidence: full diagnostic41304666154 tested exact repair,1067/1067 PASS; PR preflight41305451564 checked same tree,441/441 PASS, seed451564; earlier41297592444 seed592444 stays historical.
+- Preserve failed D-9641278451242, intermediate D-9741299683313/41302012989, original raw hashes and earlier seed426136 contradictory results; no root-cause erasure or coverage expansion.
+- R2 digest9d3f194f53276d3268cede8da023f40d1bfc449e7b2b47273b836b456a9a3ef9; qualification6972c311a6e9302856ff9bb9195aa73cf106a15da8caf91ac32b781f8909f328; plan8bb82898703fbaf4d8a4f70fd2223b02913a2c5f0cbbd85d7a17fedb251bc0b4.
+- R2/qualification disabled/BLOCK; no FEATURES passes flag is changed. TW-P0-W1-GOV remains HOLD; B-9/B-12 and live qualification remain unresolved.
+- Proposed acceptance: exact four-path diff; DECISIONS/PLAN/LOG old bytes preserved as prefixes; STATE preimage archived; valid JSON log suffix; all other committed/source bytes identical.
+- Expected publication order: approve this exact documentation diff, owner commits/publishes it separately, verify actual final main and unchanged non-doc blobs, then prepare new exact-final-SHA R2 A-5 authorization.
+- Required CI/policies are not waived. No manually dispatched retest is inferred solely from proven documentation-only changes; historical source-test evidence remains anchored to repair6867b997.
+- Cost ceiling: zero API/model spending. No commit/push/activation/dispatch/product-worker mutation authorized by this preparation.
