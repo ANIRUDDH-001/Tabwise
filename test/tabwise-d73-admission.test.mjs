@@ -66,7 +66,7 @@ test('observation binds exactly one new owner run and classifies every other new
 
 // ---- Orchestration: the real PowerShell script against local mocked gh/git/node commands. ----
 const REPO=process.cwd(),SCRIPT=resolve('scripts/tabwise/d73-observer-dispatch.ps1'),REV='d'.repeat(40),OWNER='ANIRUDDH-001';
-const FAKE_GH=String.raw`import {readFileSync,writeFileSync,appendFileSync,existsSync,rmSync,renameSync} from 'node:fs';
+const FAKE_GH=String.raw`import {readFileSync,writeFileSync,appendFileSync,existsSync,rmSync,renameSync,mkdirSync,symlinkSync} from 'node:fs';
 import {join} from 'node:path';
 const sim=process.env.TW_SIM,scenario=process.env.TW_SCENARIO,REV=process.env.TW_REV,OWNER=process.env.TW_OWNER,args=process.argv.slice(2);
 const statePath=join(sim,'state.json'),s=JSON.parse(readFileSync(statePath,'utf8'));
@@ -110,7 +110,8 @@ else if(args[0]==='workflow'&&args[1]==='run'){
  if(scenario==='missing-evidence')fail('no artifact matches');
  else{const {createQualificationWriter}=await import(process.env.TW_EVIDENCE_MODULE),w=createQualificationWriter(args[args.indexOf('--dir')+1],{fake:true});
   w.finish({candidate_pass:scenario!=='candidate-fail',reasons:[]});
-  if(scenario==='bad-artifact')writeFileSync(join(args[args.indexOf('--dir')+1],'result.json'),'{"candidate_pass":true}');}
+  if(scenario==='bad-artifact')writeFileSync(join(args[args.indexOf('--dir')+1],'result.json'),'{"candidate_pass":true}');
+  if(scenario==='unsealable-evidence'){mkdirSync(join(sim,'outside'));symlinkSync(join(sim,'outside'),join(process.env.TW_EVIDENCE,'planted-link'),'junction');}}
 }else fail('unexpected gh call: '+args.join(' '));
 appendFileSync(join(sim,'calls.jsonl'),JSON.stringify({t:Date.now(),args,code,variable:s.variable,served})+'\n');
 writeFileSync(statePath,JSON.stringify(s));process.stdout.write(out);process.stderr.write(err);process.exitCode=code;
@@ -148,10 +149,19 @@ const scenarios={
  'bad-artifact':{exit:1,outcome:'FAILED',cancels:[]},
  'candidate-fail':{exit:1,outcome:'FAILED',cancels:[]},
  'not-found-text':{exit:3,outcome:'UNRESOLVED',cancels:['200']},
+ 'unsealable-evidence':{exit:1,outcome:'FAILED',cancels:[]},
 };
 const LIMITS={ExposureSeconds:8,RevokeSeconds:3,CommandSeconds:2,PollSeconds:1};
 const EXPOSURE_BOUND_MS=(LIMITS.ExposureSeconds+LIMITS.PollSeconds+LIMITS.RevokeSeconds+5*LIMITS.CommandSeconds)*1000;
 
+// Run 41302012989: the runner's pwsh step exports PowerShell 7's module path, whose Core-only Microsoft.PowerShell.Utility
+// shadows Windows PowerShell's, so 5.1 cannot autoload Get-FileHash ("not recognized"). This shadow reproduces that on any
+// host. Every D73 child runs under it, so evidence integrity cannot quietly depend on module autoload.
+function coreUtilityShadow(dir){
+ mkdirSync(join(dir,'Microsoft.PowerShell.Utility'),{recursive:true});
+ writeFileSync(join(dir,'Microsoft.PowerShell.Utility','Microsoft.PowerShell.Utility.psd1'),'@{\r\nGUID="1DA87E53-152B-403E-98DC-74D7B4D63D59"\r\nModuleVersion="7.0.0.0"\r\nCompatiblePSEditions=@("Core")\r\nPowerShellVersion="3.0"\r\nNestedModules="Microsoft.PowerShell.Commands.Utility.dll"\r\nCmdletsToExport="Get-FileHash","New-Guid"\r\nFunctionsToExport=@()\r\n}\r\n');
+ return `${dir};${process.env.SystemRoot}\\System32\\WindowsPowerShell\\v1.0\\Modules;${process.env.PSModulePath??''}`;
+}
 function setup(name){
  const sim=mkdtempSync(join(tmpdir(),`tw-d73-${name}-`)),bin=join(sim,'bin'),evidence=join(sim,'RUNNER~1 evidence');mkdirSync(bin);mkdirSync(join(sim,'ghconfig'));
  writeFileSync(join(bin,'fake-gh.mjs'),FAKE_GH);writeFileSync(join(bin,'fake-node.mjs'),FAKE_NODE);
@@ -163,8 +173,7 @@ function setup(name){
  writeFileSync(join(sim,'state.json'),JSON.stringify({variable:null,runs,k:0,deletes:0,dispatched:0,cancels:[]}));
  // Defence in depth: if the fake were ever bypassed, the real gh has no credentials and no reachable host.
  const inherited=Object.fromEntries(Object.entries(process.env).filter(([key])=>key.toUpperCase()!=='PATH'));
- // Node may inherit a PowerShell 7 module path; the child runs Windows PowerShell 5.1.
- const childEnv={...inherited,PSModulePath:`${process.env.SystemRoot}\\System32\\WindowsPowerShell\\v1.0\\Modules;${process.env.PSModulePath??''}`,PATH:`${bin};${process.env.PATH}`,TW_SIM:sim,TW_SCENARIO:name,TW_REV:REV,TW_OWNER:OWNER,TW_REAL_NODE:process.execPath,TW_EVIDENCE:evidence,
+ const childEnv={...inherited,PSModulePath:coreUtilityShadow(join(sim,'ps7-modules')),PATH:`${bin};${process.env.PATH}`,TW_SIM:sim,TW_SCENARIO:name,TW_REV:REV,TW_OWNER:OWNER,TW_REAL_NODE:process.execPath,TW_EVIDENCE:evidence,
   TW_EVIDENCE_MODULE:pathToFileURL(resolve('scripts/tabwise/qualification-evidence.mjs')).href,GH_HOST:'offline.invalid',GH_TOKEN:'offline-invalid',GH_CONFIG_DIR:join(sim,'ghconfig'),GITHUB_TOKEN:''};
  return {sim,bin,evidence,childEnv};
 }
@@ -223,6 +232,10 @@ test('owner orchestration: normal path and every reported failure path against m
    if(name==='log-fail'){assert.ok(r.state.deletes>=2,'revocation retried after a failed delete with storage unavailable');assert.match(r.stdout,/OUTCOME FAILED/);}
    if(name==='other-branch')assert.ok(!r.state.cancels.includes('203'),'foreign-branch run is not cancelled');
    if(name==='not-found-text')assert.match(r.stdout,/MANUAL ACTION/);
+   if(name==='unsealable-evidence'){
+    assert.match(r.stdout,/OUTCOME FAILED/);assert.ok(!existsSync(join(r.evidence,'hashes.json')),'no seal over refused evidence');
+    assert.match(endEvent(r.evidence).failures.join('\n'),/evidence inventory refused: .*reparse point refused: planted-link/);
+   }
    if(spec.outcome&&name!=='log-fail')assert.equal(endEvent(r.evidence)?.outcome,spec.outcome);
   }finally{rmSync(r.sim,{recursive:true,force:true,maxRetries:5,retryDelay:200});}
  })));
@@ -272,6 +285,7 @@ test('Invoke-Native permits Windows tilde/space paths and refuses shell syntax b
 test('evidence inventory paths come from item names under short, long, spaced and non-normalized root aliases; reparse points refused',{skip:process.platform!=='win32'&&'Windows PowerShell 5.1 only'},()=>{
  const source=readFileSync(SCRIPT,'utf8'),start=source.indexOf('function Get-EvidenceInventory('),end=source.indexOf('\ntry{',start);
  assert.ok(start>=0&&end>start,'evidence inventory function present');
+ assert.doesNotMatch(source,/Get-FileHash\s+-/,'hashing must not depend on Windows PowerShell module autoload');
  const root=mkdtempSync(join(tmpdir(),'tw-d73-inventory-')),evidence=join(root,'RUNNER~1 evidence');
  try{
   const files={'events.jsonl':'events','obs-0001-start.json':'{}','artifact/acks.jsonl':'acks','artifact/hashes.json':'nested inventory is evidence','artifact/nested dir/deep file.json':'deep'};
@@ -280,23 +294,40 @@ test('evidence inventory paths come from item names under short, long, spaced an
   const aliases=[evidence,`${root}\\alias-pad\\..\\RUNNER~1 evidence`,`${root}/RUNNER~1 evidence/`];
   const short=spawnSync(process.env.ComSpec??'cmd.exe',['/d','/s','/c',`"for %I in ("${evidence}") do @echo %~sI"`],{encoding:'utf8',windowsVerbatimArguments:true}).stdout.trim();
   if(short&&short.toLowerCase()!==evidence.toLowerCase())aliases.push(short);
-  const payload=Buffer.from(JSON.stringify({aliases,evidence,outside:join(root,'outside')})).toString('base64');
-  const command=`Set-StrictMode -Version 2.0\n$ErrorActionPreference='Stop'\n${source.slice(start,end)}\n`+
+  const payload=Buffer.from(JSON.stringify({aliases,evidence})).toString('base64');
+  const inventory=`Set-StrictMode -Version 2.0\n$ErrorActionPreference='Stop'\n${source.slice(start,end)}\n`+
    `$data=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${payload}'))|ConvertFrom-Json\n`+
    `$results=@();foreach($a in @($data.aliases)){$results+=@{alias=$a;rows=@(Get-EvidenceInventory $a)}}\n`+
+   // An unreadable file is a hashing failure, never a skipped row.
+   `$lock=[IO.File]::Open((Join-Path $data.evidence 'events.jsonl'),'Open','Read','None')\n`+
+   `$locked=try{[void](Get-EvidenceInventory $data.evidence);'accepted'}catch{$_.Exception.Message}finally{$lock.Dispose()}\n`+
+   `ConvertTo-Json -InputObject @{results=$results;locked=$locked} -Compress -Depth 6`;
+  const refusals=`Set-StrictMode -Version 2.0\n$ErrorActionPreference='Stop'\n${source.slice(start,end)}\n`+
+   `$data=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${Buffer.from(JSON.stringify({evidence,outside:join(root,'outside'),linked:join(root,'linked evidence')})).toString('base64')}'))|ConvertFrom-Json\n`+
    `[void](New-Item -ItemType Directory -Path $data.outside);[IO.File]::WriteAllText((Join-Path $data.outside 'escape.txt'),'outside')\n`+
+   `[void](New-Item -ItemType Junction -Path $data.linked -Target $data.evidence)\n`+
+   `$root=try{[void](Get-EvidenceInventory $data.linked);'accepted'}catch{$_.Exception.Message}\n`+
    `[void](New-Item -ItemType Junction -Path (Join-Path $data.evidence 'artifact\\link') -Target $data.outside)\n`+
-   `$refusal=try{[void](Get-EvidenceInventory $data.evidence);'accepted'}catch{$_.Exception.Message}\n`+
-   `ConvertTo-Json -InputObject @{results=$results;refusal=$refusal} -Compress -Depth 6`;
-  const r=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(command,'utf16le').toString('base64')],{encoding:'utf8',timeout:30000});
-  assert.equal(r.status,0,r.stdout+r.stderr);
-  const {results,refusal}=JSON.parse(r.stdout),expected=Object.keys(files).map(path=>path.replaceAll('/','\\')).sort();
-  assert.equal(results.length,aliases.length);
-  for(const {alias,rows} of results){
-   const paths=rows.map(row=>row.path);
-   assert.deepEqual([...paths].sort(),expected,`complete inventory for ${alias}`);
-   for(const {path,sha256} of rows)assert.equal(createHash('sha256').update(readFileSync(join(evidence,path))).digest('hex'),sha256,`${alias}: ${path}`);
+   `$nested=try{[void](Get-EvidenceInventory $data.evidence);'accepted'}catch{$_.Exception.Message}\n`+
+   `ConvertTo-Json -InputObject @{root=$root;nested=$nested} -Compress`;
+  const base=Object.fromEntries(Object.entries(process.env).filter(([key])=>key.toUpperCase()!=='PSMODULEPATH'));
+  const ps=(command,PSModulePath)=>{
+   const r=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(command,'utf16le').toString('base64')],{encoding:'utf8',timeout:30000,env:{...base,PSModulePath}});
+   assert.equal(r.status,0,r.stdout+r.stderr);return JSON.parse(r.stdout);
+  };
+  const expected=Object.keys(files).map(path=>path.replaceAll('/','\\')).sort();
+  for(const [label,modules] of [['inherited module path',process.env.PSModulePath??''],['PowerShell 7 module path',coreUtilityShadow(join(root,'ps7-modules'))]]){
+   const {results,locked}=ps(inventory,modules);
+   assert.equal(results.length,aliases.length,label);
+   for(const {alias,rows} of results){
+    const paths=rows.map(row=>row.path);
+    assert.deepEqual([...paths].sort(),expected,`${label}: complete inventory for ${alias}`);
+    for(const {path,sha256} of rows)assert.equal(createHash('sha256').update(readFileSync(join(evidence,path))).digest('hex'),sha256,`${label}, ${alias}: ${path}`);
+   }
+   assert.match(locked,/being used by another process/,`${label}: unreadable evidence refused`);
   }
-  assert.match(refusal,/reparse point refused: artifact\\link/);
+  const refused=ps(refusals,coreUtilityShadow(join(root,'ps7-modules')));
+  assert.match(refused.root,/evidence directory refused/,'junction evidence root refused');
+  assert.match(refused.nested,/reparse point refused: artifact\\link/,'nested junction refused');
  }finally{rmSync(root,{recursive:true,force:true});}
 });

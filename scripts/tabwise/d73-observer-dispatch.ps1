@@ -14,7 +14,8 @@ Worst-case exposure: ExposureSeconds + PollSeconds + RevokeSeconds + 5 x Command
 Limitation: while the variable exists, another dispatch by the owner account at this SHA would also be admitted. That
 is detected and cancelled (outcome UNRESOLVED) but cannot be prevented, and cancellation is asynchronous.
 
-Exit: 0 PASS (admitted, run succeeded, verified artifact with candidate_pass, revoked, no other run) or PREFLIGHT-OK;
+Exit: 0 PASS (admitted, run succeeded, verified artifact with candidate_pass, revoked, no other run) or PREFLIGHT-OK,
+      each only with complete local evidence sealed by hashes.json;
       1 FAILED (revoked and nothing left running, but not PASS; includes refusals before any change);
       3 UNRESOLVED (revocation or cancellation unconfirmed, ambiguous or additional runs). Limits can only be shortened.
 #>
@@ -122,10 +123,16 @@ function Get-EvidenceInventory([string]$Directory) {
    if($item.PSIsContainer){$pending.Enqueue(@($item,($rel+'\')));continue}
    if($rel -ceq 'hashes.json'){continue}
    if(-not $seen.Add($rel)){throw "ambiguous evidence path: $rel"}
-   [void]$rows.Add([ordered]@{path=$rel;sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $item.FullName).Hash.ToLowerInvariant()})
+   [void]$rows.Add([ordered]@{path=$rel;sha256=(Get-Sha256 $item.FullName)})
   }
  }
  $rows|Sort-Object {$_.path}
+}
+# .NET hashing, not Get-FileHash: in Windows PowerShell 5.1 that is a module function whose autoload fails when a
+# PowerShell 7 module path is inherited. Any read failure throws.
+function Get-Sha256([string]$Path) {
+ $sha=[System.Security.Cryptography.SHA256]::Create()
+ try{$stream=[System.IO.File]::OpenRead($Path);try{([BitConverter]::ToString($sha.ComputeHash($stream)) -replace '-','').ToLowerInvariant()}finally{$stream.Dispose()}}finally{$sha.Dispose()}
 }
 
 try{
@@ -207,13 +214,19 @@ try{
   }catch{Add-Unresolved ('run cleanup raised an error: '+$_.Exception.Message)}
  }
  if(-not $script:EvidenceOk){[void]$script:Failures.Add('local evidence storage failed')}
+ # Evidence that cannot be inventoried can never back PASS. Checked before the outcome so the end event carries it.
+ try{[void](Get-EvidenceInventory $EvidenceDirectory)}catch{Add-Failure ('evidence inventory refused: '+$_.Exception.Message)}
  $outcome=if($script:Unresolved.Count -or $script:VarState -eq 'unresolved'){'UNRESOLVED'}elseif($script:Failures.Count){'FAILED'}elseif($PreflightOnly){'PREFLIGHT-OK'}elseif($script:EvidencePass -and $script:VarState -eq 'revoked'){'PASS'}else{'FAILED'}
  Write-Event 'end' @{outcome=$outcome;run_id=$script:RunId;admitted=$script:Admitted;conclusion=$script:Conclusion;variable=$script:VarState;failures=@($script:Failures);unresolved=@($script:Unresolved)}
+ $sealed=$false
  try{
   $hashes=@(Get-EvidenceInventory $EvidenceDirectory)
   $hashPath=Join-Path $EvidenceDirectory 'hashes.json';[System.IO.File]::WriteAllText($hashPath,(ConvertTo-Json -InputObject $hashes -Depth 4),$Utf8)
-  Write-Host "hashes.json sha256 $((Get-FileHash -Algorithm SHA256 -LiteralPath $hashPath).Hash.ToLowerInvariant())"
- }catch{Write-Host 'evidence hashing failed' -ForegroundColor Red}
+  Write-Host "hashes.json sha256 $(Get-Sha256 $hashPath)"
+  $sealed=$script:EvidenceOk
+ }catch{Write-Host "evidence hashing failed: $($_.Exception.Message)" -ForegroundColor Red}
+ # A seal failure after the end event (including an unwritten end event) still fails the run; UNRESOLVED stays UNRESOLVED.
+ if(-not $sealed){if($outcome -ne 'UNRESOLVED'){$outcome='FAILED'};Write-Event 'evidence-unsealed' @{outcome=$outcome}}
  if($script:VarState -eq 'unresolved'){Write-Host "MANUAL ACTION: delete repository variable $Variable now and confirm it is absent." -ForegroundColor Red}
  Write-Host "OUTCOME $outcome  evidence: $EvidenceDirectory"
  $script:Exit=switch($outcome){'PASS'{0}'PREFLIGHT-OK'{0}'UNRESOLVED'{3}default{1}}
