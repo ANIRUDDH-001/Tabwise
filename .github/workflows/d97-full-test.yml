@@ -3,26 +3,41 @@ name: D97 full hosted npm test
 on:
   push:
     branches:
-      - ci/d97-fulltest-e9a62d2
+      - ci/d97-fulltest-d73fix
 
 permissions:
   contents: read
 
 concurrency:
-  group: d97-fulltest-e9a62d2
+  group: d97-fulltest-d73fix
   cancel-in-progress: false
+
+# The owner replaces CANDIDATE_SHA with the commit that carries the D73 fix before pushing this branch.
+# CANDIDATE_TREE pins that commit's content: it was computed from the prepared diff on top of BASE_SHA.
+env:
+  CANDIDATE_SHA: 52c97922069a93510699d02e9ddd38a7eb3b5a6f
+  CANDIDATE_TREE: 22baac39b7dda64c22f083ae5ca93adcd7eb54a3
+  BASE_SHA: e9a62d29fc62268cf68f4d7bca0e1e0e5dff4a98
+  EXPECTED_TESTS: '1066'
 
 jobs:
   full-test:
-    if: github.ref == 'refs/heads/ci/d97-fulltest-e9a62d2' && github.run_attempt == 1
+    if: github.ref == 'refs/heads/ci/d97-fulltest-d73fix' && github.run_attempt == 1
     runs-on: windows-2025
     timeout-minutes: 45
 
     steps:
+      - name: Refuse an unset candidate
+        shell: pwsh
+        run: |
+          if ($env:CANDIDATE_SHA -cnotmatch '^[0-9a-f]{40}$') {
+            throw 'CANDIDATE_SHA is not a full commit SHA'
+          }
+
       - name: Checkout exact candidate with full history
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: e9a62d29fc62268cf68f4d7bca0e1e0e5dff4a98
+          ref: ${{ env.CANDIDATE_SHA }}
           fetch-depth: 0
           persist-credentials: false
 
@@ -35,8 +50,16 @@ jobs:
         shell: pwsh
         run: |
           $head = (git rev-parse HEAD).Trim()
-          if ($head -cne 'e9a62d29fc62268cf68f4d7bca0e1e0e5dff4a98') {
+          if ($head -cne $env:CANDIDATE_SHA) {
             throw 'Wrong source commit'
+          }
+          $tree = (git rev-parse 'HEAD^{tree}').Trim()
+          if ($tree -cne $env:CANDIDATE_TREE) {
+            throw "Candidate tree $tree is not the prepared tree"
+          }
+          $parent = (git rev-parse 'HEAD^').Trim()
+          if ($parent -cne $env:BASE_SHA) {
+            throw "Candidate parent $parent is not the base commit"
           }
           $state = Get-Content scripts/tabwise/r2-status.json -Raw | ConvertFrom-Json
           if ($state.enabled -ne $false -or $state.verdict -cne 'BLOCK') {
@@ -46,6 +69,8 @@ jobs:
           New-Item -ItemType Directory -Force -Path $out | Out-Null
           @(
             "tested_sha=$head"
+            "tested_tree=$tree"
+            "base_sha=$parent"
             "workflow_sha=$env:GITHUB_SHA"
             "workflow_ref=$env:GITHUB_REF"
             "run_id=$env:GITHUB_RUN_ID"
@@ -83,44 +108,51 @@ jobs:
             Set-ItemProperty -LiteralPath $f -Name IsReadOnly -Value $true
           }
 
-      - name: Exact concurrent npm test and TAP validation
+      - name: Exact concurrent npm test and reporter-total validation
         timeout-minutes: 25
         shell: pwsh
         run: |
           $log = Join-Path $env:RUNNER_TEMP 'd97-full/npm-test.log'
           npm test 2>&1 | Tee-Object -FilePath $log
           $testExit = $LASTEXITCODE
+
+          # Node 24 prints its run totals with the spec reporter as "<U+2139> <key> <n>", and with TAP as "# <key> <n>".
+          # Every total must appear exactly once, in one of those two forms; anything else fails closed.
+          $text = Get-Content $log -Raw -Encoding utf8
+          $pattern = '(?m)^(?:' + [char]0x2139 + '|#) (tests|suites|pass|fail|cancelled|skipped|todo|duration_ms) ([0-9]+(?:\.[0-9]+)?)\r?$'
+          $totals = [ordered]@{}
+          $dupes = @()
+          foreach ($m in [regex]::Matches($text, $pattern)) {
+            $key = $m.Groups[1].Value
+            if ($totals.Contains($key)) { $dupes += $key; continue }
+            $totals[$key] = $m.Groups[2].Value
+          }
+          $totals['npm_exit'] = $testExit
+          $totals | ConvertTo-Json -Compress |
+            Set-Content "$env:RUNNER_TEMP/d97-full/test-totals.json"
+
+          if ($dupes.Count) {
+            throw "Ambiguous reporter totals: $($dupes -join ',')"
+          }
+          foreach ($key in @('tests','pass','fail','cancelled','skipped','todo')) {
+            if (-not $totals.Contains($key) -or $totals[$key] -cnotmatch '^[0-9]+$') {
+              throw "Missing reporter total: $key"
+            }
+          }
           if ($testExit -ne 0) {
             throw "npm test failed: $testExit"
           }
-
-          $tap = Get-Content $log -Raw
-          $totals = @{}
-          $pattern = '(?m)^# (tests|pass|fail|cancelled|skipped|todo) (\d+)\r?$'
-
-          foreach ($m in [regex]::Matches($tap, $pattern)) {
-            $totals[$m.Groups[1].Value] = [int]$m.Groups[2].Value
+          $expected = [int]$env:EXPECTED_TESTS
+          if ([int]$totals.tests -ne $expected -or
+              [int]$totals.pass -ne $expected -or
+              [int]$totals.fail -ne 0 -or
+              [int]$totals.cancelled -ne 0 -or
+              [int]$totals.skipped -ne 0 -or
+              [int]$totals.todo -ne 0) {
+            throw "Unexpected reporter totals: $($totals | ConvertTo-Json -Compress)"
           }
 
-          foreach ($key in @('tests','pass','fail','cancelled','skipped','todo')) {
-            if (-not $totals.ContainsKey($key)) {
-              throw "Missing TAP total: $key"
-            }
-          }
-
-          $totals | ConvertTo-Json -Compress |
-            Set-Content "$env:RUNNER_TEMP/d97-full/tap-totals.json"
-
-          if ($totals.tests -ne 1065 -or
-              $totals.pass -ne 1065 -or
-              $totals.fail -ne 0 -or
-              $totals.cancelled -ne 0 -or
-              $totals.skipped -ne 0 -or
-              $totals.todo -ne 0) {
-            throw "Unexpected TAP totals: $($totals | ConvertTo-Json -Compress)"
-          }
-
-          Write-Host 'D97 FULL TEST: 1065/1065 PASS'
+          Write-Host "D97 FULL TEST: $expected/$expected PASS"
 
       - name: Final source integrity
         if: always()
