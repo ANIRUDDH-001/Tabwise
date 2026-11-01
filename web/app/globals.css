@@ -77,3 +77,73 @@
 @media(prefers-reduced-motion:reduce){.skeleton{animation:none}.drawer{animation:none}}
 @media print{.menu-button,.drawer,.drawer-backdrop{display:none!important}}
 @media(max-width:740px){.recorder-only{display:none}}
+/* ---- Successful R1 trace (T-P0-10 Step 2a) ---- */
+.run-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 22px}
+.run-stats>div{border:1px solid var(--border);border-radius:9px;padding:12px 14px;background:#fff}
+.run-stats dt{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#697485}
+.run-stats dd{margin:4px 0 0;font-size:24px;font-weight:600;line-height:1.2}
+.run-stats dd small{display:block;font-size:12px;font-weight:400;color:var(--muted);margin-top:2px}
+.speech-steps{list-style:none;margin:0;padding:4px 18px 10px;counter-reset:step}
+.speech-steps li{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--border);counter-increment:step}
+.speech-steps li:last-child{border-bottom:0}
+.speech-steps .key{justify-self:start;overflow-wrap:anywhere}
+.speech-steps .quote{margin:0;color:var(--speech);overflow-wrap:anywhere}
+.hero-scope .small-note{margin:6px 0 0}
+@media(max-width:740px){.run-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.speech-steps li{grid-template-columns:1fr;gap:6px}}
+/* Print: no skip link or dev chrome; let long panels flow across pages instead of leaving blank space. */
+@media print{
+ @page{margin:14mm 14mm 16mm}
+ .skip,nextjs-portal,.crumb,.print-control{display:none!important}
+ body{background:#fff}
+ .report,.workspace-main{margin:0;padding:0;max-width:none}
+ .panel,.provenance,.report .provenance{break-inside:auto}
+ .provenance>dt,.provenance>dd,.provenance .contents,.limitations li,.speech-steps li,.run-stats>div,.scope-note{break-inside:avoid}
+ h1,h2,h3,.panel-head{break-after:avoid}
+ .run-stats{grid-template-columns:repeat(4,1fr)}
+ .page-title{margin-bottom:8px}
+ .panel-head{padding:10px 16px 8px}.panel-body{padding:10px 16px}.speech-steps li{padding:6px 0}.report h2{margin:16px 0 6px}
+}
+/* ---- WEB-05: shell cohesion, private area, dashboard ---- */
+.workspace{min-height:calc(100vh - 84px)}
+.workspace+.footer{margin-top:0}
+.area-badge{margin:0 0 18px 12px;display:inline-block;font-size:11px;font-weight:600;color:#0a4fb8;background:#eaf2ff;border:1px solid #cfe0fb;border-radius:999px;padding:3px 10px}
+.workspace-private .sidebar{background:#f6f9ff}
+.area-switch{display:flex;flex-direction:column;gap:2px;margin:6px 12px 0;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:13px;font-weight:550;color:#233244}
+.area-switch small{font-weight:400;font-size:11px;color:var(--muted)}
+.area-switch:hover{border-color:#b8c7de}
+.status-link{margin-top:8px}
+.next-card{display:flex;justify-content:space-between;align-items:center;gap:24px;border:1px solid #cfe0fb;background:#f7faff;border-radius:10px;padding:20px 24px;margin:20px 0 16px}
+.next-card h2{font-size:20px;margin:2px 0 4px}.next-card p{margin:0;color:var(--muted);font-size:14px;max-width:62ch}
+.next-card .actions{margin:0;flex-shrink:0}
+.eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#0a4fb8}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.dash-grid .panel{margin:0}
+.gate-note{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin:12px 0}
+.next-step{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:14px;margin:10px 0}.next-step>span:first-child{font-weight:600}
+.row-actions{text-align:right}
+.data-table td small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.empty-state{padding:20px 22px}
+@media(max-width:1000px){.dash-grid{grid-template-columns:1fr}.next-card{flex-direction:column;align-items:flex-start}}
+@media(max-width:740px){.workspace{min-height:0}.row-actions{text-align:left}}
+@media print{.workspace{min-height:0}}
+.stat{padding:14px 18px}.stat strong{font-size:26px;line-height:1.1}
+@media(max-width:740px){.stat-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.stat{padding:10px 12px}.stat strong{font-size:22px}.stat span{font-size:12px}.next-card .actions{width:100%}}
+/* Demo density: tighter journey rows inside the workspace shell; aligned section headings; paired scope notes. */
+.workspace-main .section-heading{align-items:center;margin:30px 0 10px}
+.workspace-main .section-heading .section-title{margin:0}
+.workspace-main .journey-row{padding:14px 10px}
+.scope-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}.scope-pair .scope-note{margin:0;max-width:none}
+@media(max-width:1000px){.scope-pair{grid-template-columns:1fr}}
+@media(max-width:740px){.workspace-main .section-heading{display:flex}.workspace-main .journey-row{padding:12px 0}}
+/* Homepage: align the journeys section with the hero's content edge at every width. */
+.product-section{max-width:1440px;margin:56px auto 64px;padding:0 70px}
+@media(max-width:1000px){.product-section{margin:44px auto;padding:0 40px}}
+@media(max-width:740px){.product-section{margin:36px auto;padding:0 24px}}
+/* Tablet: stacked tables become two-column cards instead of four cramped columns. */
+@media(min-width:741px) and (max-width:1000px){
+ .data-table.stack thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+ .data-table.stack tbody{display:block}.data-table.stack tr{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;padding:12px 0;border-top:1px solid var(--border)}
+ .data-table.stack td{display:block;border-top:0;padding:6px 18px}
+ .data-table.stack td::before{content:attr(data-label);display:block;font-size:11px;color:#677485;margin-bottom:2px}
+ .row-actions{text-align:left}
+}

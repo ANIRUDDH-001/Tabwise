@@ -22,6 +22,7 @@ export default function Recorder({id,flow}:{id:string,flow:string}){
 function RecorderSession({id,flow}:{id:string,flow:string}){
  const rules=useRef(editorRules(id)).current;
  const [steps,setStepsState]=useState<Step[]>(initial[flow]),[recording,setRecording]=useState(false),[palette,setPalette]=useState(false),[message,setMessage]=useState(''),[variant,setVariant]=useState('broken');
+ const [account,setAccount]=useState<{kind:string,id?:string,n?:number}|null>(null);
  const [savingAccount,setSavingAccount]=useState(false),[storageWarning,setStorageWarning]=useState(false);
  const [banner,setBanner]=useState<{steps:Step[],updatedAt:number}|null>(null),[versions,setVersions]=useState<VersionRow[]>([]),[skipped,setSkipped]=useState(0);
  const [preview,setPreview]=useState<{sha:string,steps:Step[]}|null>(null),[savingLocal,setSavingLocal]=useState(false);
@@ -82,9 +83,9 @@ function RecorderSession({id,flow}:{id:string,flow:string}){
  function discard(){if(!clearDraft(browserStorage(),id).ok){setMessage("The draft couldn't be discarded. It is still available to restore.");return;}setBanner(null);setMessage('Draft discarded.');}
  async function saveAccount(){
   if(savingAccount||recording)return;if(!steps.length){setMessage('Add at least one step before saving.');return;}
-  setSavingAccount(true);setMessage('Saving to your account…');
-  try{const result=await saveJourneyToAccount({version:'0.1.0',journey_id:id,name:flow,steps:renumber(steps)});setMessage(`Saved to your account · version ${result.n} · SHA256 ${result.sha256}. No run has started.`);}
-  catch(error){setMessage(error instanceof Error?error.message:'Saving could not be confirmed. Check your workspace.');}
+  setSavingAccount(true);setAccount(null);setMessage('Saving to your account…');
+  try{const result=await saveJourneyToAccount({version:'0.1.0',journey_id:id,name:flow,steps:renumber(steps)});setAccount({kind:'saved',id:result.id,n:result.n});setMessage(`Saved to your account · version ${result.n} · SHA256 ${result.sha256}. No run has started.`);}
+  catch(error){setAccount({kind:(error as {kind?:string})?.kind??'unconfirmed'});setMessage(error instanceof Error?error.message:'Saving could not be confirmed. Check your workspace.');}
   finally{setSavingAccount(false);}
  }
  async function save(){
@@ -130,7 +131,9 @@ function RecorderSession({id,flow}:{id:string,flow:string}){
     {palette&&<div className="palette"><h3>Choose test data</h3><p style={{fontSize:12}}>This value will be visible in a future public workflow input.</p>{Object.entries(PALETTE).map(([key,value])=><button type="button" key={key} onClick={()=>choose(value)}>{value}</button>)}</div>}
     <ol className="step-list">{steps.map((s,i)=><li key={i}><span className="step-number">{s.step}</span><div><code>{s.key==='type'?s.text:s.key}</code>{s.checkpoint&&<small className="muted" style={{display:'block'}}>Checkpoint</small>}</div><div className="step-buttons"><button type="button" className="iconbutton" aria-label={`Move step ${i+1} up`} disabled={recording||i===0} onClick={()=>move(i,-1)}>↑</button><button type="button" className="iconbutton" aria-label={`Move step ${i+1} down`} disabled={recording||i===steps.length-1} onClick={()=>move(i,1)}>↓</button><button type="button" className="iconbutton" aria-label={`Toggle checkpoint for step ${i+1}`} aria-pressed={s.checkpoint} disabled={recording} onClick={()=>commit(stepsRef.current.map((v,n)=>n===i?{...v,checkpoint:!v.checkpoint}:v))}>◇</button><button type="button" className="iconbutton" aria-label={`Delete step ${i+1}`} disabled={recording} onClick={()=>commit(stepsRef.current.filter((_,n)=>n!==i))}>×</button></div></li>)}</ol>
     {!steps.length&&<p className="muted small-note">No steps yet. Press “Record keys”, then use Tab, Shift+Tab, Enter and Space inside Fernway.</p>}
-    <div className="actions"><button type="button" className="button" onClick={save} disabled={recording||savingLocal}>{savingLocal?'Saving local version…':'Save local version'}</button><button type="button" className="button secondary" disabled={recording||savingAccount} onClick={saveAccount}>{savingAccount?'Saving to account…':'Save to my account'}</button><Link className="textlink" href="/w/me/journeys">Open my saved versions</Link></div>
+    <div className="actions"><button type="button" className="button" onClick={save} disabled={recording||savingLocal}>{savingLocal?'Saving local version…':'Save local version'}</button><button type="button" className="button secondary" disabled={recording||savingAccount} onClick={saveAccount}>{savingAccount?'Saving to account…':'Save to my account'}</button><Link className="textlink" href="/w/me/journeys">Account saved journeys</Link></div>
+    {account?.kind==='saved'&&account.id&&<p className="next-step"><span>Next:</span> <Link className="textlink" href={`/journeys/versions/${account.id}`}>Inspect account version {account.n}</Link> · <Link className="textlink" href="/w/me/journeys">All saved journeys</Link></p>}
+    {account?.kind==='signin'&&<p className="next-step"><span>Next:</span> <a className="button small" href="/auth/login">Sign in with GitHub</a> then save again. Your draft is kept in this browser.</p>}
     <div className="notice">Saving to your account needs GitHub sign-in. Live execution remains gated pending independent worker review; nothing here starts a run. <Link className="textlink" href="/status">What works today</Link></div>
    </section></div></div>
   {versionsPanel}

@@ -70,3 +70,25 @@ test('blocked patch and verification pages state the real reason, not loading or
  await page.goto(base+'/verifications/'+id);await expect(page.getByText("Sign-in isn't set up").first()).toBeVisible();
  assert.ok(!(await page.locator('main').innerText()).includes('temporarily unavailable'));
 });
+test('editor account save explains the next step for unconfigured, signed-out and saved outcomes',async t=>{
+ const page=await pageFor(t);await page.goto(base+'/journeys/fernway-seat/edit');
+ const save=page.getByRole('button',{name:'Save to my account',exact:true});
+ await page.route('**/api/journeys',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({reason:'sign_in_configuration_pending'})}));
+ await save.click();await expect(page.locator('main').getByText("Sign-in isn't set up").first()).toBeVisible();
+ await expect(page.getByRole('link',{name:'Sign in with GitHub',exact:true})).toHaveCount(0);
+ await page.unroute('**/api/journeys');
+ await page.route('**/api/journeys',route=>route.fulfill({status:401,contentType:'application/json',body:JSON.stringify({reason:'sign_in_required'})}));
+ await save.click();await expect(page.getByRole('link',{name:'Sign in with GitHub',exact:true})).toHaveAttribute('href','/auth/login');
+ await page.unroute('**/api/journeys');
+ await page.route('**/api/journeys',async route=>{const body=route.request().postData();const {createHash}=await import('node:crypto');
+  await route.fulfill({status:201,contentType:'application/json',body:JSON.stringify({id:'11111111-1111-4111-8111-111111111111',n:3,sha256:createHash('sha256').update(body).digest('hex')})});});
+ await save.click();await expect(page.getByRole('link',{name:'Inspect account version 3',exact:true})).toHaveAttribute('href','/journeys/versions/11111111-1111-4111-8111-111111111111');
+});
+test('private workspace sidebar shows only workspace links plus a switch back to the public demo',async t=>{
+ const page=await pageFor(t);await page.goto(base+'/w/me/journeys');
+ const side=page.getByRole('complementary',{name:'Section navigation'});
+ await expect(side.getByText('Private · your account')).toBeVisible();
+ await expect(side.getByRole('link',{name:'R1 trace'})).toHaveCount(0);
+ await side.getByRole('link',{name:/Public demo/}).click();await expect(page).toHaveURL(base+'/w/demo');
+ await expect(page.getByRole('complementary',{name:'Section navigation'}).getByRole('link',{name:'Saved journeys'})).toHaveCount(0);
+});

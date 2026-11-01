@@ -8,3 +8,10 @@ test('account save uses existing journey API and confirms the exact submitted di
 test('account save refuses missing sessions, unknown network outcomes and wrong stored hashes',async()=>{
  for(const fetchImpl of [async()=>Response.json({reason:'sign_in_required'},{status:401}),async()=>{throw Error('lost response');},async()=>Response.json({id:'v',n:1,sha256:'0'.repeat(64)},{status:201})])await assert.rejects(()=>saveJourneyToAccount(journey,fetchImpl));
 });
+test('account save failures say which next step applies: sign in, configuration pending or unknown outcome',async()=>{
+ const kinds=[];
+ for(const [status,reason] of [[401,'sign_in_required'],[503,'sign_in_configuration_pending'],[503,'journey_service_unavailable'],[500,'request_failed']]){
+  try{await saveJourneyToAccount(journey,async()=>Response.json({reason},{status}));}catch(error){kinds.push(error.kind);if(error.kind==='config')assert.match(error.message,/isn't set up/);}
+ }
+ assert.deepEqual(kinds,['signin','config','unavailable','unconfirmed']);
+});

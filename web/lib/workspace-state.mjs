@@ -19,3 +19,21 @@ export function workspaceSummary(data){
  const reports=runs.filter(r=>r?.status==='completed'&&r?.evidence_status==='complete'||r?.diagnostic_evidence_available===true);
  return {counts:{journeys:versions.length,runs:runs.length,reports:reports.length},latest:{journeys:versions.slice(0,3),runs:runs.slice(0,3),reports:reports.slice(0,3)},versions,runs,reports,catalog:list(data?.catalog)};
 }
+// Readable labels for account data (WEB-05). Pure: everything shown is derived from the /api/workspace payload.
+export function journeyName(journeyId,catalog){return (Array.isArray(catalog)?catalog:[]).find(j=>j.id===journeyId)?.name??journeyId;}
+export function savedOn(iso){
+ if(typeof iso!=='string')return null;const d=new Date(iso);if(Number.isNaN(d.getTime()))return null;
+ return `${d.toISOString().slice(0,10)} ${d.toISOString().slice(11,16)} UTC`;
+}
+// One row per journey: newest version first, with its count and the editor to continue in.
+export function savedJourneyGroups(summary){
+ const groups=new Map();
+ for(const v of summary?.versions??[]){if(!v||typeof v.journey_id!=='string')continue;const g=groups.get(v.journey_id)??{journey_id:v.journey_id,name:journeyName(v.journey_id,summary.catalog),editHref:`/journeys/${v.journey_id}/edit`,versions:[]};g.versions.push(v);groups.set(v.journey_id,g);}
+ return [...groups.values()].map(g=>{const versions=[...g.versions].sort((a,b)=>(b.n??0)-(a.n??0));return {...g,versions,latest:versions[0],count:versions.length};});
+}
+// The single most useful next step for this account. Runs stay gated, so the next step is never "start a run".
+export function nextAction(summary){
+ const [first]=savedJourneyGroups(summary);
+ if(!first)return {title:'Save your first journey',reason:'Record keyboard steps in a Fernway journey, then choose “Save to my account” in the editor.',primary:{label:'Choose a journey',href:'/journeys'},secondary:null};
+ return {title:`Continue with ${first.name}`,reason:`Inspect saved version ${first.latest.n}, or open this browser's local draft. The editor does not automatically load your account version.`,primary:{label:'Open local draft',href:first.editHref},secondary:{label:`Inspect version ${first.latest.n}`,href:`/journeys/versions/${first.latest.id}`}};
+}

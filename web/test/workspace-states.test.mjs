@@ -23,3 +23,14 @@ test('T-P0-03: workspace summary partitions sections and keeps the latest three'
  assert.deepEqual(s.counts,{journeys:2,runs:4,reports:2});assert.equal(s.latest.runs.length,3);assert.deepEqual(s.reports.map(r=>r.id),['r1','r3']);assert.deepEqual(s.catalog,[]);
  assert.deepEqual(workspaceSummary(null).counts,{journeys:0,runs:0,reports:0});
 });
+test('workspace next action and saved-journey groups are derived only from the payload',async()=>{
+ const {nextAction,savedJourneyGroups,journeyName,savedOn,workspaceSummary}=await import('../lib/workspace-state.mjs');
+ const empty=workspaceSummary({versions:[],runs:[],catalog:[]});
+ assert.equal(nextAction(empty).primary.href,'/journeys');assert.equal(nextAction(empty).secondary,null);assert.deepEqual(savedJourneyGroups(empty),[]);
+ const catalog=[{id:'fernway-seat',name:'Seat selection',supported:true,href:'/journeys/fernway-seat/edit'}];
+ const s=workspaceSummary({catalog,runs:[],versions:[{id:'a',journey_id:'fernway-seat',n:1,sha256:'x'},{id:'b',journey_id:'fernway-seat',n:2,sha256:'y',created_at:'2026-11-01T09:05:00Z'},{id:'c',journey_id:'unknown-id',n:1,sha256:'z'}]});
+ const groups=savedJourneyGroups(s);assert.equal(groups.length,2);assert.equal(groups[0].name,'Seat selection');assert.equal(groups[0].latest.id,'b');assert.equal(groups[0].count,2);
+ assert.equal(groups[1].name,'unknown-id');
+ const next=nextAction(s);assert.equal(next.primary.href,'/journeys/fernway-seat/edit');assert.equal(next.secondary.href,'/journeys/versions/b');assert.doesNotMatch(JSON.stringify(next),/run/i);
+ assert.equal(journeyName('nope',null),'nope');assert.equal(savedOn('2026-11-01T09:05:00Z'),'2026-11-01 09:05 UTC');assert.equal(savedOn('bad'),null);assert.equal(savedOn(undefined),null);
+});

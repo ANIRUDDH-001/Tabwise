@@ -92,3 +92,38 @@ Browser scope: isolated headless Chromium, browser-only synthetic input, externa
 - NOT TESTED: full V-19 visual/accessibility matrix on every primary page at 375/768/1280, all drawer focus paths, all tab keys, hidden-tab/page-close recovery, actual browsers blocking site storage. T-P0-11 therefore remains partially verified. T-P1-08 secondary refinements remain deferred; no P2 work attempted.
 - Claude Local next: independent browser/visual QA of the listed remaining checks, then owner-configured OAuth/backend acceptance. Account-save configuration 503 still uses its existing generic unavailable copy; improve only if needed after auth setup. No further broad redesign is needed for these fixes.
 - Branch and HEAD preserved as requested. Everything remains uncommitted; no staging, commit, push, merge, PR, install, schema/RLS, workflow, frozen R1/R2, STATE/LOG or credential-file changes. The unrelated fx-wPC4q4 directory was not inspected or changed.
+
+## CODEX-TABWISE-WEB-06 final targeted review
+
+Updated: 2026-11-01T15:26:32Z (UTC, date -u). MEASURED run id: web06-final. Branch feat/tabwise-web-e2e-finish; HEAD f9356a7190283476b0c929d5366d2762090cce74, unchanged. WEB-04/05 changes remain uncommitted.
+
+- FIXED — R1 validator accepted changed keys, step numbers, redistributed phrases, nested private metadata and invented model costs after resealing. Three new regression tests first failed; all now pass. Pinning the public projection digest anchors all published fields, while exact nested field checks reject extra metadata and malformed values fail closed. The public JSON itself was not changed.
+- PASS — independently read owner-supplied Downloads/tabwise-r1-pass-evidence-40716824856.zip without extracting private logs. ZIP SHA256 matches 419807699a32e3752f6e6637f275803b9db803c960991f0b4d8ecfe8844fc885; all seven published source hashes match archive bytes; all three public step projections exactly match their archived records. Run/commit/timestamps, attempt states, A15 settings and acknowledgement totals match summary.json. Confirmed 81/171, unconfirmable 90/171, missing 0; limitations retained. No NVDA re-execution or R2 qualification claim.
+- FIXED — malformed/non-JSON or null account-save success responses leaked raw parser/type errors. Now produce the safe unconfirmed-result message and do not offer a false success path.
+- FIXED — workspace next-action text implied editing the saved account version although the link opens this browser's local draft. Copy now distinguishes them; counts are labelled recent results because the API returns at most 25 versions. No backend/query/ownership behavior changed.
+- PASS — service-role workspace reads still filter by authenticated owner and independently reject foreign rows before artifact lookup; private/no-store API response retained. Existing guard, session code and policy-gated execution remain unchanged. Persistence library unchanged; all five recorder regressions passed.
+
+### Local origin discrepancy (MEASURED; security code unchanged)
+
+Actual credential-disabled Next production server on port 3101, bound to 127.0.0.1:
+
+| Browser/request origin | Result for POST /api/journeys |
+|---|---|
+| http://127.0.0.1:3101 | 403 same_origin_required |
+| http://localhost:3101 | 503 sign_in_configuration_pending (origin guard passed; no authenticated write) |
+| http://evil.example:3101 | 403 same_origin_required on both local hostnames |
+
+Installed Next.js 16.4.3 server/web/next-url.js parseURL normalizes loopback numeric hostnames to localhost; NextRequest.url uses that normalized URL. The browser Origin header retains 127.0.0.1, causing the exact comparison to fail. Supported local browser origin is http://localhost:3101 (use localhost with the chosen port). No loopback aliases, forwarded-host trust or CSRF exceptions were added. Smoke suite passed with TABWISE_SMOKE_URL=http://localhost:3101. Server stopped after tests; no environment file edited.
+
+### Verification and remaining acceptance
+
+- npm --prefix web test: PASS 107/107, exit 0.
+- npm --prefix web run typecheck: PASS, exit 0.
+- npm --prefix web run build: PASS, exit 0.
+- git diff --check: PASS, exit 0.
+- node --test web/test/web-smoke.browser.mjs: PASS 6/6, exit 0 (credential-disabled local server; account success/sign-in examples mocked).
+- node --test web/test/recorder.browser.mjs: PASS 5/5, exit 0.
+- This session did not repeat Claude's entire 33-state responsive matrix; that result remains owner/Claude-reported.
+- Actual source edits in this session: web/lib/r1-pass.mjs, web/lib/account-save.mjs, web/lib/workspace-state.mjs, web/components/OwnedWorkspace.tsx. Added web/test/web06-integrity.test.mjs; appended this handoff. Existing tests, snapshot bytes, security core, settings, workflows, schema, R1/R2 infrastructure and excluded paths were not edited.
+- BLOCKED/NOT TESTED: real GitHub OAuth callback, PKCE/session-cookie survival across redirects and refresh, authenticated account save/read with exact saved-version hash, second-user API isolation and database RLS acceptance. Mocks and offline owner-filter tests do not establish these results.
+- Ready for owner checkpoint commit and updated Vercel Preview; no production-write authorization implied. Owner should run the real authentication acceptance against the configured Preview. No commit, push, branch integration or deployment was performed.

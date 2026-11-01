@@ -7,7 +7,7 @@ test('the displayed R1 run id and outcome come from its own data file and stay l
  assert.match(v.scope,/does not prove R2 causal diagnosis, Fernway findings, Spark output or patch verification/);
 });
 test('the PASS run cannot be presented without a validated data file',()=>{
- assert.equal(R1_PASS_LEDGER.validated,false);assert.equal(existsSync(new URL('../data/r1-pass.json',import.meta.url)),false);
+ assert.equal(existsSync(new URL('../data/r1-pass.json',import.meta.url)),true);
  assert.equal(r1View(r1).passNotice,R1_PASS_PENDING);
  assert.equal(r1View(r1,{validated:false,result:'PASS'}).passNotice,R1_PASS_PENDING);
  assert.notEqual(r1.run_id,R1_PASS_LEDGER.run_id);
