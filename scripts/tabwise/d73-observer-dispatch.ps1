@@ -107,6 +107,26 @@ function Stop-Run([string]$Id,[string]$Why) {
  do{if((Get-Decision 'terminal' (Get-Response (Get-Api 'run' "actions/runs/$Id"))) -eq $true){Write-Event 'run-terminal' @{run_id=$Id};return $true};Start-Sleep -Seconds 1}while((Get-Date) -lt $deadline)
  Add-Unresolved "run $Id still not terminal after cancellation request";return $false
 }
+# Evidence inventory. Each relative path is built from item names only, never from the root string's length, which
+# differs between 8.3 short and long aliases of one directory. Reparse points, odd names and duplicates are refused.
+function Get-EvidenceInventory([string]$Directory) {
+ $rows=New-Object System.Collections.ArrayList;$seen=New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
+ $pending=New-Object System.Collections.Queue;$pending.Enqueue(@((Get-Item -LiteralPath $Directory -Force),''))
+ while($pending.Count){
+  $dir,$prefix=$pending.Dequeue()
+  if(-not $dir.PSIsContainer -or ($dir.Attributes -band [IO.FileAttributes]::ReparsePoint)){throw "evidence directory refused: $prefix"}
+  foreach($item in @(Get-ChildItem -LiteralPath $dir.FullName -Force)){
+   $rel=$prefix+$item.Name
+   if($item.Name -cnotmatch '^[^\\/:*?"<>|\x00-\x1f]+\z' -or $item.Name -eq '.' -or $item.Name -eq '..'){throw "evidence name refused: $rel"}
+   if($item.Attributes -band [IO.FileAttributes]::ReparsePoint){throw "evidence reparse point refused: $rel"}
+   if($item.PSIsContainer){$pending.Enqueue(@($item,($rel+'\')));continue}
+   if($rel -ceq 'hashes.json'){continue}
+   if(-not $seen.Add($rel)){throw "ambiguous evidence path: $rel"}
+   [void]$rows.Add([ordered]@{path=$rel;sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $item.FullName).Hash.ToLowerInvariant()})
+  }
+ }
+ $rows|Sort-Object {$_.path}
+}
 
 try{
  :main do{
@@ -190,7 +210,7 @@ try{
  $outcome=if($script:Unresolved.Count -or $script:VarState -eq 'unresolved'){'UNRESOLVED'}elseif($script:Failures.Count){'FAILED'}elseif($PreflightOnly){'PREFLIGHT-OK'}elseif($script:EvidencePass -and $script:VarState -eq 'revoked'){'PASS'}else{'FAILED'}
  Write-Event 'end' @{outcome=$outcome;run_id=$script:RunId;admitted=$script:Admitted;conclusion=$script:Conclusion;variable=$script:VarState;failures=@($script:Failures);unresolved=@($script:Unresolved)}
  try{
-  $hashes=@(Get-ChildItem -LiteralPath $EvidenceDirectory -Recurse -File|Where-Object{$_.Name -ne 'hashes.json'}|Sort-Object FullName|ForEach-Object{[ordered]@{path=$_.FullName.Substring($EvidenceDirectory.Length+1);sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLowerInvariant()}})
+  $hashes=@(Get-EvidenceInventory $EvidenceDirectory)
   $hashPath=Join-Path $EvidenceDirectory 'hashes.json';[System.IO.File]::WriteAllText($hashPath,(ConvertTo-Json -InputObject $hashes -Depth 4),$Utf8)
   Write-Host "hashes.json sha256 $((Get-FileHash -Algorithm SHA256 -LiteralPath $hashPath).Hash.ToLowerInvariant())"
  }catch{Write-Host 'evidence hashing failed' -ForegroundColor Red}

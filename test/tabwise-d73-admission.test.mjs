@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync,mkdirSync,mkdtempSync,rmSync,existsSync,readdirSync} from 'node:fs';
 import {spawn,spawnSync} from 'node:child_process';
-import {join,resolve} from 'node:path';
+import {join,resolve,dirname} from 'node:path';
 import {tmpdir} from 'node:os';
 import {createHash} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
@@ -263,5 +263,40 @@ test('Invoke-Native permits Windows tilde/space paths and refuses shell syntax b
   const results=JSON.parse(r.stdout);
   for(const row of results.slice(0,positive.length)){assert.equal(row.code,0,row.err);assert.ok(row.out.includes(row.arg),row.out);}
   for(const row of results.slice(positive.length)){assert.equal(row.code,-2,JSON.stringify(row));assert.match(row.err,/unsafe argument/);}
+ }finally{rmSync(root,{recursive:true,force:true});}
+});
+
+// Hosted run 41299683313: the evidence root was an 8.3 alias (RUNNER~1) while enumeration returned long names, so
+// prefix-length paths were shifted ("ce\artifact\acks.jsonl"). A non-normalized alias reproduces the length mismatch
+// deterministically on any host; a real 8.3 alias is added when the volume provides one.
+test('evidence inventory paths come from item names under short, long, spaced and non-normalized root aliases; reparse points refused',{skip:process.platform!=='win32'&&'Windows PowerShell 5.1 only'},()=>{
+ const source=readFileSync(SCRIPT,'utf8'),start=source.indexOf('function Get-EvidenceInventory('),end=source.indexOf('\ntry{',start);
+ assert.ok(start>=0&&end>start,'evidence inventory function present');
+ const root=mkdtempSync(join(tmpdir(),'tw-d73-inventory-')),evidence=join(root,'RUNNER~1 evidence');
+ try{
+  const files={'events.jsonl':'events','obs-0001-start.json':'{}','artifact/acks.jsonl':'acks','artifact/hashes.json':'nested inventory is evidence','artifact/nested dir/deep file.json':'deep'};
+  for(const [path,text] of Object.entries(files)){mkdirSync(dirname(join(evidence,path)),{recursive:true});writeFileSync(join(evidence,path),text);}
+  writeFileSync(join(evidence,'hashes.json'),'previous output is not inventoried');
+  const aliases=[evidence,`${root}\\alias-pad\\..\\RUNNER~1 evidence`,`${root}/RUNNER~1 evidence/`];
+  const short=spawnSync(process.env.ComSpec??'cmd.exe',['/d','/s','/c',`"for %I in ("${evidence}") do @echo %~sI"`],{encoding:'utf8',windowsVerbatimArguments:true}).stdout.trim();
+  if(short&&short.toLowerCase()!==evidence.toLowerCase())aliases.push(short);
+  const payload=Buffer.from(JSON.stringify({aliases,evidence,outside:join(root,'outside')})).toString('base64');
+  const command=`Set-StrictMode -Version 2.0\n$ErrorActionPreference='Stop'\n${source.slice(start,end)}\n`+
+   `$data=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${payload}'))|ConvertFrom-Json\n`+
+   `$results=@();foreach($a in @($data.aliases)){$results+=@{alias=$a;rows=@(Get-EvidenceInventory $a)}}\n`+
+   `[void](New-Item -ItemType Directory -Path $data.outside);[IO.File]::WriteAllText((Join-Path $data.outside 'escape.txt'),'outside')\n`+
+   `[void](New-Item -ItemType Junction -Path (Join-Path $data.evidence 'artifact\\link') -Target $data.outside)\n`+
+   `$refusal=try{[void](Get-EvidenceInventory $data.evidence);'accepted'}catch{$_.Exception.Message}\n`+
+   `ConvertTo-Json -InputObject @{results=$results;refusal=$refusal} -Compress -Depth 6`;
+  const r=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(command,'utf16le').toString('base64')],{encoding:'utf8',timeout:30000});
+  assert.equal(r.status,0,r.stdout+r.stderr);
+  const {results,refusal}=JSON.parse(r.stdout),expected=Object.keys(files).map(path=>path.replaceAll('/','\\')).sort();
+  assert.equal(results.length,aliases.length);
+  for(const {alias,rows} of results){
+   const paths=rows.map(row=>row.path);
+   assert.deepEqual([...paths].sort(),expected,`complete inventory for ${alias}`);
+   for(const {path,sha256} of rows)assert.equal(createHash('sha256').update(readFileSync(join(evidence,path))).digest('hex'),sha256,`${alias}: ${path}`);
+  }
+  assert.match(refusal,/reparse point refused: artifact\\link/);
  }finally{rmSync(root,{recursive:true,force:true});}
 });
