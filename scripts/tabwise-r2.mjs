@@ -19,7 +19,7 @@ import {sealR2Run, verifyR2Run} from './tabwise/r2-evidence.mjs';
 import {createQualificationIntegrity} from './tabwise/qualification-integrity.mjs';
 import {installQualificationCrashHandlers} from './tabwise/qualification-crash.mjs';
 import {windowsProcessTools} from './tabwise/r2-proctree.mjs';
-import {checkR2Entry, r2RunDir, r2ChildEnv, r2PageCommand, r2SessionData, r2PageExit, r2RunSealable, r2RunInputs, r2VerifyRun, runR2Pages, PAGE_DEADLINE_MS} from './tabwise/r2-run.mjs';
+import {checkR2Entry, r2RunDir, r2ChildEnv, r2PageCommand, r2SessionData, r2PageExit, r2RunSealable, r2RunInputs, r2RunExit, r2VerifyRun, runR2Pages, PAGE_DEADLINE_MS} from './tabwise/r2-run.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const entry = fileURLToPath(import.meta.url);
@@ -100,7 +100,7 @@ async function runAll(gate) {
   const verified = await verifyR2Run(runDir, {plan, inputs});
   console.log(JSON.stringify({schema: 'tabwise-r2-run-summary/1', run_class: verified.run_class, verified: verified.ok, errors: verified.errors,
     run_manifest_sha256: sealed.manifest_sha256, pages: outcome.pages, stopped_after: outcome.stopped_after, genuine_evidence: false}));
-  return outcome.stopped_after === null && verified.ok ? 0 : 2;
+  return r2RunExit(outcome, verified);
 }
 
 // S7: a fresh process re-verifies the sealed run from disk after every gate. Read-only: no child, seal, write or runtime.

@@ -32,6 +32,8 @@ export const RUN_SEAL_RESERVE_MS = 120_000;
 
 const PAGE_ID = /^[a-z][a-z0-9-]{0,63}$/;
 const SHA256 = /^[0-9a-f]{64}$/;
+// W1: the only class the synthetic A-5 engineering smoke accepts; genuine-unqualified and qualified are refused, never promoted.
+const ACCEPTED_CLASS = 'synthetic';
 const FIXTURE_PATH = /^[A-Za-z0-9_-][A-Za-z0-9._-]*(\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$/;
 const PLAN_KEYS = ['focusWaitMs', 'handleTimeoutMs', 'pages', 'schema', 'spec', 'split'];
 const PAGE_KEYS = ['fixture', 'fixture_sha256', 'id', 'task'];
@@ -346,16 +348,40 @@ export async function r2VerifyRun(gate, runDir) {
   return r2VerifyOutcome(await verifyR2Run(runDir, {plan, inputs}));
 }
 
-/** Exit 0 only for a verified run with a digest whose every planned page ran, exited 0 and sealed. Never a genuine-evidence claim. */
+/**
+ * W1: the one acceptance decision for --run and --verify-run, over a verifyR2Run result. Integrity (ok) is not success:
+ * coverage and order are recomputed by verifyR2Run, and on top of it every page and the run must be exactly
+ * ACCEPTED_CLASS, every page exited 0 and sealed, and nothing in the result contradicts that. Returns the refusal
+ * reasons; [] means accepted. Never a genuine-evidence or qualification claim.
+ */
+export function r2RunAcceptance(verification) {
+  if (!object(verification)) return ['run not verified'];
+  const why = [], m = object(verification.manifest) ? verification.manifest : null, pages = Array.isArray(m?.pages) ? m.pages : [];
+  if (verification.ok !== true) why.push('run not verified');
+  if (!SHA256.test(verification.manifest_sha256 ?? '')) why.push('verified run has no manifest digest');
+  if (!Array.isArray(verification.errors) || verification.errors.length) why.push('verification reported errors');
+  const ids = pages.map(p => p?.id);
+  if (!pages.length || ids.some(id => !PAGE_ID.test(id ?? '')) || new Set(ids).size !== ids.length
+    || (m && 'order' in m && JSON.stringify(m.order) !== JSON.stringify(ids))) why.push('run pages are missing, duplicated or out of plan order');
+  if (m && 'stopped_after' in m) why.push('run stopped after a page');
+  if (pages.some(p => p?.exit_code !== 0 || !SHA256.test(p?.manifest_sha256 ?? ''))) why.push('run is not complete: a planned page did not run, exit 0 and seal');
+  if (verification.run_class !== ACCEPTED_CLASS || (m && 'run_class' in m && m.run_class !== verification.run_class)) why.push(`run class is not ${ACCEPTED_CLASS}`);
+  if (pages.some(p => p?.class !== ACCEPTED_CLASS)) why.push(`a page class is not ${ACCEPTED_CLASS}`);
+  return why;
+}
+
+/** W1 --run exit: 0 only when no page stopped the coordinator and the from-disk verification is accepted by r2RunAcceptance. */
+export function r2RunExit(outcome, verification) {
+  return object(outcome) && outcome.stopped_after === null && r2RunAcceptance(verification).length === 0 ? 0 : 2;
+}
+
+/** Exit 0 only when r2RunAcceptance accepts the verified run. ok reports integrity alone; complete is acceptance. Never a genuine-evidence claim. */
 export function r2VerifyOutcome(verification) {
   const ok = verification?.ok === true && SHA256.test(verification.manifest_sha256 ?? '');
-  const pages = ok && object(verification.manifest) && Array.isArray(verification.manifest.pages) ? verification.manifest.pages : null;
-  const complete = pages !== null && pages.length > 0 && !('stopped_after' in verification.manifest)
-    && pages.every(p => p?.exit_code === 0 && SHA256.test(p?.manifest_sha256 ?? ''));
-  const errors = [...(Array.isArray(verification?.errors) ? verification.errors : []), ...(verification?.ok === true && !ok ? ['verified run has no manifest digest'] : []),
-    ...(ok && !complete ? ['run is not complete: a planned page did not run, exit 0 and seal'] : []), ...(verification?.ok !== true && !verification?.errors?.length ? ['run not verified'] : [])]
+  const refusals = r2RunAcceptance(verification), complete = refusals.length === 0;
+  const errors = [...(Array.isArray(verification?.errors) ? verification.errors : []), ...refusals]
     .slice(0, REASONS).map(r => String(r).length > REASON_CAP ? `${String(r).slice(0, REASON_CAP - 12)} [truncated]` : String(r));
-  return {code: ok && complete ? 0 : 2, summary: {schema: VERIFY_SCHEMA, ok, complete, run_class: ok ? verification.run_class : 'incomplete', errors,
+  return {code: complete ? 0 : 2, summary: {schema: VERIFY_SCHEMA, ok, complete, run_class: ok ? verification.run_class : 'incomplete', errors,
     run_manifest_sha256: ok ? verification.manifest_sha256 : null, genuine_evidence: false}};
 }
 

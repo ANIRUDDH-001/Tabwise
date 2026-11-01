@@ -499,3 +499,11 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Expected publication order: approve this exact documentation diff, owner commits/publishes it separately, verify actual final main and unchanged non-doc blobs, then prepare new exact-final-SHA R2 A-5 authorization.
 - Required CI/policies are not waived. No manually dispatched retest is inferred solely from proven documentation-only changes; historical source-test evidence remains anchored to repair6867b997.
 - Cost ceiling: zero API/model spending. No commit/push/activation/dispatch/product-worker mutation authorized by this preparation.
+
+### F-03 / R2-W1 - completion integrity (F3) (D-99, 2026-11-01T19:48:20Z)
+- Base: 35f5ffa104aec6db412a061d8a634212b8b7fa7f; owner-created worktree C:\projects\tabwise-w1-completion, branch fix/F-03-w1-completion-integrity.
+- Goal: an integrity-valid but incomplete or non-synthetic R2 run never gives exit 0, complete:true or attestation eligibility.
+- Files: scripts/tabwise/r2-run.mjs, scripts/tabwise-r2.mjs, test/r2-completion-integrity.test.mjs (new); ledger STATE/LOG/DECISIONS/PLAN and CODEMAP only.
+- Acceptance: node --test --test-timeout=10000 test/r2-completion-integrity.test.mjs test/r2-evidence.test.mjs test/r2-review.test.mjs; then node --test --test-timeout=10000 "test/r2*.test.mjs".
+- Cost ceiling: $0. No installs, hosted runs, NVDA, workflow or status edits, commit.
+- Result: RED 9/10 fail -> GREEN 10/10; acceptance 154/154 exit 0; R2 suite 726/726 exit 0; 7/7 mutations killed. Ordinary profile and full frozen integrity not run (no node_modules; Node 24.11.0). Stress UNSATISFIED unchanged.
