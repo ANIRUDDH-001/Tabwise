@@ -51,6 +51,7 @@ test('R2 review: an acknowledgement of the wrong key is insufficient when a pres
 
 // S4 (R2-L2 §11): R2 policy and status. Ships disabled/BLOCK; every approval field must agree; D-72..D-74 refused.
 import { readFileSync as readS4, mkdtempSync as tmpS4, mkdirSync as mkdirS4, copyFileSync as copyS4, chmodSync as chmodS4, writeFileSync as writeS4, rmSync as rmS4, existsSync as existsS4 } from 'node:fs';
+import { execFileSync as execS4 } from 'node:child_process';
 import { tmpdir as tmpdirS4 } from 'node:os';
 import { join as joinS4, dirname as dirnameS4 } from 'node:path';
 import { createHash as hashS4 } from 'node:crypto';
@@ -60,7 +61,10 @@ import { qualificationDigest, QUALIFICATION_FILES } from '../scripts/tabwise/qua
 const S4_HEAD = 'b'.repeat(40);
 const S4_PLAN = '{"schema":"tabwise-r2-plan/1","pairs":["synthetic-pair"]}\n';
 const S4_DISABLED = Object.freeze({ schema: R2_STATUS_SCHEMA, enabled: false, verdict: 'BLOCK', reviewer: null, review_ref: null, owner_approval_ref: null, actor: null,
-  reviewed_files: Object.freeze([]), reviewed_sha256: null, qualification_sha256: null, plan_sha256: null });
+  reviewed_files: Object.freeze([]), reviewed_sha256: null, qualification_sha256: null, plan_sha256: null,
+  reason: 'Pristine BLOCK fixture; D-72, D-73 and D-74 are retired.' });
+// Deployment status is mutable; default-BLOCK behavior must use an explicit fixture.
+const pristineBlockS4 = () => structuredClone(S4_DISABLED);
 function s4Status(root) {
   return { schema: R2_STATUS_SCHEMA, enabled: true, verdict: 'PASS', reviewer: 'independent-test-reviewer', review_ref: 'synthetic-offline-review', owner_approval_ref: 'D-999', actor: 'test-owner',
     reviewed_files: [...R2_FILES], reviewed_sha256: r2Digest(root), qualification_sha256: qualificationDigest(root), plan_sha256: r2PlanDigest(S4_PLAN), reason: 'synthetic fixture' };
@@ -82,14 +86,95 @@ test('S4 policy: a valid fixture status at the right HEAD, plan, actor and envir
   assert.equal(s4Check({ plan: Buffer.from(S4_PLAN) }).ok, true, 'plan bytes are accepted');
 });
 
-test('S4 policy: the shipped r2-status.json is pristine disabled/BLOCK and refuses even with full synthetic authorization', () => {
-  const shipped = readR2Status();
+test('S4 policy: pristine disabled/BLOCK refuses even with full synthetic authorization', () => {
+  const shipped = pristineBlockS4();
   for (const [key, value] of Object.entries(S4_DISABLED)) assert.deepEqual(shipped[key], value, key);
   assert.match(shipped.reason, /D-72/); assert.match(shipped.reason, /D-73/); assert.match(shipped.reason, /D-74/);
   const r = checkR2Approval({ env: s4Env({ ...s4Status(process.cwd()) }), head: S4_HEAD, status: shipped, plan: S4_PLAN, platform: 'win32' });
   assert.equal(r.ok, false); assert.match(r.errors.join('\n'), /R2 is BLOCK\/disabled/);
   const q = JSON.parse(readS4('scripts/tabwise/qualification-status.json', 'utf8'));
   assert.equal(q.enabled, false); assert.equal(q.verdict, 'BLOCK');
+});
+
+// The operational caller obtains identity from CI inputs and Git, never from status under test.
+// This assumes the existing owner process approved those external inputs; no test mints human authority.
+function readDeploymentAuthorizationS4() {
+  const git = (...args) => execS4('git', args, { encoding: 'utf8', timeout: 10000 }).trim();
+  const head = git('rev-parse', 'HEAD');
+  return { head, committedStatus: JSON.parse(git('show', `${head}:scripts/tabwise/r2-status.json`)), env: { ...process.env }, platform: process.platform };
+}
+function assertDeploymentStatusS4(status, authorization) {
+  assert.ok(status && Object.getPrototypeOf(status) === Object.prototype);
+  assert.deepEqual(Object.keys(status).sort(), Object.keys(S4_DISABLED).sort(), 'exact status fields');
+  assert.equal(typeof status.reason, 'string'); assert.ok(status.reason.trim());
+  if (status.enabled === false) {
+    for (const [key, value] of Object.entries(S4_DISABLED).filter(([key]) => key !== 'reason')) assert.deepEqual(status[key], value, key);
+    for (const retired of RETIRED_APPROVALS) assert.ok(status.reason.includes(retired), retired);
+  } else {
+    assert.ok(authorization && authorization.env, 'PASS requires an independently established authorization identity');
+    assert.deepEqual(status, authorization.committedStatus, 'status must equal the independently approved committed status record');
+    assert.equal(authorization.env.TABWISE_R2_PLAN_PATH, 'fixtures/r2/plans/a5-validation-smoke.json');
+    const plan = readS4('fixtures/r2/plans/a5-validation-smoke.json');
+    const check = env => checkR2Approval({ status, plan, env, head: authorization.head, platform: authorization.platform });
+    const result = check(authorization.env);
+    // The workflow's Offline tests step deliberately has no runtime opt-in. Never manufacture one.
+    assert.deepEqual(result, authorization.env.TABWISE_R2_ENABLED === 'true'
+      ? { ok: true, errors: [] } : { ok: false, errors: ['manual R2 opt-in absent'] });
+    assert.equal(check({ ...authorization.env, TABWISE_R2_ENABLED: undefined }).ok, false);
+  }
+}
+// Explicit synthetic trust-boundary fixture, not an operational owner authorization.
+// Establish the expected identity first; derive the candidate from it, never vice versa.
+function syntheticDeploymentAuthorizationS4() {
+  const plan_sha256 = r2PlanDigest(readS4('fixtures/r2/plans/a5-validation-smoke.json'));
+  return { head: S4_HEAD, platform: 'win32', committedStatus: { ...s4Status(process.cwd()), plan_sha256 },
+    env: { ...s4Env({ actor: 'test-owner', owner_approval_ref: 'D-999', plan_sha256 }), TABWISE_R2_PLAN_PATH: 'fixtures/r2/plans/a5-validation-smoke.json' } };
+}
+
+test('S4 deployment status is pristine BLOCK or matches independently supplied approval identity; no runtime authority is minted', () => {
+  const deployed = readR2Status();
+  assertDeploymentStatusS4(deployed, deployed?.enabled === true ? readDeploymentAuthorizationS4() : undefined);
+  assertDeploymentStatusS4(pristineBlockS4());
+  const authorization = syntheticDeploymentAuthorizationS4(), active = structuredClone(authorization.committedStatus);
+  assertDeploymentStatusS4(active, authorization);
+  assertDeploymentStatusS4(active, { ...authorization, env: { ...authorization.env, TABWISE_R2_ENABLED: undefined } });
+  for (const change of [{ enabled: 'true' }, { enabled: false }, { verdict: 'BLOCK' }, { reviewer: active.actor }, { review_ref: null },
+    { owner_approval_ref: 'D-72' }, { reviewed_files: [] }, { reviewed_sha256: '0'.repeat(64) },
+    { qualification_sha256: '0'.repeat(64) }, { plan_sha256: '0'.repeat(64) }, { injected: true }])
+    assert.throws(() => assertDeploymentStatusS4({ ...active, ...change }, authorization), { code: 'ERR_ASSERTION' }, JSON.stringify(change));
+});
+
+test('S4 deployment trust: coherent PASS cannot supply its own authorization identity', () => {
+  const active = { ...s4Status(process.cwd()), plan_sha256: r2PlanDigest(readS4('fixtures/r2/plans/a5-validation-smoke.json')) };
+  assert.throws(() => assertDeploymentStatusS4(active), { code: 'ERR_ASSERTION' }, 'PASS requires an independent authorization context');
+  const forged = { ...active, owner_approval_ref: 'D-998', actor: 'forged-owner', reviewer: 'forged-reviewer', review_ref: 'forged-review' };
+  assert.equal(s4Check({ status: forged, plan: readS4('fixtures/r2/plans/a5-validation-smoke.json') }).ok, true, 'coherence alone is deliberately insufficient');
+  assert.throws(() => assertDeploymentStatusS4(forged), { code: 'ERR_ASSERTION' }, 'self-consistent forged metadata is not owner authorization');
+});
+
+test('S4 deployment trust: independent revision, decision, actor, plan and committed status cannot be substituted', () => {
+  const authorization = syntheticDeploymentAuthorizationS4(), active = structuredClone(authorization.committedStatus);
+  for (const env of [{ TABWISE_R2_APPROVED_REVISION: 'c'.repeat(40) }, { TABWISE_R2_OWNER_APPROVAL: 'D-998' },
+    { GITHUB_ACTOR: 'other-owner' }, { GITHUB_SHA: 'c'.repeat(40) }, { TABWISE_R2_PLAN_SHA256: '0'.repeat(64) },
+    { TABWISE_R2_PLAN_PATH: 'fixtures/r2/plans/other.json' }, { GITHUB_ACTIONS: undefined }, { GITHUB_WORKFLOW_REF: 'other/repo/workflow@refs/heads/main' }])
+    assert.throws(() => assertDeploymentStatusS4(active, { ...authorization, env: { ...authorization.env, ...env } }), { code: 'ERR_ASSERTION' }, JSON.stringify(env));
+  assert.throws(() => assertDeploymentStatusS4(active, { ...authorization, head: 'c'.repeat(40) }), { code: 'ERR_ASSERTION' });
+  assert.throws(() => assertDeploymentStatusS4(active, { ...authorization, committedStatus: { ...active, review_ref: 'substituted-review' } }), { code: 'ERR_ASSERTION' });
+  const forged = { ...active, actor: 'forged-owner', owner_approval_ref: 'D-998' };
+  assert.throws(() => assertDeploymentStatusS4(forged, authorization), { code: 'ERR_ASSERTION' });
+  assert.throws(() => assertDeploymentStatusS4(active, readDeploymentAuthorizationS4()), { code: 'ERR_ASSERTION' }, 'synthetic approval cannot impersonate this committed deployment');
+});
+
+test('S4 activation requires every independent binding even when metadata claims PASS', () => {
+  const status = s4Status(process.cwd());
+  assert.deepEqual(s4Check({ status }), { ok: true, errors: [] });
+  for (const change of [{ reviewer: status.actor }, { review_ref: null }, { actor: 'other' }, { owner_approval_ref: 'D-72' },
+    { reviewed_files: [] }, { reviewed_sha256: '0'.repeat(64) }, { qualification_sha256: '0'.repeat(64) }, { plan_sha256: '0'.repeat(64) }]) {
+    assert.equal(checkR2Approval({ env: s4Env(status), head: S4_HEAD, status: { ...status, ...change }, plan: S4_PLAN, platform: 'win32' }).ok, false, JSON.stringify(change));
+  }
+  for (const env of [{ TABWISE_R2_ENABLED: undefined }, { TABWISE_R2_APPROVED_REVISION: 'c'.repeat(40) },
+    { GITHUB_ACTOR: 'other' }, { TABWISE_R2_OWNER_APPROVAL: 'D-998' }, { TABWISE_R2_PLAN_SHA256: '0'.repeat(64) }])
+    assert.equal(s4Check({ status, env }).ok, false, JSON.stringify(env));
 });
 
 test('S4 policy: each status field mismatch refuses', () => {
@@ -269,9 +354,9 @@ test('S5a static: only the S5b session imports r2-compose (no entry or other mod
   assert.doesNotMatch(readS4('src/r2/speech-payload.mjs', 'utf8'), /\bimport\s*\(|playwright|child_process|qualification-loader|fetch\(|respond\(/);
 });
 
-test('S5a/C-3 scope: R2_FILES covers r2-compose and speech-payload; the shipped R2 status stays disabled/BLOCK', () => {
+test('S5a/C-3 scope: R2_FILES covers r2-compose and speech-payload; the pristine R2 fixture stays disabled/BLOCK', () => {
   for (const file of ['scripts/tabwise/r2-compose.mjs', 'src/r2/speech-payload.mjs']) assert.ok(R2_FILES.includes(file), file);
-  const shipped = readR2Status();
+  const shipped = pristineBlockS4();
   assert.deepEqual([shipped.enabled, shipped.verdict, shipped.reviewed_sha256], [false, 'BLOCK', null]);
 });
 
@@ -488,11 +573,11 @@ function s6Gate(o = {}) {
     frozen: o.frozen ?? (() => ({ ok: true, errors: [] })), readStatus: o.readStatus ?? (() => status) } };
 }
 
-test('S6-G1 the shipped BLOCK status refuses after the opt-in, before git, the plan file or any fixture is read', async () => {
+test('S6-G1 the pristine BLOCK fixture refuses after the opt-in, before git, the plan file or any fixture is read', async () => {
   const { checkR2Entry } = await runModule();
   const git = () => { throw Error('git must not run'); };
   for (const argv of [['--check-only', '--plan', '/nonexistent/p.json'], ['--run', '--plan', '/nonexistent/p.json'], ['--page', 'validation-healthy', '--plan', '/nonexistent/p.json']])
-    assert.throws(() => checkR2Entry({ argv, env: { TABWISE_R2_ENABLED: 'true' }, execArgv: [], root: process.cwd(), platform: 'win32', git, frozen: () => { throw Error('frozen must not run'); }, readStatus: () => readR2Status() }),
+    assert.throws(() => checkR2Entry({ argv, env: { TABWISE_R2_ENABLED: 'true' }, execArgv: [], root: process.cwd(), platform: 'win32', git, frozen: () => { throw Error('frozen must not run'); }, readStatus: pristineBlockS4 }),
       /^Error: BLOCK: R2 status is disabled\/BLOCK$/, JSON.stringify(argv));
 });
 
@@ -707,11 +792,11 @@ test('S6-S1 static: the loader and session are imported only inside runPage, in 
   assert.deepEqual(envNames, [], 'the entry passes process.env to the gate helper and reads no variable itself');
 });
 
-test('S6-S2 r2-run is capability-free; R2_FILES covers S5b and S6; the shipped status stays disabled/BLOCK', () => {
+test('S6-S2 r2-run is capability-free; R2_FILES covers S5b and S6; the pristine fixture stays disabled/BLOCK', () => {
   const code = readS4(S6_RUN, 'utf8').replace(/^\s*\/\/.*$/gm, '');
   assert.doesNotMatch(code, /\bimport\s*\(|child_process|node:net|node:http|playwright|qualification-loader|r2-session|r2-compose|worker_threads/);
   for (const file of [S6_SESSION, S6_ENTRY, S6_RUN]) assert.ok(R2_FILES.includes(file), file);
-  const shipped = readR2Status();
+  const shipped = pristineBlockS4();
   assert.deepEqual([shipped.enabled, shipped.verdict, shipped.reviewed_sha256, shipped.plan_sha256], [false, 'BLOCK', null, null]);
 });
 
@@ -919,10 +1004,10 @@ test('S7-A1 strict CLI accepts --verify-run --plan only; combinations with anoth
     assert.throws(() => parseR2Args(argv), /^Error: R2 usage:/, JSON.stringify(argv));
 });
 
-test('S7-G1 --verify-run passes through every gate: the shipped BLOCK refuses before git; a passing gate needs a clean approved checkout', async () => {
+test('S7-G1 --verify-run passes through every gate: the pristine BLOCK fixture refuses before git; a passing gate needs a clean approved checkout', async () => {
   const { checkR2Entry } = await runModule();
   assert.throws(() => checkR2Entry({ argv: ['--verify-run', '--plan', '/nonexistent/p.json'], env: { TABWISE_R2_ENABLED: 'true' }, execArgv: [], root: process.cwd(), platform: 'win32',
-    git: () => { throw Error('git must not run'); }, frozen: () => { throw Error('frozen must not run'); }, readStatus: () => readR2Status() }), /^Error: BLOCK: R2 status is disabled\/BLOCK$/);
+    git: () => { throw Error('git must not run'); }, frozen: () => { throw Error('frozen must not run'); }, readStatus: pristineBlockS4 }), /^Error: BLOCK: R2 status is disabled\/BLOCK$/);
   const off = s6Gate({ env: { TABWISE_R2_ENABLED: undefined }, readStatus: () => { throw Error('status must not be read'); } });
   try { off.input.argv = ['--verify-run', '--plan', off.path]; assert.throws(() => checkR2Entry(off.input), /^Error: BLOCK: R2 disabled by default/); }
   finally { rmS4(off.dir, { recursive: true, force: true }); }
@@ -1188,9 +1273,9 @@ test('S7-W4 the reviewed R2 digest binds the workflow text: R2_FILES lists it, a
   } finally { rmS4(tmp, { recursive: true, force: true }); }
 });
 
-test('S7-W3 the workflow path is the one the R2 policy pins; the shipped status stays disabled/BLOCK', () => {
+test('S7-W3 the workflow path is the one the R2 policy pins; the pristine fixture stays disabled/BLOCK', () => {
   assert.equal(R2_WORKFLOW, S7_WORKFLOW);
-  const shipped = readR2Status();
+  const shipped = pristineBlockS4();
   assert.deepEqual([shipped.enabled, shipped.verdict, shipped.reviewed_sha256, shipped.plan_sha256], [false, 'BLOCK', null, null]);
 });
 
@@ -1300,14 +1385,14 @@ test('A5-N1 wrong hash, unsupported action, duplicate page, extra key and budget
   } finally { rmS4(g.dir, { recursive: true, force: true }); }
 });
 
-test('A5-N2 the candidate is not approved: the shipped status names no plan and every entry mode refuses BLOCK before git', async () => {
+test('A5-N2 the pristine fixture is not approved: it names no plan and every entry mode refuses BLOCK before git', async () => {
   const { checkR2Entry } = await runModule();
-  const shipped = readR2Status();
+  const shipped = pristineBlockS4();
   assert.deepEqual([shipped.enabled, shipped.verdict, shipped.plan_sha256, shipped.owner_approval_ref], [false, 'BLOCK', null, null]);
   const git = () => { throw Error('git must not run'); };
   for (const mode of [['--check-only'], ['--run'], ['--verify-run'], ['--page', 'validation-healthy']]) {
     assert.throws(() => checkR2Entry({ argv: [...mode, '--plan', A5_PLAN], env: { TABWISE_R2_ENABLED: 'true' }, execArgv: [], root: process.cwd(), platform: 'win32', git,
-      frozen: () => { throw Error('frozen must not run'); }, readStatus: () => readR2Status() }), /^Error: BLOCK: R2 status is disabled\/BLOCK$/, mode[0]);
+      frozen: () => { throw Error('frozen must not run'); }, readStatus: pristineBlockS4 }), /^Error: BLOCK: R2 status is disabled\/BLOCK$/, mode[0]);
   }
   // Even a status that is otherwise approved refuses a plan digest it does not name.
   const g = s6Gate({ planDir: { dir: tmpS4(joinS4(tmpdirS4(), 'a5 ')), path: A5_PLAN, text: a5Text() }, status: { plan_sha256: 'f'.repeat(64) } });

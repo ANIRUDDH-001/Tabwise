@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdirSync,mkdtempSync,rmSync,cpSync,readFileSync,writeFileSync,existsSync} from 'node:fs';
+import {mkdirSync,mkdtempSync,rmSync,cpSync,chmodSync,readFileSync,writeFileSync,existsSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {resolve,dirname,join} from 'node:path';
 import {tmpdir} from 'node:os';
@@ -22,6 +22,7 @@ test('B1 actual source closure and frozen guard validation timings on this host;
  const files=existsSync('../source-manifest.json')?JSON.parse(readFileSync('../source-manifest.json','utf8')).map(row=>row.path):execFileSync('git',['ls-files','-z'],{encoding:'utf8'}).split('\0').filter(Boolean);
  for(const file of new Set([...files,...QUALIFICATION_FILES])){mkdirSync(dirname(resolve(root,file)),{recursive:true});cpSync(resolve(file),resolve(root,file));}
  cpSync('node_modules/@guidepup/guidepup',resolve(root,'node_modules/@guidepup/guidepup'),{recursive:true});
+ chmodSync(resolve(root,'packages/contracts/limits.mjs'),0o600);
  git('init','-q');git('add','.');git('-c','user.name=Offline fixture','-c','user.email=offline@example.invalid','commit','-qm','offline fixture');
  mkdirSync(resolve(root,'cache/ignored'),{recursive:true});writeFileSync(resolve(root,'cache/ignored/setup.txt'),'ignored setup simulation');
  writeFileSync(resolve(root,'node_modules/setup-ignored.txt'),'ignored dependency simulation');assert.equal(git('status','--porcelain','--untracked-files=all'),'');

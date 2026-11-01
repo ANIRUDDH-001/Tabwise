@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import { createPageCustody, parseProcessSnapshot, processBaseline, quiescenceOf, wallMicros, windowsProcessTools, PROCESS_SNAPSHOT_PS, PROCESS_TERMINATE_PS,
   SNAPSHOT_SCHEMA, SPAWN_CLOCK_TOLERANCE_US } from '../scripts/tabwise/r2-proctree.mjs';
 import { runR2Pages, r2RunSealable, EXIT } from '../scripts/tabwise/r2-run.mjs';
-import { R2_FILES } from '../scripts/tabwise/r2-policy.mjs';
+import { R2_FILES, R2_STATUS_SCHEMA, checkR2Approval } from '../scripts/tabwise/r2-policy.mjs';
 
 const T0 = 13_400_000_000_000_000n; // microseconds since 1601 (2025)
 const us = (offset) => (T0 + BigInt(offset)).toString();
@@ -449,7 +449,10 @@ test('PT-S2 the entry wires custody, cancellation and protection into the coordi
   const tree = readFileSync('scripts/tabwise/r2-proctree.mjs', 'utf8').replace(/^\s*\/\/.*$/gm, '');
   assert.doesNotMatch(tree, /\bimport\s*\(|child_process|node:net|node:http|playwright|qualification-loader|r2-session|r2-compose|worker_threads|^import /m);
   assert.ok(R2_FILES.includes('scripts/tabwise/r2-proctree.mjs'));
-  const status = JSON.parse(readFileSync('scripts/tabwise/r2-status.json', 'utf8'));
+  const status = {schema: R2_STATUS_SCHEMA, enabled: false, verdict: 'BLOCK', reviewer: null, review_ref: null, owner_approval_ref: null, actor: null,
+    reviewed_files: [], reviewed_sha256: null, qualification_sha256: null, plan_sha256: null};
   assert.deepEqual([status.enabled, status.verdict], [false, 'BLOCK']);
+  const refusal = checkR2Approval({env: {}, status, plan: '', platform: 'win32'});
+  assert.equal(refusal.ok, false); assert.ok(refusal.errors.includes('R2 is BLOCK/disabled'));
   assert.equal(wallMicros(() => 0), (11_644_473_600_000n * 1000n).toString());
 });

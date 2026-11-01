@@ -73,7 +73,9 @@ const statePath=join(sim,'state.json'),s=JSON.parse(readFileSync(statePath,'utf8
 const run=(id,c={})=>({id,head_sha:REV,head_branch:'main',event:'workflow_dispatch',run_attempt:1,status:'queued',conclusion:null,actor:{login:OWNER},triggering_actor:{login:OWNER},...c});
 const find=id=>s.runs.find(r=>String(r.id)===String(id));
 let out='',err='',code=0,served=null;const fail=(text,c=1)=>{err=text;code=c;};
-const sleep=ms=>Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,ms);
+// A timed-out client may survive a failed OS tree kill. It must never replay its
+// old remote-state snapshot over a later revocation/cancellation.
+const sleep=ms=>{Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,ms);Object.assign(s,JSON.parse(readFileSync(statePath,'utf8')));};
 const path=args.find(a=>a.startsWith('repos/'))??'',method=args.includes('-X')?args[args.indexOf('-X')+1]:'GET';
 const PHASES={pass:['queued','running','success'],'run-failure':['queued','running','failure'],'completion-timeout':['queued','running'],'hang-before-admission':['queued'],skip:['skipped']};
 function step(){
@@ -151,7 +153,7 @@ const LIMITS={ExposureSeconds:8,RevokeSeconds:3,CommandSeconds:2,PollSeconds:1};
 const EXPOSURE_BOUND_MS=(LIMITS.ExposureSeconds+LIMITS.PollSeconds+LIMITS.RevokeSeconds+5*LIMITS.CommandSeconds)*1000;
 
 function setup(name){
- const sim=mkdtempSync(join(tmpdir(),`tw-d73-${name}-`)),bin=join(sim,'bin'),evidence=join(sim,'evidence');mkdirSync(bin);mkdirSync(join(sim,'ghconfig'));
+ const sim=mkdtempSync(join(tmpdir(),`tw-d73-${name}-`)),bin=join(sim,'bin'),evidence=join(sim,'RUNNER~1 evidence');mkdirSync(bin);mkdirSync(join(sim,'ghconfig'));
  writeFileSync(join(bin,'fake-gh.mjs'),FAKE_GH);writeFileSync(join(bin,'fake-node.mjs'),FAKE_NODE);
  writeFileSync(join(bin,'gh.cmd'),'@"%TW_REAL_NODE%" "%~dp0fake-gh.mjs" %*\r\n');
  writeFileSync(join(bin,'node.cmd'),'@"%TW_REAL_NODE%" "%~dp0fake-node.mjs" %*\r\n');
@@ -161,7 +163,8 @@ function setup(name){
  writeFileSync(join(sim,'state.json'),JSON.stringify({variable:null,runs,k:0,deletes:0,dispatched:0,cancels:[]}));
  // Defence in depth: if the fake were ever bypassed, the real gh has no credentials and no reachable host.
  const inherited=Object.fromEntries(Object.entries(process.env).filter(([key])=>key.toUpperCase()!=='PATH'));
- const childEnv={...inherited,PATH:`${bin};${process.env.PATH}`,TW_SIM:sim,TW_SCENARIO:name,TW_REV:REV,TW_OWNER:OWNER,TW_REAL_NODE:process.execPath,TW_EVIDENCE:evidence,
+ // Node may inherit a PowerShell 7 module path; the child runs Windows PowerShell 5.1.
+ const childEnv={...inherited,PSModulePath:`${process.env.SystemRoot}\\System32\\WindowsPowerShell\\v1.0\\Modules;${process.env.PSModulePath??''}`,PATH:`${bin};${process.env.PATH}`,TW_SIM:sim,TW_SCENARIO:name,TW_REV:REV,TW_OWNER:OWNER,TW_REAL_NODE:process.execPath,TW_EVIDENCE:evidence,
   TW_EVIDENCE_MODULE:pathToFileURL(resolve('scripts/tabwise/qualification-evidence.mjs')).href,GH_HOST:'offline.invalid',GH_TOKEN:'offline-invalid',GH_CONFIG_DIR:join(sim,'ghconfig'),GITHUB_TOKEN:''};
  return {sim,bin,evidence,childEnv};
 }
@@ -204,9 +207,15 @@ test('owner orchestration: normal path and every reported failure path against m
    assert.equal(r.state.variable_at_dispatch,REV,'variable existed at dispatch');
    if(spec.cancels)assert.deepEqual([...new Set(r.state.cancels)].sort(),spec.cancels,'cancellation scope');
    if(name==='pass'){
+    assert.ok(r.calls.some(call=>call.args[0]==='run'&&call.args[1]==='download'&&call.args.includes(join(r.evidence,'artifact'))),'artifact downloader launched with tilde/space path');
+    const decisions=readdirSync(r.evidence).filter(file=>file.endsWith('-decision-evidence.json'));
+    assert.equal(decisions.length,1,'artifact validation reached');
+    const validation=JSON.parse(readFileSync(join(r.evidence,decisions[0]),'utf8'));
+    assert.equal(validation.code,0);assert.equal(JSON.parse(validation.out).value.ok,true,'downloaded artifact validated');
     const firstDelete=r.calls.findIndex(call=>isCall(call,'DELETE',`/actions/variables/${VARIABLE}`)),started=r.calls.findIndex(call=>call.served==='in_progress');
     assert.ok(started>=0&&firstDelete>started,'revocation only after the qualify job was observed started');
     const files=readdirSync(r.evidence);assert.ok(files.filter(file=>file.startsWith('obs-')).length>10,'each observation preserved');
+    assert.ok(existsSync(join(r.evidence,'hashes.json')),r.stdout);
     const hashes=JSON.parse(readFileSync(join(r.evidence,'hashes.json'),'utf8'));
     for(const {path,sha256} of hashes)assert.equal(createHash('sha256').update(readFileSync(join(r.evidence,path))).digest('hex'),sha256,path);
     assert.ok(hashes.some(row=>row.path==='events.jsonl'));assert.ok(hashes.some(row=>row.path.startsWith('artifact')));
@@ -233,5 +242,26 @@ test('D74 artifact evidence accepts one run-attempt subdirectory but rejects amb
   rmSync(join(root,'unexpected'),{recursive:true,force:true});
   writeFileSync(join(nested,'result.json'),'{"candidate_pass":true}');
   assert.equal((await artifactEvidence({dir:root})).ok,false);
+ }finally{rmSync(root,{recursive:true,force:true});}
+});
+
+
+test('Invoke-Native permits Windows tilde/space paths and refuses shell syntax before launch',{skip:process.platform!=='win32'&&'Windows PowerShell 5.1 only'},()=>{
+ const source=readFileSync(SCRIPT,'utf8'),start=source.indexOf('function Invoke-Native('),end=source.indexOf('\nfunction Invoke-Gh',start);
+ assert.ok(start>=0&&end>start);
+ const root=mkdtempSync(join(tmpdir(),'tw-d73-arguments-'));
+ try{
+  const mock=join(root,'echo.cmd');writeFileSync(mock,'@echo %*\r\n');
+  const positive=['C:\\Users\\RUNNER~1\\artifact','C:\\space dir\\RUNNER~1\\artifact'];
+  const negative=['a&b','a|b','a<b','a>b','a^b','%PATH%','!PATH!','$(whoami)','`whoami`','"quoted"',"'quoted'",'a;b','a\nb','a\r\nb','a\n','a\r','a\tb'];
+  const payload=Buffer.from(JSON.stringify({mock,positive,negative})).toString('base64');
+  const command=`$Utf8=New-Object System.Text.UTF8Encoding($false);$CommandSeconds=2\n${source.slice(start,end)}\n`+
+   `$data=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${payload}'))|ConvertFrom-Json\n`+
+   `$results=@();foreach($a in @($data.positive)+@($data.negative)){$r=Invoke-Native $data.mock @($a);$results+=@{arg=$a;code=$r.code;out=$r.out;err=$r.err}};ConvertTo-Json -InputObject $results -Compress`;
+  const r=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(command,'utf16le').toString('base64')],{encoding:'utf8',timeout:15000});
+  assert.equal(r.status,0,r.stdout+r.stderr);
+  const results=JSON.parse(r.stdout);
+  for(const row of results.slice(0,positive.length)){assert.equal(row.code,0,row.err);assert.ok(row.out.includes(row.arg),row.out);}
+  for(const row of results.slice(positive.length)){assert.equal(row.code,-2,JSON.stringify(row));assert.match(row.err,/unsafe argument/);}
  }finally{rmSync(root,{recursive:true,force:true});}
 });

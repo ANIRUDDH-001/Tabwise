@@ -1424,14 +1424,17 @@ test('O11-F1 page record formatter: eligibility, payload digest and redaction mu
   assert.equal(blindFixtureId(run1, 'validation-healthy').includes('healthy'), false);
 });
 
-test('O11-S1 arm-input custody is capability-free reviewed scope: no model call, network, child process, runtime or class write; R2 stays BLOCK', async () => {
+test('O11-S1 arm-input custody is capability-free reviewed scope: no model call, network, child process, runtime or class write; pristine fixture stays BLOCK', async () => {
   const code = readFileSync(new URL('../src/r2/arm-inputs.mjs', import.meta.url), 'utf8');
   const imports = [...code.matchAll(/^import\s[^;]*?from\s+'([^']+)'/gms)].map(m => m[1]).sort();
   assert.deepEqual(imports, ['../../scripts/tabwise/r2-evidence.mjs', '../../scripts/tabwise/r2-policy.mjs', './speech-payload.mjs', 'node:crypto', 'node:fs', 'node:path']);
   assert.doesNotMatch(code, /\bimport\s*\(|\brequire\s*\(|child_process|node:net|node:http|fetch\(|playwright|qualification-loader|respond\(|sealR2Run|createR2EvidenceWriter/);
   assert.doesNotMatch(code, /genuine-unqualified'|class\s*:/, 'never names or writes an evidence class');
-  const {R2_FILES} = await import('../scripts/tabwise/r2-policy.mjs');
+  const {R2_FILES, R2_STATUS_SCHEMA, checkR2Approval} = await import('../scripts/tabwise/r2-policy.mjs');
   assert.ok(R2_FILES.includes('src/r2/arm-inputs.mjs'), 'arm-input custody is reviewed R2 scope');
-  const status = JSON.parse(readFileSync(new URL('../scripts/tabwise/r2-status.json', import.meta.url), 'utf8'));
+  const status = {schema: R2_STATUS_SCHEMA, enabled: false, verdict: 'BLOCK', reviewer: null, review_ref: null, owner_approval_ref: null, actor: null,
+    reviewed_files: [], reviewed_sha256: null, qualification_sha256: null, plan_sha256: null};
   assert.deepEqual([status.enabled, status.verdict, status.reviewed_sha256, status.plan_sha256], [false, 'BLOCK', null, null]);
+  const refusal = checkR2Approval({env: {}, status, plan: '', platform: 'win32'});
+  assert.equal(refusal.ok, false); assert.ok(refusal.errors.includes('R2 is BLOCK/disabled'));
 });

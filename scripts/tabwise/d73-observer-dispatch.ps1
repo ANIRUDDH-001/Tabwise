@@ -61,7 +61,7 @@ function Add-Failure([string]$Text){[void]$script:Failures.Add($Text);Write-Even
 # Runs one native command with a hard timeout and returns {code,out,err}. Never throws; a timeout kills the tree.
 function Invoke-Native([string]$Name,[string[]]$Arguments,[string]$StdIn='',[int]$Seconds=$CommandSeconds) {
  try{
-  foreach($a in $Arguments){if($a -notmatch '^[A-Za-z0-9_./:=,@\[\]+\\ -]+$'){return [pscustomobject]@{code=-2;out='';err="unsafe argument: $a"}}}
+  foreach($a in $Arguments){if($a -notmatch '^[A-Za-z0-9_./:=,@\[\]+\\ ~-]+\z'){return [pscustomobject]@{code=-2;out='';err="unsafe argument: $a"}}}
   $quoted=($Arguments|ForEach-Object{if($_ -match ' '){'"'+$_+'"'}else{$_}}) -join ' '
   $exe=(Get-Command $Name -CommandType Application -ErrorAction Stop|Select-Object -First 1).Source
   $psi=New-Object System.Diagnostics.ProcessStartInfo
