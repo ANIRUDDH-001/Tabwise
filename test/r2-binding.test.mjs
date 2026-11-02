@@ -784,3 +784,20 @@ test('S5a-L6 compose refuses a missing or foreign lifecycle and a writer already
     assert.deepEqual(s5Effects(f.calls), [], name);
   }
 });
+
+test('COR-A composition refuses completion when lifecycle becomes non-clean during real sealing', async () => {
+  const f = s5Rig({handles: (h, e) => {
+    const raw = h.writer;
+    h.writer = Object.freeze({...raw, seal: async options => {
+      const sealing = raw.seal(options);
+      assert.throws(() => e.lifecycle.bindWriter(h.writer).append('events', {phase: 'late'}), /producer writes closed/);
+      return sealing;
+    }});
+  }});
+  const result = await f.run();
+  assert.equal(result.evidence.sealed, true, JSON.stringify(result));
+  assert.equal(result.completed, false);
+  assert.equal(result.lifecycle.clean, false);
+  assert.equal(f.handles.lifecycle.status().clean, false);
+  assert.equal(f.gate.isStopped(), true);
+});

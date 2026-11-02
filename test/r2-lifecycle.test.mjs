@@ -352,3 +352,151 @@ test('S-2 static: page mode holds persistent handlers for every cancel signal un
   const off = body.indexOf('for (const name of CANCEL_SIGNALS) process.off(name, onSignal);');
   assert.ok(off > body.indexOf('console.log(JSON.stringify(r2PageExit('), 'handlers removed only after the page exit line');
 });
+
+// Targeted contract corrections: deterministic boundaries, no real capabilities.
+test('COR-A controlled seal cannot hide a sticky producer failure', async () => {
+  const {createR2Lifecycle} = await load();
+  const l = createR2Lifecycle({pageStart: performance.now()});
+  let producer;
+  producer = l.bindWriter(Object.freeze({identity: {}, append() {}, put() {}, failure: () => null,
+    seal: async () => { await Promise.resolve(); assert.throws(() => producer.append('events', {}), /producer writes closed/); return {}; }}));
+  const result = await l.finalize();
+  assert.equal(result.clean, false);
+  assert.equal((await l.finalize()).clean, false);
+  assert.equal(l.status().clean, false);
+});
+
+test('COR-A real seal preserves artifact but refuses completion after a lifecycle write refusal', async () => {
+  const {createR2Lifecycle} = await load();
+  const l = createR2Lifecycle({pageStart: performance.now()});
+  const {writer: raw, dir} = rawWriter();
+  let producer;
+  producer = l.bindWriter(Object.freeze({...raw, seal: async options => {
+    const sealing = raw.seal(options);
+    assert.throws(() => producer.append('events', {phase: 'during-seal'}), /producer writes closed/);
+    return sealing;
+  }}));
+  const result = await l.finalize();
+  assert.ok(result.sealed);
+  assert.equal(result.clean, false);
+  assert.equal((await l.finalize()).clean, false);
+  const bytes = readFileSync(join(dir, 'manifest.json'));
+  assert.throws(() => producer.append('events', {phase: 'after-seal'}), /producer writes closed/);
+  assert.equal((await l.finalize()).clean, false);
+  assert.ok(bytes.equals(readFileSync(join(dir, 'manifest.json'))));
+  assert.equal((await verifyR2PageEvidence(dir, {fixture: FIXTURE, approved: APPROVED})).ok, true);
+});
+
+test('COR-B raw writer and producer wrapper each have one lifecycle owner', async () => {
+  const {createR2Lifecycle} = await load();
+  const a = quick({createR2Lifecycle}), b = quick({createR2Lifecycle});
+  const {writer: raw} = rawWriter();
+  const producer = a.bindWriter(raw);
+  assert.equal(a.bindWriter(raw), producer);
+  assert.equal(a.bindWriter(producer), producer);
+  assert.throws(() => b.bindWriter(raw), /another lifecycle/);
+  assert.throws(() => b.bindWriter(producer), /another lifecycle/);
+});
+
+test('COR-C partial acquisition attempts browser and server cleanup after stalled context close', async () => {
+  const {createR2Lifecycle} = await load();
+  const calls = [];
+  const context = {addInitScript: async () => { throw Error('init failed'); }, close: () => { calls.push('context'); return never(); }};
+  const browser = {close: async () => { calls.push('browser'); }};
+  const server = {process: () => ({pid: 42}), wsEndpoint: () => '', kill: async () => { calls.push('server'); }};
+  const writer = {identity: {served: 'x'}, append() {}, put() {}, failure: () => null, seal: async () => ({})};
+  globalThis.__corModules = [{randomBytes: () => Buffer.from('12345678','hex'), randomUUID: () => 'id'},
+    {createServer: () => ({once() {}, listen(a,b,ok) {ok();}, address: () => ({port: 1}), close(ok) {ok();}})},
+    {isAbsolute: () => true}, {chromium: {launchServer: async () => server, connect: async () => browser}},
+    {}, {BROWSER_ARGS: [], createIsolatedContext: async () => context}, {}, {}, {}, {},
+    {applyTitleNonce: () => ({record: {fixture_sha256: 'hash'}}), buildR2StepMap() {}, planR2EvidenceCaps() {}, createR2EvidenceWriter: () => writer}, {},
+    {createR2Lifecycle: o => createR2Lifecycle({...o, settleMs: 80})}];
+  let code = readFileSync('scripts/tabwise/r2-session.mjs', 'utf8')
+    .replace("import {isQualificationRuntime} from './qualification-loader.mjs';", 'const isQualificationRuntime = () => true;')
+    .replace("import {composeR2Page} from './r2-compose.mjs';", 'const composeR2Page = () => {throw Error("unexpected composition");};');
+  const begin = code.indexOf('await Promise.all(['), end = code.indexOf(']);', begin) + 3;
+  assert.ok(begin > 0 && end > begin);
+  code = code.slice(0, begin) + 'globalThis.__corModules;' + code.slice(end);
+  const {runR2Session} = await import('data:text/javascript;base64,' + Buffer.from(code).toString('base64'));
+  let stopped = false;
+  const guard = {isStopped: () => stopped, stop: () => {stopped = true;}, status: () => ({live: 0})};
+  try {
+    const result = await runR2Session({guard, getGate: () => guard, assertAuthentic() {}},
+      {fixture: Buffer.from('x'), evidenceDir: 'fake', fixture_id: 'x', approved: {fixture_sha256: 'hash'}, spec: {}, handleTimeoutMs: 20, focusWaitMs: 20});
+    assert.deepEqual(calls, ['context', 'browser', 'server']);
+    assert.equal(result.completed, false);
+    assert.equal(result.lifecycle.clean, false);
+    assert.ok(result.reasons.some(r => /CONTAINMENT_REQUIRED/.test(r)));
+  } finally { delete globalThis.__corModules; }
+});
+
+test('COR-A post-seal refusal invalidates repeated runtime verdict without rewriting artifact', async () => {
+  const l = quick(await load()); const {writer: raw, dir} = rawWriter(); const producer = l.bindWriter(raw);
+  assert.equal((await l.finalize()).clean, true);
+  const bytes = readFileSync(join(dir, 'manifest.json'));
+  assert.throws(() => producer.append('events', {}), /producer writes closed/);
+  assert.equal((await l.finalize()).clean, false);
+  assert.equal(l.status().clean, false);
+  assert.ok(bytes.equals(readFileSync(join(dir, 'manifest.json'))));
+});
+
+
+for (const mode of ['during-finalize', 'after-seal', 'late-success']) test(`COR-C late acquisition ${mode} uses one tracked cleanup owner`, async () => {
+  const {createR2Lifecycle} = await load();
+  const calls = [];
+  let rejectInit, resolveInit, signalFinalizing, signalKilled, owner;
+  const initializing = new Promise((resolve, reject) => { rejectInit = reject; resolveInit = resolve; });
+  const killed = new Promise(resolve => { signalKilled = resolve; });
+  const finalizing = new Promise(resolve => { signalFinalizing = resolve; });
+  const context = {addInitScript: () => initializing, newPage: async () => ({goto: async () => {}, bringToFront: async () => {}}), close: () => { calls.push('context'); return never(); }};
+  const browser = {close: async () => { calls.push('browser'); }};
+  let launches = 0;
+  const server = {process: () => ({pid: 42}), wsEndpoint: () => '', kill: async () => { calls.push('server'); signalKilled(); }};
+  const {writer, dir} = rawWriter();
+  globalThis.__corLateModules = [{randomBytes: () => Buffer.from('12345678','hex'), randomUUID: () => 'id'},
+    {createServer: () => ({once() {}, listen(a,b,ok) {ok();}, address: () => ({port: 1}), close(ok) {ok();}})},
+    {isAbsolute: () => true}, {chromium: {launchServer: async () => { launches++; return server; }, connect: async () => browser}},
+    {}, {BROWSER_ARGS: [], createIsolatedContext: async () => context}, {}, {}, {}, {},
+    {applyTitleNonce: () => ({record: {fixture_sha256: 'hash'}}), buildR2StepMap() {}, planR2EvidenceCaps() {}, createR2EvidenceWriter: () => writer}, {},
+    {createR2Lifecycle: o => {
+      owner = createR2Lifecycle({...o, settleMs: 80});
+      return Object.freeze({...owner, finalize: options => {
+        const result = owner.finalize(options); // closes admission synchronously
+        signalFinalizing();
+        return result;
+      }});
+    }}];
+  let code = readFileSync('scripts/tabwise/r2-session.mjs', 'utf8')
+    .replace("import {isQualificationRuntime} from './qualification-loader.mjs';", 'const isQualificationRuntime = () => true;')
+    .replace("import {composeR2Page} from './r2-compose.mjs';", 'const composeR2Page = () => {throw Error("unexpected composition");};');
+  const begin = code.indexOf('await Promise.all(['), end = code.indexOf(']);', begin) + 3;
+  assert.ok(begin > 0 && end > begin);
+  code = code.slice(0, begin) + 'globalThis.__corLateModules;' + code.slice(end);
+  const {runR2Session} = await import('data:text/javascript;base64,' + Buffer.from(code + '\n// scenario: ' + mode).toString('base64'));
+  let stopped = false;
+  const guard = {isStopped: () => stopped, stop: () => {stopped = true;}, status: () => ({live: 0})};
+  try {
+    const running = runR2Session({guard, getGate: () => guard, assertAuthentic() {}},
+      {fixture: Buffer.from('x'), evidenceDir: 'fake', fixture_id: 'x', approved: {fixture_sha256: 'hash'}, spec: {}, handleTimeoutMs: 20, focusWaitMs: 20});
+    await finalizing;
+    assert.equal(owner.slot('browser'), 'acquiring', 'acquisition timed out before initialization rejected');
+    const earlier = mode === 'during-finalize' ? null : await running;
+    const sealedBeforeCleanup = earlier ? readFileSync(join(dir, 'manifest.json')) : null;
+    if (mode === 'late-success') resolveInit();
+    else rejectInit(Error('delayed initialization failed'));
+    await killed;
+    const result = await running;
+    assert.deepEqual(calls, ['context', 'browser', 'server']);
+    assert.equal(launches, 1);
+    assert.equal(result.completed, false);
+    assert.equal(result.lifecycle.clean, false);
+    assert.ok(owner.pending().some(label => label.startsWith('partial context close#')), JSON.stringify(owner.pending()));
+    assert.ok(result.reasons.some(r => /unsettled|CONTAINMENT_REQUIRED/.test(r)));
+    const bytes = readFileSync(join(dir, 'manifest.json'));
+    if (sealedBeforeCleanup) assert.ok(sealedBeforeCleanup.equals(bytes), 'late cleanup never rewrites sealed evidence');
+    await assert.rejects(owner.op('new producer', () => {throw Error('must not run');}), /operation after finalize/);
+    assert.equal((await owner.finalize()).clean, false);
+    assert.ok(bytes.equals(readFileSync(join(dir, 'manifest.json'))));
+    assert.equal((await verifyR2PageEvidence(dir, {fixture: FIXTURE, approved: APPROVED})).ok, true);
+  } finally { delete globalThis.__corLateModules; }
+});

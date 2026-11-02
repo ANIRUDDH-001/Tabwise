@@ -1,28 +1,27 @@
-# STATE - F-03/R2-W1 completion integrity (F3): committed locally, publication pending
-Recorded UTC: 2026-11-01T21:09:54Z (date -u). Implementation first recorded 2026-11-01T19:48:20Z.
-Worktree: C:\projects\tabwise-w1-completion; branch fix/F-03-w1-completion-integrity; parent 35f5ffa104aec6db412a061d8a634212b8b7fa7f; HEAD 59c94c8df1b5ea9fad9bf7882d57acd6898c3921 (W1 local commit).
+# STATE - W3/W4 final ledger reconciliation; uncommitted
+Recorded UTC: 2026-11-02T12:54:51Z (date -u).
+Worktree: D:/Projects/Meta AI/app-w3w4-review; HEAD 600132fb62f648dab59a7edf83a8dae70b989d32.
+Prior STATE retained at HEAD and in existing ledger history; pre-reconciliation bytes retained in the external reconciliation packet.
 ## Now
-- D-99: shared r2RunAcceptance (run and every page exactly synthetic) drives r2VerifyOutcome and runAll (via r2RunExit).
-- Changed: scripts/tabwise/r2-run.mjs, scripts/tabwise-r2.mjs; new test/r2-completion-integrity.test.mjs; ledger + CODEMAP; ci/offline-tests.json registration (owner "Approve registration", D-99 addendum).
-- RED (baseline): 9/10 fail; baseline r2VerifyOutcome returned code 0, complete:true for incomplete/genuine-unqualified/qualified.
-- GREEN (Node 24.11.0, earlier): W1 10/10; acceptance 154/154 exit 0; test/r2*.test.mjs 726/726 exit 0; 7/7 mutations killed.
-- Pinned acceptance (MEASURED, Node 24.22.1, 2026-11-01T20:12:06Z-20:18:20Z): focused 154/154; R2 726/726; ci-offline-selection 20/20; ordinary seed 1 50/50 files, 1,015/1,015 tests; check-r1-baseline ok; frozen integrity PASS; preflight (no --clean) PASS 6/6; git diff --check clean. All gates exit 0.
-- Tested tree = commit: acceptance ran on the uncommitted tree at parent 35f5ffa (preflight head 35f5ffa). 59c94c8 scripts/test/ci/workflow are git-diff-identical to it; blobs are LF, worktree scripts CRLF; LF-normalized sha256 match (r2-run 5765ea55, tabwise-r2 82b6ad7b, test 37d87695).
-- Dependency copy completed and verified (owner-approved): cache c2-ci-h3-validation-attempt2 -> worktree node_modules, robocopy exit 1; 1,527 files identical, 10/10 lock hashes, 58/58 packages, 0 reparse points; no install or network.
-- Evidence: C:\projects\tabwise-w1-evidence-pinned (zz-index.sha256, 49 files, sha256 a9d8edd7f0d12f00fc80e3ca98ebff891835d4e09e68269d4eb3aed00f44920c); re-verified 49/49 at 2026-11-01T21:09:54Z.
-- Candidate R2 digest 658a693554c7d4915513dc09645a7f766f2fb6e5a5a7e81af0a9355653702ccb (baseline 9d3f194f): NOT approved, not bound. Qualification digest 6972c311a6e9302856ff9bb9195aa73cf106a15da8caf91ac32b781f8909f328 unchanged.
-- r2-status.json disabled/BLOCK unchanged; qualification-status.json disabled/BLOCK; no workflow, vendor, fixture or dependency change.
-## Blocked / limits
-- Superseded: the earlier Node 24.11.0 / missing node_modules failures of preflight and frozen integrity; resolved by the pinned acceptance above.
-- Not run: full npm test; process suites (broker, r1-baseline-eol, tabwise-budget, tabwise-d67-timing, tabwise-d73-admission, tabwise-qualification-policy); browser suites (fernway, tabwise-network-browser, tabwise-qualification-browser); stress profiles. Historical stress acceptance stays UNSATISFIED; W1 does not repair it.
-- runAll is pinned statically (entry cannot pass BLOCK offline); no end-to-end --run executed.
-- order coverage check applies when the manifest carries order (sealed manifests always do); verifyR2Run recomputation remains the coverage authority.
-- --run summary still prints verified/errors from verifyR2Run only; exit code and --verify-run complete are the acceptance signals.
-- Permission denials, not retried: a Bash call with a git config read; a Bash call with git worktree list (closeout check).
-- W1 committed locally only (59c94c8); not pushed or published. W2-W5, hosted runs, NVDA, activation and digest rebinding not authorized. TW-P0-W1-GOV, B-9, B-12 HOLD.
-- Previous STATE: 35f5ffa:docs/ledger/STATE.md (D-98 addendum 2); D-98/D-99 history stays in DECISIONS.md and LOG.jsonl.
-## Next / handoff (each needs owner approval)
-- Codex review done: PASS WITH CONDITIONS (owner-reported); ledger path fix and test registration applied after it.
-- This STATE correction is uncommitted on top of 59c94c8; owner makes the STATE-only commit (or tells Codex to).
-- Publication (push/PR/merge) needs a distinct owner authorization; a read-only preflight against remote main is prepared, not run.
-- Status rebinding to the new digest is a separate later decision.
+- MEASURED existing ordinary evidence: 51/51 files PASS, exit 0, 108316.7187 ms / 180000 ms.
+- MEASURED existing stress evidence: eight profiles, 408/408 files PASS, exit 0; no watchdog failures; original scheduling budgets unchanged.
+- Combined 459/459 file executions: process exit and stdio closure confirmed. Nine browser/process-classified tests excluded.
+- Sources: C:/Users/ANIRUDDH/AppData/Local/Temp/Tabwise-W3W4-FinalOrdinary-20261102-171403 and Tabwise-W3W4-Stress-20261102-171823 (same parent); JSON reports and selection manifests.
+- MEASURED frozen R1 integrity PASS; recovered installed Guidepup 0.36.4 matches all 10 locked dependency hashes. No npm install (owner recovery account); no install this task.
+- MEASURED candidate R2 SHA256 d68a79729893feb9fff6690aae5bace2043e74da0f0b71af149fdda1393715c7; not approved/bound.
+- MEASURED qualification SHA256 6972c311a6e9302856ff9bb9195aa73cf106a15da8caf91ac32b781f8909f328; recomputed, historically unchanged.
+- Audit ZIP: C:/Users/ANIRUDDH/AppData/Local/Temp/Tabwise-W3W4-FinalAudit-20261102-181519.zip.
+- MEASURED ZIP SHA256 41b16d0a52857db51e3363691de4f00356aa393f8f9f1b4321e125df93a88423.
+- CITED owner-supplied independent source review: A finalization freshness, B exclusive writer ownership, C late browser cleanup; no native qualification claim or invented reviewer identity.
+- Filtered binding-test ENOENT is historical, not a present full-suite failure. Prior failed results and D-98/D-99 remain intact.
+## Next / blocked
+- R2 and qualification disabled/BLOCK; no activation authorization. Merge HOLD remains.
+- Physical late-NVDA containment, real Chromium/NVDA evidence, W2a native qualification and W5 admission unresolved.
+- Separate owner authorization and native evidence required for further execution/admission; no status change inferred from offline PASS.
+## Verification / handoff
+- Read-only r2Digest(), qualificationDigest(), checkFrozenIntegrity(): required R2 match, unchanged qualification, frozen R1 PASS.
+- Evidence JSON/ZIP/dependency hash audit PASS; no tests rerun, model calls, native/hosted operations or status changes.
+- Final incremental verification: byte snapshots / old append-only prefixes / JSONL / git diff --check (result recorded in final report).
+- Existing uncommitted code/test files preserved: scripts/tabwise/r2-lifecycle.mjs, scripts/tabwise/r2-session.mjs, test/r2-binding.test.mjs, test/r2-lifecycle.test.mjs.
+- Documentation changes only this session: docs/ledger/STATE.md, PLAN.md, DECISIONS.md, LOG.jsonl.
+- Proposed commit: none authorized; leave all eight modifications uncommitted for the user.

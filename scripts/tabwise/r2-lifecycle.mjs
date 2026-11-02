@@ -10,6 +10,8 @@
 // Timing: the NVDA abandon (T1) and orphan (T2) bounds are monotonic escalation triggers taken from t0, immediately
 // before the raw start, and never reset; they are not termination proofs. Nothing is clean once the page guard
 // deadline has passed, and settlement never waits past it; the coordinator's child deadline stays authoritative.
+// Weak keys retain neither discarded writers nor lifecycle closures. Tokens identify owners only.
+const WRITER_OWNERS = new WeakMap();
 const SCHEMA = 'tabwise-r2-lifecycle/1';
 const DEFAULTS = Object.freeze({nvdaAbandonMs: 40000, nvdaOrphanMs: 52000, workMs: 540000, settleMs: 60000, guardMs: 600000, opCap: 256});
 const CLEAN = ['released', 'never-acquired'];
@@ -37,6 +39,7 @@ export function createR2Lifecycle(options = {}) {
   if (bounds.nvdaOrphanMs < bounds.nvdaAbandonMs) throw Error('lifecycle: NVDA orphan trigger precedes the abandon trigger');
   Object.freeze(bounds);
   const at = t => Math.round(t - pageStart);
+  const owner = {};
   const slots = new Map(), active = new Map(), counts = {}, sticky = [];
   let seq = 0, stickyCount = 0, closed = false, raw = null, bound = null, finalizing = null, finalClean = null;
 
@@ -121,6 +124,8 @@ export function createR2Lifecycle(options = {}) {
     }
     if (writer === null || typeof writer !== 'object' || typeof writer.append !== 'function' || typeof writer.put !== 'function' ||
       typeof writer.seal !== 'function' || typeof writer.failure !== 'function') throw Error('r2 lifecycle: not an R2 evidence writer');
+    if (WRITER_OWNERS.has(writer) && WRITER_OWNERS.get(writer) !== owner) throw refuse('writer belongs to another lifecycle');
+    WRITER_OWNERS.set(writer, owner);
     raw = writer;
     bound = Object.freeze({
       append: (lane, record) => { if (closed) late(lane); return raw.append(lane, record); },
@@ -129,6 +134,7 @@ export function createR2Lifecycle(options = {}) {
       failure: () => raw.failure(),
       identity: raw.identity,
     });
+    WRITER_OWNERS.set(bound, owner);
     return bound;
   };
 
@@ -145,7 +151,7 @@ export function createR2Lifecycle(options = {}) {
     }
   };
 
-  const finalize = ({incomplete = [], fallback = false} = {}) => finalizing ??= (async () => {
+  const finalizeOnce = ({incomplete = [], fallback = false} = {}) => finalizing ??= (async () => {
     closed = true;
     const start = now();
     const settleEnd = Math.min(start + bounds.settleMs, pageStart + bounds.guardMs);
@@ -181,6 +187,24 @@ export function createR2Lifecycle(options = {}) {
     finalClean = clean;
     return {clean, sealed, error, reasons: finalReasons, record: {...record, clean, reasons: finalReasons, sealed: sealed !== null, finalize_end_ms: at(now())}};
   })();
+
+  // Reconcile after the seal await and on every repeated call. This is a runtime verdict;
+  // the diagnostic event and immutable manifest describe only their earlier snapshot.
+  const finalize = options => finalizeOnce(options).then(result => {
+    const live = status();
+    const extra = [];
+    if (live.sticky > result.record.sticky.count) extra.push(`lifecycle refused ${live.sticky - result.record.sticky.count} operation(s) after diagnostic snapshot`);
+    if (live.pending.length) extra.push(`operations unsettled at completion: ${live.pending.join(', ')}`);
+    if (stopped()) extra.push('gate stopped at completion');
+    if (now() - pageStart >= bounds.guardMs) extra.push(`R2 page guard deadline ${bounds.guardMs} ms passed`);
+    if (!live.clean || extra.length) {
+      finalClean = false;
+      result.clean = false;
+      for (const reason of extra) if (!result.reasons.includes(reason)) result.reasons.push(reason);
+      result.record = {...result.record, clean: false, reasons: [...result.reasons]};
+    }
+    return result;
+  });
 
   // Live view: sticky refusals, unsettled work and a non-clean finalize keep the page non-clean; later cleanup cannot undo it.
   const status = () => {

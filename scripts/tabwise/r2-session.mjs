@@ -105,10 +105,33 @@ export async function runR2Session(runtime, data) {
     writer = lifecycle.bindWriter(evidence.createR2EvidenceWriter({enabled: true, dir: input.evidenceDir, page: {fixture_id: input.fixture_id, session, port}, fixture: input.fixture,
       approved: input.approved, nonce, spec: input.spec}));
 
+    let browserAbandoned = false, browserReady = false, requestCleanup, cleanupFinished;
     const launching = (async () => {
-      const server = await chromium.launchServer({headless: false, args: [...network.BROWSER_ARGS], handleSIGINT: false, handleSIGTERM: false, handleSIGHUP: false});
-      let browser, context;
+      let server, browser, context;
+      // Reserve only these fixed cleanup callbacks while operation admission is open.
+      // Their handles are private to this one launch; no late producer or second owner is admitted.
+      const cleanupRequested = new Promise(resolve => { requestCleanup = resolve; });
+      let previous = Promise.resolve();
+      for (const [label, close] of [
+        ['partial context close', () => context?.close()],
+        ['partial browser close', () => browser?.close()],
+        ['partial server kill', () => server?.kill()],
+      ]) {
+        const before = previous;
+        const operation = lifecycle.op(label, async () => {
+          const requested = await cleanupRequested;
+          await before;
+          if (requested) return close();
+        });
+        previous = cleanupRequested.then(async requested => {
+          await before;
+          if (requested) await within(label, () => operation, input.handleTimeoutMs);
+          else await operation;
+        }).catch(failure => { cleanup.push(`${label}: ${message(failure)}`); });
+      }
+      cleanupFinished = previous;
       try {
+        server = await chromium.launchServer({headless: false, args: [...network.BROWSER_ARGS], handleSIGINT: false, handleSIGTERM: false, handleSIGHUP: false});
         const pid = server.process()?.pid;
         if (!Number.isSafeInteger(pid) || pid <= 0) throw Error('owned Chromium PID missing');
         browser = await chromium.connect(server.wsEndpoint());
@@ -117,18 +140,30 @@ export async function runR2Session(runtime, data) {
         const page = await context.newPage();
         await page.goto(writer.identity.url, {waitUntil: 'load', timeout: input.handleTimeoutMs});
         await page.bringToFront();
+        browserReady = true;
+        if (browserAbandoned) throw Error('browser setup completed after acquisition abandonment');
         let closing;
         return {pid, version: browser.version(), page,
           close: () => closing ??= (async () => { try { await context.close(); } finally { try { await browser.close(); } finally { await server.close(); } } })()};
       } catch (error) {
-        await context?.close().catch(() => {}); await browser?.close().catch(() => {}); await server.kill().catch(() => {});
+        requestCleanup(true);
+        await previous; // bounded attempts; an unresolved callback stays in lifecycle.pending()
         throw error;
       }
     })();
-    // A launch that outlives its bound is closed when it settles; it is never handed to composition, and its slot stays
-    // orphaned (containment required) because that late close is not confirmed here.
-    try { owned = await lifecycle.acquire('browser', () => launching, {label: 'owned browser', boundMs: input.handleTimeoutMs}); }
-    catch (error) { launching.then(late => late.close()).catch(() => {}); throw error; }
+    // A timed-out acquisition never hands a late browser to composition. The same reserved
+    // cleanup owner handles either late failure or late success, even after evidence is sealed.
+    try {
+      owned = await lifecycle.acquire('browser', () => launching, {label: 'owned browser', boundMs: input.handleTimeoutMs});
+      requestCleanup(false); // only the acquisition winner may hand cleanup to the normal owner
+      await cleanupFinished;
+    } catch (error) {
+      browserAbandoned = true;
+      // Covers setup resolving between the timeout firing and this catch observing it.
+      // Otherwise the still-running setup triggers its reserved cleanup when it settles.
+      if (browserReady) requestCleanup(true);
+      throw error;
+    }
     authentic();
     probe = await lifecycle.acquire('foreground', () => runtime.createForeground());
 
