@@ -120,3 +120,5 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 | web/lib/server/r2-{product-context,evidence-bridge}.mjs; scripts/tabwise/r2-{admission-server,product}-policy.json | Stored-owner request binding, compensated ingestion/storage validation; policies disabled | productR2AdmissionContext, ingestR2BridgeArchive | web/test/r2-storage-bridge.test.mjs |
 | docs/engineering/R2-production-bridge-handoff.md; web/test/helpers/r2-bridge-fixture.mjs | Engineering handoff and generated offline fixture helpers | no runtime qualification | cache/bridge-review |
 | src/r2/product-export.mjs | Offline source-copy exporter and bridge validation; no signer or capture activation | buildR2ProductExport, writeR2ProductExport | test/r2-product-export.test.mjs; genuine runtime remains blocked |
+
+| src/r2/capture-export.mjs | Source-bound capture JSON-pointer projection for exporter and bridge | captureObservationSources | test/r2-capture-export.test.mjs |

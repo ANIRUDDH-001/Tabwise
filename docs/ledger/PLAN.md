@@ -571,3 +571,12 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Root ordinary 54/54 files, 1082/1082 tests PASS; nine classified exclusions remain. Web 127, contracts 21, browser/API 15 PASS; TypeScript/build exit0. All root exit/stdio closures confirmed; original budgets unchanged.
 - Frozen R1 PASS; R2 722fc80cc55d8420dbe088946b56b7ee70060781310621064ab9d8803569807e (53 files); qualification 6972c311a6e9302856ff9bb9195aa73cf106a15da8caf91ac32b781f8909f328 unchanged. No status promotion.
 - See R2-production-bridge-handoff.md and cache/bridge-review/verification-summary.json. Service mocks reach coordinator grant/finalization and independent evidence refusal; real native producer/export/attester and separately approved deployment/custody remain blocked. Stop for independent review; no commit.
+
+### F-03 / R2 producer projection (owner request, 2026-11-03 IST)
+- Goal: bind actual serialized capture records to existing exporter and independent product inspection.
+- Files: src/r2/{capture-export,product-export,product-bridge}.mjs; new capture-export tests; ci/offline-tests.json narrow registration; ledgers, CODEMAP and handoff.
+- Acceptance: ordinary offline runner, targeted Node tests, web/contracts/browser/API tests, tsc, production build, frozen integrity and diff check. Existing thresholds/exclusions retained.
+- Cost ceiling: $0; no installs, native input, hosted dispatch, credentials, authority-core changes or commits.
+- MEASURED producer-review: see cache/producer-review/verification-summary.json; 56 ordinary files PASS.
+- BLOCKED: authentic producer manifests cannot reach genuine-unqualified with current independent verifier; no signer/attester. Integration test uses generated surrounding identity, never genuine native evidence.
+- Rollback: discard only this task's listed diff/new files after review.

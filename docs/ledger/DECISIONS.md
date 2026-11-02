@@ -648,3 +648,8 @@ Scope/cost/acceptance: PLAN F-03 production bridge; no active configuration or n
 Owner instruction: “Do substantive implementation, not a design-only handoff.” “No live input, workflow dispatch, hosted changes, database writes, credentials, installs, model calls or spending.” “If any change to protected files is unavoidable, stop and identify the exact reason.”
 Scope used: new offline exporter and negative tests; zero spending. No protected file edited.
 Ordinary runner refuses unclassified test/r2-product-export.test.mjs. Continuing through that runner requires adding its classification to protected ci/offline-tests.json; stopped per owner instruction.
+
+## R2 producer authorization (2026-11-03 IST)
+User answer: "Do not stop merely because test registration needs a narrowly scoped change; explain and implement necessary test registration while preserving the fail-closed classification rules."
+User answer: "If an independent native signer/attester is unavailable, leave that requirement BLOCKED. Do not manufacture attestation or qualification PASS."
+Consequence: raw-capture exporter wiring and additive offline registration; no classification or authority promotion.

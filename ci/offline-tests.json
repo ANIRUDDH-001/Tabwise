@@ -254,5 +254,9 @@
   "vendor.test.mjs": {
     "kind": "offline",
     "reason": "sandbox imported first; OS/process/network boundaries denied and replaced with fakes"
+  },
+  "r2-capture-export.test.mjs": {
+    "kind": "offline",
+    "reason": "real captureJourney serialization with injected in-memory telemetry; no native execution, browser, credentials or external authority"
   }
 }

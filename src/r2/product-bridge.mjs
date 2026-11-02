@@ -5,6 +5,7 @@ import {assertContract,sha256,LIMITS} from '../../packages/contracts/index.mjs';
 import {SCHEMA,IDENTITY_KEYS,identity,exact,stable,same,safePath,validateR2ProductArtifact} from '../../packages/contracts/r2-product.mjs';
 import {parseUniqueJson as uniqueJson} from './strict-json.mjs';
 import {reviewedR2Module} from './node-review.mjs';
+import {captureObservationSources} from './capture-export.mjs';
 const handles=new WeakMap(),copyFiles=f=>Object.fromEntries(Object.entries(f).map(([p,b])=>[p,Buffer.from(b)]));
 const parse=b=>uniqueJson(new TextDecoder('utf-8',{fatal:true}).decode(b));
 function inspect({files,expected}){
@@ -28,15 +29,24 @@ function inspect({files,expected}){
  const entry=run.pages.find(p=>p.id===i.page_id);
  if(entry?.manifest_sha256!==i.page_manifest_sha256||page.schema!=='tabwise-r2-page-evidence/1'||page.class!=='genuine-unqualified'||page.page?.fixture_id!==i.page_id||page.page.session!==i.session||page.transform?.fixture_sha256!==i.fixture_sha256||!Array.isArray(page.incomplete)||page.incomplete.length)throw Error('page/session binding');
  if(!Array.isArray(page.files))throw Error('page file table');for(const f of page.files){if(!safePath(f.path)||!files[i.page_id+'/'+f.path]||sha256(files[i.page_id+'/'+f.path])!==f.sha256||files[i.page_id+'/'+f.path].length!==f.bytes)throw Error('page source hash');}
- if(capture.schema!=='r2-capture/1'||capture.fixture_id!==i.page_id||capture.completed!==true||capture.outcome!=='COMPLETE'||capture.source!=='observed-nvda'||capture.reasons?.length||capture.unattributed?.length||capture.unattributed_page?.length||capture.records?.length!==p.task.length)throw Error('unverified native capture');
+ if(capture.schema!=='r2-capture/1'||capture.fixture_id!==i.page_id||capture.completed!==true||capture.outcome!=='COMPLETE'||!['nvda','observed-nvda'].includes(capture.source)||capture.reasons?.length||capture.unattributed?.length||capture.unattributed_page?.length||capture.records?.length!==p.task.length)throw Error('unverified native capture');
  if(!Array.isArray(exp.step_map)||exp.step_map.length!==expected.spec.steps.length||exp.step_map.length!==p.task.length)throw Error('step coverage');
  const map=new Map();for(const [n,m] of exp.step_map.entries()){exact(m,['task','action','step']);const task=p.task[n],step=expected.spec.steps[n],raw=page.step_map?.actions?.[n],record=capture.records[n];
   if(m.task!==task.step||m.action!=='a'+(n+1)||m.step!==step.step||task.press!==step.key||raw?.task!==m.task||raw.action!==m.action||raw.press!==task.press||record.step!==m.action||record.press!==task.press||!['speech','observed-silence'].includes(record.capture_status)||record.reasons?.length||map.has(m.task))throw Error('step/task/action binding');map.set(m.task,m);}
  const lanes={keys:[],focus:[],speech:[],app_events:[],screenshots:[]},axe=[],refs=new Set(),pointers=new Set(),sequences=new Set(),last=new Map(),lastTime=new Map();
+ const native=exp.observations?.some(p=>'pointer' in p)?captureObservationSources({files,expected}):null;
+ if(native&&!same(exp.observations,native.map(x=>x.pointer)))throw Error('raw capture coverage');
  function source(pointer,kind){
+  if('pointer' in pointer){
+   exact(pointer,['path','pointer']);const found=native?.find(x=>same(x.pointer,pointer));
+   if(!found||kind!=='event')throw Error('raw capture pointer');
+   return accept(found.row,kind);
+  }
   exact(pointer,['path','line']);if(!Number.isSafeInteger(pointer.line)||pointer.line<1||!exp.source_files.some(f=>f.path===pointer.path)||pointers.has(pointer.path+':'+pointer.line))throw Error('source pointer');
   pointers.add(pointer.path+':'+pointer.line);const lines=new TextDecoder('utf-8',{fatal:true}).decode(files[pointer.path]).split('\n');if(!lines.at(-1))lines.pop();const line=lines[pointer.line-1];if(!line||line.length>30000)throw Error('missing raw observation');
-  const row=uniqueJson(line);exact(row,['schema','lane','page_id','session','task','action',kind]);const m=map.get(row.task);
+  const row=uniqueJson(line);return accept(row,kind);
+ }
+ function accept(row,kind){exact(row,['schema','lane','page_id','session','task','action',kind]);const m=map.get(row.task);
   if(row.schema!=='tabwise-r2-product-observation/1'||row.page_id!==i.page_id||row.session!==i.session||!m||m.action!==row.action||row[kind]?.step!==m.step)throw Error('raw observation binding');
   const e=row[kind];if(refs.has(e.evidence_ref))throw Error('duplicate evidence reference');refs.add(e.evidence_ref);
   if(kind==='event'){if(!Object.hasOwn(lanes,row.lane))throw Error('observation lane');const k=e.clock+':'+e.seq;if(sequences.has(k)||e.seq<=(last.get(e.clock)??-1)||e.t<(lastTime.get(e.clock)??0))throw Error('observation sequence');sequences.add(k);last.set(e.clock,e.seq);lastTime.set(e.clock,e.t);if(e.artifact_path!==null&&(!Object.hasOwn(files,e.artifact_path)||!exp.source_files.some(f=>f.path===e.artifact_path)))throw Error('missing observed artifact');lanes[row.lane].push(structuredClone(e));}

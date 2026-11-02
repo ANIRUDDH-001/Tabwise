@@ -5,6 +5,7 @@ import {sha256,LIMITS} from '../../packages/contracts/index.mjs';
 import {safePath,same} from '../../packages/contracts/r2-product.mjs';
 import {parseUniqueJson} from './strict-json.mjs';
 import {inspectR2ProductExport} from './product-bridge.mjs';
+import {captureObservationSources} from './capture-export.mjs';
 const parse=b=>parseUniqueJson(new TextDecoder('utf-8',{fatal:true}).decode(b));
 
 export function buildR2ProductExport({files,expected,stage_timings}) {
@@ -31,6 +32,7 @@ export function buildR2ProductExport({files,expected,stage_timings}) {
    (row.lane==='axe'?axe:observations).push({path,line:n+1});
   }
  }
+ if(!observations.length)observations.push(...captureObservationSources({files:copied,expected}).map(x=>x.pointer));
  const exp={schema:'tabwise-r2-product-export/1',identity:Object.fromEntries(Object.entries(expected).filter(([k])=>k!=='spec')),source_files:Object.keys(copied).sort().map(path=>({path,sha256:sha256(copied[path]),bytes:copied[path].length,kind:path.endsWith('.png')?'screenshot':path.endsWith('.jsonl')?'journal':'source'})),step_map:expected.spec.steps.map((step,n)=>{
   const m=parse(copied[expected.page_id+'/manifest.json']).step_map.actions[n];return {task:m.task,action:m.action,step:step.step};
  }),observations,axe,stage_timings:structuredClone(stage_timings)};

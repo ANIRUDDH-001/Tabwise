@@ -1,20 +1,18 @@
-# STATE — native exporter partial; protected gate stop
+# STATE — raw capture projection; genuine completion BLOCKED
 Worktree: D:/Projects/Meta AI/app-r2-native-export
-Base: b7c6896e2bc609c3884df08188396bef288eae17
+Baseline: a8708299de1776ca9ebb8dc991de89d37903af31
 ## Now
-- New offline exporter builds source file inventory and observation pointers; copies bytes separately.
-- MEASURED targeted 10/10 PASS; web 127/127 PASS.
-- Contracts: 6 PASS, 1 file failure: missing installed ajv. No install attempted.
-- Ordinary runner refuses new unclassified test; requires protected ci/offline-tests.json edit.
-- No protected files edited. No commit, hosted/native action, spending or activation.
+- Capture JSON pointers wired to exporter and independently recomputed by bridge.
+- Actual observer source nvda recognized; no native promotion.
+- MEASURED producer-review: ordinary56/56 files (1097 reported tests), targeted16/16, web127/127, contracts21/21.
+- Browser11/11; localhost API4/4; TypeScript and webpack build exit0.
+- Default builder failed external junction resolution; initial numeric-host API3/4 (origin refusal); logs retained.
+- Frozen integrity and git diff --check PASS. R2/qualification disabled/BLOCK.
 ## Next / blocked
-- STOP under owner's protected-file boundary. Independent review required.
-- Exporter is partial: no genuine producer wiring or independently verified native attester.
-- Genuine-unqualified remains unreachable with existing independent verifier.
-- Exporter test negatives involving modified bytes primarily exercise digest refusal.
-- TypeScript/build/browser/frozen integrity not run before protected gate stop.
-- R2/W5/qualification remain disabled/BLOCK.
+- Genuine classification unreachable without independent native attester.
+- Integration test uses real capture serialization and generated surrounding identity, not a branded native session.
+- Screenshot timestamps / axe version absent; no corresponding product lane events manufactured.
+- No native run, install, spending, credential, hosted action, commit or deployment.
 ## Handoff
-- cache/native-export-review: measured test logs and exact source packet.
-- Last verification: node --test test/r2-product-export.test.mjs: 10/10 PASS.
-- git diff --check PASS. No success claim for complete requested task.
+- docs/engineering/R2-producer-projection-handoff.md; cache/producer-review review ZIP and logs.
+- Independent review pending; genuine end-to-end task not complete.
