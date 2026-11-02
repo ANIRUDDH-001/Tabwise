@@ -580,3 +580,12 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - MEASURED producer-review: see cache/producer-review/verification-summary.json; 56 ordinary files PASS.
 - BLOCKED: authentic producer manifests cannot reach genuine-unqualified with current independent verifier; no signer/attester. Integration test uses generated surrounding identity, never genuine native evidence.
 - Rollback: discard only this task's listed diff/new files after review.
+
+## R3 complete - user request 2026-11-03
+- Goal: "Complete R3 AI diagnosis and repair, end-to-end. This is full implementation work, not a minimum demo."
+- Base d75f04335dc0ba6c9e64fb92fcedc408c5867cfc; isolated feat/tabwise-r3-complete.
+- Files: diagnosis/contracts, repair application/review/persistence, API/UI, new SQL/tests and normal handoff ledgers.
+- Ceiling: zero incremental budget. No installs or live calls.
+- Verification commands/results: docs/engineering/Tabwise-R3-complete-handoff.md.
+- "Commit and push only the R3 branch. No merging or modifications to main."
+- PARTIAL: candidate worker/rerun integration, live acceptance and Claude review pending. Frozen thresholds unchanged.

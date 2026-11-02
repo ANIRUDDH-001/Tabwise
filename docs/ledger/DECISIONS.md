@@ -653,3 +653,6 @@ Ordinary runner refuses unclassified test/r2-product-export.test.mjs. Continuing
 User answer: "Do not stop merely because test registration needs a narrowly scoped change; explain and implement necessary test registration while preserving the fail-closed classification rules."
 User answer: "If an independent native signer/attester is unavailable, leave that requirement BLOCKED. Do not manufacture attestation or qualification PASS."
 Consequence: raw-capture exporter wiring and additive offline registration; no classification or authority promotion.
+
+## R3 user authorization - 2026-11-02T20:10:47Z
+User: "Tabwise: Complete R3 AI diagnosis and repair, end-to-end. This is full implementation work, not a minimum demo." "Use a new isolated worktree and branch feat/tabwise-r3-complete. Do not touch Codex 1's worktree." "₹0 incremental budget." "Commit and push only the R3 branch. No merging or modifications to main." No installs/paid calls performed. R3 acceptance remains incomplete.

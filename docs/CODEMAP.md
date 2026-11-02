@@ -122,3 +122,6 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 | src/r2/product-export.mjs | Offline source-copy exporter and bridge validation; no signer or capture activation | buildR2ProductExport, writeR2ProductExport | test/r2-product-export.test.mjs; genuine runtime remains blocked |
 
 | src/r2/capture-export.mjs | Source-bound capture JSON-pointer projection for exporter and bridge | captureObservationSources | test/r2-capture-export.test.mjs |
+
+| `src/meta/input.mjs`, `src/repair/{application,verify-application}.mjs`, `web/app/api/patches/[id]/apply/` | Observed input, immutable candidate materialization and independent patch inspection; no execution/verdict | R3 input/application tests |
+| `supabase/migrations/20261103000000_repair_application.sql`, `supabase/tests/repair-application.sql`, `test/tabwise-r3-database.test.mjs` | Atomic private persistence, immutable review/audit and local concurrency/recovery tests | R3 handoff |

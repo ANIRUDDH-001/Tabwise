@@ -1,18 +1,22 @@
-# STATE — raw capture projection; genuine completion BLOCKED
-Worktree: D:/Projects/Meta AI/app-r2-native-export
-Baseline: a8708299de1776ca9ebb8dc991de89d37903af31
+# STATE - R3 offline implementation PARTIAL
+Updated: 2026-11-02T20:10:47Z
+Worktree: D:/Projects/Meta AI/app-r3-complete
+Branch: feat/tabwise-r3-complete; base d75f04335dc0ba6c9e64fb92fcedc408c5867cfc
 ## Now
-- Capture JSON pointers wired to exporter and independently recomputed by bridge.
-- Actual observer source nvda recognized; no native promotion.
-- MEASURED producer-review: ordinary56/56 files (1097 reported tests), targeted16/16, web127/127, contracts21/21.
-- Browser11/11; localhost API4/4; TypeScript and webpack build exit0.
-- Default builder failed external junction resolution; initial numeric-host API3/4 (origin refusal); logs retained.
-- Frozen integrity and git diff --check PASS. R2/qualification disabled/BLOCK.
+- Observed-evidence diagnosis provenance/source bindings integrated.
+- Private candidate persistence, recovery, immutable audit and review API/UI added.
+- R7 exact replay inspection added. R3 passes remains false.
+## Verification - MEASURED r3-offline-20261103
+- Targeted 21/21; web/contracts 148/148; R2 809/809.
+- Typecheck and production webpack build exit 0.
+- Local PostgreSQL migrations/rollback/recovery/concurrency tests PASS.
+- Existing tests unchanged. No paid calls, installs, deployments or gate changes.
 ## Next / blocked
-- Genuine classification unreachable without independent native attester.
-- Integration test uses real capture serialization and generated surrounding identity, not a branded native session.
-- Screenshot timestamps / axe version absent; no corresponding product lane events manufactured.
-- No native run, install, spending, credential, hosted action, commit or deployment.
+- Candidate consumption by qualified worker/rerun admission still needs implementation.
+- runs API refuses patch_id; worker liveGate remains BLOCKED.
+- Withheld rescue/wrong-patch acceptance and live Muse/hosted browser checks absent.
+- Claude cross-tool review outstanding; Codex review corrections applied.
 ## Handoff
-- docs/engineering/R2-producer-projection-handoff.md; cache/producer-review review ZIP and logs.
-- Independent review pending; genuine end-to-end task not complete.
+- docs/engineering/Tabwise-R3-complete-handoff.md: contracts, commands and remaining work.
+- Commit/push R3 branch explicitly authorized; no main modification or merge.
+- Local PostgreSQL stopped. Installed dependency junctions ignored.

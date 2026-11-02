@@ -1,6 +1,12 @@
 // Human copy for every reason code emitted by web/app/api/** and web/app/auth/** (T-P0-04, T-P1-04).
 // Copy never names environment variables, secrets or stack traces.
 export const REASON_COPY=Object.freeze({
+ repair_application_status_unavailable:'Saved candidate status is unavailable. Try again later.',
+ repair_application_digest_conflict:'The saved candidate belongs to a different patch revision. Reload this page.',
+
+ invalid_application_request:'Reload the patch and try saving the candidate again.',
+ repair_application_failed_retry_same_patch:'The candidate could not be confirmed. Retry this same patch; a saved candidate will be recovered safely.',
+
  sign_in_configuration_pending:"Sign-in isn't set up on this deployment yet. You can still use the demo.",
  server_configuration_pending:"Account storage isn't set up on this deployment yet. You can still use the demo.",
  github_oauth_provider_pending:"GitHub sign-in isn't set up on this deployment yet. You can still use the demo.",
