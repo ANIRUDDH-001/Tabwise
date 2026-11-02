@@ -588,3 +588,4 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Acceptance: node --check scripts/tabwise/nvda-startup-diagnostic.mjs; YAML parser/trigger assertions; frozen R1 baseline; git diff --check; actual hosted report/artifact readback.
 - Cost ceiling: ₹0 incremental; public repo + standard windows-2025 only. No new dependencies.
 - No keyboard, browser, capture, qualification, status, frozen asset or lifecycle timeout changes.
+- MEASURED run_id 41514466149: workflow success at c6132d1; startup 5465 ms; process and relay PID 1344; settings file readback match; shutdown 1095 ms; worker/supervisor post-quiescence clean. ZIP digest matched GitHub. NONQUALIFYING; R2/W2a BLOCK.
