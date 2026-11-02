@@ -1,4 +1,16 @@
 {
+  "r2-admission.test.mjs": {
+    "kind": "harness",
+    "reason": "signed receipt and simulated transaction tests; bounded controlled Node IPC children only; no native runtime"
+  },
+  "r2-admission-integration.test.mjs": {
+    "kind": "offline",
+    "reason": "source/policy inspection and injected HTTP responses; no live authority or runtime"
+  },
+  "r2-evidence-compatibility.test.mjs": {
+    "kind": "offline",
+    "reason": "negative schema and product-ingestion checks over synthetic in-memory evidence; no conversion or runtime"
+  },
   "broker.test.mjs": {
     "kind": "process",
     "reason": "spawns real Node workers for SQLite contention"

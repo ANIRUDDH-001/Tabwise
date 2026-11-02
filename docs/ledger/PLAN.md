@@ -531,3 +531,20 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - STILL UNVERIFIED: physical late-NVDA containment, real Chromium/NVDA evidence, W2a native qualification and W5 admission. R2 and qualification remain disabled/BLOCK; no activation authorization. Nine browser/process-classified tests remain excluded per selection.json; offline acceptance does not cover those tests.
 - Historical filtered binding-test ENOENT remains recorded; it is not a present full-suite failure. D-98, D-99 and all prior failed acceptance results remain unchanged. Current offline acceptance supersedes the earlier pending ordinary/stress status only for this candidate and these reports.
 - Reconciliation acceptance: recompute digests/frozen integrity; verify only the four allowed documentation paths change incrementally, all prior code/test bytes identical, old ledger prefixes intact, appended JSON valid and git diff --check clean. No test reruns, model/native/hosted operations, status changes or Git writes.
+
+### F-03 / W5 offline execution admission (2026-11-02T13:23:14Z)
+- Owner: "Implement W5 offline as far as safely possible." Separate worktree app-w5-review; branch feat/tabwise-r2-w5-offline; parent 60f6aeaa3fb160976ae526582ac47bcc123f3809.
+- Scope: new scripts/tabwise/r2-admission*.mjs and disabled transport policy; source scope/production entry integration; supabase/proposals/r2-w5-admission.sql (unapplied); new adversarial tests and evidence bridge mapping; normal ledgers/CODEMAP.
+- Reuse approved Postgres infrastructure: immutable bindings, permanent atomic consume, signed receipt, coordinator ephemeral signing key and page-specific challenge/response. No deployed endpoint or credentials configured.
+- Acceptance: RED-first W5 tests; GREEN W5 and existing R2 review/lifecycle/evidence/completion suites; frozen R1/digest/BLOCK/diff checks; external review packet. PostgreSQL tests, if run, use a new isolated local cluster only.
+- Cost $0; no installs/native containment/NVDA/Chromium/hosted workflows/production mutations/model calls/commits/push/merge/activation; no R3/R7 or other worktree edits.
+- Existing S7-I1 expected scope list extension explicitly approved; preserve all assertions and thresholds. No other existing tests changed.
+- Rollback: preserve uncommitted W5 diff for owner; never reset or delete other work.
+
+- W5 result (2026-11-02T13:49:50Z, W5-20261102T134320Z): MEASURED Node301/301 exit0; isolated local PostgreSQL11/11 exit0, eight concurrent consumers exactly one winner; two isolated mutants killed exit1. Initial RED logs and intermediate O11 failure retained; owner approved exact two regex delimiters and three CI classifications.
+- Current candidate R2 84f7b4b2c24f34b8f076a336fba8102c3da05bb5064b87a4eda38f246217257b (27 files); qualification 6972c311a6e9302856ff9bb9195aa73cf106a15da8caf91ac32b781f8909f328 unchanged; frozen R1 PASS. Authority transport unconfigured/disabled; actual hosted authentication/keys/database deployment and native qualification pending. Independent review before commit; full profiles not rerun.
+
+### F-03/W5 Next.js transport correction (2026-11-02T14:11:27Z)
+- Owner: "Our approved architecture requires Next.js API routes as the only HTTP backend." Transport/policy, affected transport tests and relevant handoff only; $0; no new route/deployment/network/credentials/commit/activation.
+- Replace Edge Functions URL with reviewed canonical HTTPS owner origin and fixed /api/r2/admission contract; policy remains disabled/null. Accepted admission core/SQL untouched; reviewed scope membership unchanged.
+- MEASURED affected RED4/6 exit1 -> GREEN6/6 exit0; original acceptance command302/302 exit0. R2 971f21a1d37136c496b365cae14cbb999aefe1ce06c693b85a6507bec266789f; frozen R1 PASS, qualification unchanged, statuses BLOCK. Independent core review accepted; stop for preservation approval of this correction.

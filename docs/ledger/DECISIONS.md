@@ -610,3 +610,22 @@ Owner scope: only docs/ledger/{STATE.md,PLAN.md,DECISIONS.md,LOG.jsonl}; $0, no 
 - CITED (owner-provided independent source-review result in final reconciliation request): A finalization freshness, B exclusive writer ownership, C late browser cleanup independently source-reviewed. Reviewer identity and review timestamp were not supplied; none inferred. This is source review, not native qualification.
 - STILL UNVERIFIED: physical late-NVDA containment, real Chromium/NVDA evidence, W2a native qualification and W5 admission. R2 and qualification remain disabled/BLOCK; no activation authorization. Nine browser/process-classified tests remain excluded per selection.json; offline acceptance does not cover those tests.
 - Historical filtered binding-test ENOENT remains recorded; it is not a present full-suite failure. D-98, D-99 and all prior failed acceptance results remain unchanged. Current offline acceptance supersedes the earlier pending ordinary/stress status only for this candidate and these reports.
+
+## W5 offline authorization (2026-11-02T13:23:14Z)
+Owner: "Create a separate W5 worktree and branch from the exact preservation commit." "Implement R2 W5's missing durable, atomic, one-use execution-admission mechanism." "No commits until I separately authorize them."
+Scope/cost/acceptance: PLAN F-03/W5; existing Postgres selected after admission/broker inspection; no production operations or configuration.
+Owner scope-test answer: "Allow the exact scope-list extension (recommended): keeps the integrity test meaningful; no threshold changes."
+Only the S7-I1 expected source list may be extended; all other existing test bytes retained. No native or deployment approval inferred.
+
+## W5 CI registration (2026-11-02T13:39:29Z)
+Owner: "Approve classification entries (recommended): keeps the offline runner usable; three CI metadata additions only."
+Only r2-admission, r2-admission-integration and r2-evidence-compatibility classifications added; selection logic, existing entries, scheduling budgets and thresholds unchanged. PostgreSQL qualification remains an explicit separate local command.
+
+## W5 O11-P1 regex correction (2026-11-02T13:47:42Z)
+Owner: "Approve the two-character regex correction (recommended): restores the test’s stated intent without changing production behavior."
+MEASURED: combined run 300/301; O11-P1's literal backspace delimiters failed to remove legitimate 64-hex digests before nonce-fragment checking. Exact two delimiters changed to intended backslash-b word boundaries; no production redaction or acceptance threshold changed. Failure retained in cache/w5-review/final-node-failed-evidence.txt.
+
+## W5 HTTP architecture correction (2026-11-02T14:11:27Z)
+Owner: "The offline admission core is accepted." "Next.js API routes as the only HTTP backend. Supabase Postgres remains the durable data authority; Supabase Edge Functions are not approved."
+Owner: "Keep transport disabled/unconfigured. Do not invent a working endpoint, deploy a route, or claim authenticated production communication."
+Consequence: source-reviewed owner-origin plus fixed Next.js API path contract; no actual route or credentials; all accepted core/SQL bytes preserved. Affected tests and existing acceptance command pass; no preservation commit authorized yet.

@@ -10,7 +10,7 @@
 // only reads the sealed run directory and re-verifies it. Nothing here selects the composition seam, and no argument or
 // variable bypasses a gate.
 import {execFileSync, spawn} from 'node:child_process';
-import {mkdirSync} from 'node:fs';
+import {mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {checkFrozenIntegrity} from './check-r1-baseline.mjs';
@@ -20,6 +20,9 @@ import {createQualificationIntegrity} from './tabwise/qualification-integrity.mj
 import {installQualificationCrashHandlers} from './tabwise/qualification-crash.mjs';
 import {windowsProcessTools} from './tabwise/r2-proctree.mjs';
 import {checkR2Entry, r2RunDir, r2ChildEnv, r2PageCommand, r2SessionData, r2PageExit, r2RunSealable, r2RunInputs, r2RunExit, r2VerifyRun, runR2Pages, PAGE_DEADLINE_MS} from './tabwise/r2-run.mjs';
+
+import {bindingFromGate, createCoordinator, requestPageAdmission, verifyAdmissionRecord} from './tabwise/r2-admission.mjs';
+import {loadAdmissionPolicy, createConfiguredTransport, admissionConsumer, admissionDirectory} from './tabwise/r2-admission-transport.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const entry = fileURLToPath(import.meta.url);
@@ -31,6 +34,9 @@ const message = error => error?.message ?? String(error);
 
 // One page in this process: integrity scope, branded runtime, session, then the phase-boundary checks.
 async function runPage(gate) {
+  // W5: no protected import before the signed, one-process IPC challenge is accepted.
+  const policy = loadAdmissionPolicy(), binding = bindingFromGate(gate, policy);
+  await requestPageAdmission({id:policy.authorization_id,binding, consumer: admissionConsumer(process.env), page: gate.pages[0].id, publicKey: policy.receipt_public_key});
   const page = gate.pages[0], runDir = r2RunDir(process.env, root);
   const phase = createQualificationIntegrity({root, head: gate.head, reviewedDigest: gate.status.qualification_sha256});
   const r2Phase = () => (r2Digest(root) === gate.status.reviewed_sha256 ? [] : ['R2 reviewed content changed']);
@@ -70,8 +76,30 @@ async function runPage(gate) {
   return completed ? 0 : 2;
 }
 
+function launchAdmittedPage({id,gate,env,coordinator,admissionDir,cancel}) {
+  const c = r2PageCommand({entry, page: id, planPath: gate.planPath, env, cwd: root});
+  const child = spawn(c.file, c.args, {...c.options, stdio: [...c.options.stdio, 'ipc']});
+  child.once('message', value => {
+    const grant = async () => {
+      if (value?.schema !== 'tabwise-r2-page-challenge/1' || Object.keys(value).sort().join(',') !== 'challenge,schema') throw Error('W5 malformed child request');
+      const admitted = await coordinator.grant(value.challenge, {pid: child.pid, ppid: process.pid, page: id});
+      writeFileSync(join(admissionDir, `${id}.json`), JSON.stringify(admitted), {flag: 'wx'});
+      if (child.connected) child.send(admitted, error => { if (error) { console.error('W5 child admission delivery failed'); cancel.abort(); } });
+    };
+    grant().catch(() => { console.error('W5 page admission refused'); cancel.abort(); if (child.connected) child.disconnect(); });
+  });
+  return child;
+}
+
 // Sequential page children; never a runtime in this process. The run manifest is sealed and verified from disk.
 async function runAll(gate) {
+  const policy = loadAdmissionPolicy(), binding = bindingFromGate(gate, policy), consumer = admissionConsumer(process.env);
+  const coordinator = await createCoordinator({id: policy.authorization_id, binding, consumer, publicKey: policy.receipt_public_key,
+    transport: createConfiguredTransport(policy, process.env)});
+  // Any failure after consumption burns this authorization. No recovery path can create another coordinator.
+  const admissionDir = admissionDirectory(r2RunDir(process.env, root), consumer);
+  mkdirSync(dirname(admissionDir), {recursive: true}); mkdirSync(admissionDir);
+  writeFileSync(join(admissionDir, 'receipt.json'), JSON.stringify(coordinator.receipt), {flag: 'wx'});
   const runDir = r2RunDir(process.env, root), env = r2ChildEnv(process.env), forwarded = new Map();
   // R-1/R-2: OS process custody of every page child's tree, held here and never delegated to the child's own report.
   const processes = windowsProcessTools({spawn, env: process.env});
@@ -84,7 +112,7 @@ async function runAll(gate) {
   try {
     outcome = await runR2Pages({
       pages: gate.pages.map(p => p.id),
-      launch: id => { const c = r2PageCommand({entry, page: id, planPath: gate.planPath, env, cwd: root}); return spawn(c.file, c.args, c.options); },
+      launch: id => launchAdmittedPage({id,gate,env,coordinator,admissionDir,cancel}),
       onStderr: (id, data) => { const used = forwarded.get(id) ?? 0; if (used < STDERR_CAP) { forwarded.set(id, used + data.length); process.stderr.write(data); } },
       processes, signal: cancel.signal, protect: [process.pid, process.ppid],
     });
@@ -101,6 +129,9 @@ async function runAll(gate) {
   const {plan, inputs} = r2RunInputs(gate);
   const sealed = await sealR2Run(runDir, {enabled: true, plan, pages: outcome.pages.map(({id, exit_code}) => ({id, exit_code})), inputs});
   const verified = await verifyR2Run(runDir, {plan, inputs});
+  const admission = coordinator.record(sealed.manifest_sha256);
+  writeFileSync(join(admissionDir, 'admission.json'), JSON.stringify(admission), {flag: 'wx'});
+  verifyAdmissionRecord(admission, {id:policy.authorization_id,binding, consumer, publicKey: policy.receipt_public_key, manifest: sealed.manifest_sha256, pages: outcome.pages.map(p => p.id)});
   console.log(JSON.stringify({schema: 'tabwise-r2-run-summary/1', run_class: verified.run_class, verified: verified.ok, errors: verified.errors,
     run_manifest_sha256: sealed.manifest_sha256, pages: outcome.pages, stopped_after: outcome.stopped_after, genuine_evidence: false}));
   return r2RunExit(outcome, verified);
@@ -109,6 +140,10 @@ async function runAll(gate) {
 // S7: a fresh process re-verifies the sealed run from disk after every gate. Read-only: no child, seal, write or runtime.
 async function verifyRun(gate) {
   const {summary, code} = await r2VerifyRun(gate, r2RunDir(process.env, root));
+  const policy = loadAdmissionPolicy(), binding = bindingFromGate(gate, policy);
+  const admission = JSON.parse(readFileSync(join(admissionDirectory(r2RunDir(process.env, root), admissionConsumer(process.env)), 'admission.json'), 'utf8'));
+  verifyAdmissionRecord(admission, {id:policy.authorization_id,binding, consumer: admissionConsumer(process.env), publicKey: policy.receipt_public_key, manifest: summary.run_manifest_sha256,
+    pages: gate.plan.pages.map(p => p.id)});
   console.log(JSON.stringify(summary));
   return code;
 }

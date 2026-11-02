@@ -1175,7 +1175,7 @@ test('O11-P1 a sealed synthetic run gives a verified refusal-only custody manife
     assert.equal(raw.includes(NONCE), false, `${file} holds the nonce`);
     assert.equal(raw.includes(sha256(NONCE)), false, `${file} holds sha256(nonce)`);
     // 64-hex digests are bound evidence identities, not speech; any other nonce fragment would be a leak.
-    const text = raw.replace(/[0-9a-f]{64}/g, 'digest');
+    const text = raw.replace(/\b[0-9a-f]{64}\b/g, 'digest');
     assert.deepEqual(redactNonce([{seq: 1, text}], NONCE), {ok: true, reason: null, texts: [{seq: 1, text}], redaction: {version: 'nonce-redact/2', edits: []}},
       `${file}: no nonce occurrence or 4-character nonce fragment`);
   }

@@ -60,3 +60,7 @@ All D8 installs used independent `packages/contracts/` or `web/` manifests/lockf
 
 | CI-H1 offline reliability harness | Explicit root-test classification, bounded Node supervisor and synthetic browser-launch rejection preload | Codex-authored during event; ours, synthetic; no dependency, fixture dataset or third-party code intake | No real browser/physical input/model execution |
 | R2 S7 verify-run, hosted workflow; R-1/R-2 process custody; D-88 integration | `scripts/tabwise-r2.mjs`, `scripts/tabwise/{r2-run,r2-policy,r2-proctree,r2-evidence}.mjs`, `.github/workflows/tabwise-r2.yml`, `test/r2-{review,proctree,evidence}.test.mjs` | Claude (S7, D-86; custody review and CR-1, D-87; integration, D-88) and Claude Cloud (custody design, D-87) during event; ours | No new dependency or data; action pins as in the D-86 row; no hosted run, NVDA, browser or real process termination |
+
+### W5 new work (2026-11-02T13:49:50Z)
+- Newly authored W5 admission modules, disabled policy, SQL proposal, evidence compatibility helper, tests and handoff in this worktree; project-owned event work. No external code/dependency/fixture/dataset added. Existing pinned dependency reference files copied hash-exact into ignored node_modules; no install.
+- References only: PostgreSQL18 official transaction/row-lock/privilege documentation retrieved with cached Context7 CLI, no code copied. Local PostgreSQL18.3 tools were already installed; no dependency ships with W5. Native/product qualification not claimed.

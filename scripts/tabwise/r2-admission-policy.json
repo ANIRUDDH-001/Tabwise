@@ -1,0 +1,8 @@
+{
+  "schema": "tabwise-r2-admission-policy/1",
+  "enabled": false,
+  "authority_origin": null,
+  "receipt_public_key": null,
+  "authorization_id": null,
+  "expires_at": null
+}
