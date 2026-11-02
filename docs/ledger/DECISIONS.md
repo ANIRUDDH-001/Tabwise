@@ -629,3 +629,7 @@ MEASURED: combined run 300/301; O11-P1's literal backspace delimiters failed to 
 Owner: "The offline admission core is accepted." "Next.js API routes as the only HTTP backend. Supabase Postgres remains the durable data authority; Supabase Edge Functions are not approved."
 Owner: "Keep transport disabled/unconfigured. Do not invent a working endpoint, deploy a route, or claim authenticated production communication."
 Consequence: source-reviewed owner-origin plus fixed Next.js API path contract; no actual route or credentials; all accepted core/SQL bytes preserved. Affected tests and existing acceptance command pass; no preservation commit authorized yet.
+
+## Product integration authorization (2026-11-02T14:25:23Z)
+Owner: "Integrate the preserved R2 offline implementation and the completed frontend into one working local product candidate." "A local integration operation in the new isolated worktree is permitted; stop before committing."
+Scope and acceptance: PLAN Product integration; new isolated branch only, existing worktrees/branches/untracked files preserved. All runtime/qualification statuses and thresholds remain unchanged; no external operations or additional agents.

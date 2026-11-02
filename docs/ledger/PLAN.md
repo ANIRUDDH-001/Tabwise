@@ -548,3 +548,13 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Owner: "Our approved architecture requires Next.js API routes as the only HTTP backend." Transport/policy, affected transport tests and relevant handoff only; $0; no new route/deployment/network/credentials/commit/activation.
 - Replace Edge Functions URL with reviewed canonical HTTPS owner origin and fixed /api/r2/admission contract; policy remains disabled/null. Accepted admission core/SQL untouched; reviewed scope membership unchanged.
 - MEASURED affected RED4/6 exit1 -> GREEN6/6 exit0; original acceptance command302/302 exit0. R2 971f21a1d37136c496b365cae14cbb999aefe1ce06c693b85a6507bec266789f; frozen R1 PASS, qualification unchanged, statuses BLOCK. Independent core review accepted; stop for preservation approval of this correction.
+
+### Product integration (2026-11-02T14:25:23Z; owner-authorized local no-commit merge)
+- Goal: preserved R2/W5 plus frontend as one local candidate. Baseline d2d18540766466de11dc9aa699a2470fc8f17582; frontend d79c066228a16e3c69c0c38f696d5525fe9dd6ab; merge-base063e789f2b0429105b73dc624bb96c77a660ba70.
+- Worktree app-product-integration; branch feat/tabwise-product-integration. Frontend tracked clean; untracked hashes retained; local merge --no-commit --no-ff completed without conflicts.
+- Scope: frontend branch changes, confirmed integration defects with regressions, relevant handoff/ledgers only. Available dependencies copied, no install/upgrade.
+- Acceptance: root ordinary offline profile (nine classified exclusions explicit); contracts and web tests; production build/TypeScript; local credential-disabled browser regression; disabled execution/API/owner-isolation checks; frozen/digest/status/preservation audits.
+- Cost $0; no W2a changes, native qualification, hosted DB/workflow/model/credentials/deployment/activation, commits/push/main integration or R3/R7. Stop for review before committing.
+
+- Integration result (2026-11-02T14:35:27Z, Integration-20261102T143527Z):85 merged paths/81 web, no conflicts; no confirmed product defect/source fix. Root54/54 files1082/1082 tests, contracts21/21, web107/107, browser/API15/15, types/build all exit0. Nine root exclusions explicit; no stress/native qualification.
+- Digests/statuses unchanged; frontend tracked clean and7 untracked hashes preserved. Merge pending independent review; cache/integration-review and Tabwise-product-integration-handoff.md contain evidence.

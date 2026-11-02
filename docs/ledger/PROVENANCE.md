@@ -64,3 +64,6 @@ All D8 installs used independent `packages/contracts/` or `web/` manifests/lockf
 ### W5 new work (2026-11-02T13:49:50Z)
 - Newly authored W5 admission modules, disabled policy, SQL proposal, evidence compatibility helper, tests and handoff in this worktree; project-owned event work. No external code/dependency/fixture/dataset added. Existing pinned dependency reference files copied hash-exact into ignored node_modules; no install.
 - References only: PostgreSQL18 official transaction/row-lock/privilege documentation retrieved with cached Context7 CLI, no code copied. Local PostgreSQL18.3 tools were already installed; no dependency ships with W5. Native/product qualification not claimed.
+
+### Local product integration (2026-11-02T14:35:27Z)
+- Existing project-owned frontend d79c066 integrated into R2/W5 d2d1854 without commit. Newly authored four-case API test and handoff; no third-party code/dataset/dependency/license added. Existing installed dependencies copied to ignored node_modules without install; source worktrees untouched.
