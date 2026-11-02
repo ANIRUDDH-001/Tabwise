@@ -1287,13 +1287,25 @@ test('S7-W3 the workflow path is the one the R2 policy pins; the pristine fixtur
 // O-11 (D-89) adds arm-inputs; C2 adds input-policy, executor and palette (exact-membership expansion disclosed).
 test('S7-I1 R2_FILES is exactly the union of the S7, custody, O-11 and W3/W4 lifecycle reviewed scopes; r2Digest is the CRLF-normalized per-file digest over it', () => {
   assert.deepEqual([...R2_FILES], [
-    '.github/workflows/tabwise-r2.yml', 'packages/contracts/palette.mjs', 'scripts/tabwise-r2.mjs', 'scripts/tabwise/executor.mjs',
-    'scripts/tabwise/input-policy.mjs', 'scripts/tabwise/r2-admission-policy.json', 'scripts/tabwise/r2-admission-transport.mjs', 'scripts/tabwise/r2-admission.mjs',
-    'scripts/tabwise/r2-compose.mjs', 'scripts/tabwise/r2-evidence.mjs', 'scripts/tabwise/r2-lifecycle.mjs', 'scripts/tabwise/r2-policy.mjs',
-    'scripts/tabwise/r2-proctree.mjs', 'scripts/tabwise/r2-run.mjs', 'scripts/tabwise/r2-session.mjs', 'src/r2/arm-inputs.mjs',
-    'src/r2/binding.mjs', 'src/r2/capture.mjs', 'src/r2/contract.mjs', 'src/r2/page-journal.mjs',
-    'src/r2/page-provider.mjs', 'src/r2/page-recorder.mjs', 'src/r2/page-source.mjs', 'src/r2/preparation.mjs',
-    'src/r2/send-receipt.mjs', 'src/r2/speech-payload.mjs', 'supabase/proposals/r2-w5-admission.sql']);
+    '.github/workflows/tabwise-r2.yml', 'packages/contracts/index.mjs', 'packages/contracts/limits.mjs',
+    'packages/contracts/palette.mjs', 'packages/contracts/r2-product.mjs', 'packages/contracts/schemas.mjs',
+    'scripts/tabwise-r2.mjs', 'scripts/tabwise/executor.mjs', 'scripts/tabwise/input-policy.mjs',
+    'scripts/tabwise/r2-admission-policy.json', 'scripts/tabwise/r2-admission-server-policy.json', 'scripts/tabwise/r2-admission-transport.mjs',
+    'scripts/tabwise/r2-admission.mjs', 'scripts/tabwise/r2-compose.mjs', 'scripts/tabwise/r2-evidence.mjs',
+    'scripts/tabwise/r2-lifecycle.mjs', 'scripts/tabwise/r2-policy.mjs', 'scripts/tabwise/r2-proctree.mjs',
+    'scripts/tabwise/r2-product-policy.json', 'scripts/tabwise/r2-run.mjs', 'scripts/tabwise/r2-session.mjs',
+    'src/budget/prices.mjs', 'src/r2/approval-constants.mjs', 'src/r2/arm-inputs.mjs',
+    'src/r2/binding.mjs', 'src/r2/capture.mjs', 'src/r2/contract.mjs',
+    'src/r2/node-review.mjs', 'src/r2/page-journal.mjs', 'src/r2/page-provider.mjs',
+    'src/r2/page-recorder.mjs', 'src/r2/page-source.mjs', 'src/r2/preparation.mjs',
+    'src/r2/product-bridge.mjs', 'src/r2/send-receipt.mjs', 'src/r2/speech-payload.mjs',
+    'src/r2/strict-json.mjs', 'supabase/proposals/r2-w5-admission.sql', 'web/app/api/r2/admission/route.ts',
+    'web/app/api/runs/[id]/evidence/route.ts', 'web/lib/server/artifact-ingest.mjs', 'web/lib/server/artifact-store.mjs',
+    'web/lib/server/artifact-zip.mjs', 'web/lib/server/core.mjs', 'web/lib/server/r2-admission-live.ts',
+    'web/lib/server/r2-admission.mjs', 'web/lib/server/r2-caller.mjs', 'web/lib/server/r2-evidence-bridge.mjs',
+    'web/lib/server/r2-product-context.mjs', 'web/lib/server/stored-evidence.mjs', 'web/lib/server/supabase.ts',
+    'web/package-lock.json', 'web/package.json'
+  ]);
   // Recomputed independently here from the files on disk: no reviewed digest is pinned (the shipped status has none).
   const outer = hashS4('sha256');
   for (const file of R2_FILES) outer.update(`${file}\0${hashS4('sha256').update(readS4(file, 'utf8').replace(/\r\n/g, '\n')).digest('hex')}\n`);

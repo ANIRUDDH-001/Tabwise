@@ -114,3 +114,8 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 
 | web/test/product-integration.browser.mjs | Credential-disabled local production API checks: cross-origin/forged approval refusal, unavailable owned reads, absent experimental execution endpoints | local production server only | explicit browser acceptance |
 | docs/engineering/Tabwise-product-integration-handoff.md | Exact revisions, flows, verification and remaining genuine product bridge | integration review packet | no runtime activation |
+
+| web/app/api/r2/admission/route.ts; web/lib/server/r2-admission{,-live}.*; r2-caller.mjs | Disabled Next.js W5 boundary, independently signed execution identity, existing PostgreSQL adapter | createAdmissionHandler, verifyExecutionCaller | web/test/r2-admission-api.test.mjs |
+| src/r2/{product-bridge,strict-json,approval-constants,node-review}.mjs; packages/contracts/r2-product.mjs | Raw observation mapping, separate versioned product contract, internally gated native handle; pure parser and allowlisted Node CLI loader | inspectR2ProductExport, openQualifiedR2ProductEvidence | web/test/r2-product-bridge.test.mjs; r2-offline-pipeline.test.mjs |
+| web/lib/server/r2-{product-context,evidence-bridge}.mjs; scripts/tabwise/r2-{admission-server,product}-policy.json | Stored-owner request binding, compensated ingestion/storage validation; policies disabled | productR2AdmissionContext, ingestR2BridgeArchive | web/test/r2-storage-bridge.test.mjs |
+| docs/engineering/R2-production-bridge-handoff.md; web/test/helpers/r2-bridge-fixture.mjs | Engineering handoff and generated offline fixture helpers | no runtime qualification | cache/bridge-review |

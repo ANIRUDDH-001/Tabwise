@@ -19,5 +19,5 @@ test('owned read APIs expose no data when sign-in is unavailable',async()=>{
 });
 test('experimental R2 and W5 admission have no accidentally exposed API execution endpoint',async()=>{
  for(const path of ['/api/r2/admission','/api/r2'])for(const method of ['GET','POST']){
-  const response=await fetch(base+path,{method,headers:{origin:base}});assert.ok([404,405].includes(response.status),`${method} ${path}: ${response.status}`);}
+  const response=await fetch(base+path,{method,headers:{origin:base}});if(path==='/api/r2/admission'&&method==='POST'){assert.equal(response.status,503);assert.deepEqual(await response.json(),{reason:'r2_admission_disabled'});}else assert.ok([404,405].includes(response.status),`${method} ${path}: ${response.status}`);}
 });

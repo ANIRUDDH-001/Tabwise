@@ -1,0 +1,10 @@
+{
+  "schema": "tabwise-r2-native-product-policy/1",
+  "enabled": false,
+  "public_key": null,
+  "review_ref": null,
+  "qualification_sha256": null,
+  "source_scope_sha256": null,
+  "not_before": null,
+  "not_after": null
+}

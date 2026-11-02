@@ -67,3 +67,7 @@ All D8 installs used independent `packages/contracts/` or `web/` manifests/lockf
 
 ### Local product integration (2026-11-02T14:35:27Z)
 - Existing project-owned frontend d79c066 integrated into R2/W5 d2d1854 without commit. Newly authored four-case API test and handoff; no third-party code/dataset/dependency/license added. Existing installed dependencies copied to ignored node_modules without install; source worktrees untouched.
+
+### Production bridge (2026-11-02T18:27:11Z)
+- Project-owned event work: signed execution-caller verifier, disabled Next.js admission boundary, R2/product contract and native-gated ingestion, regression fixtures and handoff. No new dependency, dataset or third-party code added; existing installed dependencies copied into ignored local directories without installation.
+- Reference only: official GitHub Actions OIDC claims/JWKS documentation and Next.js route/Turbopack documentation retrieved through cached Context7 CLI. No code copied. Cryptographic fixtures generated locally; signatures/claims/observation rows are tests, never native evidence. Existing frozen dependencies/licenses unchanged.

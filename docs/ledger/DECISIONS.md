@@ -633,3 +633,13 @@ Consequence: source-reviewed owner-origin plus fixed Next.js API path contract; 
 ## Product integration authorization (2026-11-02T14:25:23Z)
 Owner: "Integrate the preserved R2 offline implementation and the completed frontend into one working local product candidate." "A local integration operation in the new isolated worktree is permitted; stop before committing."
 Scope and acceptance: PLAN Product integration; new isolated branch only, existing worktrees/branches/untracked files preserved. All runtime/qualification statuses and thresholds remain unchanged; no external operations or additional agents.
+
+## Production bridge implementation authorization (2026-11-02T16:40:15Z)
+Owner: "Implement the missing production integration between W5 admission, the existing Next.js product backend, the R2 coordinator and the product evidence contracts." "No commits, pushes or merges before independent review."
+Owner test answer: "Approve these two assertion updates (recommended): keep coverage aligned with the new disabled API."
+Scope/cost/acceptance: PLAN F-03 production bridge; no active configuration or native clearance. GitHub OIDC issuer/claims checked against official docs; server-side authentication never derives identity from request-body claims.
+
+## Production bridge boundary result (2026-11-02T18:27:11Z)
+- Implementation within the approved scope: Next.js only, signed server execution caller, unchanged PostgreSQL permanent consumption and W5 receipt protocol. No owner approval or native qualification inferred.
+- Preserved the original R2-policy import restriction after a measured regression; no change to that assertion. Pure server constants are checked against the reviewed CLI. Node loader accepts only three fixed reviewed modules and fails if source is unavailable.
+- Product-native acceptance requires internally read disabled policy, qualification PASS and a separately signed source/custody attestation. Test-only assessment never mints a native handle. No authentication success, observed-NVDA result or production communication claimed.

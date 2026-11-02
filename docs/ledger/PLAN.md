@@ -558,3 +558,16 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 
 - Integration result (2026-11-02T14:35:27Z, Integration-20261102T143527Z):85 merged paths/81 web, no conflicts; no confirmed product defect/source fix. Root54/54 files1082/1082 tests, contracts21/21, web107/107, browser/API15/15, types/build all exit0. Nine root exclusions explicit; no stress/native qualification.
 - Digests/statuses unchanged; frontend tracked clean and7 untracked hashes preserved. Merge pending independent review; cache/integration-review and Tabwise-product-integration-handoff.md contain evidence.
+
+### F-03 production bridge (2026-11-02T16:40:15Z; approved implementation)
+- Baseline11b070c7279a3a7e14b0273d87a8f07efa8d6d80; app-r2-production-bridge, feat/tabwise-r2-production-bridge; preserve all other worktrees.
+- Scope: Next.js /api/r2/admission, strict signed GitHub OIDC verifier and server policy, W5 adapter integration; versioned R2/product mapping contract, native-proof-gated bridge and ingestion helper; source scope, regression tests, normal handoff/ledgers.
+- Reuse W5/Postgres atomic consume and existing product authentication/contracts; no Edge Functions, no replacement of native qualification. Scope/security and native proof independent of permission.
+- RED-first adversarial security/contract/service tests; root ordinary, contracts/web/API/browser, TypeScript/build; frozen R1 and disabled/BLOCK integrity; review ZIP.
+- Cost $0. No credentials/model calls/hosted mutation/deployment/workflow/native experiment/W2a changes/R3/R7/commit/push/merge. Keep server/bridge policies unconfigured and disabled.
+- Owner approved only exact existing source-membership assertion additions and absent-admission-route expectation becoming explicit disabled refusal; preserve thresholds and all other assertions.
+
+### Production bridge measured result (2026-11-02T18:27:11Z; Bridge-20261102T182711Z)
+- Root ordinary 54/54 files, 1082/1082 tests PASS; nine classified exclusions remain. Web 127, contracts 21, browser/API 15 PASS; TypeScript/build exit0. All root exit/stdio closures confirmed; original budgets unchanged.
+- Frozen R1 PASS; R2 722fc80cc55d8420dbe088946b56b7ee70060781310621064ab9d8803569807e (53 files); qualification 6972c311a6e9302856ff9bb9195aa73cf106a15da8caf91ac32b781f8909f328 unchanged. No status promotion.
+- See R2-production-bridge-handoff.md and cache/bridge-review/verification-summary.json. Service mocks reach coordinator grant/finalization and independent evidence refusal; real native producer/export/attester and separately approved deployment/custody remain blocked. Stop for independent review; no commit.

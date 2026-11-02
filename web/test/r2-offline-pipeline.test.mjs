@@ -1,0 +1,37 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {generateKeyPairSync,sign} from 'node:crypto';
+import {sha256} from '../../packages/contracts/index.mjs';
+import {stable} from '../../packages/contracts/r2-product.mjs';
+import {createCoordinator,publicText,verifyAdmissionRecord} from '../../scripts/tabwise/r2-admission.mjs';
+import {createAdmissionHandler} from '../lib/server/r2-admission.mjs';
+import {productR2AdmissionContext} from '../lib/server/r2-product-context.mjs';
+import {inspectR2ProductExport,assessNativeAttestation} from '../../src/r2/product-bridge.mjs';
+import {prepareR2BridgeIngest,ingestR2Bridge} from '../lib/server/r2-evidence-bridge.mjs';
+import {prepareIngest} from '../lib/server/jobs.mjs';
+import {binding,consumer,configuration,token,jwks,database,receiptKeys,observationFixture} from './helpers/r2-bridge-fixture.mjs';
+test('offline product context -> Next service -> atomic W5 coordinator -> verified export preview -> product refusal',async()=>{
+ const f=observationFixture(),b={...binding(),plan_sha256:f.expected.plan_sha256,fixtures:[{id:'p1',sha256:f.expected.fixture_sha256}]},c=configuration(b);
+ const run={id:f.expected.product_run_id,user_id:'owner',spec:f.expected.spec,spec_sha256:f.expected.spec_sha256,gh_run_id:'123',gh_head_sha:b.revision,status:'ingesting'};
+ const gate={head:b.revision,status:c.status,plan:JSON.parse(f.files['plan.json']),planBytes:f.files['plan.json']};
+ const context=productR2AdmissionContext({user:{id:'owner'},run,gate,policy:{expires_at:b.expires_at},pageId:'p1'});assert.deepEqual(context.binding,b);
+ const db=database(b),handler=createAdmissionHandler({configuration:()=>c,keys:async()=>jwks,client:()=>db.client,signingKey:()=>receiptKeys.privateKey});
+ const transport=async body=>{const response=await handler(new Request(c.audience,{method:'POST',headers:{authorization:'Bearer '+token(),'content-type':'application/json'},body:JSON.stringify(body)}));if(!response.ok)throw Error('refused');return response.json();};
+ const coord=await createCoordinator({id:'auth-1',...context,transport,publicKey:publicText(receiptKeys.publicKey)});
+ await coord.grant({page:'p1',nonce:'1'.repeat(64),pid:111,ppid:100},{page:'p1',pid:111,ppid:100});
+ assert.equal(verifyAdmissionRecord(coord.record(f.expected.run_manifest_sha256),{id:'auth-1',...context,publicKey:publicText(receiptKeys.publicKey),manifest:f.expected.run_manifest_sha256,pages:['p1']}),true);
+ const view=inspectR2ProductExport(f);assert.equal(view.ok,true);assert.equal(view.source_verified,false);assert.equal(view.preview.evidence.provenance,'synthetic-test');
+ assert.equal(prepareR2BridgeIngest({handle:coord.receipt,user:{id:'owner'},run,workerReview:'PASS'}).ok,false);
+ assert.equal(prepareR2BridgeIngest({handle:view,user:{id:'owner'},run,workerReview:'PASS'}).ok,false);
+ const ordinary=prepareIngest({run:{},manifest:view.preview.manifest,files:view.preview.files,expected:{},workerReview:'PASS'});assert.equal(ordinary.ok,false);
+ let stores=0;await assert.rejects(ingestR2Bridge({input:f,user:{id:'owner'},run,workerReview:'PASS',store:async()=>stores++,record:async()=>{}}),/qualification disabled/);assert.equal(stores,0);
+ for(const user of [{id:'other'},null])assert.throws(()=>productR2AdmissionContext({user,run,gate,policy:{expires_at:b.expires_at},pageId:'p1'}));
+});
+test('independent native-attestation cryptography is tested without minting native handles',()=>{
+ const f=observationFixture(),pair=generateKeyPairSync('ed25519'),policy={schema:'tabwise-r2-native-product-policy/1',enabled:true,public_key:publicText(pair.publicKey),review_ref:'fixture-only-not-a-real-review',qualification_sha256:f.expected.qualification_sha256,source_scope_sha256:f.expected.r2_source_sha256,not_before:'2020-01-01T00:00:00.000Z',not_after:'2099-01-01T00:00:00.000Z'};
+ const payload={schema:'tabwise-r2-native-attestation/1',export_sha256:sha256(f.files['r2-export.json']),identity:f.exp.identity,review_ref:policy.review_ref,qualification_sha256:policy.qualification_sha256,source_scope_sha256:policy.source_scope_sha256,created_at:new Date().toISOString(),integrity_verified:true,observation_complete:true,custody_confirmed:true,runtime:'nvda'};
+ const envelope=p=>({payload:p,signature:sign(null,Buffer.from(stable(p)),pair.privateKey).toString('base64')});
+ const checked=assessNativeAttestation({...f,attestation:envelope(payload)},policy);assert.deepEqual(checked,{ok:true,errors:[],source_verified:false});
+ for(const patch of [{runtime:'fake-nvda'},{custody_confirmed:false},{integrity_verified:false},{observation_complete:false},{export_sha256:'f'.repeat(64)},{identity:{...payload.identity,github_run_id:'124'}},{review_ref:'unapproved'},{qualification_sha256:'f'.repeat(64)},{source_scope_sha256:'f'.repeat(64)},{created_at:'2026/01/01'},{created_at:'2000-01-01T00:00:00.000Z'},{created_at:'2098-01-01T00:00:00.000Z'}])assert.equal(assessNativeAttestation({...f,attestation:envelope({...payload,...patch})},policy).ok,false);
+ const forged=envelope(payload);forged.signature='A'.repeat(86)+'==';assert.equal(assessNativeAttestation({...f,attestation:forged},policy).ok,false);
+});

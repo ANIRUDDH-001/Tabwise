@@ -6,6 +6,8 @@
 // launcher, and is the only module that can load a runtime (and only in --page mode, after these gates).
 import {readFileSync, lstatSync, realpathSync} from 'node:fs';
 import {basename, dirname, isAbsolute, join, relative, resolve, sep} from 'node:path';
+import {parseUniqueJson} from '../../src/r2/strict-json.mjs';
+export {parseUniqueJson};
 import {pageHash} from '../../src/r2/contract.mjs';
 import {checkR2Approval, r2Digest} from './r2-policy.mjs';
 import {buildR2StepMap, planR2EvidenceCaps, verifyR2Run} from './r2-evidence.mjs';
@@ -59,27 +61,6 @@ const block = detail => { throw Error(`BLOCK: ${detail}`); };
 
 // JSON.parse remains the grammar oracle; scan valid tokens iteratively to reject duplicate decoded names.
 // Both callers bound their document before parsing. No recursive descent or regexp string parsing.
-function parseUniqueJson(text) {
-  const parsed = JSON.parse(text), stack = [];
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    if (c === '{') stack.push(new Set());
-    else if (c === '[') stack.push(null);
-    else if (c === '}' || c === ']') stack.pop();
-    else if (c === '"') {
-      const start = i++;
-      while (text[i] !== '"') { if (text[i] === '\\') i++; i++; }
-      let next = i + 1;
-      while (' \t\r\n'.includes(text[next]) && next < text.length) next++;
-      if (text[next] === ':') {
-        const name = JSON.parse(text.slice(start, i + 1)), names = stack.at(-1);
-        if (names.has(name)) throw Error('duplicate JSON object member');
-        names.add(name);
-      }
-    }
-  }
-  return parsed;
-}
 
 /** Exactly one mode (--check-only | --page <id> | --run | --verify-run) and exactly one --plan <path>; no other token. */
 export function parseR2Args(argv) {
