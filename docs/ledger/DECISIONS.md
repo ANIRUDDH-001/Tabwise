@@ -643,3 +643,8 @@ Scope/cost/acceptance: PLAN F-03 production bridge; no active configuration or n
 - Implementation within the approved scope: Next.js only, signed server execution caller, unchanged PostgreSQL permanent consumption and W5 receipt protocol. No owner approval or native qualification inferred.
 - Preserved the original R2-policy import restriction after a measured regression; no change to that assertion. Pure server constants are checked against the reviewed CLI. Node loader accepts only three fixed reviewed modules and fails if source is unavailable.
 - Product-native acceptance requires internally read disabled policy, qualification PASS and a separately signed source/custody attestation. Test-only assessment never mints a native handle. No authentication success, observed-NVDA result or production communication claimed.
+
+### R2 native exporter — partial implementation, stopped for protected CI gate
+Owner instruction: “Do substantive implementation, not a design-only handoff.” “No live input, workflow dispatch, hosted changes, database writes, credentials, installs, model calls or spending.” “If any change to protected files is unavoidable, stop and identify the exact reason.”
+Scope used: new offline exporter and negative tests; zero spending. No protected file edited.
+Ordinary runner refuses unclassified test/r2-product-export.test.mjs. Continuing through that runner requires adding its classification to protected ci/offline-tests.json; stopped per owner instruction.

@@ -103,6 +103,10 @@
     "kind": "offline",
     "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
   },
+  "r2-product-export.test.mjs": {
+    "kind": "offline",
+    "reason": "pure source export with owned synthetic fixtures; no native input, browser or external authority"
+  },
   "r2-review.test.mjs": {
     "kind": "offline",
     "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
