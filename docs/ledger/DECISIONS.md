@@ -656,3 +656,6 @@ Consequence: raw-capture exporter wiring and additive offline registration; no c
 
 ## R3 user authorization - 2026-11-02T20:10:47Z
 User: "Tabwise: Complete R3 AI diagnosis and repair, end-to-end. This is full implementation work, not a minimum demo." "Use a new isolated worktree and branch feat/tabwise-r3-complete. Do not touch Codex 1's worktree." "₹0 incremental budget." "Commit and push only the R3 branch. No merging or modifications to main." No installs/paid calls performed. R3 acceptance remains incomplete.
+
+## R3 continuation authorization - 2026-11-02T20:26:45Z
+User: "Continue R3 from commit 5de07e6. Do not merge." "Correct the application-layer stale-source check; preserve safe idempotent recovery." "Implement qualified patched-source worker consumption and rerun admission using immutable candidate hashes and exact source binding." "Commit and push only the R3 branch." "No paid Muse calls, deployments, live NVDA or unrelated audits." All validation remained offline; execution/source-readiness gates left closed.

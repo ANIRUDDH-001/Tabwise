@@ -47,3 +47,5 @@ export async function runOfflineWorker(envelope,providers){
  const integrity=verifyManifest(manifest,files);if(!integrity.ok)throw Error(integrity.errors.join('; '));
  return {manifest,files,capture};
 }
+
+export {consumePatchedSource} from '../../src/repair/rerun.mjs';

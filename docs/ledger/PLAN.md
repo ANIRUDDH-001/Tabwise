@@ -589,3 +589,9 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Verification commands/results: docs/engineering/Tabwise-R3-complete-handoff.md.
 - "Commit and push only the R3 branch. No merging or modifications to main."
 - PARTIAL: candidate worker/rerun integration, live acceptance and Claude review pending. Frozen thresholds unchanged.
+
+## R3 continuation from 5de07e6
+- User priorities: stale-source fix/recovery; immutable candidate worker consumption and rerun admission; positive/negative offline rerun tests; preserve all R2/W2a gates.
+- Files: src/repair/application.mjs and rerun.mjs; worker source staging/loader and guarded entry; rerun migration/API/UI; new tests and normal handoff ledgers.
+- Acceptance: targeted28, web/contracts148, R2 809, worker/review15, DB concurrency/rollback, typecheck/build; details in R3 handoff.
+- Zero paid calls, deployment or live NVDA. Commit/push R3 branch only. R3 real-runtime acceptance still false.

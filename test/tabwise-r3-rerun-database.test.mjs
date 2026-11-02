@@ -1,0 +1,30 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {spawn} from 'node:child_process';
+const db=process.env.TABWISE_R3_RERUN_DB,enabled=/^r3continue[0-9]*$/.test(db??'');
+function sql(text){return new Promise((resolve,reject)=>{const p=spawn(process.env.TABWISE_R3_PSQL??'psql',['-X','-h','127.0.0.1','-p','55439','-U','r3test','-d',db,'-v','ON_ERROR_STOP=1','-At','-c',text],{windowsHide:true,env:{...process.env,PGPASSWORD:''}});let out='',err='';p.stdout.on('data',b=>out+=b);p.stderr.on('data',b=>err+=b);p.on('error',reject);p.on('close',c=>c?reject(Error(err)):resolve(out.trim()));});}
+const owner='00000000-0000-4000-8000-000000000001',baseline='00000000-0000-4000-8000-000000000090',version='00000000-0000-4000-8000-000000000091',patch='00000000-0000-4000-8000-000000000092';
+test('real concurrent rerun admission keeps gates, exact hashes, immutable binding, replay and ownership',{skip:!enabled},async()=>{
+ await sql(`insert into public.operators values('${owner}','offline-r3');
+ update public.apps set base_sha256=encode(sha256(convert_to('base','UTF8')),'hex') where id='fernway';
+ insert into public.journey_versions(id,journey_id,user_id,n,steps,sha256) values('${version}','fernway-passenger','${owner}',1,'[{"step":1,"key":"Tab","text":null,"checkpoint":true}]',repeat('a',64));
+ insert into public.runs(id,user_id,journey_id,journey_version_id,access_kind,status,evidence_status,deadline_at,spec) select '${baseline}','${owner}','fernway-passenger','${version}','owner','completed','complete',now(),jsonb_build_object('app_hash',encode(sha256(convert_to('base','UTF8')),'hex'),'steps',steps) from public.journey_versions where id='${version}';
+ insert into public.patches(id,run_id,diff,files,validator) values('${patch}','${baseline}','diff',array['index.html'],jsonb_build_object('ok',true,'contract',jsonb_build_object('run_id','${baseline}','base_sha256',encode(sha256(convert_to('base','UTF8')),'hex'),'patch_sha256',encode(sha256(convert_to('diff','UTF8')),'hex'))));
+ select public.review_patch('${owner}','${patch}','approved',encode(sha256(convert_to('diff','UTF8')),'hex'));
+ select public.materialize_repair('${owner}','${patch}',encode(sha256(convert_to('diff','UTF8')),'hex'),'base','candidate',encode(sha256(convert_to('candidate','UTF8')),'hex'));`);
+ const call=key=>`select public.admit_repair('${owner}','${version}','${patch}','${key}')`;
+ assert.equal(JSON.parse(await sql(call('gate-off'))).reason,'worker_review_pending');
+ await sql(`update public.system_flags set worker_review_verdict='PASS',worker_review_ref='synthetic-local-only';insert into public.capacity_snapshots(db_bytes,storage_bytes,gh_rate_remaining,est_egress_bytes) values(0,0,5000,0);`);
+ await sql(`update public.apps set base_sha256=repeat('0',64) where id='fernway'`);
+ await assert.rejects(()=>sql(call('stale-source')),/stale/);
+ await sql(`update public.apps set base_sha256=encode(sha256(convert_to('base','UTF8')),'hex') where id='fernway'`);
+ const results=await Promise.all([sql(call('concurrent')),sql(call('concurrent'))]);const a=results.map(JSON.parse);assert.equal(a[0].run_id,a[1].run_id);assert.ok(a[0].run_id);assert.equal(a.filter(v=>v.replayed===true).length,1);
+ assert.equal(await sql(`select count(*) from public.repair_reruns where verify_run_id='${a[0].run_id}'`),'1');
+ const spec=JSON.parse(await sql(`select spec from public.runs where id='${a[0].run_id}'`));assert.equal(spec.variant,'patched');
+ assert.equal(await sql(`select (r.spec->>'app_hash'=a.source_sha256 and r.spec->>'patch_ref'=a.patch_sha256 and r.kind='verify') from public.runs r join public.repair_reruns b on b.verify_run_id=r.id join public.repair_applications a on a.id=b.application_id where r.id='${a[0].run_id}'`),'t');
+ await assert.rejects(()=>sql(`select public.admit_repair('00000000-0000-4000-8000-000000000099','${version}','${patch}','foreign')`),/owned/);
+ await assert.rejects(()=>sql(`select public.admit_repair('${owner}','00000000-0000-4000-8000-000000000099','${patch}','concurrent')`),/idempotency/);
+ await assert.rejects(()=>sql(`update public.repair_reruns set source_sha256=repeat('0',64) where verify_run_id='${a[0].run_id}'`),/immutable/);
+ assert.equal(await sql(`select has_function_privilege('authenticated','public.admit_repair(uuid,uuid,uuid,text)','execute')`),'f');
+ assert.equal(await sql(`select base_source from public.repair_applications where patch_id='${patch}'`),'base');
+});

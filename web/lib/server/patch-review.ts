@@ -8,7 +8,7 @@ export async function ownedPatchReview(id:string,userId:string){
  if(!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(id))throw new HttpError(404,'patch_not_found');
  const db=serviceClient(),{data:patch}=await db.from('patches').select('*').eq('id',id).maybeSingle();
  if(!patch)throw new HttpError(404,'patch_not_found');
- const {data:run}=await db.from('runs').select('id,user_id,status,evidence_status,spec').eq('id',patch.run_id).maybeSingle();
+ const {data:run}=await db.from('runs').select('id,user_id,status,evidence_status,spec,journey_version_id').eq('id',patch.run_id).maybeSingle();
  authorizeRun({id:userId},run);
  const {data:finding}=await db.from('findings').select('title,mechanism,evidence_refs,confidence,location').eq('id',patch.finding_id).eq('run_id',run!.id).maybeSingle();
  if(!finding)throw new HttpError(409,'finding_unavailable');

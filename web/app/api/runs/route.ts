@@ -11,9 +11,10 @@ export async function POST(request:Request){return endpoint(request,async()=>{
  const db=serviceClient();const {data:version}=await db.from('journey_versions').select('*').eq('id',input.journey_version_id).eq('user_id',user.id).maybeSingle();if(!version)throw new HttpError(404,'journey_version_not_found');
  // No irreversible dispatch path is active before a separately recorded execution approval.
  if(!process.env.TABWISE_EXECUTION_APPROVAL_REF)throw new HttpError(503,'worker_review_and_execution_approval_pending');
- if(input.patch_id)throw new HttpError(409,'verification_dispatch_pending_review');
+ if(input.patch_id&&!process.env.TABWISE_REPAIR_EXECUTION_APPROVAL_REF)throw new HttpError(503,'repair_worker_source_binding_approval_pending');
+ if(input.patch_id!==undefined&&(typeof input.patch_id!=='string'||!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(input.patch_id)))throw new HttpError(400,'invalid_run_request');
  assertContract('journey',{version:'0.1.0',journey_id:version.journey_id,name:'Saved journey',steps:version.steps});
- const {data:admission,error:admissionError}=await db.rpc('admit_version',{p_user:user.id,p_version:version.id,p_key:key});
+ const {data:admission,error:admissionError}=await db.rpc(input.patch_id?'admit_repair':'admit_version',{p_user:user.id,p_version:version.id,p_key:key,...(input.patch_id?{p_patch:input.patch_id}:{})});
  if(admissionError)throw new HttpError(500,'admission_failed');
  if(admission.reason)return Response.json(admission,{status:admission.http_status??429});
  const {data:run}=await db.from('runs').select('*').eq('id',admission.run_id).eq('user_id',user.id).single();

@@ -1,6 +1,9 @@
 // Human copy for every reason code emitted by web/app/api/** and web/app/auth/** (T-P0-04, T-P1-04).
 // Copy never names environment variables, secrets or stack traces.
 export const REASON_COPY=Object.freeze({
+ repair_worker_source_binding_approval_pending:'Repair reruns are waiting for approval of the worker source binding. Your saved candidate is retained.',
+ repair_input_unavailable:'The saved repair input is unavailable for this run.',
+ repair_input_integrity_failed:'The saved repair input does not match this run. Execution is blocked.',
  repair_application_status_unavailable:'Saved candidate status is unavailable. Try again later.',
  repair_application_digest_conflict:'The saved candidate belongs to a different patch revision. Reload this page.',
 
