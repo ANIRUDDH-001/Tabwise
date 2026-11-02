@@ -1,14 +1,17 @@
-# STATE — R2 integration verified offline; native diagnostic next; merge BLOCK
-- Branch feat/tabwise-r2-production-bridge; base d75f043; main 9bb994c unchanged.
-- Draft PR #19 exists for hosted CI only. Owner prohibits merge until native capture, qualification, evidence verification and ingestion pass.
-- Scope correction: capture-export.mjs now bound into R2_FILES; mutation regression RED then GREEN; exact scope expectation updated.
-- Separate subagent reviewed 141-path inventory and final scope correction; no source blocker to disabled feature preservation. No native approval implied.
-- MEASURED r2-merge-validation: final root1161/1161; R2810/810; web127/127; contracts21/21.
-- Recorder browser5/5; production smoke/API10/10; final webpack build and TypeScript exit0.
-- Baseline clean preflight and frozen R1 PASS; final scope correction leaves all activation policies disabled/BLOCK.
-- Initial post-change full root had one stale exact scope assertion; corrected, then full root1161/1161 PASS. Failure log preserved.
-- Evidence cache/r2-merge-validation; ignored local logs retained.
-- Next: push reviewed correction to feature only, observe actual PR hosted CI; build separately gated NONQUALIFYING native diagnostic in a new isolated branch.
-- Before any native input prepare exact revision/fixture/keys/bounds/owner approval packet; STOP for explicit authorization.
-- Native trusted attestation/W2a qualification/product acceptance remain BLOCK. No merge, activation, native input, model calls or paid infrastructure.
-- Validation server PID21712 stopped after verified command-line match; R3 worktree untouched.
+# STATE — NONQUALIFYING native diagnostic prepared; owner packet approval required
+- Branch diag/tabwise-r2-native; isolated app-r2-native-diagnostic; ancestor d75f043 plus reviewed projector binding fb93744.
+- Production, runtime, frozen R1, W5, qualification and product status gates unchanged, disabled/BLOCK.
+- Dedicated workflow first push runs only offline/full regression/build/browser checks; native cannot run on attempt1.
+- Manual attempt2 additionally requires an exact owner-approved packet in TABWISE_NATIVE_DIAGNOSTIC_APPROVAL.
+- Packet binds commit/source digest/run/attempt/actor/workflow/fixture/keys/bounds. Later attempts and stale packets refuse.
+- Fixture validation-healthy, f22a2f22be578e0609f990564acb703bab40bd8bf770079acc090775d79e9555; Tab,Tab,Enter; no text input.
+- Worker's 150s stop, supervisor180s plus original bounded custody/cleanup; GitHub-hosted Windows only; no model/API/signing credentials.
+- Reuses unchanged loader/session/guard/observer/lifecycle and original runR2Pages custody; no production entry or W5 receipts fabricated.
+- Separate Ubuntu job re-verifies sealed sources, projection, product refusal and tampering; grants no independent native attestation.
+- Product exporter/native bridge are expected to refuse real diagnostic identity and disabled qualification. Never relabel evidence.
+- MEASURED: new diagnostic tests28/28, syntax/YAML/local native refusal/frozen R1/preflight PASS.
+- Prior source fb93744: root1161/R2810/web127/contracts21/browser+API15, types+build PASS. Actual hosted bootstrap pending.
+- Independent subagent code review corrected baseline, custody/census/grace, pipeline status, source scope and cross-run verifier binding; no native approval implied.
+- Next: push reviewed diagnostic; observe offline bootstrap; generate exact run-specific approval packet from committed SHA; STOP before setting approval variable or native rerun.
+- Main unchanged; PR19 remains draft/nonmergeable by owner requirement. R3 untouched. No native input, paid service or model call.
+- Evidence: cache/native-diagnostic-review; integration logs at app-r2-production-bridge/cache/r2-merge-validation.

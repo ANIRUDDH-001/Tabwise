@@ -658,3 +658,8 @@ Consequence: raw-capture exporter wiring and additive offline registration; no c
 User answer: "Do not merge into main until native capture, evidence verification, product ingestion and required qualification have passed."
 User answer: "Implement, test and push the diagnostic branch. Stop only when explicit approval or a genuine external dependency is required."
 Consequence: draft PR19 for offline CI only; preserve reviewed digest-binding correction; new isolated NONQUALIFYING diagnostic and exact approval packet before native input. Production qualification/admission policies unchanged.
+
+## F-03 native diagnostic implementation authorization
+User answer: "Implement, test and push the diagnostic branch. Stop only when explicit approval or a genuine external dependency is required."
+User answer: "After authorization, exercise genuine NVDA keyboard interaction, speech observation, focus and page-event capture, source attribution and teardown."
+Consequence: build and push disabled native-input bootstrap; prepare exact owner packet from committed revision/run. No variable provisioning, rerun, input, qualification or merge before that explicit approval.

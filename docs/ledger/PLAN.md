@@ -586,3 +586,11 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Files: r2-policy.mjs and r2-review.test.mjs; session ledgers. Add missing projector to source scope with mutation regression, preserve disabled gates.
 - Acceptance: full root1161/1161, R2810/810, web127/127, contracts21/21, browser/API15/15, TypeScript/build/frozen/preflight PASS; hosted PR19 CI pending.
 - Budget: no paid infrastructure/model calls/dependency changes. Rollback: revert feature correction; main untouched.
+
+### F-03 / NONQUALIFYING native integration diagnostic
+- User: "Build a separately gated NONQUALIFYING native R2 integration diagnostic on a fresh GitHub-hosted Windows runner." "Prepare the exact revision, fixture, permitted keyboard actions, execution bounds and explicit owner-approval packet before any native input."
+- Scope: diagnostics/r2-native/{policy,run,verify,test,web-check}.mjs; dedicated workflow; normal ledgers/CODEMAP/PROVENANCE. Existing loader/session and production gates unchanged.
+- Steps: approval/refusal tests first; gated wrapper over existing session and custody; separate-runner source verification/tampering; hosted offline bootstrap; exact packet; stop for owner approval before any native rerun.
+- Acceptance: node --test diagnostics/r2-native/test.mjs; hosted full root/web/contracts/browser/API/types/build/preflight/frozen checks; native and separate verifier only after exact explicit approval.
+- Bounds: one existing healthy page; Tab,Tab,Enter; worker stop150s, supervisor180s plus existing bounded custody; one run ID/attempt2; ₹0, no model/dependency changes.
+- Rollback: delete diagnostic branch; production and main unchanged. No new acceptance/qualification claim.
