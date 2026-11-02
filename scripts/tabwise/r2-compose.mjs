@@ -18,9 +18,11 @@ import {speechLaneRecord} from '../../src/r2/speech-payload.mjs';
 import {buildR2StepMap, planR2EvidenceCaps} from './r2-evidence.mjs';
 
 const COMPOSE_SCHEMA = 'tabwise-r2-compose-result/1';
-const HANDLE_KEYS = ['clock', 'createExecutor', 'foreground', 'getGate', 'guard', 'nvda', 'observer', 'page', 'writer'];
-const METHODS = Object.freeze({nvda: ['press', 'start', 'stop'], observer: ['open', 'read', 'close'], foreground: ['check', 'close'],
+const HANDLE_KEYS = ['clock', 'createExecutor', 'foreground', 'getGate', 'guard', 'lifecycle', 'nvda', 'observer', 'page', 'writer'];
+// W3/W4: nvda.start is the raw start only; nvda.validate checks its receipt. The lifecycle handle owns slots, operations and the seal.
+const METHODS = Object.freeze({nvda: ['press', 'start', 'stop', 'validate'], observer: ['open', 'read', 'close'], foreground: ['check', 'close'],
   page: ['evaluate', 'screenshot', 'axe', 'close'], clock: ['now', 'wait'],
+  lifecycle: ['bindWriter', 'op', 'acquire', 'release', 'retain', 'slot', 'pending', 'status', 'finalize'],
   guard: ['setCheck', 'setAck', 'onIntent', 'arm', 'disarm', 'idle', 'quiesce', 'stop', 'isStopped', 'status']});
 const DATA_KEYS = ['approved', 'fixture_id', 'focusWaitMs', 'handleTimeoutMs', 'nonce', 'session', 'spec'];
 const QUIESCE_MS = 1000; // design §7.3 step 1, as createQualificationTeardown.
@@ -56,7 +58,8 @@ function validate(handles, data) {
     for (const method of methods) if (typeof handles[name]?.[method] !== 'function') refuse(`handle ${name}.${method} missing`);
   }
   if (typeof handles.getGate !== 'function' || typeof handles.createExecutor !== 'function') refuse('getGate and createExecutor must be functions');
-  const {guard, writer} = handles;
+  const {guard, writer, lifecycle} = handles;
+  if (!Object.isFrozen(lifecycle) || !object(lifecycle.bounds) || !Number.isSafeInteger(lifecycle.bounds.nvdaAbandonMs)) refuse('lifecycle must be a frozen R2 lifecycle owner');
   if (!Object.isFrozen(guard) || !Number.isSafeInteger(guard.bounds?.ackMs) || guard.bounds.ackMs <= 0) refuse('guard must be a frozen send gate with an ackMs bound');
   if (!Object.isFrozen(writer) || typeof writer.append !== 'function' || typeof writer.put !== 'function' || typeof writer.seal !== 'function' ||
     typeof writer.failure !== 'function' || !object(writer.identity)) refuse('writer must be a frozen R2 evidence writer');
@@ -79,58 +82,47 @@ function validate(handles, data) {
   if (handles.getGate() !== guard) refuse('guard is not the registered gate');
   const s = guard.status();
   if (guard.isStopped() || s?.stopped !== false || s.sends !== 0 || s.live !== 0) refuse('guard already stopped, used or busy');
-  return {step_map, actions: step_map.actions, served: {title: id.title, url: id.url}};
+  // Pure: binding records the writer and returns its producer wrapper; a writer bound to another owner is refused.
+  let bound;
+  try { bound = lifecycle.bindWriter(writer); } catch (error) { refuse(message(error)); }
+  return {step_map, actions: step_map.actions, served: {title: id.title, url: id.url}, writer: bound};
 }
 
 /**
- * composeR2Page(handles, data) -> JSON-only result. handles = {guard, getGate, createExecutor, nvda:{press,start,stop},
+ * composeR2Page(handles, data) -> JSON-only result. handles = {guard, getGate, createExecutor, lifecycle, nvda:{press,start,stop,validate},
  * observer:{open,read,close}, foreground:{check,close}, page:{evaluate,screenshot,axe,close}, writer, clock:{now,wait}}.
  * data = {fixture_id, session, approved:{fixture_sha256, task}, nonce, spec:{actions, ackMs, timeoutMs, observationMs,
  * pollMs}, handleTimeoutMs, focusWaitMs}. Throws (touching no handle) when validation fails; otherwise always runs
  * the §7.3 teardown and returns. completed is true only for a complete capture, a live gate after the final read, a
- * quiet teardown with no error or pending operation, and evidence that sealed and verified.
+ * quiet teardown with no error or pending operation, a clean lifecycle finalize, and evidence that sealed and verified.
  */
 export async function composeR2Page(handles, input) {
   // Detached once: a getter or later mutation of the caller's object cannot change what was validated.
   let data;
   try { data = structuredClone(input); } catch (error) { refuse(`data is not plain data: ${message(error)}`); }
   const plan = validate(handles, data);
-  const {guard, getGate, nvda, observer, foreground, page, writer, clock} = handles;
-  const {actions} = plan, journey = actions.map(a => ({step: a.action, press: a.press}));
-  const reasons = [], order = [], teardownErrors = [], active = new Set(), intents = [];
-  let source, views, ack, ledger, capture = null, receipt = null, nvdaStarted = false, observerOpened = false, finalAck = null;
+  const {guard, getGate, lifecycle, nvda, observer, foreground, page, clock} = handles;
+  const {actions, writer} = plan, journey = actions.map(a => ({step: a.action, press: a.press}));
+  const reasons = [], order = [], teardownErrors = [], intents = [];
+  let source, views, ack, ledger, capture = null, receipt = null, observerOpened = false, finalAck = null, life = null;
 
   const reason = text => { if (!reasons.includes(text)) reasons.push(text); };
   const stop = (why, kind) => { if (!guard.isStopped()) guard.stop(why, kind ?? (guard.status().sends > 0 ? 'send' : 'pre')); };
-  // Bounded handle call; a call still running at the bound stays listed in active (pending_operations).
-  let opId = 0;
-  const bounded = (label, fn) => {
-    const id = `${label}#${++opId}`;
-    active.add(id);
-    let timer;
-    const operation = Promise.resolve().then(fn);
-    operation.then(() => active.delete(id), () => active.delete(id));
-    return Promise.race([operation, new Promise((_, reject) => { timer = setTimeout(() => reject(Error(`${label}: timed out after ${data.handleTimeoutMs} ms`)), data.handleTimeoutMs); })])
-      .finally(() => clearTimeout(timer));
-  };
+  // Bounded handle call through the lifecycle owner; a call still running at the bound stays pending (pending_operations).
+  const bounded = (label, fn) => lifecycle.op(label, fn, {boundMs: data.handleTimeoutMs});
   // Unbounded tracking for an operation another layer already bounds (captureJourney bounds execute by timeoutMs).
-  const track = (label, fn) => {
-    const id = `${label}#${++opId}`;
-    active.add(id);
-    const operation = Promise.resolve().then(fn);
-    operation.then(() => active.delete(id), () => active.delete(id));
-    return operation;
-  };
+  // Every callback that can reach the writer runs as one, so finalize waits for it or counts its late write.
+  const track = (label, fn) => lifecycle.op(label, fn);
   const event = record => writer.append('events', record);
 
   // §5 step 7: foreground verdicts are the session-built foregroundMismatch result, appended to the focus lane.
-  const check = async context => {
+  const check = context => track('foreground verdict', async () => {
     let errors;
     try { errors = await bounded('foreground check', () => foreground.check(context ?? null)); } catch (error) { errors = [`foreground check failed: ${message(error)}`]; }
     if (!Array.isArray(errors) || errors.some(e => typeof e !== 'string')) errors = ['foreground check returned no verdict'];
     writer.append('focus', {context: context === undefined ? null : structuredClone(context), errors: [...errors], observed_at: clock.now()});
     return errors;
-  };
+  });
   // Synchronous intent recorder (send-receipt.mjs:108-119): the intents lane and the page source's accounting view.
   const recordIntent = token => {
     const label = token?.action?.label;
@@ -147,18 +139,20 @@ export async function composeR2Page(handles, input) {
       journey: actions.map(({action, press}) => ({action, press})), intents: () => intents, writer, now: () => clock.now()});
     views = serializePageViews(createPageJournal({source, writer}));
     ack = pageAck({read: cursor => views.keys(cursor), ackMs: guard.bounds.ackMs});
-    const reader = async token => {
+    const reader = token => track('ack read', async () => {
       const value = await ack(token);
       writer.append('acks', {send: token.id, action: token.action.label, ack: value.ack, reasons: [...value.reasons]});
       return value;
-    };
+    });
     reader.before = token => ack.before(token);
     guard.setCheck(check);
     // §5 step 8: the ledger installs the gate's ack reader and intent hook; this module never replaces them.
     ledger = createSendReceiptLedger({gate: guard, getGate, ackReader: Object.freeze(reader), onIntent: recordIntent, actions: journey, now: () => clock.now()});
 
-    nvdaStarted = true;
-    receipt = await bounded('NVDA start', () => nvda.start());
+    // Raw start through the nvda slot: T1 abandons the wait, T2 marks the slot orphaned; neither proves termination.
+    // A rejected or unsettled start is never stopped. A resolved start is owned (and stopped once) even if validation fails.
+    const started = await lifecycle.acquire('nvda', () => nvda.start(), {label: 'NVDA start', boundMs: lifecycle.bounds.nvdaAbandonMs, orphanMs: lifecycle.bounds.nvdaOrphanMs});
+    receipt = await bounded('NVDA validate', () => nvda.validate(started));
     if (!Number.isSafeInteger(receipt?.pid) || receipt.pid <= 0 || receipt.relay_pid !== receipt.pid || receipt.reset_confirmed !== true) throw Error('NVDA start receipt missing or not owned');
     event({phase: 'nvda-start', pid: receipt.pid, reset_confirmed: true});
 
@@ -192,12 +186,12 @@ export async function composeR2Page(handles, input) {
 
     const executor = handles.createExecutor({steps: journey.map(a => ({step: a.step, key: a.press})), nvda: {press: (key, options) => nvda.press(key, options)},
       guard, checkForeground: () => check({phase: 'executor'}),
-      persistActionIntent: async ({step, press}) => { event({phase: 'action-intent', action: step, press}); }});
+      persistActionIntent: ({step, press}) => track('action intent', () => { event({phase: 'action-intent', action: step, press}); })});
     if (!Object.isFrozen(executor) || typeof executor.execute !== 'function') throw Error('executor factory did not return a frozen guarded executor');
 
     capture = await captureJourney({fixture_id: data.fixture_id, actions: journey,
-      speech: {read: () => observer.read()}, page: {read: () => views.snapshot()},
-      // An execution still running when capture returns stays in active (an unsettled operation).
+      speech: {read: () => track('observer read', () => observer.read())}, page: {read: () => track('page snapshot', () => views.snapshot())},
+      // An execution still running when capture returns stays pending in the lifecycle (an unsettled operation).
       execute: (action, context) => track('executor', () => executor.execute(action, context)),
       clock, observationMs: data.spec.observationMs, pollMs: data.spec.pollMs, timeoutMs: data.spec.timeoutMs, receipts: ledger});
     const state = ledger.gateState();
@@ -236,26 +230,32 @@ export async function composeR2Page(handles, input) {
   if (observerOpened) await attempt('speech lane', async () => writer.append('speech', speechLaneRecord(await bounded('observer final read', () => observer.read()))));
   await attempt('observer close', () => bounded('observer close', () => observer.close()));
   await attempt('foreground close', () => bounded('foreground close', () => foreground.close()));
+  // A live send keeps the browser open: the slot is retained (containment required) and nothing later closes it.
   if (quiet?.quiet === true) await attempt('page close', () => bounded('page close', () => page.close()));
-  if (nvdaStarted) await attempt('NVDA stop', () => bounded('NVDA stop', () => nvda.stop()));
+  else lifecycle.retain('browser', 'live sends at teardown');
+  if (lifecycle.slot('nvda') === 'owned') await attempt('NVDA stop', () => lifecycle.release('nvda', () => nvda.stop(), {label: 'NVDA stop', boundMs: data.handleTimeoutMs}));
   if (ledger) await attempt('receipts lane', () => writer.append('receipts', ledger.read()));
   if (capture) await attempt('capture.json', () => writer.put('capture.json', JSON.stringify(capture)));
-  const pending = [...active].sort();
+  const pending = lifecycle.pending();
   for (const r of [...reasons, ...teardownErrors]) await attempt('refusal record', () => event({phase: 'refusal', reason: r}));
   if (pending.length) await attempt('refusal record', () => event({phase: 'refusal', reason: `operations pending at teardown: ${pending.join(', ')}`}));
   const incomplete = [...reasons, ...teardownErrors, ...(pending.length ? [`operations pending at teardown: ${pending.join(', ')}`] : []),
     ...(quiet?.quiet === true ? [] : ['LIVE_AT_TEARDOWN'])];
   const evidence = {sealed: false, manifest_sha256: null, verified: false, verdict: null, errors: []};
+  // Finalize: producer writes close synchronously, pending operations settle (bounded), one diagnostic lifecycle event,
+  // then the seal. Lifecycle reasons (unsettled work, refused writes, CONTAINMENT_REQUIRED) are sealed as incomplete.
   await attempt('seal', async () => {
     const capped = incomplete.slice(0, REASONS).map(r => r.length > REASON_CAP ? `${r.slice(0, REASON_CAP - 12)} [truncated]` : r);
-    const sealed = await writer.seal({incomplete: capped});
+    life = await lifecycle.finalize({incomplete: capped});
+    if (!life.sealed) throw Error(life.error ?? 'evidence not sealed');
+    const sealed = life.sealed;
     Object.assign(evidence, {sealed: true, manifest_sha256: sealed.manifest_sha256, verified: sealed.verification.ok === true,
       verdict: sealed.verification.class, errors: [...sealed.verification.errors]});
   });
   if (!evidence.sealed) evidence.errors.push(...teardownErrors.filter(e => e.startsWith('seal:')));
 
   const done = capture?.completed === true && !reasons.length && !teardownErrors.length && !pending.length && quiet?.quiet === true &&
-    !guard.isStopped() && evidence.sealed && evidence.verified && evidence.verdict === 'synthetic';
+    !guard.isStopped() && life?.clean === true && evidence.sealed && evidence.verified && evidence.verdict === 'synthetic';
   // Fail closed: a page that is not complete never hands its gate back live (an earlier stop keeps its identity).
   if (!done) stop(`R2 compose incomplete: ${[...reasons, ...teardownErrors][0] ?? 'evidence not sealed and verified'}`, 'protocol');
   const status = guard.status();
@@ -269,7 +269,8 @@ export async function composeR2Page(handles, input) {
     gate: {stopped: status.stopped, kind: status.kind, reason: status.reason, sends: status.sends, misdelivered: status.misdelivered, refused: status.refused},
     final: {ack_errors: finalAck === null ? null : [...finalAck], pending_shift: source?.pending() ?? null, shift_prefix: source ? source.prefixes() : []},
     teardown: {order: [...order], quiescence: quiet?.quiet === true ? 'QUIET_AT_TEARDOWN' : 'LIVE_AT_TEARDOWN', physical_quiescence_verified: false, errors: [...teardownErrors]},
-    pending_operations: pending, guarded_execution_verified: false, evidence,
+    pending_operations: lifecycle.pending(), guarded_execution_verified: false, evidence,
+    lifecycle: life ? structuredClone(life.record) : null,
   };
   result.completed = done && !status.stopped;
   if (result.completed) result.outcome = 'COMPLETE';

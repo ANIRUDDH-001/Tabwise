@@ -1438,3 +1438,30 @@ test('O11-S1 arm-input custody is capability-free reviewed scope: no model call,
   const refusal = checkR2Approval({env: {}, status, plan: '', platform: 'win32'});
   assert.equal(refusal.ok, false); assert.ok(refusal.errors.includes('R2 is BLOCK/disabled'));
 });
+
+// ---- W3/W4 (spec 2026-11-02): the seal's synchronous closing latch ----
+import {existsSync} from 'node:fs';
+test('W-2 a producer write that lands while the seal awaits is refused and fails the seal closed (no unverifiable manifest)', async () => {
+  const dir = join(temp(), 'x');
+  const w = createR2EvidenceWriter(options(dir));
+  const sealing = w.seal({incomplete: ['offline latch row']});
+  let late = null;
+  await Promise.resolve();
+  try { w.append('events', {phase: 'late microtask'}); } catch (error) { late = error.message; }
+  assert.match(late, /r2 evidence: write after seal started/);
+  await assert.rejects(sealing, /r2 evidence: write after seal started/);
+  assert.equal(existsSync(join(dir, 'manifest.json')), false, 'no manifest over a racing producer');
+  assert.equal(readFileSync(join(dir, 'events.jsonl'), 'utf8').includes('late microtask'), false);
+  assert.equal((await verifyR2PageEvidence(dir, INPUTS)).class, 'incomplete');
+});
+
+test('W-4 a concurrent second seal is refused synchronously by the closing latch; the first seals and verifies once', async () => {
+  const dir = join(temp(), 'x');
+  const w = createR2EvidenceWriter(options(dir));
+  const first = w.seal({incomplete: ['offline latch row']});
+  await assert.rejects(w.seal({incomplete: ['second']}), /r2 evidence: already sealing/);
+  const sealed = await first;
+  assert.deepEqual([sealed.verification.ok, sealed.class], [true, 'incomplete']);
+  assert.equal(w.failure(), null, 'the refused second seal does not latch a failure on the first');
+  assert.deepEqual(JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8')).incomplete, ['offline latch row']);
+});

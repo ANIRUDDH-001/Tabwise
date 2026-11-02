@@ -184,13 +184,15 @@ export function createR2EvidenceWriter(options = {}) {
   const ctx = prepare(options);
   const fixture = Buffer.from(options.fixture), approved = structuredClone({fixture_sha256: options.approved.fixture_sha256, task: options.approved.task});
   const caps = ctx.caps.files, written = new Map();
-  let total = 0, failure = null, sealed = false, stateChanges = 0, visualDir = false;
+  // closing: the seal latch (W3/W4), set synchronously before seal's first await; a later write or second seal is refused.
+  let total = 0, failure = null, sealed = false, closing = false, stateChanges = 0, visualDir = false;
   mkdirSync(dirname(dir), {recursive: true});
   mkdirSync(dir);
   for (const lane of LANES) { writeFileSync(join(dir, laneFile(lane)), '', {flag: 'wx'}); written.set(laneFile(lane), {bytes: 0, hash: createHash('sha256')}); }
   const guard = fn => (...args) => {
     if (failure) throw failure;
     if (sealed) throw Error('r2 evidence: sealed');
+    if (closing) throw (failure = Error('r2 evidence: write after seal started'));
     try { return fn(...args); } catch (error) { throw (failure = Error(/^r2 evidence:/.test(error.message) ? error.message : `r2 evidence: ${error.message}`)); }
   };
   const account = (name, bytes) => {
@@ -228,8 +230,11 @@ export function createR2EvidenceWriter(options = {}) {
       entry.bytes = data.length; entry.hash.update(data); total += data.length;
     }),
     seal: async (sealOptions = {}) => {
+      // Synchronous, before any await: a concurrent second seal is refused without touching the first.
       if (failure) throw failure;
       if (sealed) throw Error('r2 evidence: already sealed');
+      if (closing) throw Error('r2 evidence: already sealing');
+      closing = true;
       try {
         if (!object(sealOptions)) fail('seal options must be an object');
         if ('class' in sealOptions) fail('the evidence class is recomputed, never supplied');
@@ -252,6 +257,8 @@ export function createR2EvidenceWriter(options = {}) {
           spec: ctx.spec, caps: ctx.caps, files, incomplete, provenance, authenticity: assessed.authenticity, source, runner, evidence_scope: EVIDENCE_SCOPE};
         const bytes = Buffer.from(JSON.stringify(JSON.parse(canonical(manifest)), null, 2) + '\n'), hash = sha256(bytes);
         if (bytes.length > MANIFEST_CAP) fail('manifest cap');
+        // A producer write refused while the seal awaited latched a failure: no manifest over a racing producer.
+        if (failure) throw failure;
         sealed = true;
         writeFileSync(join(dir, 'manifest.json'), bytes, {flag: 'wx'});
         writeFileSync(join(dir, 'manifest.sha256'), `${hash}  manifest.json\n`, {flag: 'wx'});

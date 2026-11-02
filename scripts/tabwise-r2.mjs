@@ -41,7 +41,9 @@ async function runPage(gate) {
   const abort = why => { if (!runtime.guard.isStopped()) runtime.guard.stop(`R2 page ${why}`, 'timeout'); };
   const onSignal = () => abort('signal');
   const removeCrash = installQualificationCrashHandlers({abort: () => abort('crash'), record: event => console.error(JSON.stringify({r2_page: page.id, ...event}))});
-  process.once('SIGINT', onSignal); process.once('SIGTERM', onSignal);
+  // W3/W4: persistent handlers for every cancel signal until the exit line is printed; a repeated signal stops the
+  // gate again (idempotent) instead of falling through to the default handler mid-cleanup.
+  for (const name of CANCEL_SIGNALS) process.on(name, onSignal);
   const deadline = setTimeout(() => abort('deadline'), PAGE_DEADLINE_MS);
   let result = null, failure = null;
   try {
@@ -51,7 +53,7 @@ async function runPage(gate) {
     failure = message(error);
     abort('session refused');
   } finally {
-    clearTimeout(deadline); process.off('SIGINT', onSignal); process.off('SIGTERM', onSignal); removeCrash();
+    clearTimeout(deadline); removeCrash();
   }
   const integrity = phase.verifyPhase();
   const reasons = [...(failure ? [failure] : []), ...(result?.reasons ?? []), ...(result?.cleanup_errors ?? []), ...integrity.errors, ...r2Phase()];
@@ -64,6 +66,7 @@ async function runPage(gate) {
   if (!completed) abort('incomplete');
   if (result) console.error(JSON.stringify(result));
   console.log(JSON.stringify(r2PageExit({page: page.id, completed, nvda: result?.nvda ?? 'not-started', manifest_sha256: result?.manifest_sha256 ?? null, reasons})));
+  for (const name of CANCEL_SIGNALS) process.off(name, onSignal);
   return completed ? 0 : 2;
 }
 
