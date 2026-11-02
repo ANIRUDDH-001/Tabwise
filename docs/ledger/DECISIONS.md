@@ -653,3 +653,8 @@ Ordinary runner refuses unclassified test/r2-product-export.test.mjs. Continuing
 User answer: "Do not stop merely because test registration needs a narrowly scoped change; explain and implement necessary test registration while preserving the fail-closed classification rules."
 User answer: "If an independent native signer/attester is unavailable, leave that requirement BLOCKED. Do not manufacture attestation or qualification PASS."
 Consequence: raw-capture exporter wiring and additive offline registration; no classification or authority promotion.
+
+## F-03 R2 verification and native diagnostic — owner priority updates
+User answer: "Do not merge into main until native capture, evidence verification, product ingestion and required qualification have passed."
+User answer: "Implement, test and push the diagnostic branch. Stop only when explicit approval or a genuine external dependency is required."
+Consequence: draft PR19 for offline CI only; preserve reviewed digest-binding correction; new isolated NONQUALIFYING diagnostic and exact approval packet before native input. Production qualification/admission policies unchanged.

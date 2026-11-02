@@ -25,7 +25,7 @@ export const R2_FILES=Object.freeze([
  'scripts/tabwise/r2-lifecycle.mjs', 'scripts/tabwise/r2-policy.mjs', 'scripts/tabwise/r2-proctree.mjs',
  'scripts/tabwise/r2-product-policy.json', 'scripts/tabwise/r2-run.mjs', 'scripts/tabwise/r2-session.mjs',
  'src/budget/prices.mjs', 'src/r2/arm-inputs.mjs', 'src/r2/binding.mjs',
- 'src/r2/capture.mjs', 'src/r2/contract.mjs', 'src/r2/page-journal.mjs',
+ 'src/r2/capture-export.mjs', 'src/r2/capture.mjs', 'src/r2/contract.mjs', 'src/r2/page-journal.mjs',
  'src/r2/page-provider.mjs', 'src/r2/page-recorder.mjs', 'src/r2/page-source.mjs',
  'src/r2/preparation.mjs', 'src/r2/product-bridge.mjs', 'src/r2/send-receipt.mjs',
  'src/r2/speech-payload.mjs', 'supabase/proposals/r2-w5-admission.sql', 'web/app/api/r2/admission/route.ts',

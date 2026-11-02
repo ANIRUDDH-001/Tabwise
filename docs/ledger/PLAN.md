@@ -580,3 +580,9 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - MEASURED producer-review: see cache/producer-review/verification-summary.json; 56 ordinary files PASS.
 - BLOCKED: authentic producer manifests cannot reach genuine-unqualified with current independent verifier; no signer/attester. Integration test uses generated surrounding identity, never genuine native evidence.
 - Rollback: discard only this task's listed diff/new files after review.
+
+### F-03 / R2 integration verification and projector binding
+- User-authorized review/test/feature-only publication; merge explicitly blocked pending native qualification and end-to-end capture/ingestion.
+- Files: r2-policy.mjs and r2-review.test.mjs; session ledgers. Add missing projector to source scope with mutation regression, preserve disabled gates.
+- Acceptance: full root1161/1161, R2810/810, web127/127, contracts21/21, browser/API15/15, TypeScript/build/frozen/preflight PASS; hosted PR19 CI pending.
+- Budget: no paid infrastructure/model calls/dependency changes. Rollback: revert feature correction; main untouched.
