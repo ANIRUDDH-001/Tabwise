@@ -653,3 +653,9 @@ Ordinary runner refuses unclassified test/r2-product-export.test.mjs. Continuing
 User answer: "Do not stop merely because test registration needs a narrowly scoped change; explain and implement necessary test registration while preserving the fail-closed classification rules."
 User answer: "If an independent native signer/attester is unavailable, leave that requirement BLOCKED. Do not manufacture attestation or qualification PASS."
 Consequence: raw-capture exporter wiring and additive offline registration; no classification or authority promotion.
+
+## Hosted NVDA startup diagnostic authorization — 2026-11-02T19:54:08Z
+User answer: "Your job is to IMPLEMENT, EXECUTE, VERIFY and REPORT the real GitHub-hosted Windows NVDA startup diagnostic."
+User answer: "I authorize you to:" "Create a new isolated local worktree." "Create the diagnostic branch." "Implement and modify diagnostic-specific files." "Run local static checks." "Commit the diagnostic using Git." "Push the diagnostic branch to GitHub." "Trigger the intended hosted diagnostic through the push." "Read GitHub Actions logs and artifacts." "Fix demonstrated diagnostic-only defects." "Perform another diagnostic run if genuinely necessary and still free."
+User answer: "Budget strictly ₹0 incremental"
+Consequence: diagnostic-only hosted execution; no native desktop run, R2/W2a activation, frozen edits or main writes.

@@ -122,3 +122,5 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 | src/r2/product-export.mjs | Offline source-copy exporter and bridge validation; no signer or capture activation | buildR2ProductExport, writeR2ProductExport | test/r2-product-export.test.mjs; genuine runtime remains blocked |
 
 | src/r2/capture-export.mjs | Source-bound capture JSON-pointer projection for exporter and bridge | captureObservationSources | test/r2-capture-export.test.mjs |
+
+| scripts/tabwise/nvda-startup-diagnostic.mjs; .github/workflows/tabwise-nvda-startup-diagnostic.yml | Standalone hosted NONQUALIFYING startup/settings/PID/shutdown diagnostic with bounded worker and independent post-snapshot | branch-specific push; no input or R2 activation | syntax/YAML + hosted artifact |

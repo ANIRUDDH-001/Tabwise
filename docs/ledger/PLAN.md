@@ -580,3 +580,11 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - MEASURED producer-review: see cache/producer-review/verification-summary.json; 56 ordinary files PASS.
 - BLOCKED: authentic producer manifests cannot reach genuine-unqualified with current independent verifier; no signer/attester. Integration test uses generated surrounding identity, never genuine native evidence.
 - Rollback: discard only this task's listed diff/new files after review.
+
+### F-03 / hosted NVDA startup diagnostic (owner-authorized 2026-11-02T19:54:08Z)
+- Goal: measure authentic frozen NVDA startup, settings readback, PID/relay ownership, shutdown and quiescence on a fresh hosted VM. NONQUALIFYING.
+- Base: d75f04335dc0ba6c9e64fb92fcedc408c5867cfc; branch diag/tabwise-r2-startup.
+- Files: scripts/tabwise/nvda-startup-diagnostic.mjs; .github/workflows/tabwise-nvda-startup-diagnostic.yml; normal ledgers/CODEMAP.
+- Acceptance: node --check scripts/tabwise/nvda-startup-diagnostic.mjs; YAML parser/trigger assertions; frozen R1 baseline; git diff --check; actual hosted report/artifact readback.
+- Cost ceiling: ₹0 incremental; public repo + standard windows-2025 only. No new dependencies.
+- No keyboard, browser, capture, qualification, status, frozen asset or lifecycle timeout changes.
