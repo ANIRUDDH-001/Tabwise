@@ -6,6 +6,8 @@ import {requireUser,requireOperator,serviceClient} from '../../../../../lib/serv
 import {authorizeRun,createHostedBroker,HttpError} from '../../../../../lib/server/core.mjs';
 import {assertContract,sha256} from '../../../../../../packages/contracts/index.mjs';
 import {diagnose,DIAGNOSIS_PROMPT} from '../../../../../../src/meta/diagnosis.mjs';
+import {diagnosisInput} from '../../../../../../src/meta/input.mjs';
+import {readRunEvidence} from '../../../../../lib/server/stored-evidence.mjs';
 import {persistValidatedDiagnosis} from '../../../../../../src/repair/persistence.mjs';
 export const maxDuration=150;
 export async function POST(request:Request,{params}:{params:Promise<{id:string}>}){return endpoint(request,async()=>{
@@ -15,15 +17,17 @@ export async function POST(request:Request,{params}:{params:Promise<{id:string}>
  if(flags.diagnosis_mode==='owner')await requireOperator(user.id);
  if(!flags.qualification_ref||!process.env.TABWISE_META_APPROVAL_REF)throw new HttpError(403,'probe_and_allocation_approval_required');
  if(run!.status!=='completed'||run!.evidence_status!=='complete')throw new HttpError(409,'qualified_evidence_required');
- const {data:blob,error:downloadError}=await db.storage.from('tabwise-evidence').download(`${id}/evidence.json`);
- if(downloadError||!blob||blob.size>4000000)throw new HttpError(409,'evidence_unavailable');
- const evidence=assertContract('evidence-bundle',JSON.parse(await blob.text()));
- if(evidence.provenance!=='observed-nvda'||evidence.evidence_status!=='complete'||evidence.run_id!==id)throw new HttpError(409,'qualified_evidence_required');
+ const {data:metadata,error:metadataError}=await db.from('artifacts').select('path,kind,bytes,sha256').eq('run_id',id).limit(201);
+ if(metadataError)throw new HttpError(503,'evidence_service_unavailable');
+ let stored;try{stored=await readRunEvidence({run,metadata,download:async(path:string)=>{
+  const {data,error}=await db.storage.from('tabwise-evidence').download(path);
+  if(error||!data||data.size>4000000)throw Error('artifact unavailable');
+  return Buffer.from(await data.arrayBuffer());
+ }});}catch{throw new HttpError(409,'stored_evidence_unavailable_or_integrity_failed');}
+ if(!stored?.complete)throw new HttpError(409,'qualified_evidence_required');
  const source=(await readFile(join(process.cwd(),'../fixtures/fernway/index.html'),'utf8')).replace(/\r\n/g,'\n');
  if(sha256(source)!==run!.spec?.app_hash)throw new HttpError(409,'matching_run_source_required');
- const timeline=Object.values(evidence.lanes).flat() as {evidence_ref:string}[];
- const input={version:'0.1.0',run_id:id,journey:run!.spec?.steps,evidence_refs:timeline.map(e=>e.evidence_ref),timeline,signals:[],axe:{violations:evidence.axe.reduce((sum:number,a:{violations:number})=>sum+a.violations,0),rules_checked:0},source:[{path:'index.html',sha256:sha256(source),lines:source.split('\n').map((text,n)=>({n:n+1,text}))}]};
- assertContract('diagnosis-input',input);
+ const input=diagnosisInput({run,evidence:stored.evidence,source});
  const inputHash=sha256(JSON.stringify(input)),promptHash=sha256(DIAGNOSIS_PROMPT);
  const {data:cached}=await db.from('diagnoses').select('*').eq('run_id',id).eq('input_sha256',inputHash).eq('prompt_sha256',promptHash).eq('model','muse-spark-1.3').maybeSingle();
  if(cached)return Response.json({diagnosis_id:cached.id,...cached.output,model:cached.model,cached:true},{headers:{'Cache-Control':'private, no-store'}});

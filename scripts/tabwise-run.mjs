@@ -11,7 +11,13 @@ try{
   const worker=await import('./tabwise/worker.mjs');
   return {decodeSpec:contracts.decodeSpec,liveGate:worker.liveGate};
  });
- decodeSpec({run_id:process.env.TABWISE_RUN_ID??'',spec_b64:process.env.TABWISE_SPEC_B64??'',spec_sha256:process.env.TABWISE_SPEC_SHA256??''});
+ const spec=decodeSpec({run_id:process.env.TABWISE_RUN_ID??'',spec_b64:process.env.TABWISE_SPEC_B64??'',spec_sha256:process.env.TABWISE_SPEC_SHA256??''});
  const head=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
  liveGate(process.env,head);
+ if(spec.variant==='patched'){
+  const {stagePatchedWorkerSource}=await import('./tabwise/repair-source.mjs');
+  const staged=await stagePatchedWorkerSource({spec,bundlePath:process.env.TABWISE_REPAIR_INPUT_PATH});
+  try{throw Error('BLOCK: repaired execution requires the sole admitted R2 entry');}finally{await staged.dispose();}
+ }
+
 }catch(error){console.error(`Tabwise worker refused: ${error.message}`);process.exitCode=2;}

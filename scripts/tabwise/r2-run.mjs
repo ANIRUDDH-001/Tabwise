@@ -1,3 +1,4 @@
+import {preparePatchedSession,validateRepairPacket} from './repair-session.mjs';
 // R2-L2 S6: capability-free helpers for the default-blocked entry (scripts/tabwise-r2.mjs; design §1.2, §1.5, §2.2, §9).
 // Strict CLI, the run-plan schema (tabwise-r2-plan/1), fixture loading bound to the approved plan, the ordered gate
 // sequence up to (not including) any runtime import, the run directory, the child environment allowlist, the page
@@ -6,9 +7,12 @@
 // launcher, and is the only module that can load a runtime (and only in --page mode, after these gates).
 import {readFileSync, lstatSync, realpathSync} from 'node:fs';
 import {basename, dirname, isAbsolute, join, relative, resolve, sep} from 'node:path';
+import {parseUniqueJson} from '../../src/r2/strict-json.mjs';
+export {parseUniqueJson};
+import {sha256} from '../../packages/contracts/index.mjs';
 import {pageHash} from '../../src/r2/contract.mjs';
 import {checkR2Approval, r2Digest} from './r2-policy.mjs';
-import {buildR2StepMap, planR2EvidenceCaps, verifyR2Run} from './r2-evidence.mjs';
+import {buildR2StepMap, planR2EvidenceCaps, verifyR2Run,nativeFixtureQuery} from './r2-evidence.mjs';
 import {createPageCustody, processBaseline, wallMicros, HELPER_TIMEOUT_MS, REAP_ROUNDS} from './r2-proctree.mjs';
 
 export const PLAN_SCHEMA = 'tabwise-r2-plan/1';
@@ -59,27 +63,6 @@ const block = detail => { throw Error(`BLOCK: ${detail}`); };
 
 // JSON.parse remains the grammar oracle; scan valid tokens iteratively to reject duplicate decoded names.
 // Both callers bound their document before parsing. No recursive descent or regexp string parsing.
-function parseUniqueJson(text) {
-  const parsed = JSON.parse(text), stack = [];
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    if (c === '{') stack.push(new Set());
-    else if (c === '[') stack.push(null);
-    else if (c === '}' || c === ']') stack.pop();
-    else if (c === '"') {
-      const start = i++;
-      while (text[i] !== '"') { if (text[i] === '\\') i++; i++; }
-      let next = i + 1;
-      while (' \t\r\n'.includes(text[next]) && next < text.length) next++;
-      if (text[next] === ':') {
-        const name = JSON.parse(text.slice(start, i + 1)), names = stack.at(-1);
-        if (names.has(name)) throw Error('duplicate JSON object member');
-        names.add(name);
-      }
-    }
-  }
-  return parsed;
-}
 
 /** Exactly one mode (--check-only | --page <id> | --run | --verify-run) and exactly one --plan <path>; no other token. */
 export function parseR2Args(argv) {
@@ -110,24 +93,26 @@ export function parseR2Plan(bytes) {
   if (!(bytes instanceof Uint8Array) || !bytes.length || bytes.length > MAX_PLAN) planFail(`must be 1..${MAX_PLAN} bytes`);
   let plan;
   try { plan = parseUniqueJson(Buffer.from(bytes).toString('utf8')); } catch (error) { planFail(`not JSON: ${message(error)}`); }
-  if (!object(plan) || !sameKeys(plan, PLAN_KEYS)) planFail(`must be exactly {${PLAN_KEYS.join(', ')}}`);
+  if (!object(plan) || !sameKeys(plan, Object.hasOwn(plan,'repair') ? [...PLAN_KEYS,'repair'].sort() : PLAN_KEYS)) planFail(`must be exactly {${PLAN_KEYS.join(', ')}}`);
   if (plan.schema !== PLAN_SCHEMA) planFail('schema');
   if (!['development', 'withheld'].includes(plan.split)) planFail('split must be development or withheld');
   if (!object(plan.spec) || !sameKeys(plan.spec, SPEC_KEYS)) planFail(`spec must be exactly {${SPEC_KEYS.join(', ')}}`);
   for (const k of ['handleTimeoutMs', 'focusWaitMs']) if (!int(plan[k], 1, 60000)) planFail(`${k} must be 1..60000`);
   if (!Array.isArray(plan.pages) || !plan.pages.length || plan.pages.length > MAX_PAGES) planFail(`pages must list 1..${MAX_PAGES} pages`);
+  if(Object.hasOwn(plan,'repair') && (!object(plan.repair)||!sameKeys(plan.repair,['path','sha256'])||!FIXTURE_PATH.test(plan.repair.path??'')||plan.repair.path.split('/').some(p=>p==='.'||p==='..')||!SHA256.test(plan.repair.sha256??'')||plan.pages.length!==1))planFail('repair delivery reference');
   const pages = plan.pages.map((page, i) => {
-    if (!object(page) || !sameKeys(page, PAGE_KEYS)) planFail(`page ${i + 1} must be exactly {${PAGE_KEYS.join(', ')}}`);
+    if (!object(page) || !sameKeys(page, Object.hasOwn(page,'query')?[...PAGE_KEYS,'query'].sort():PAGE_KEYS)) planFail(`page ${i + 1} must be exactly {${PAGE_KEYS.join(', ')}}`);
+    if(Object.hasOwn(page,'query'))nativeFixtureQuery(page.query);
     if (!PAGE_ID.test(page.id ?? '')) planFail(`page ${i + 1} id`);
     if (typeof page.fixture !== 'string' || page.fixture.length > 256 || !FIXTURE_PATH.test(page.fixture) || page.fixture.split('/').some(s => s === '.' || s === '..'))
       planFail(`page ${page.id} fixture must be a relative path inside the plan directory`);
     if (!SHA256.test(page.fixture_sha256 ?? '')) planFail(`page ${page.id} fixture_sha256`);
     if (!Array.isArray(page.task) || page.task.some(t => !object(t) || !sameKeys(t, ['press', 'step']))) planFail(`page ${page.id} task entries must be exactly {step, press}`);
     try { buildR2StepMap(page.task); planR2EvidenceCaps({...plan.spec, actions: page.task.length}); } catch (error) { planFail(`page ${page.id}: ${message(error)}`); }
-    return Object.freeze({id: page.id, fixture: page.fixture, fixture_sha256: page.fixture_sha256, task: Object.freeze(page.task.map(t => Object.freeze({step: t.step, press: t.press})))});
+    return Object.freeze({...(page.query?{query:page.query}:{}),id: page.id, fixture: page.fixture, fixture_sha256: page.fixture_sha256, task: Object.freeze(page.task.map(t => Object.freeze({step: t.step, press: t.press})))});
   });
   if (new Set(pages.map(p => p.id)).size !== pages.length) planFail('duplicate page id');
-  return Object.freeze({schema: plan.schema, split: plan.split, spec: Object.freeze({...plan.spec}), handleTimeoutMs: plan.handleTimeoutMs,
+  return Object.freeze({...(plan.repair?{repair:Object.freeze({...plan.repair})}:{}),schema: plan.schema, split: plan.split, spec: Object.freeze({...plan.spec}), handleTimeoutMs: plan.handleTimeoutMs,
     focusWaitMs: plan.focusWaitMs, pages: Object.freeze(pages)});
 }
 
@@ -187,7 +172,15 @@ export function checkR2Entry({argv, env, execArgv, root, platform, git, frozen, 
   if (r2Digest(root) !== status.reviewed_sha256) block('R2 content changed after approval');
   const pages = args.page === null ? plan.pages : plan.pages.filter(p => p.id === args.page);
   const fixtures = new Map(pages.map(p => [p.id, loadR2Fixture(planPath, p)]));
-  return Object.freeze({mode: args.mode, page: args.page, planPath, planBytes, plan, pages, fixtures, head, status});
+  let repair = null;
+  if(plan.repair){
+    const base=realpathSync(dirname(planPath)),path=join(base,plan.repair.path),stat=lstatSync(path),real=realpathSync(path);
+    if(!stat.isFile()||stat.isSymbolicLink()||stat.size>2200000||!real.startsWith(base+sep))block('repair delivery file');
+    const bytes=readFileSync(real);if(bytes.length>2200000||sha256(bytes)!==plan.repair.sha256)block('repair delivery digest');
+    repair=validateRepairPacket({packet:parseUniqueJson(bytes.toString('utf8')),head,env});
+    r2SessionData(plan,pages[0],fixtures.get(pages[0].id),join(dirname(planPath),'repair-evidence-validation'),repair);
+  }
+  return Object.freeze({repair,mode: args.mode, page: args.page, planPath, planBytes, plan, pages, fixtures, head, status});
 }
 
 /**
@@ -262,8 +255,15 @@ export function r2PageCommand({entry, page, planPath, env, cwd}) {
 }
 
 /** The session data for one plan page; the session generates the nonce and session id itself. */
-export function r2SessionData(plan, page, fixture, evidenceDir) {
-  return {fixture_id: page.id, fixture, approved: {fixture_sha256: page.fixture_sha256, task: page.task.map(t => ({step: t.step, press: t.press}))},
+export function r2SessionData(plan, page, fixture, evidenceDir, repair = null) {
+  if (repair !== null) {
+    const data = preparePatchedSession({...repair, evidenceDir, timing: plan.spec, handleTimeoutMs: plan.handleTimeoutMs, focusWaitMs: plan.focusWaitMs});
+    if ((page.query??'') !== (data.approved.query??'') || data.fixture_id !== page.id || data.approved.fixture_sha256 !== page.fixture_sha256 ||
+        !Buffer.from(fixture).equals(data.fixture) || JSON.stringify(data.approved.task) !== JSON.stringify(page.task.map(t => ({step:t.step,press:t.press}))))
+      throw Error('repair source differs from admitted native plan');
+    return data;
+  }
+  return {fixture_id: page.id, fixture, approved: {...(page.query?{query:page.query}:{}),fixture_sha256: page.fixture_sha256, task: page.task.map(t => ({step: t.step, press: t.press}))},
     spec: {actions: page.task.length, ...plan.spec}, evidenceDir, handleTimeoutMs: plan.handleTimeoutMs, focusWaitMs: plan.focusWaitMs};
 }
 
@@ -338,7 +338,7 @@ export function r2RunSealable(outcome) {
 /** The plan copy and approved per-page inputs that --run seals with and --verify-run re-verifies with. */
 export function r2RunInputs(gate) {
   const plan = JSON.parse(JSON.stringify(gate.plan));
-  const inputs = Object.fromEntries(gate.pages.map(p => [p.id, {fixture: gate.fixtures.get(p.id), approved: {fixture_sha256: p.fixture_sha256, task: plan.pages.find(q => q.id === p.id).task}}]));
+  const inputs = Object.fromEntries(gate.pages.map(p => [p.id, {fixture: gate.fixtures.get(p.id), approved: {...(p.query?{query:p.query}:{}),fixture_sha256: p.fixture_sha256, task: plan.pages.find(q => q.id === p.id).task}}]));
   return {plan, inputs};
 }
 

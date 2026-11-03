@@ -1,7 +1,7 @@
 import {endpoint} from '../../../../../lib/server/http';
 import {requireUser,serviceClient} from '../../../../../lib/server/supabase';
 import {authorizeRun,HttpError} from '../../../../../lib/server/core.mjs';
-import {readRunEvidence,screenshotBytes} from '../../../../../lib/server/stored-evidence.mjs';
+import {readRunEvidence,screenshotBytes,screenshotMediaType} from '../../../../../lib/server/stored-evidence.mjs';
 export async function GET(request:Request,{params}:{params:Promise<{id:string}>}){return endpoint(request,async()=>{
  const user=await requireUser(),db=serviceClient(),{id}=await params;
  const {data:run,error}=await db.from('runs').select('*').eq('id',id).maybeSingle();if(error)throw new HttpError(503,'evidence_service_unavailable');authorizeRun(user,run);
@@ -12,6 +12,6 @@ export async function GET(request:Request,{params}:{params:Promise<{id:string}>}
  if(!result)throw new HttpError(404,'evidence_not_collected');
  const headers={'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'};
  const asset=new URL(request.url).searchParams.get('asset');
- if(asset){try{return new Response(new Uint8Array(screenshotBytes(result,asset)),{headers:{...headers,'Content-Type':'image/webp'}});}catch{throw new HttpError(404,'screenshot_unavailable');}}
+ if(asset){try{const bytes=screenshotBytes(result,asset);return new Response(new Uint8Array(bytes),{headers:{...headers,'Content-Type':screenshotMediaType(bytes)}});}catch{throw new HttpError(404,'screenshot_unavailable');}}
  const {files,...view}=result;return Response.json(view,{headers});
  });}

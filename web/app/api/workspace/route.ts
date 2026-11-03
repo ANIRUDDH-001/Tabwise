@@ -9,6 +9,9 @@ export async function GET(request:Request){return endpoint(request,async()=>{
   const fields=table==='runs'?'id,user_id,status,evidence_status,created_at':'id,user_id,journey_id,n,sha256,created_at';
   const {data,error}=await db.from(table).select(fields).eq('user_id',userId).order('created_at',{ascending:false}).limit(25);
   if(error)throw new HttpError(503,'workspace_service_unavailable');return data??[];
+ },async(runId:string)=>{
+  const {data,error}=await db.from('artifacts').select('path').eq('run_id',runId).eq('kind','evidence').like('path','diagnostics/%').limit(1);
+  if(error)throw new HttpError(503,'workspace_service_unavailable');return Boolean(data?.length);
  });
  const {data:catalog,error}=await db.from('journeys').select('id,app_id,name,supported').eq('app_id','fernway').limit(3);if(error)throw new HttpError(503,'workspace_service_unavailable');
  return Response.json({...data,catalog:catalogView(catalog)},{headers:{'Cache-Control':'private, no-store'}});

@@ -507,3 +507,181 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Acceptance: node --test --test-timeout=10000 test/r2-completion-integrity.test.mjs test/r2-evidence.test.mjs test/r2-review.test.mjs; then node --test --test-timeout=10000 "test/r2*.test.mjs".
 - Cost ceiling: $0. No installs, hosted runs, NVDA, workflow or status edits, commit.
 - Result: RED 9/10 fail -> GREEN 10/10; acceptance 154/154 exit 0; R2 suite 726/726 exit 0; 7/7 mutations killed. Ordinary profile and full frozen integrity not run (no node_modules; Node 24.11.0). Stress UNSATISFIED unchanged.
+
+### F-03 / W3-W4 targeted contract corrections (2026-11-02)
+- Owner request: finalization freshness, exclusive writer ownership, bounded independent partial browser cleanup. No redesign, thresholds, activation or late-NVDA policy change.
+- Starting HEAD 600132fb62f648dab59a7edf83a8dae70b989d32; clean; baseline 9bb994c335c2af716f727c519bc9853d5cd80dd0.
+- Files: scripts/tabwise/{r2-lifecycle,r2-session}.mjs; test/r2-{lifecycle,binding}.test.mjs; normal STATE/PLAN/DECISIONS/LOG records. Cost $0; existing dependencies only.
+- Acceptance: meaningful RED before fixes; full affected files with --test-timeout=10000, file watchdog 60000; W1 tests; protected-path identity; diff check. Ordinary budget 180000 unchanged; no full repository/profile run.
+- MEASURED: four initial regressions RED 0/4 (two A, B, C). GREEN lifecycle+W1 41/41; binding 68/68; evidence 69/69; review 77/77. Full binding includes the real-seal composition refusal regression.
+- Focused name-filter binding run failed ENOENT on its temporary evidence; full binding subsequently passed 68/68. Filtered harness scheduling behavior unresolved; no existing test edited or weakened.
+- Source inspection: WeakMap ownership tokens do not retain owners/writers; finalize reconciles live failure state after seal and on repeats; partial cleanup registers all attempts before finalization can close registration and tracks unsettled work.
+- Artifact bytes are not rewritten after sealing; runtime refusal is distinct from the sealed diagnostic snapshot. No evidence schema or R2_FILES change.
+- Qualification digest unchanged 6972c311a6e9302856ff9bb9195aa73cf106a15da8caf91ac32b781f8909f328; R1 baseline PASS. Full frozen integrity BLOCKED by absent node_modules/@guidepup/guidepup/package.json; no install/copy.
+- November 2 implementation final handoff/amendments not found locally. Revision-2 late-start requirement is owner-supplied, not independently recovered. Current late-NVDA orphan policy unchanged; recommend separately authorizing owned late-start release once identity is established, preserving incomplete/containment until independent OS confirmation.
+- Independent cross-tool review and Windows qualification remain pending; merge HOLD. No hosted run, physical input, model call, git write or publication.
+
+### F-03 / W3-W4 final ledger reconciliation (2026-11-02; 2026-11-02T12:54:51Z)
+- Owner-authorized documentation only at HEAD 600132fb62f648dab59a7edf83a8dae70b989d32; continue existing eight modifications. Scope: STATE.md rewrite; append PLAN.md, DECISIONS.md and one LOG.jsonl record. Cost ceiling $0.
+- MEASURED (existing reports, inspected without rerunning tests): ordinary 51/51 files PASS, exit 0, elapsed 108316.7187 ms against 180000 ms; stress eight profiles, 408/408 files PASS, exit 0, no watchdog failures. Combined 459/459 file executions confirm process exit and stdio closure. Original scheduling budgets unchanged (stall-40/mixed 240000 ms, other profiles 180000 ms); no acceptance threshold relaxed.
+- Sources / run_ids: C:\Users\ANIRUDDH\AppData\Local\Temp\Tabwise-W3W4-FinalOrdinary-20261102-171403 (results-ordinary.json, selection.json); C:\Users\ANIRUDDH\AppData\Local\Temp\Tabwise-W3W4-Stress-20261102-171823 (results-{repeat-1,repeat-2,serial,random-1,slow-fs-30,slow-fs-100,stall-40,mixed}.json, selection.json, console.txt).
+- MEASURED (read-only integrity checks this session): frozen R1 PASS; installed Guidepup 0.36.4 matches all 10 locked dependency hashes after exact package recovery. No npm install performed (owner-supplied recovery account; this task performed no install). Qualification digest recomputed: 6972c311a6e9302856ff9bb9195aa73cf106a15da8caf91ac32b781f8909f328, historically unchanged. Candidate R2 digest recomputed: d68a79729893feb9fff6690aae5bace2043e74da0f0b71af149fdda1393715c7, exact required match; candidate only, not approved/bound. Sources: checkFrozenIntegrity(), r2Digest(), qualificationDigest(), fixtures/r1/lock.json.
+- MEASURED audit custody: C:\Users\ANIRUDDH\AppData\Local\Temp\Tabwise-W3W4-FinalAudit-20261102-181519.zip; SHA256 41b16d0a52857db51e3363691de4f00356aa393f8f9f1b4321e125df93a88423 (recomputed this session).
+- CITED (owner-provided independent source-review result in final reconciliation request): A finalization freshness, B exclusive writer ownership, C late browser cleanup independently source-reviewed. Reviewer identity and review timestamp were not supplied; none inferred. This is source review, not native qualification.
+- STILL UNVERIFIED: physical late-NVDA containment, real Chromium/NVDA evidence, W2a native qualification and W5 admission. R2 and qualification remain disabled/BLOCK; no activation authorization. Nine browser/process-classified tests remain excluded per selection.json; offline acceptance does not cover those tests.
+- Historical filtered binding-test ENOENT remains recorded; it is not a present full-suite failure. D-98, D-99 and all prior failed acceptance results remain unchanged. Current offline acceptance supersedes the earlier pending ordinary/stress status only for this candidate and these reports.
+- Reconciliation acceptance: recompute digests/frozen integrity; verify only the four allowed documentation paths change incrementally, all prior code/test bytes identical, old ledger prefixes intact, appended JSON valid and git diff --check clean. No test reruns, model/native/hosted operations, status changes or Git writes.
+
+### F-03 / W5 offline execution admission (2026-11-02T13:23:14Z)
+- Owner: "Implement W5 offline as far as safely possible." Separate worktree app-w5-review; branch feat/tabwise-r2-w5-offline; parent 60f6aeaa3fb160976ae526582ac47bcc123f3809.
+- Scope: new scripts/tabwise/r2-admission*.mjs and disabled transport policy; source scope/production entry integration; supabase/proposals/r2-w5-admission.sql (unapplied); new adversarial tests and evidence bridge mapping; normal ledgers/CODEMAP.
+- Reuse approved Postgres infrastructure: immutable bindings, permanent atomic consume, signed receipt, coordinator ephemeral signing key and page-specific challenge/response. No deployed endpoint or credentials configured.
+- Acceptance: RED-first W5 tests; GREEN W5 and existing R2 review/lifecycle/evidence/completion suites; frozen R1/digest/BLOCK/diff checks; external review packet. PostgreSQL tests, if run, use a new isolated local cluster only.
+- Cost $0; no installs/native containment/NVDA/Chromium/hosted workflows/production mutations/model calls/commits/push/merge/activation; no R3/R7 or other worktree edits.
+- Existing S7-I1 expected scope list extension explicitly approved; preserve all assertions and thresholds. No other existing tests changed.
+- Rollback: preserve uncommitted W5 diff for owner; never reset or delete other work.
+
+- W5 result (2026-11-02T13:49:50Z, W5-20261102T134320Z): MEASURED Node301/301 exit0; isolated local PostgreSQL11/11 exit0, eight concurrent consumers exactly one winner; two isolated mutants killed exit1. Initial RED logs and intermediate O11 failure retained; owner approved exact two regex delimiters and three CI classifications.
+- Current candidate R2 84f7b4b2c24f34b8f076a336fba8102c3da05bb5064b87a4eda38f246217257b (27 files); qualification 6972c311a6e9302856ff9bb9195aa73cf106a15da8caf91ac32b781f8909f328 unchanged; frozen R1 PASS. Authority transport unconfigured/disabled; actual hosted authentication/keys/database deployment and native qualification pending. Independent review before commit; full profiles not rerun.
+
+### F-03/W5 Next.js transport correction (2026-11-02T14:11:27Z)
+- Owner: "Our approved architecture requires Next.js API routes as the only HTTP backend." Transport/policy, affected transport tests and relevant handoff only; $0; no new route/deployment/network/credentials/commit/activation.
+- Replace Edge Functions URL with reviewed canonical HTTPS owner origin and fixed /api/r2/admission contract; policy remains disabled/null. Accepted admission core/SQL untouched; reviewed scope membership unchanged.
+- MEASURED affected RED4/6 exit1 -> GREEN6/6 exit0; original acceptance command302/302 exit0. R2 971f21a1d37136c496b365cae14cbb999aefe1ce06c693b85a6507bec266789f; frozen R1 PASS, qualification unchanged, statuses BLOCK. Independent core review accepted; stop for preservation approval of this correction.
+
+### Product integration (2026-11-02T14:25:23Z; owner-authorized local no-commit merge)
+- Goal: preserved R2/W5 plus frontend as one local candidate. Baseline d2d18540766466de11dc9aa699a2470fc8f17582; frontend d79c066228a16e3c69c0c38f696d5525fe9dd6ab; merge-base063e789f2b0429105b73dc624bb96c77a660ba70.
+- Worktree app-product-integration; branch feat/tabwise-product-integration. Frontend tracked clean; untracked hashes retained; local merge --no-commit --no-ff completed without conflicts.
+- Scope: frontend branch changes, confirmed integration defects with regressions, relevant handoff/ledgers only. Available dependencies copied, no install/upgrade.
+- Acceptance: root ordinary offline profile (nine classified exclusions explicit); contracts and web tests; production build/TypeScript; local credential-disabled browser regression; disabled execution/API/owner-isolation checks; frozen/digest/status/preservation audits.
+- Cost $0; no W2a changes, native qualification, hosted DB/workflow/model/credentials/deployment/activation, commits/push/main integration or R3/R7. Stop for review before committing.
+
+- Integration result (2026-11-02T14:35:27Z, Integration-20261102T143527Z):85 merged paths/81 web, no conflicts; no confirmed product defect/source fix. Root54/54 files1082/1082 tests, contracts21/21, web107/107, browser/API15/15, types/build all exit0. Nine root exclusions explicit; no stress/native qualification.
+- Digests/statuses unchanged; frontend tracked clean and7 untracked hashes preserved. Merge pending independent review; cache/integration-review and Tabwise-product-integration-handoff.md contain evidence.
+
+### F-03 production bridge (2026-11-02T16:40:15Z; approved implementation)
+- Baseline11b070c7279a3a7e14b0273d87a8f07efa8d6d80; app-r2-production-bridge, feat/tabwise-r2-production-bridge; preserve all other worktrees.
+- Scope: Next.js /api/r2/admission, strict signed GitHub OIDC verifier and server policy, W5 adapter integration; versioned R2/product mapping contract, native-proof-gated bridge and ingestion helper; source scope, regression tests, normal handoff/ledgers.
+- Reuse W5/Postgres atomic consume and existing product authentication/contracts; no Edge Functions, no replacement of native qualification. Scope/security and native proof independent of permission.
+- RED-first adversarial security/contract/service tests; root ordinary, contracts/web/API/browser, TypeScript/build; frozen R1 and disabled/BLOCK integrity; review ZIP.
+- Cost $0. No credentials/model calls/hosted mutation/deployment/workflow/native experiment/W2a changes/R3/R7/commit/push/merge. Keep server/bridge policies unconfigured and disabled.
+- Owner approved only exact existing source-membership assertion additions and absent-admission-route expectation becoming explicit disabled refusal; preserve thresholds and all other assertions.
+
+### Production bridge measured result (2026-11-02T18:27:11Z; Bridge-20261102T182711Z)
+- Root ordinary 54/54 files, 1082/1082 tests PASS; nine classified exclusions remain. Web 127, contracts 21, browser/API 15 PASS; TypeScript/build exit0. All root exit/stdio closures confirmed; original budgets unchanged.
+- Frozen R1 PASS; R2 722fc80cc55d8420dbe088946b56b7ee70060781310621064ab9d8803569807e (53 files); qualification 6972c311a6e9302856ff9bb9195aa73cf106a15da8caf91ac32b781f8909f328 unchanged. No status promotion.
+- See R2-production-bridge-handoff.md and cache/bridge-review/verification-summary.json. Service mocks reach coordinator grant/finalization and independent evidence refusal; real native producer/export/attester and separately approved deployment/custody remain blocked. Stop for independent review; no commit.
+
+### F-03 / R2 producer projection (owner request, 2026-11-03 IST)
+- Goal: bind actual serialized capture records to existing exporter and independent product inspection.
+- Files: src/r2/{capture-export,product-export,product-bridge}.mjs; new capture-export tests; ci/offline-tests.json narrow registration; ledgers, CODEMAP and handoff.
+- Acceptance: ordinary offline runner, targeted Node tests, web/contracts/browser/API tests, tsc, production build, frozen integrity and diff check. Existing thresholds/exclusions retained.
+- Cost ceiling: $0; no installs, native input, hosted dispatch, credentials, authority-core changes or commits.
+- MEASURED producer-review: see cache/producer-review/verification-summary.json; 56 ordinary files PASS.
+- BLOCKED: authentic producer manifests cannot reach genuine-unqualified with current independent verifier; no signer/attester. Integration test uses generated surrounding identity, never genuine native evidence.
+- Rollback: discard only this task's listed diff/new files after review.
+
+## R3 complete - user request 2026-11-03
+- Goal: "Complete R3 AI diagnosis and repair, end-to-end. This is full implementation work, not a minimum demo."
+- Base d75f04335dc0ba6c9e64fb92fcedc408c5867cfc; isolated feat/tabwise-r3-complete.
+- Files: diagnosis/contracts, repair application/review/persistence, API/UI, new SQL/tests and normal handoff ledgers.
+- Ceiling: zero incremental budget. No installs or live calls.
+- Verification commands/results: docs/engineering/Tabwise-R3-complete-handoff.md.
+- "Commit and push only the R3 branch. No merging or modifications to main."
+- PARTIAL: candidate worker/rerun integration, live acceptance and Claude review pending. Frozen thresholds unchanged.
+
+## R3 continuation from 5de07e6
+- User priorities: stale-source fix/recovery; immutable candidate worker consumption and rerun admission; positive/negative offline rerun tests; preserve all R2/W2a gates.
+- Files: src/repair/application.mjs and rerun.mjs; worker source staging/loader and guarded entry; rerun migration/API/UI; new tests and normal handoff ledgers.
+- Acceptance: targeted28, web/contracts148, R2 809, worker/review15, DB concurrency/rollback, typecheck/build; details in R3 handoff.
+- Zero paid calls, deployment or live NVDA. Commit/push R3 branch only. R3 real-runtime acceptance still false.
+
+### F-03 / local-first R3 integration stabilization
+- Owner request: complete local integration/regression, zero spend, isolated from production/diagnostic, no push/native run/merge.
+- Files: approved ci/offline-tests.json classifications; test/tabwise-d67-timing.test.mjs; session ledgers; ignored local evidence/harnesses.
+- Acceptance: root, web/contracts, ordinary/stress seed415682473, TypeScript/webpack build, actual production browser/API, isolated PostgreSQL migrations/SQL/concurrency, synthetic connected R3 flow, frozen/preflight/diff checks; all exit0.
+- Root1177 PASS/2 opt-in DB skips; both DB tests pass separately; web127, contracts21, browser/API15 PASS; ordinary+8stress60 files/1111 tests each PASS.
+- Local PostgreSQL18.3: seven migrations x three fresh DBs, seven SQL suites, two concurrency tests PASS; cluster stopped. Auth/storage stand-ins are not hosted qualification.
+- Connected synthetic R3: healthy/correct/wrong/rejected, stale-source and duplicate controls PASS; production modules plus real PG/Chromium, mocked model/native/human choices, L0; no native acceptance.
+- D67 source/dependency closure, assertions and30s/100ms deadlines retained; measured setup optimization only; timeout not reproduced.
+- CI parity: protection applied during repeat-1; repeat-2 through mixed used read-only tracked source/Guidepup lib. Original attributes restored after completion.
+- Rollback: revert isolated local correction commit; no runtime, migration, dependency, lock, activation or FEATURES changes.
+
+### F-03 / R2 integration verification and projector binding
+- User-authorized review/test/feature-only publication; merge explicitly blocked pending native qualification and end-to-end capture/ingestion.
+- Files: r2-policy.mjs and r2-review.test.mjs; session ledgers. Add missing projector to source scope with mutation regression, preserve disabled gates.
+- Acceptance: full root1161/1161, R2810/810, web127/127, contracts21/21, browser/API15/15, TypeScript/build/frozen/preflight PASS; hosted PR19 CI pending.
+- Budget: no paid infrastructure/model calls/dependency changes. Rollback: revert feature correction; main untouched.
+
+## PR19 CI O10 file-watchdog correction
+- Approved user task: diagnose run41517337074 slow-fs-30 r2-evidence file watchdog; zero infrastructure, no gate/threshold changes.
+- Files: test/r2-evidence.test.mjs, new test/r2-provenance.test.mjs, ci/offline-tests.json selection, normal ledgers/handoff.
+- Acceptance: all original69 tests retained byte-equivalently; two files included in unchanged ordinary/stress budgets; targeted runs, harness regression, frozen R1.
+- Feature-only normal push; no merge; other session holding production pushes.
+
+### F-03 / local-first production engineering stabilization
+- Owner request: exact 30ba7b5 source, isolated local correction, zero spend, no push/native run/merge.
+- Files: test/tabwise-d67-timing.test.mjs and normal session ledgers. Runtime/guards/activation/frozen R1 unchanged.
+- Acceptance: root node --test --test-timeout=10000 "test/*.test.mjs"; scripts/offline-tests.mjs ordinary/stress seed415682473; web/contracts tests, types/build/browser, preflight/frozen R1/diff checks; exit0.
+- MEASURED: root1161; web127; contracts21; production browser/API15; ordinary57 files/1099 tests; eight stress profiles57 files/1099 tests each; no watchdog or unconfirmed process/stdio closure.
+- D67 timeout did not reproduce. Instrumented full511-file closure; copy-only setup improved1994.521ms to488.4676ms; full dependency copy and existing mutation assertions retained.
+- 30000ms test allowance and100ms production freshness remain unchanged. Late101ms commit refusal/zero sends retained in frozen sendguard tests.
+- Owner reported hosted Windows run41568247343 PASS at30ba7b5; prior stress correction was not changed.
+- Rollback: revert this isolated local correction commit. No remote action authorized.
+
+### F-03 / local R2-R3 integration reconciliation
+- Approved parents: R3a0dec78 + R233cfa8e; isolated fix/F-03-r2-r3-local-integration; no candidate/main rewrite.
+- Files: four conflicting documentation files, parent STATE archive, normal session LOG; automatic nonconflicting merge retained exactly.
+- Goal: retain both workstream histories/module inventories and one accurate integrated status without gate/source changes from resolution.
+- Acceptance: full root/web/contracts; ordinary and eight stress profiles; actual production browser/API; isolated PostgreSQL migration/RLS/concurrency/rollback plus connected synthetic R3; TypeScript/webpack build; frozen R1/preflight; preserved parent records and automatic non-doc index identities; clean local integration commit.
+- Budget: ₹0; no installs, native input, remote writes, deployment, paid APIs or approval enablement. Rollback: discard only isolated integration branch after review; parents untouched.
+- MEASURED combined acceptance: root1180 registered/1178 PASS/2 DB skips; both real DB tests separately PASS; web127/contracts21/browser-API15 PASS; types/webpack/frozen/preflight PASS.
+- Ordinary+8stress each61 files/1112 tests PASS, no watchdog/unconfirmed exit/stdio. Entire profile matrix used read-only tracked source/Guidepup files; saved attributes restored.
+- Resolution audit:430 automatic non-document blobs/modes preserved; both parent histories/inventories retained and STATE texts archived. Local PostgreSQL36 commands and connected synthetic R3 controls PASS; cluster stopped. Native acceptance unchanged/BLOCK.
+
+### F-03 / R3 executable lifecycle continuation
+User authorization: current chat, base 4ccc544, new isolated worktree.
+Goal: audit integrated lifecycle and implement safe source delivery/consumption without releasing native execution.
+Files: scripts/tabwise/{repair-session,repair-source,r2-run,r2-policy}.mjs; new test/tabwise-r3-native-source.test.mjs; engineering handoff and standard ledgers/CODEMAP.
+Acceptance: root/R2/R3/verdict node tests; contracts/web tests; browser/API; local PostgreSQL; web typecheck/build; frozen R1 and diff integrity. Failures disclosed, no threshold edits.
+Cost ceiling: $0 paid/model/hosted; no install; bounded current session.
+Out of scope: native input, live dispatch, qualification, hosted writes, deployments or git publication.
+Rollback: discard this uncommitted isolated branch only.
+
+### F-03 / R3 executable lifecycle continuation, second authorized slice
+User: "Resolve all five full-suite failures without weakening assertions." / "Wire authorized repair records into the sole guarded native entrypoint."
+Files: prior R3 adapter/source/entry/policy plus r2-evidence; CI registration and exact scope test; new lifecycle/recorder tests; verification API/UI/reason copy; owner repair-input API; repair-verdict service; one new migration and rollback SQL; handoff/normal ledgers.
+Acceptance: zero unexpected root failures; real isolated PostgreSQL; web/contracts/browser/API; typecheck/build; frozen R1/preflight; ordinary offline selection.
+Budget: $0; installed dependency copy only; no native, hosted, paid, install, commit or deployment.
+Scope: guarded source delivery, explicit pre-dispatch owner oracle and immutable independently recomputed narrow verdict; validation/status abstain; native qualification remains blocked.
+Rollback: discard only uncommitted changes in this isolated worktree after review.
+
+### F-03 / R3 bounded completion pass
+Approved: user current chat; one pass, sole implementation session, no publication/native/hosted/paid operations.
+Scope: prior-session exit inspection; latest oracle UI/API/admission proof; confirmed dispatch guard correction; SQL/browser negatives; full root/PG/web/contracts/browser/types/build/R1/preflight/ordinary on stable source; original STATE prefix preservation; complete diff/inventory/handoff.
+Files: existing uncommitted R3 slice, dispatch guard in new oracle-admission migration, existing PG regression plus new browser regression; standard ledgers and handoff artifacts.
+Budget: $0; no installs or agents. Stop after final report; no automatic continuation.
+
+### F-03/demo-polish — approved bounded demo task
+- Base: 4ccc54442bdba81febe1cac7f1c97700ead3fe76; feat/F-03-demo-polish; separate managed worktree.
+- Goal: coherent existing UI and an honest 2–3-minute hackathon storyboard/recording plan.
+- Files: web/app presentation, web/components presentation; docs/engineering/Tabwise-demo-{plan,results}.md; normal session ledgers/CODEMAP.
+- Acceptance: node --test web/test/*.test.mjs packages/contracts/test/*.test.mjs; npm run typecheck --prefix web; npm run build --prefix web -- --webpack.
+- Browser: node --test web/test/web-smoke.browser.mjs web/test/product-integration.browser.mjs web/test/recorder.browser.mjs (loopback); local axe/keyboard/mobile/print checks.
+- Preservation: node scripts/check-r1-baseline.mjs; node scripts/preflight.mjs; git diff --check; protected tracked blobs identical to base.
+- Ceiling: $0 paid services; two hours. No installs, test edits, native input, commit/push/deploy/merge, model calls or execution/qualification/evidence changes.
+- Rollback: discard only this task's isolated diff; other worktrees untouched.
+
+#### F-03/demo-polish — owner-requested correction
+- Preserve base integrated STATE verbatim; append separate demo status. Record owner-reported41584715963 attempt2 failure without native rerun.
+- Correct transcript-only labels in web/app/{page,w/demo/page}.tsx and web/components/PassRunDetail.tsx; revise existing demo plan/results and normal ledgers only.
+- Product interaction/provenance/fail-closed evidence dominate planned2:30; simulated repair explicitly labelled; no live Muse/native repair/R7 acceptance claims.
+- Same acceptance commands and zero-paid-services ceiling as above; no tests/guards/frozen files/runtime/APIs/workflows/policies/evidence changes.
+
+### F-03 / final R3 + Demo integration — authorized 2026-11-03T11:41:56Z
+Goal: audit existing 04f632f + 8e790b6 merge, validate combined snapshot and deliver through a normal GitHub PR.
+Files: existing 11-file staged merge, genuine integration fixes if required, integration handoff and normal ledgers/CODEMAP. No new feature or qualification change.
+Acceptance: serial root suite, ordinary classified suite, web/contracts, typecheck/production build, production browser/API and visual checks, isolated PostgreSQL migrations/SQL/concurrency, frozen R1/preflight/source and Git integrity; required remote CI and normal protected merge permission before main.
+Cost ceiling: $0 paid services; no model calls, new runtime dependencies, native input, deployments, hosted database changes or other agents. Preserve all historical STATE records.
+Measured local outcome: root1189 PASS/3 DB skips (PG3 PASS separately); web128/contracts21/browser16 PASS; ordinary63 files/1122 tests PASS with13 excluded files explicitly reported; SQL8/migrations9x2 PASS; types/build/R1/preflight PASS.
+Publication conditional: remote main9bb994c is an ancestor; GitHub currently reports main unprotected and no active branch rules. Do not change protection or bypass the requested protected-merge gate.

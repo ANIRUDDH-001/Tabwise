@@ -103,6 +103,8 @@ export function validateDiagnosis(input,output) {
   for(const signal of input.signals) if(signal.refs.some(r=>!refs.has(r))) errors.push('signal references unknown evidence');
   for(const finding of output.findings) {
     if(finding.evidence_refs.some(r=>!refs.has(r))) errors.push('unknown evidence reference');
+    if(!finding.evidence_refs.some(ref=>input.timeline.some(event=>event.evidence_ref===ref&&event.step===finding.step))) errors.push('finding lacks observation at claimed step');
+    if([finding.title,finding.user_impact,finding.mechanism].some(text=>!text.trim())) errors.push('empty finding explanation');
     const source=input.source.find(s=>s.path===finding.location.path);
     const {start_line:start,end_line:end}=finding.location;
     const lines=new Set(source?.lines.map(l=>l.n));

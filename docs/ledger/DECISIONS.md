@@ -593,3 +593,133 @@ Verification (MEASURED, Node 24.11.0, not the pinned 24.22.1): RED 1/10 pass (ba
 Candidate R2 digest 658a693554c7d4915513dc09645a7f766f2fb6e5a5a7e81af0a9355653702ccb (baseline 9d3f194f), NOT approved and not bound. r2-status.json disabled/BLOCK unchanged; qualification BLOCK. Stress acceptance stays UNSATISFIED; W1 does not repair it.
 Boundaries: no commit, push, workflow, NVDA, hosted run, status change, install or model call. Codex independent read-only review pending. W2-W5 not authorized.
 D-99 addendum 2026-11-01T20:07:41Z: owner answer "Approve registration" (CI config). ci/offline-tests.json classifies test/r2-completion-integrity.test.mjs as offline with the standard reason (4 lines; it was unclassified, so selectTests and the ordinary profile refused). Not in R2_FILES: candidate R2 digest 658a6935 unchanged. MEASURED (Node 24.11.0): selectTests 50 included; test/ci-offline-selection.test.mjs 20/20.
+
+## W3/W4 targeted contract corrections (owner request, 2026-11-02)
+Owner: "Correct the three confirmed W3/W4 defects identified during the independent read-only investigation, without redesigning lifecycle management or changing acceptance thresholds."
+Owner: "This is a limited offline implementation task. No publication or runtime activation is authorized."
+Owner: "Do not modify late NVDA release policy as part of this task." "Do not invoke Claude or other subagents."
+Scope: lifecycle/session corrections, lifecycle/binding regressions and normal session records; starting HEAD 600132fb62f648dab59a7edf83a8dae70b989d32; $0; no dependency changes.
+
+## W3/W4 final ledger reconciliation (2026-11-02; 2026-11-02T12:54:51Z)
+Owner (current request, verbatim): "Reconcile documentation against independently verified W3/W4 acceptance. No engineering changes." "Continue the existing eight uncommitted modifications. Do not reset, stash, branch-switch, commit or publish." "R2 and qualification status remain disabled/BLOCK. No activation authorization."
+Owner scope: only docs/ledger/{STATE.md,PLAN.md,DECISIONS.md,LOG.jsonl}; $0, no test reruns or runtime operations. This records documentation authorization only, not a fictional approval of the candidate or native behavior.
+- MEASURED (existing reports, inspected without rerunning tests): ordinary 51/51 files PASS, exit 0, elapsed 108316.7187 ms against 180000 ms; stress eight profiles, 408/408 files PASS, exit 0, no watchdog failures. Combined 459/459 file executions confirm process exit and stdio closure. Original scheduling budgets unchanged (stall-40/mixed 240000 ms, other profiles 180000 ms); no acceptance threshold relaxed.
+- Sources / run_ids: C:\Users\ANIRUDDH\AppData\Local\Temp\Tabwise-W3W4-FinalOrdinary-20261102-171403 (results-ordinary.json, selection.json); C:\Users\ANIRUDDH\AppData\Local\Temp\Tabwise-W3W4-Stress-20261102-171823 (results-{repeat-1,repeat-2,serial,random-1,slow-fs-30,slow-fs-100,stall-40,mixed}.json, selection.json, console.txt).
+- MEASURED (read-only integrity checks this session): frozen R1 PASS; installed Guidepup 0.36.4 matches all 10 locked dependency hashes after exact package recovery. No npm install performed (owner-supplied recovery account; this task performed no install). Qualification digest recomputed: 6972c311a6e9302856ff9bb9195aa73cf106a15da8caf91ac32b781f8909f328, historically unchanged. Candidate R2 digest recomputed: d68a79729893feb9fff6690aae5bace2043e74da0f0b71af149fdda1393715c7, exact required match; candidate only, not approved/bound. Sources: checkFrozenIntegrity(), r2Digest(), qualificationDigest(), fixtures/r1/lock.json.
+- MEASURED audit custody: C:\Users\ANIRUDDH\AppData\Local\Temp\Tabwise-W3W4-FinalAudit-20261102-181519.zip; SHA256 41b16d0a52857db51e3363691de4f00356aa393f8f9f1b4321e125df93a88423 (recomputed this session).
+- CITED (owner-provided independent source-review result in final reconciliation request): A finalization freshness, B exclusive writer ownership, C late browser cleanup independently source-reviewed. Reviewer identity and review timestamp were not supplied; none inferred. This is source review, not native qualification.
+- STILL UNVERIFIED: physical late-NVDA containment, real Chromium/NVDA evidence, W2a native qualification and W5 admission. R2 and qualification remain disabled/BLOCK; no activation authorization. Nine browser/process-classified tests remain excluded per selection.json; offline acceptance does not cover those tests.
+- Historical filtered binding-test ENOENT remains recorded; it is not a present full-suite failure. D-98, D-99 and all prior failed acceptance results remain unchanged. Current offline acceptance supersedes the earlier pending ordinary/stress status only for this candidate and these reports.
+
+## W5 offline authorization (2026-11-02T13:23:14Z)
+Owner: "Create a separate W5 worktree and branch from the exact preservation commit." "Implement R2 W5's missing durable, atomic, one-use execution-admission mechanism." "No commits until I separately authorize them."
+Scope/cost/acceptance: PLAN F-03/W5; existing Postgres selected after admission/broker inspection; no production operations or configuration.
+Owner scope-test answer: "Allow the exact scope-list extension (recommended): keeps the integrity test meaningful; no threshold changes."
+Only the S7-I1 expected source list may be extended; all other existing test bytes retained. No native or deployment approval inferred.
+
+## W5 CI registration (2026-11-02T13:39:29Z)
+Owner: "Approve classification entries (recommended): keeps the offline runner usable; three CI metadata additions only."
+Only r2-admission, r2-admission-integration and r2-evidence-compatibility classifications added; selection logic, existing entries, scheduling budgets and thresholds unchanged. PostgreSQL qualification remains an explicit separate local command.
+
+## W5 O11-P1 regex correction (2026-11-02T13:47:42Z)
+Owner: "Approve the two-character regex correction (recommended): restores the test’s stated intent without changing production behavior."
+MEASURED: combined run 300/301; O11-P1's literal backspace delimiters failed to remove legitimate 64-hex digests before nonce-fragment checking. Exact two delimiters changed to intended backslash-b word boundaries; no production redaction or acceptance threshold changed. Failure retained in cache/w5-review/final-node-failed-evidence.txt.
+
+## W5 HTTP architecture correction (2026-11-02T14:11:27Z)
+Owner: "The offline admission core is accepted." "Next.js API routes as the only HTTP backend. Supabase Postgres remains the durable data authority; Supabase Edge Functions are not approved."
+Owner: "Keep transport disabled/unconfigured. Do not invent a working endpoint, deploy a route, or claim authenticated production communication."
+Consequence: source-reviewed owner-origin plus fixed Next.js API path contract; no actual route or credentials; all accepted core/SQL bytes preserved. Affected tests and existing acceptance command pass; no preservation commit authorized yet.
+
+## Product integration authorization (2026-11-02T14:25:23Z)
+Owner: "Integrate the preserved R2 offline implementation and the completed frontend into one working local product candidate." "A local integration operation in the new isolated worktree is permitted; stop before committing."
+Scope and acceptance: PLAN Product integration; new isolated branch only, existing worktrees/branches/untracked files preserved. All runtime/qualification statuses and thresholds remain unchanged; no external operations or additional agents.
+
+## Production bridge implementation authorization (2026-11-02T16:40:15Z)
+Owner: "Implement the missing production integration between W5 admission, the existing Next.js product backend, the R2 coordinator and the product evidence contracts." "No commits, pushes or merges before independent review."
+Owner test answer: "Approve these two assertion updates (recommended): keep coverage aligned with the new disabled API."
+Scope/cost/acceptance: PLAN F-03 production bridge; no active configuration or native clearance. GitHub OIDC issuer/claims checked against official docs; server-side authentication never derives identity from request-body claims.
+
+## Production bridge boundary result (2026-11-02T18:27:11Z)
+- Implementation within the approved scope: Next.js only, signed server execution caller, unchanged PostgreSQL permanent consumption and W5 receipt protocol. No owner approval or native qualification inferred.
+- Preserved the original R2-policy import restriction after a measured regression; no change to that assertion. Pure server constants are checked against the reviewed CLI. Node loader accepts only three fixed reviewed modules and fails if source is unavailable.
+- Product-native acceptance requires internally read disabled policy, qualification PASS and a separately signed source/custody attestation. Test-only assessment never mints a native handle. No authentication success, observed-NVDA result or production communication claimed.
+
+### R2 native exporter — partial implementation, stopped for protected CI gate
+Owner instruction: “Do substantive implementation, not a design-only handoff.” “No live input, workflow dispatch, hosted changes, database writes, credentials, installs, model calls or spending.” “If any change to protected files is unavoidable, stop and identify the exact reason.”
+Scope used: new offline exporter and negative tests; zero spending. No protected file edited.
+Ordinary runner refuses unclassified test/r2-product-export.test.mjs. Continuing through that runner requires adding its classification to protected ci/offline-tests.json; stopped per owner instruction.
+
+## R2 producer authorization (2026-11-03 IST)
+User answer: "Do not stop merely because test registration needs a narrowly scoped change; explain and implement necessary test registration while preserving the fail-closed classification rules."
+User answer: "If an independent native signer/attester is unavailable, leave that requirement BLOCKED. Do not manufacture attestation or qualification PASS."
+Consequence: raw-capture exporter wiring and additive offline registration; no classification or authority promotion.
+
+## R3 user authorization - 2026-11-02T20:10:47Z
+User: "Tabwise: Complete R3 AI diagnosis and repair, end-to-end. This is full implementation work, not a minimum demo." "Use a new isolated worktree and branch feat/tabwise-r3-complete. Do not touch Codex 1's worktree." "₹0 incremental budget." "Commit and push only the R3 branch. No merging or modifications to main." No installs/paid calls performed. R3 acceptance remains incomplete.
+
+## R3 continuation authorization - 2026-11-02T20:26:45Z
+User: "Continue R3 from commit 5de07e6. Do not merge." "Correct the application-layer stale-source check; preserve safe idempotent recovery." "Implement qualified patched-source worker consumption and rerun admission using immutable candidate hashes and exact source binding." "Commit and push only the R3 branch." "No paid Muse calls, deployments, live NVDA or unrelated audits." All validation remained offline; execution/source-readiness gates left closed.
+
+## F-03 local stabilization inventory approval
+User answer: "Approve corrected inventory (Recommended): preserves CI capability boundaries; ₹0, no deadline changes."
+Consequence: classify four R3 offline files, one Chromium browser file and two opt-in PostgreSQL process files in ci/offline-tests.json; no watchdog/test/deadline change.
+User scope: "Keep R2 production, diagnostic and R3 changes isolated. No pushes, native reruns or merges without review."
+
+## F-03 local-first R3 task authorization
+User: "Complete local integration and regression checks." "Keep R2 production, diagnostic and R3 changes isolated."
+User: "You may commit corrections locally on the appropriate feature branches."
+Consequence: local fix/F-03-local-stabilization-r3 correction and handoff only; approved CI classification, D67 test setup, no runtime/activation/native/publication change.
+
+## F-03 R2 verification and native diagnostic — owner priority updates
+User answer: "Do not merge into main until native capture, evidence verification, product ingestion and required qualification have passed."
+User answer: "Implement, test and push the diagnostic branch. Stop only when explicit approval or a genuine external dependency is required."
+Consequence: draft PR19 for offline CI only; preserve reviewed digest-binding correction; new isolated NONQUALIFYING diagnostic and exact approval packet before native input. Production qualification/admission policies unchanged.
+
+## CI O10 watchdog correction - 2026-11-02T20:40:37Z
+User: "Fix PR #19 CI failure without weakening tests." "Make the smallest evidence-backed fix." "Do not blindly extend timeouts, weaken assertions, disable stress tests or modify R2 qualification gates." "Commit and push the correction to the R2 branch only if justified. Coordinate with the other Codex session to avoid conflicting pushes. No merging." Scope: separate unchanged O10 tests into their own offline file and classify it for all stress profiles; existing deadline/profile budgets unchanged. Other session has left production branch untouched for this correction.
+
+## F-03 local-first production stabilization authorization
+User: "Continue local-first stabilization"; "Investigate the D67 timing timeout without relaxing production guards."; "You may commit corrections locally on the appropriate feature branches."
+User: "Do not revisit the previous slow-fs-30 CI failure unless your local testing reveals a new regression."
+Consequence: isolated fix/F-03-local-stabilization-r2 from30ba7b5; instrument/optimize D67 fixture copy only; preserve existing stress fix and gates; no publication/native input.
+
+## F-03 local R2/R3 integration authorization
+User: "APPROVED: Local-only R2/R3 integration conflict reconciliation."
+User: "Create an isolated integration branch from R3 a0dec78 and merge R2 33cfa8e locally."
+User: "Do not use blanket ours/theirs resolution. Preserve the already-tested candidate commits."
+User: "Create a separate local integration commit and return its SHA, exact diff, test results and remaining blockers."
+Consequence: union both histories/inventories, archive parent states, validate combined automatic runtime tree; local commit only, no remote/native/deploy/paid calls.
+
+## R3 continuation authorization 2026-11-03T06:48:39Z
+User answer: "Then implement the highest-value missing production components that can be completed and tested offline without bypassing qualification gates."
+Consequence: isolated zero-credit source adapter/cleanup implementation; no existing tests, CI or governance edits; full-green acceptance remains unmet.
+
+## R3 continuation second-slice authorization 2026-11-03T07:45:52Z
+User answer: "Register the new native-source test in the correct CI classification." / "Reconcile R2_FILES and source-digest membership with the new production adapter, preserving exact integrity guarantees."
+Consequence: explicit CI/scope assertion expansion, clean local dependency copy, guarded native packet/query wiring, pre-dispatch owner oracle and immutable verdict path; all runtime policies remain blocked.
+
+## R3 bounded pass — 2026-11-03T10:56:52Z
+User answer: "AUTHORIZE ONE BOUNDED R3 COMPLETION PASS."
+User requirement: "Preserve the complete original integrated docs/ledger/STATE.md as the prefix, appending R3 updates instead of replacing history."
+Consequence: sole implementation session; corrected confirmed legacy dispatch gap; verified local stable snapshot; restored exact base STATE prefix and retained R3 text; no activation or publication. Stop after report.
+
+## D-demo-polish 2026-11-03T05:40:02Z — bounded local demo preparation
+Question: approve F-03/demo-polish? | Options: bounded demo polish (recommended) / review and storyboard only.
+User answer: "Approve bounded demo polish (Recommended) — existing UI and demo documentation only; $0, up to two hours; local and reversible."
+Consequence: isolated feat/F-03-demo-polish at 4ccc54442bdba81febe1cac7f1c97700ead3fe76; web presentation and demo docs only.
+No installs, commits, remote writes, paid calls or native input; qualification, gates, provenance and frozen R1 unchanged.
+Reversal: discard this isolated task's diff after review.
+
+## D-demo-polish-correction 2026-11-03T06:31:45Z — scoped review corrections
+User instruction: "Review and correct the existing F-03/demo-polish candidate in the same isolated worktree."
+User instruction: "Preserve the full integrated R2/R3 engineering state in docs/ledger/STATE.md. Append the demo preparation as a separate update rather than replacing the prior integration evidence."
+Scope: owner-reported native diagnostic41584715963/attempt2, transcript labels, product-led storyboard, normal records; existing zero-paid-services ceiling.
+Acceptance: affected web/contracts/browser tests, typecheck/build, frozen R1, preflight, whitespace and exact protected-path diff.
+No runtime/API/workflow/qualification/evidence/guard changes, commits, remote writes or native execution.
+
+## D-final-integration 2026-11-03T11:41:56Z — sole-agent R3 + Demo delivery
+User instruction: "Do the actual work. Do not merely draft a plan."
+User authorization: "You are explicitly authorized to inspect and modify files, run local tests, resolve defects, create commits, push branches, open pull requests, and merge into `main` **only when the acceptance gates below are satisfied**."
+User boundary: "No Claude or other agents." / "No Meta Model API requests."
+Consequence: continue the existing two-parent merge; zero paid calls; local dependency reuse; preserve diagnostic worktree and blocked qualification. Normal PR publication authorized; merging requires the stated local/remote/safety/protection gates. This current instruction supersedes earlier user-only Git and cross-tool execution requirements for this task; it grants no R7 qualification.
+Tooling: Context7 ctx7 0.9.0 ran via the user-prescribed npx command in npm cache only; no repository manifest or lock changed.

@@ -1,3 +1,5 @@
+import {SCHEMA,assertR2ProductHeader,validateR2ProductArtifact,same} from '../../../packages/contracts/r2-product.mjs';
+import {openQualifiedR2ProductEvidence,readQualifiedR2ProductEvidence} from '../../../src/r2/product-bridge.mjs';
 import {assertContract,sha256,verifyManifest} from '../../../packages/contracts/index.mjs';
 
 // Read only already-ingested, owner-authorized records. No worker reconciliation or external call.
@@ -8,7 +10,8 @@ export async function readRunEvidence({run,metadata,download}){
  const prefix=complete?'':attempts.length?`diagnostics/${attempts[0]}/`:null;
  if(prefix===null||!metadata.some(f=>f.kind==='evidence'&&f.path.startsWith(prefix)&&!(!prefix&&f.path.startsWith('diagnostics/'))))return null;
  const bytes=await download(`${run.id}/${prefix}manifest.json`);if(!bytes||bytes.length>65536)throw Error('manifest unavailable');
- const manifest=assertContract('artifact-manifest',JSON.parse(Buffer.from(bytes).toString('utf8')));
+ const candidate=JSON.parse(Buffer.from(bytes).toString('utf8')),bridged=candidate.schema===SCHEMA;
+ const manifest=bridged?assertR2ProductHeader(candidate):assertContract('artifact-manifest',candidate);
  if(manifest.run_id!==run.id||manifest.spec_sha256!==run.spec_sha256||manifest.runner.github_run_id!==String(run.gh_run_id)||manifest.runner.head_sha!==run.gh_head_sha||prefix&&prefix!==`diagnostics/${manifest.runner.github_run_attempt}/`)throw Error('stored artifact identity mismatch');
  const files={},anchored=metadata.filter(f=>prefix?f.path.startsWith(prefix):!f.path.startsWith('diagnostics/'));
  if(anchored.length!==manifest.files.length||manifest.files.filter(f=>f.kind==='evidence').length!==1)throw Error('artifact metadata coverage mismatch');
@@ -18,7 +21,12 @@ export async function readRunEvidence({run,metadata,download}){
   total+=file.bytes;if(total>4000000)throw Error('artifact byte cap');
   const bytes=await download(`${run.id}/${prefix}${file.path}`);if(!bytes||bytes.length!==file.bytes||sha256(bytes)!==file.sha256)throw Error('stored artifact bytes mismatch');files[file.path]=bytes;
  }
- if(!verifyManifest(manifest,files).ok)throw Error('stored manifest integrity failed');
+ if(bridged){
+  const checked=validateR2ProductArtifact(manifest,files);if(!checked.ok)throw Error('stored R2 bridge integrity failed');
+  const source={...files};delete source['evidence.json'];delete source['native-attestation.json'];
+  const h=openQualifiedR2ProductEvidence({files:source,expected:{...manifest.r2_identity,spec:run.spec},attestation:JSON.parse(Buffer.from(files['native-attestation.json']).toString('utf8'))});
+  const native=readQualifiedR2ProductEvidence(h);if(!same(native.manifest,manifest))throw Error('stored R2 bridge does not recompute');
+ }else if(!verifyManifest(manifest,files).ok)throw Error('stored manifest integrity failed');
  const entry=manifest.files.find(f=>f.kind==='evidence'),evidence=assertContract('evidence-bundle',JSON.parse(Buffer.from(files[entry.path]).toString('utf8')));
  if(evidence.run_id!==run.id||evidence.journey_id!==run.journey_id||evidence.provenance!=='observed-nvda'||sha256(files[entry.path])!==manifest.evidence_sha256)throw Error('stored evidence journey/provenance mismatch');
  if(complete&&(manifest.evidence_status!=='complete'||evidence.evidence_status!=='complete'))throw Error('incomplete stored evidence');
@@ -33,6 +41,12 @@ export function screenshotBytes(result,path){
  const row=result.artifacts.find(row=>row.path===path&&row.kind==='screenshot');
  if(!row||!result.evidence.lanes.screenshots.some(event=>event.artifact_path===path))throw Error('screenshot not referenced');
  const bytes=Buffer.from(result.files[path]);
- if(bytes.subarray(0,4).toString()!=='RIFF'||bytes.subarray(8,12).toString()!=='WEBP')throw Error('unsupported screenshot encoding');
+ const media=screenshotMediaType(bytes);if(media==='image/png'&&result.runner?.workflow!=='.github/workflows/tabwise-r2.yml')throw Error('unsupported screenshot encoding');
  return bytes;
+}
+
+export function screenshotMediaType(bytes){
+ if(bytes.subarray(0,4).toString()==='RIFF'&&bytes.subarray(8,12).toString()==='WEBP')return 'image/webp';
+ if(bytes.subarray(0,8).equals(Buffer.from('89504e470d0a1a0a','hex'))&&bytes.subarray(12,16).toString()==='IHDR'&&bytes.length>=24)return 'image/png';
+ throw Error('unsupported screenshot encoding');
 }

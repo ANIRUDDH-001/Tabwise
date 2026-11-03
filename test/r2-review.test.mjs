@@ -251,7 +251,7 @@ test('S4 policy: forged or changed source content refuses (R2 scope and qualific
   } finally { rmS4(tmp, { recursive: true, force: true }); }
 });
 
-for (const file of ['scripts/tabwise/input-policy.mjs', 'scripts/tabwise/executor.mjs', 'packages/contracts/palette.mjs']) {
+for (const file of ['scripts/tabwise/input-policy.mjs', 'scripts/tabwise/executor.mjs', 'packages/contracts/palette.mjs', 'src/r2/capture-export.mjs']) {
   test(`C2- integrity mutation independently invalidates digest and approval: ${file}`, () => {
     const tmp = tmpS4(joinS4(tmpdirS4(), 'tabwise-r2-c2-'));
     try {
@@ -889,14 +889,18 @@ async function reviewSessionHarness(createObserver, composeFn) {
   const page = {goto:async()=>{},bringToFront:async()=>{}};
   const context = {addInitScript:async()=>{},newPage:async()=>page,close:async()=>{}};
   const browser = {version:()=> 'fake',close:async()=>{}};
-  const writer = {identity:{served:'test'},failure:()=>null,seal:async()=>{}};
+  // W3/W4 (amendment C): the session binds its writer to the lifecycle, which appends one record and needs a seal result.
+  const writer = {identity:{served:'test'},failure:()=>null,append(){},put(){},seal:async()=>({})};
+  const {createR2Lifecycle} = await import('../scripts/tabwise/r2-lifecycle.mjs');
   globalThis.__r2Review = {compose:composeFn,modules:[
     {randomBytes:()=>Buffer.from('12345678','hex'),randomUUID:()=> 'id'},
     {createServer:()=>({once(){},listen(a,b,done){done();},address:()=>({port:1}),close(done){done();}})},
     {isAbsolute:()=>true}, {chromium:{launchServer:async()=>({process:()=>({pid:1}),wsEndpoint:()=>'',close:async()=>{}}),connect:async()=>browser}},
     {AxeBuilder:class{}}, {BROWSER_ARGS:[],createIsolatedContext:async()=>context}, {createSpeechObserver:createObserver},
     {createGuardedPressExecutor(){}},{foregroundMismatch(){}},{settingsMismatch:()=>[]},
-    {applyTitleNonce:()=>({record:{fixture_sha256:'hash'}}),buildR2StepMap(){},planR2EvidenceCaps(){},createR2EvidenceWriter:()=>writer},{installR2PageRecorder(){}}
+    {applyTitleNonce:()=>({record:{fixture_sha256:'hash'}}),buildR2StepMap(){},planR2EvidenceCaps(){},createR2EvidenceWriter:()=>writer},{installR2PageRecorder(){}},
+    // The real lifecycle, with its 60 s settle allowance shortened as CLEANUP_MS is above.
+    {createR2Lifecycle:o=>createR2Lifecycle({...o,settleMs:80})}
   ]};
   const module = await import('data:text/javascript;base64,'+Buffer.from(code+`\n// ${Math.random()}`).toString('base64'));
   const runtime = {guard,getGate:()=>guard,assertAuthentic(){},createForeground:()=>({close:async()=>{}}),nvda:{},cfg:{}};
@@ -1281,11 +1285,81 @@ test('S7-W3 the workflow path is the one the R2 policy pins; the pristine fixtur
 
 // ---- S7 + R-1/R-2 custody integration (D-88) ----
 // O-11 (D-89) adds arm-inputs; C2 adds input-policy, executor and palette (exact-membership expansion disclosed).
-test('S7-I1 R2_FILES is exactly the union of the S7, custody and O-11 reviewed scopes; r2Digest is the CRLF-normalized per-file digest over it', () => {
-  assert.deepEqual([...R2_FILES], ['.github/workflows/tabwise-r2.yml', 'packages/contracts/palette.mjs', 'scripts/tabwise-r2.mjs', 'scripts/tabwise/executor.mjs', 'scripts/tabwise/input-policy.mjs', 'scripts/tabwise/r2-compose.mjs', 'scripts/tabwise/r2-evidence.mjs',
-    'scripts/tabwise/r2-policy.mjs', 'scripts/tabwise/r2-proctree.mjs', 'scripts/tabwise/r2-run.mjs', 'scripts/tabwise/r2-session.mjs', 'src/r2/arm-inputs.mjs', 'src/r2/binding.mjs', 'src/r2/capture.mjs',
-    'src/r2/contract.mjs', 'src/r2/page-journal.mjs', 'src/r2/page-provider.mjs', 'src/r2/page-recorder.mjs', 'src/r2/page-source.mjs', 'src/r2/preparation.mjs',
-    'src/r2/send-receipt.mjs', 'src/r2/speech-payload.mjs']);
+test('S7-I1 R2_FILES is exactly the union of the S7, custody, O-11 and W3/W4 lifecycle reviewed scopes; r2Digest is the CRLF-normalized per-file digest over it', () => {
+  assert.deepEqual([...R2_FILES], [
+    '.github/workflows/tabwise-r2.yml',
+    'packages/contracts/index.mjs',
+    'packages/contracts/limits.mjs',
+    'packages/contracts/palette.mjs',
+    'packages/contracts/r2-product.mjs',
+    'packages/contracts/schemas.mjs',
+    'scripts/tabwise-r2.mjs',
+    'scripts/tabwise/executor.mjs',
+    'scripts/tabwise/input-policy.mjs',
+    'scripts/tabwise/r2-admission-policy.json',
+    'scripts/tabwise/r2-admission-server-policy.json',
+    'scripts/tabwise/r2-admission-transport.mjs',
+    'scripts/tabwise/r2-admission.mjs',
+    'scripts/tabwise/r2-compose.mjs',
+    'scripts/tabwise/r2-evidence.mjs',
+    'scripts/tabwise/r2-lifecycle.mjs',
+    'scripts/tabwise/r2-policy.mjs',
+    'scripts/tabwise/r2-proctree.mjs',
+    'scripts/tabwise/r2-product-policy.json',
+    'scripts/tabwise/r2-run.mjs',
+    'scripts/tabwise/r2-session.mjs',
+    'scripts/tabwise/repair-session.mjs',
+    'scripts/tabwise/verdict.mjs',
+    'src/budget/prices.mjs',
+    'src/r2/approval-constants.mjs',
+    'src/r2/arm-inputs.mjs',
+    'src/r2/binding.mjs',
+    'src/r2/capture-export.mjs',
+    'src/r2/capture.mjs',
+    'src/r2/contract.mjs',
+    'src/r2/node-review.mjs',
+    'src/r2/page-journal.mjs',
+    'src/r2/page-provider.mjs',
+    'src/r2/page-recorder.mjs',
+    'src/r2/page-source.mjs',
+    'src/r2/preparation.mjs',
+    'src/r2/product-bridge.mjs',
+    'src/r2/send-receipt.mjs',
+    'src/r2/speech-payload.mjs',
+    'src/r2/strict-json.mjs',
+    'src/repair/apply.mjs',
+    'src/repair/oracle.mjs',
+    'src/repair/rerun.mjs',
+    'src/repair/verify-application.mjs',
+    'supabase/migrations/20261103020000_repair_verdict.sql',
+    'supabase/migrations/20261103030000_repair_oracle_admission.sql',
+    'supabase/proposals/r2-w5-admission.sql',
+    'web/app/api/patches/[id]/oracle/route.ts',
+    'web/app/api/patches/[id]/route.ts',
+    'web/app/api/r2/admission/route.ts',
+    'web/app/api/runs/[id]/evidence/route.ts',
+    'web/app/api/runs/[id]/repair-input/route.ts',
+    'web/app/api/verifications/[id]/route.ts',
+    'web/components/PatchReview.tsx',
+    'web/components/RepairOracleReview.tsx',
+    'web/components/VerificationPanel.tsx',
+    'web/lib/oracle-state.mjs',
+    'web/lib/server/artifact-ingest.mjs',
+    'web/lib/server/artifact-store.mjs',
+    'web/lib/server/artifact-zip.mjs',
+    'web/lib/server/core.mjs',
+    'web/lib/server/patch-review.ts',
+    'web/lib/server/r2-admission-live.ts',
+    'web/lib/server/r2-admission.mjs',
+    'web/lib/server/r2-caller.mjs',
+    'web/lib/server/r2-evidence-bridge.mjs',
+    'web/lib/server/r2-product-context.mjs',
+    'web/lib/server/repair-verdict.mjs',
+    'web/lib/server/stored-evidence.mjs',
+    'web/lib/server/supabase.ts',
+    'web/package-lock.json',
+    'web/package.json',
+  ]);
   // Recomputed independently here from the files on disk: no reviewed digest is pinned (the shipped status has none).
   const outer = hashS4('sha256');
   for (const file of R2_FILES) outer.update(`${file}\0${hashS4('sha256').update(readS4(file, 'utf8').replace(/\r\n/g, '\n')).digest('hex')}\n`);

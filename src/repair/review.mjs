@@ -5,8 +5,12 @@ import {validatePatchProposal} from './patch.mjs';
 export function preparePatchReview({userId,run,patch,source,currentBaseSha256,knownEvidenceRefs,decision}){
  const errors=[];
  if(!userId||run?.user_id!==userId||patch?.run_id!==run?.id)errors.push('patch_not_found');
- if(run?.status!=='completed'||run?.evidence_status!=='complete')errors.push('qualified_baseline_required');
  if(!decision||Object.keys(decision).sort().join(',')!=='decision,patch_sha256'||!['approved','rejected'].includes(decision.decision))errors.push('invalid_review_decision');
+ if(decision?.decision==='rejected'){
+  if(typeof patch?.diff!=='string'||sha256(patch.diff)!==decision.patch_sha256)errors.push('patch_integrity');
+  return {ok:!errors.length,errors,decision:errors.length?null:'rejected',patch_sha256:errors.length?null:decision.patch_sha256,dispatch:false,verdict:null};
+ }
+ if(run?.status!=='completed'||run?.evidence_status!=='complete')errors.push('qualified_baseline_required');
  const contract=patch?.validator?.contract;
  if(patch?.validator?.ok!==true||!validateContract('patch',contract).ok||contract?.run_id!==run?.id||contract?.diff!==patch?.diff||sha256(patch?.diff??'')!==contract?.patch_sha256||decision?.patch_sha256!==contract?.patch_sha256)errors.push('patch_integrity');
  if(contract?.base_sha256!==run?.spec?.app_hash||currentBaseSha256!==run?.spec?.app_hash)errors.push('stale_patch_source');

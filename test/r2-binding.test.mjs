@@ -243,6 +243,8 @@ import {createR2EvidenceWriter, verifyR2PageEvidence, ATTESTATION_UNAVAILABLE as
 import {createGuardedPressExecutor} from '../scripts/tabwise/executor.mjs';
 import {sendGate as sendGateS5, VK as VKS5} from '../src/speech/sendguard.mjs';
 import {assessR2SpeechPayload, openVerifiedR2SpeechEvidence} from '../src/r2/speech-payload.mjs';
+// W3/W4 (amendment C): the lifecycle handle. Loaded dynamically so the rows above still run without it (RED evidence).
+const S5_LIFECYCLE = await import('../scripts/tabwise/r2-lifecycle.mjs').catch(error => ({error}));
 
 const S5_MANIFEST = JSON.parse(readS5(new URL('../fixtures/r2/manifest.json', import.meta.url), 'utf8'));
 const S5_PAIR = S5_MANIFEST.pairs.find(p => p.id === 'validation');
@@ -306,7 +308,9 @@ function s5Rig(o = {}) {
       const said = speak(press, presses.length);
       if (said !== null) later(50, () => phrases.push(said));
     },
-    start: async () => { calls.push('nvda.start'); return {pid: 4242, relay_pid: 4242, reset_confirmed: true}; },
+    start: async () => { calls.push('nvda.start'); return o.start ? o.start(env) : {pid: 4242, relay_pid: 4242, reset_confirmed: true}; },
+    // W3/W4 (amendment C): validation is separate from the raw start; it records no handle effect.
+    validate: async receipt => (o.validate ? o.validate(receipt, env) : receipt),
     stop: async () => { calls.push('nvda.stop'); },
   };
   const observer = {
@@ -321,7 +325,11 @@ function s5Rig(o = {}) {
     axe: async () => { calls.push('page.axe'); return o.axe?.() ?? {violations: []}; },
     close: async () => { calls.push('page.close'); },
   };
-  const handles = {guard: gate, getGate: () => gate, createExecutor: createGuardedPressExecutor, nvda, observer, foreground, page, writer, clock};
+  if (S5_LIFECYCLE.error) throw S5_LIFECYCLE.error;
+  const lifecycle = S5_LIFECYCLE.createR2Lifecycle({pageStart: performance.now(), stopped: () => gate.isStopped(), settleMs: o.settleMs ?? 300,
+    nvdaAbandonMs: o.nvdaAbandonMs ?? 3000, nvdaOrphanMs: o.nvdaOrphanMs ?? 3500});
+  env.lifecycle = lifecycle;
+  const handles = {guard: gate, getGate: () => gate, createExecutor: createGuardedPressExecutor, lifecycle, nvda, observer, foreground, page, writer, clock};
   const data = {fixture_id: 'validation', session: S5_SESSION, approved, nonce: S5_NONCE, spec, handleTimeoutMs: 2000, focusWaitMs: 200};
   o.handles?.(handles, env); o.data?.(data, env);
   return {...env, handles, data, approved, run: () => composeR2Page(handles, data)};
@@ -699,4 +707,97 @@ test('S5a-N a malformed final result from an injected handle: no COMPLETE result
     assert.equal(f.gate.status().kind, 'protocol', name);
     assert.match(f.gate.status().reason, /R2 compose result refused/, name);
   }
+});
+
+// ---- W3/W4 (spec 2026-11-02): compose through the single lifecycle owner ----
+const s5Events = f => readS5(joinS5(f.dir, 'events.jsonl'), 'utf8').trim().split('\n').map(l => JSON.parse(l));
+const s5Manifest = f => JSON.parse(readS5(joinS5(f.dir, 'manifest.json'), 'utf8'));
+
+test('S5a-L1 a complete page: clean lifecycle, NVDA released once, one diagnostic lifecycle event, every writer callback ran as an operation', async () => {
+  const f = s5Rig();
+  const result = await f.run();
+  assert.equal(result.completed, true, JSON.stringify([result.reasons, result.teardown.errors, result.lifecycle?.reasons]));
+  assert.equal(result.lifecycle.clean, true); assert.equal(result.lifecycle.slots.nvda.state, 'released');
+  assert.equal(f.calls.filter(c => c === 'nvda.stop').length, 1);
+  const life = s5Events(f).filter(e => e.phase === 'lifecycle');
+  assert.equal(life.length, 1); assert.equal(life[0].diagnostic, true);
+  const counts = result.lifecycle.op_counts;
+  assert.equal(counts['ack read'], 3, JSON.stringify(counts)); assert.equal(counts['action intent'], 3, JSON.stringify(counts));
+  for (const label of ['foreground verdict', 'page snapshot', 'observer read', 'page evaluate', 'executor', 'NVDA start', 'NVDA validate', 'NVDA stop'])
+    assert.ok(counts[label] > 0, `${label} ran as a lifecycle operation: ${JSON.stringify(counts)}`);
+  assert.equal(s5Manifest(f).class, 'synthetic');
+});
+
+test('S5a-L2 raw start resolves but validation fails: no input, the owned NVDA is stopped exactly once, never complete', async () => {
+  const f = s5Rig({validate: () => { throw Error('NVDA settings read-back: speech.rate differs'); }});
+  const result = await f.run();
+  await s5AssertFailed(f, result, /NVDA settings read-back/);
+  assert.equal(pressCount(f), 0); assert.equal(f.calls.includes('observer.open'), false);
+  assert.equal(f.calls.filter(c => c === 'nvda.stop').length, 1);
+  assert.ok(result.teardown.order.includes('NVDA stop'));
+  assert.equal(result.lifecycle.slots.nvda.state, 'released');
+});
+
+test('S5a-L3 raw start rejects: rejected-unconfirmed, no stop is attempted, containment required in the sealed evidence', async () => {
+  const f = s5Rig({start: () => { throw Error('NVDA failed to start'); }});
+  const result = await f.run();
+  await s5AssertFailed(f, result, /NVDA failed to start/);
+  assert.equal(f.calls.includes('nvda.stop'), false, 'no stop after a rejected start');
+  assert.equal(result.teardown.order.includes('NVDA stop'), false);
+  assert.equal(result.lifecycle.slots.nvda.state, 'rejected-unconfirmed');
+  assert.ok(s5Manifest(f).incomplete.includes('CONTAINMENT_REQUIRED:nvda:rejected-unconfirmed'), JSON.stringify(s5Manifest(f).incomplete));
+});
+
+test('S5a-L4 raw start never settles: abandoned at T1, no stop, orphaned at T2, the start stays pending and the page is never complete', async () => {
+  const f = s5Rig({start: () => new Promise(() => {}), nvdaAbandonMs: 100, nvdaOrphanMs: 250, settleMs: 5000});
+  const t0 = performance.now();
+  const result = await f.run();
+  assert.ok(performance.now() - t0 < 4000, 'settle stopped waiting at T2');
+  await s5AssertFailed(f, result, /NVDA start: abandoned after 100 ms/);
+  assert.equal(f.calls.includes('nvda.stop'), false);
+  assert.ok(result.pending_operations.some(p => p.startsWith('NVDA start#')), JSON.stringify(result.pending_operations));
+  assert.equal(result.lifecycle.slots.nvda.state, 'orphaned');
+  assert.ok(s5Manifest(f).incomplete.includes('CONTAINMENT_REQUIRED:nvda:orphaned'));
+});
+
+test('S5a-L5 a live send at teardown retains the browser: never released, containment required, NVDA still stopped', async () => {
+  const f = s5Rig({transport: async (press, e) => {
+    const token = await e.gate.admit(s5Info(press)); e.gate.commit(token); e.pressKeys(press);
+    e.sending--;
+    try { await new Promise(() => {}); } finally { e.sending++; }
+  }});
+  const result = await f.run();
+  await s5AssertFailed(f, result, /LIVE_AT_TEARDOWN|live sends|timed out/);
+  assert.equal(f.calls.includes('page.close'), false);
+  assert.equal(result.lifecycle.slots.browser.state, 'retained');
+  assert.ok(s5Manifest(f).incomplete.includes('CONTAINMENT_REQUIRED:browser:retained'));
+  assert.equal(f.calls.at(-1), 'nvda.stop');
+});
+
+test('S5a-L6 compose refuses a missing or foreign lifecycle and a writer already bound elsewhere, before any handle effect', async () => {
+  for (const [name, mutate] of [['missing lifecycle', h => { delete h.lifecycle; }], ['lifecycle not frozen', h => { h.lifecycle = {...h.lifecycle}; }],
+    ['missing nvda.validate', h => { h.nvda = {...h.nvda}; delete h.nvda.validate; }],
+    ['writer bound to another lifecycle owner', (h, e) => { h.lifecycle.bindWriter(createR2EvidenceWriter({enabled: true, dir: joinS5(e.dir, '..', 'other'), page: {fixture_id: 'validation', session: S5_SESSION, port: 4100},
+      fixture: S5_FIXTURE, approved: {fixture_sha256: S5_PAIR.healthy.sha256, task: S5_TASK}, nonce: S5_NONCE, spec: s5Spec(3)})); }]]) {
+    const f = s5Rig({handles: mutate});
+    await assert.rejects(f.run(), /R2 compose refused before input/, name);
+    assert.deepEqual(s5Effects(f.calls), [], name);
+  }
+});
+
+test('COR-A composition refuses completion when lifecycle becomes non-clean during real sealing', async () => {
+  const f = s5Rig({handles: (h, e) => {
+    const raw = h.writer;
+    h.writer = Object.freeze({...raw, seal: async options => {
+      const sealing = raw.seal(options);
+      assert.throws(() => e.lifecycle.bindWriter(h.writer).append('events', {phase: 'late'}), /producer writes closed/);
+      return sealing;
+    }});
+  }});
+  const result = await f.run();
+  assert.equal(result.evidence.sealed, true, JSON.stringify(result));
+  assert.equal(result.completed, false);
+  assert.equal(result.lifecycle.clean, false);
+  assert.equal(f.handles.lifecycle.status().clean, false);
+  assert.equal(f.gate.isStopped(), true);
 });

@@ -1,4 +1,44 @@
 {
+  "tabwise-r3-application.test.mjs": {
+    "kind": "offline",
+    "reason": "synthetic immutable candidate validation and injected persistence; no external service or native runtime"
+  },
+  "tabwise-r3-continuation.test.mjs": {
+    "kind": "offline",
+    "reason": "stale-source refusal before injected persistence; no external service or native runtime"
+  },
+  "tabwise-r3-input.test.mjs": {
+    "kind": "offline",
+    "reason": "synthetic observed-input and diagnosis contract validation; no model calls or native runtime"
+  },
+  "tabwise-r3-worker-input.test.mjs": {
+    "kind": "offline",
+    "reason": "source-bundle validation with injected HTTP responses; no external service or native runtime"
+  },
+  "tabwise-r3-rerun.test.mjs": {
+    "kind": "browser",
+    "reason": "launches real local Chromium for synthetic correct/wrong repair task controls; run separately"
+  },
+  "tabwise-r3-database.test.mjs": {
+    "kind": "process",
+    "reason": "opt-in isolated PostgreSQL connections and real concurrent candidate transactions; run separately"
+  },
+  "tabwise-r3-rerun-database.test.mjs": {
+    "kind": "process",
+    "reason": "opt-in isolated PostgreSQL connections and real concurrent rerun transactions; run separately"
+  },
+  "r2-admission.test.mjs": {
+    "kind": "harness",
+    "reason": "signed receipt and simulated transaction tests; bounded controlled Node IPC children only; no native runtime"
+  },
+  "r2-admission-integration.test.mjs": {
+    "kind": "offline",
+    "reason": "source/policy inspection and injected HTTP responses; no live authority or runtime"
+  },
+  "r2-evidence-compatibility.test.mjs": {
+    "kind": "offline",
+    "reason": "negative schema and product-ingestion checks over synthetic in-memory evidence; no conversion or runtime"
+  },
   "broker.test.mjs": {
     "kind": "process",
     "reason": "spawns real Node workers for SQLite contention"
@@ -63,7 +103,15 @@
     "kind": "offline",
     "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
   },
+  "r2-provenance.test.mjs": {
+    "kind": "offline",
+    "reason": "O10 provenance policy and simulated subprocess boundaries; moved unchanged from r2-evidence for independent bounded file scheduling"
+  },
   "r2-evidence.test.mjs": {
+    "kind": "offline",
+    "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "r2-lifecycle.test.mjs": {
     "kind": "offline",
     "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
   },
@@ -86,6 +134,10 @@
   "r2-proctree.test.mjs": {
     "kind": "offline",
     "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
+  },
+  "r2-product-export.test.mjs": {
+    "kind": "offline",
+    "reason": "pure source export with owned synthetic fixtures; no native input, browser or external authority"
   },
   "r2-review.test.mjs": {
     "kind": "offline",
@@ -234,5 +286,21 @@
   "vendor.test.mjs": {
     "kind": "offline",
     "reason": "sandbox imported first; OS/process/network boundaries denied and replaced with fakes"
+  },
+  "r2-capture-export.test.mjs": {
+    "kind": "offline",
+    "reason": "real captureJourney serialization with injected in-memory telemetry; no native execution, browser, credentials or external authority"
+  },
+  "tabwise-r3-native-source.test.mjs": {
+    "kind": "offline",
+    "reason": "data-only repair source binding and local staging cleanup; no browser, native runtime, hosted service or physical input"
+  },
+  "tabwise-r3-lifecycle.test.mjs": {
+    "kind": "offline",
+    "reason": "repair admission and genuine-handle refusal tests; no native execution or external service"
+  },
+  "tabwise-r3-recorder-browser.test.mjs": {
+    "kind": "browser",
+    "reason": "real local headless Chromium measures shipped Fernway recorder identities; no NVDA or physical input; run separately"
   }
 }

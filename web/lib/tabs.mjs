@@ -1,0 +1,11 @@
+// Roving-tabindex index math for an ARIA tablist (T-P1-02).
+export function nextTabIndex(key,current,count){
+ if(count<=0)return -1;
+ switch(key){
+  case 'ArrowRight':return (current+1)%count;
+  case 'ArrowLeft':return (current-1+count)%count;
+  case 'Home':return 0;
+  case 'End':return count-1;
+  default:return null;
+ }
+}

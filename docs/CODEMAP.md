@@ -67,10 +67,10 @@ Read this before opening source files. One line per file or folder. If a line is
 | `fixtures/fernway/` | Newly authored synthetic rail-booking app; three healthy/broken flows; pinned source hash; never withheld evaluation data | `index.html?flow=passenger|seat|search&variant=healthy|broken`, `manifest.json` | `test/fernway.test.mjs` |
 | `scripts/tabwise/`, `scripts/tabwise-run.mjs`, `.github/workflows/tabwise-run.yml` | Offline worker/patch/verdict helpers, R1 snapshot importer, browser checks; live worker permanently BLOCKED scaffold | `runOfflineWorker`, `applyPatch`, `verificationVerdict`, `review-status.json` | `test/tabwise-worker.test.mjs`, verdict tests |
 | `src/meta/diagnosis.mjs` | Standard Spark structured diagnosis, citation validation and explicit abstention; only existing client wrapper calls network | `diagnose()` | `test/tabwise-{meta,diagnosis}.test.mjs` |
-| `web/` | Next.js product UI and static genuine R1 diagnostic snapshot; local recorder, timelines, reports, availability and owner controls; independent lockfile | `npm --prefix web run dev`; `web/app/`, `web/components/`, `web/lib/` | web tests; `scripts/tabwise/check-web.mjs` |
+| `web/` | Next.js product UI and static genuine R1 diagnostic snapshot; local recorder, timelines, reports, availability and owner controls; independent lockfile | `web/lib/local-drafts.mjs` (durable save/readback), `auth-redirect.mjs` + `app/auth/unavailable/` (safe HTML auth fallback); `components/Recorder.tsx` (journey-keyed state, read-only version preview) | web tests; `web/test/{recorder,web-smoke}.browser.mjs`; `scripts/tabwise/check-web.mjs` |
 | `web/lib/server/`, `web/app/api/` | Dedicated-project/auth/ownership/CSRF guards; hosted broker adapter, jobs, bounded ZIP and artifact ingest/reconcile code; live paths unqualified | `core.mjs`, `jobs.mjs`, `artifact-{zip,ingest}.mjs`, `reconcile.mjs`, `live-reconcile.ts` | `web/test/` |
 | `test/tabwise-budget*.test.mjs` | Split-cap, retained-exposure, persistent alarm and 50-process reservation checks; original tests unchanged | `node --test test/tabwise-budget*.test.mjs` | — |
-| `docs/engineering/Tabwise-*` | Exact implementation status, independent worker-binding blocker, dependency/version/license inventory | `Tabwise-implementation-handoff.md`, `Tabwise-worker-binding-blocker.md`, `Tabwise-dependencies.json` | measured checks; no live claims |
+| `docs/engineering/Tabwise-*` | Implementation status, worker blockers, dependency/licenses; `Tabwise-demo-{plan,results}.md`: demo checks; `Tabwise-final-integration.md`: combined acceptance and delivery | `Tabwise-implementation-handoff.md`, `Tabwise-worker-binding-blocker.md`, `Tabwise-dependencies.json` | measured checks; no live claims |
 | `docs/engineering/Claude-review-handoff.md` | D-62 fixed read-only architecture/safety review snapshot and separate Claude outbox; active checkout remains Codex-only | REVIEW.md in sealed local review directory | 88 source hashes;40 targeted tests |
 | `scripts/tabwise/{input-policy,network,review-approval}.mjs` | D-63 whole-journey preflight, in-memory isolated browser context and content-bound approval; bootstrap checks full frozen integrity before imports | `preflightJourney`, `createIsolatedContext`, `checkReviewApproval`; worker remains BLOCK | `test/tabwise-review*.test.mjs`, network browser test |
 | `scripts/tabwise/{observer,observer-qualification}.mjs` | Injected read-only continuous observer candidate, pure narrow assessment and ordered teardown; no live loader or dispatch | `createSpeechObserver`, `assessObserverQualification`, `createQualificationTeardown` | `test/tabwise-observer.test.mjs` |
@@ -108,3 +108,34 @@ Read this before opening source files. One line per file or folder. If a line is
 | `docs/engineering/CI-H3-stress-budgets.md` | D-90 registered scheduling amendment; contradictory speech evidence, unchanged safety limits, RED/GREEN and integration plan | `profileBudgetMs`, `fileWatchdogMs`, `runProfile` in `scripts/offline-tests.mjs` | `test/ci-offline-selection.test.mjs` (20 targeted tests) |
 
 C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 22 R2_FILES, adding scripts/tabwise/{input-policy,executor}.mjs and packages/contracts/palette.mjs without editing those dependencies. test/r2-review.test.mjs C2 regressions independently check digest invalidation and explicit approval refusal for each file; the 19-file row above describes the D-89 checkpoint. Current digest/results: R2-final-handoff.md §J.
+
+| `scripts/tabwise/r2-admission*.mjs`, `r2-admission-policy.json`, `supabase/proposals/r2-w5-admission.sql` | W5 signed permanent consumption, existing-client RPC adapter, disabled HTTPS transport, coordinator IPC grants and finalization; SQL unapplied | `createPostgresAuthority`, `createCoordinator`, `requestPageAdmission`, `verifyAdmissionRecord` | r2-admission*.test.mjs; r2-admission-postgres.py |
+| `scripts/tabwise/r2-evidence-compatibility.mjs` | Explicit experimental/product evidence refusal diagnostic; never a converter | `productCompatibility` | r2-evidence-compatibility.test.mjs |
+
+| web/test/product-integration.browser.mjs | Credential-disabled local production API checks: cross-origin/forged approval refusal, unavailable owned reads, absent experimental execution endpoints | local production server only | explicit browser acceptance |
+| docs/engineering/Tabwise-product-integration-handoff.md | Exact revisions, flows, verification and remaining genuine product bridge | integration review packet | no runtime activation |
+
+| web/app/api/r2/admission/route.ts; web/lib/server/r2-admission{,-live}.*; r2-caller.mjs | Disabled Next.js W5 boundary, independently signed execution identity, existing PostgreSQL adapter | createAdmissionHandler, verifyExecutionCaller | web/test/r2-admission-api.test.mjs |
+| src/r2/{product-bridge,strict-json,approval-constants,node-review}.mjs; packages/contracts/r2-product.mjs | Raw observation mapping, separate versioned product contract, internally gated native handle; pure parser and allowlisted Node CLI loader | inspectR2ProductExport, openQualifiedR2ProductEvidence | web/test/r2-product-bridge.test.mjs; r2-offline-pipeline.test.mjs |
+| web/lib/server/r2-{product-context,evidence-bridge}.mjs; scripts/tabwise/r2-{admission-server,product}-policy.json | Stored-owner request binding, compensated ingestion/storage validation; policies disabled | productR2AdmissionContext, ingestR2BridgeArchive | web/test/r2-storage-bridge.test.mjs |
+| docs/engineering/R2-production-bridge-handoff.md; web/test/helpers/r2-bridge-fixture.mjs | Engineering handoff and generated offline fixture helpers | no runtime qualification | cache/bridge-review |
+| src/r2/product-export.mjs | Offline source-copy exporter and bridge validation; no signer or capture activation | buildR2ProductExport, writeR2ProductExport | test/r2-product-export.test.mjs; genuine runtime remains blocked |
+
+| src/r2/capture-export.mjs | Source-bound capture JSON-pointer projection for exporter and bridge | captureObservationSources | test/r2-capture-export.test.mjs |
+
+| `src/meta/input.mjs`, `src/repair/{application,verify-application}.mjs`, `web/app/api/patches/[id]/apply/` | Observed input, immutable candidate materialization and independent patch inspection; no execution/verdict | R3 input/application tests |
+| `supabase/migrations/20261103000000_repair_application.sql`, `supabase/tests/repair-application.sql`, `test/tabwise-r3-database.test.mjs` | Atomic private persistence, immutable review/audit and local concurrency/recovery tests | R3 handoff |
+
+| `src/repair/rerun.mjs`, `scripts/tabwise/repair-{input,source}.mjs`, `web/app/api/runs/[id]/repair-input/` | Independent exact patched source consumption/staging after liveGate; dedicated-project read-only or staged input | R3 rerun/worker-input tests |
+| `supabase/migrations/20261103010000_repair_rerun.sql`, `test/tabwise-r3-{continuation,rerun,rerun-database,worker-input}.test.mjs` | Saved base bytes, gate-preserving immutable rerun admission, stale-source/concurrency/offline browser task controls | R3 continuation handoff |
+
+| `test/r2-provenance.test.mjs` | Unchanged O10 policy/simulated-child boundary tests separated from evidence I/O suite; offline/stress selected | CI-O10-watchdog handoff |
+
+| `docs/engineering/R2-R3-parent-states.md` | Exact R2/R3 parent STATE handoffs retained during local integration | Parents a0dec78 and 33cfa8e | no qualification promotion |
+
+| `scripts/tabwise/repair-session.mjs` | Source-bound data adapter for existing native session-data builder; no execution or qualification authority | `preparePatchedSession`; `test/tabwise-r3-native-source.test.mjs` |
+
+| `web/lib/server/repair-verdict.mjs`, verification API/UI, `supabase/migrations/20261103020000_repair_verdict.sql` | Qualified sealed evidence re-read, pre-dispatch owner oracle, narrow focus result and immutable replay/audit; qualification stays disabled | lifecycle/SQL/recorder browser tests |
+
+| `src/repair/oracle.mjs`, `web/components/RepairOracleReview.tsx`, patch oracle API, `web/lib/oracle-state.mjs` | Explicit source-bound owner check registration/readback before admission | lifecycle/oracle-state and repair-oracle browser tests |
+| `supabase/migrations/20261103030000_repair_oracle_admission.sql` | Pre-admission oracle tuple plus shared live-dispatch guard; no execution clearance | real PostgreSQL concurrent registration/admission and legacy-dispatch negatives |

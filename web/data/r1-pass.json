@@ -1,0 +1,516 @@
+{
+ "format": "tabwise-r1-pass-public/1",
+ "run_id": "r1-20261028T153344Z",
+ "result": "PASS",
+ "status": "finished",
+ "github_run_id": "40716824856",
+ "github_url": "https://github.com/ANIRUDDH-001/Tabwise/actions/runs/40716824856",
+ "artifact_name": "r1-evidence-40716824856-1",
+ "artifact_id": "12829526270",
+ "archive_sha256": "419807699a32e3752f6e6637f275803b9db803c960991f0b4d8ecfe8844fc885",
+ "source_commit": "0c93fa73e0c111a2df65302adfe0006d63f50a39",
+ "started": "2026-10-28T15:33:49Z",
+ "finished": "2026-10-28T15:36:23Z",
+ "profile": "D-53/A15",
+ "fixture": "R1 sign-up fixture (synthetic)",
+ "settings": {
+  "keyboard.speakTypedCharacters": 1,
+  "keyboard.speakTypedWords": 0,
+  "virtualBuffers.enableOnPageLoad": false,
+  "virtualBuffers.autoSayAllOnPageLoad": false
+ },
+ "send_guard": {
+  "sends": 171,
+  "misdelivered": false,
+  "refused": 0,
+  "unsettled": 0,
+  "acks": {
+   "confirmed": 81,
+   "unconfirmable": 90,
+   "missing": 0
+  }
+ },
+ "attempts": [
+  {
+   "attempt": 1,
+   "status": "completed",
+   "fresh": true,
+   "complete": true,
+   "steps_recorded": 10,
+   "steps": [
+    {
+     "step": 1,
+     "keys": [
+      "Tab"
+     ],
+     "phrases": [
+      "main landmark. form landmark. Full name, edit, blank"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 2,
+     "keys": [
+      "A",
+      "d",
+      "a"
+     ],
+     "phrases": [
+      "A",
+      "d",
+      "a"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 3,
+     "keys": [
+      "Tab"
+     ],
+     "phrases": [
+      "Email, edit, blank"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 4,
+     "keys": [
+      "a",
+      "d",
+      "a",
+      "@",
+      "e",
+      "x",
+      "a",
+      "m",
+      "p",
+      "l",
+      "e",
+      ".",
+      "t",
+      "e",
+      "s",
+      "t"
+     ],
+     "phrases": [
+      "a",
+      "d",
+      "a",
+      "at",
+      "e",
+      "x",
+      "a",
+      "m",
+      "p",
+      "l",
+      "e",
+      "dot",
+      "t",
+      "e",
+      "s",
+      "t"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 5,
+     "keys": [
+      "Tab"
+     ],
+     "phrases": [
+      "I agree to the terms, check box, not checked"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 6,
+     "keys": [
+      "Space"
+     ],
+     "phrases": [
+      "checked"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 7,
+     "keys": [
+      "Tab"
+     ],
+     "phrases": [
+      "Review, button"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 8,
+     "keys": [
+      "Enter"
+     ],
+     "phrases": [
+      "Confirm subscription, dialog. Confirm, button"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 9,
+     "keys": [
+      "Enter"
+     ],
+     "phrases": [
+      "main landmark. form landmark. Review, button. Subscription saved"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 10,
+     "keys": [
+      "Shift+Tab"
+     ],
+     "phrases": [
+      "I agree to the terms, check box, checked"
+     ],
+     "timed_out": false,
+     "error": null
+    }
+   ]
+  },
+  {
+   "attempt": 2,
+   "status": "completed",
+   "fresh": true,
+   "complete": true,
+   "steps_recorded": 10,
+   "steps": [
+    {
+     "step": 1,
+     "keys": [
+      "Tab"
+     ],
+     "phrases": [
+      "main landmark. form landmark. Full name, edit, blank"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 2,
+     "keys": [
+      "A",
+      "d",
+      "a"
+     ],
+     "phrases": [
+      "A",
+      "d",
+      "a"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 3,
+     "keys": [
+      "Tab"
+     ],
+     "phrases": [
+      "Email, edit, blank"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 4,
+     "keys": [
+      "a",
+      "d",
+      "a",
+      "@",
+      "e",
+      "x",
+      "a",
+      "m",
+      "p",
+      "l",
+      "e",
+      ".",
+      "t",
+      "e",
+      "s",
+      "t"
+     ],
+     "phrases": [
+      "a",
+      "d",
+      "a",
+      "at",
+      "e",
+      "x",
+      "a",
+      "m",
+      "p",
+      "l",
+      "e",
+      "dot",
+      "t",
+      "e",
+      "s",
+      "t"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 5,
+     "keys": [
+      "Tab"
+     ],
+     "phrases": [
+      "I agree to the terms, check box, not checked"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 6,
+     "keys": [
+      "Space"
+     ],
+     "phrases": [
+      "checked"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 7,
+     "keys": [
+      "Tab"
+     ],
+     "phrases": [
+      "Review, button"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 8,
+     "keys": [
+      "Enter"
+     ],
+     "phrases": [
+      "Confirm subscription, dialog. Confirm, button"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 9,
+     "keys": [
+      "Enter"
+     ],
+     "phrases": [
+      "main landmark. form landmark. Review, button. Subscription saved"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 10,
+     "keys": [
+      "Shift+Tab"
+     ],
+     "phrases": [
+      "I agree to the terms, check box, checked"
+     ],
+     "timed_out": false,
+     "error": null
+    }
+   ]
+  },
+  {
+   "attempt": 3,
+   "status": "completed",
+   "fresh": true,
+   "complete": true,
+   "steps_recorded": 10,
+   "steps": [
+    {
+     "step": 1,
+     "keys": [
+      "Tab"
+     ],
+     "phrases": [
+      "main landmark. form landmark. Full name, edit, blank"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 2,
+     "keys": [
+      "A",
+      "d",
+      "a"
+     ],
+     "phrases": [
+      "A",
+      "d",
+      "a"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 3,
+     "keys": [
+      "Tab"
+     ],
+     "phrases": [
+      "Email, edit, blank"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 4,
+     "keys": [
+      "a",
+      "d",
+      "a",
+      "@",
+      "e",
+      "x",
+      "a",
+      "m",
+      "p",
+      "l",
+      "e",
+      ".",
+      "t",
+      "e",
+      "s",
+      "t"
+     ],
+     "phrases": [
+      "a",
+      "d",
+      "a",
+      "at",
+      "e",
+      "x",
+      "a",
+      "m",
+      "p",
+      "l",
+      "e",
+      "dot",
+      "t",
+      "e",
+      "s",
+      "t"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 5,
+     "keys": [
+      "Tab"
+     ],
+     "phrases": [
+      "I agree to the terms, check box, not checked"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 6,
+     "keys": [
+      "Space"
+     ],
+     "phrases": [
+      "checked"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 7,
+     "keys": [
+      "Tab"
+     ],
+     "phrases": [
+      "Review, button"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 8,
+     "keys": [
+      "Enter"
+     ],
+     "phrases": [
+      "Confirm subscription, dialog. Confirm, button"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 9,
+     "keys": [
+      "Enter"
+     ],
+     "phrases": [
+      "main landmark. form landmark. Review, button. Subscription saved"
+     ],
+     "timed_out": false,
+     "error": null
+    },
+    {
+     "step": 10,
+     "keys": [
+      "Shift+Tab"
+     ],
+     "phrases": [
+      "I agree to the terms, check box, checked"
+     ],
+     "timed_out": false,
+     "error": null
+    }
+   ]
+  }
+ ],
+ "model_provenance": {
+  "status": "not_run",
+  "model": null,
+  "cost": null
+ },
+ "source_hashes": {
+  "summary.json": "f49a4e34ce3b991f8e2d3d3bf6300c160d45e50ff3394cd85914f82100dc1de3",
+  "attempt-1.jsonl": "c42db48135807ae41f1419e0092a1f2e9771c2d97019f5f82db57b85c6a66e72",
+  "attempt-2.jsonl": "0f7d6f2a3808f940b0d6d0368bd097168d7dbb793d15d351d47778f7e3523dbe",
+  "attempt-3.jsonl": "9430db6c4aeff01448ddb4043af91d53c2a6ac783ae2f2c4c21bef4f82512b18",
+  "raw-1.json": "99b1e0dde36734fe5781d431fdb46e00b50ddbe507eea339e1cdb1b3d479defd",
+  "raw-2.json": "99b1e0dde36734fe5781d431fdb46e00b50ddbe507eea339e1cdb1b3d479defd",
+  "raw-3.json": "99b1e0dde36734fe5781d431fdb46e00b50ddbe507eea339e1cdb1b3d479defd"
+ },
+ "limitations": [
+  "R1 sign-up fixture (synthetic); not Fernway.",
+  "Measured under the non-default D-53/A15 profile (browse mode off on page load); not default NVDA browse-mode coverage.",
+  "Only 81 of 171 key sends had a confirmed page acknowledgement; 90 could not be confirmed and 0 were missing.",
+  "No R2 causal diagnosis, Spark output, accessibility finding or patch verification is asserted.",
+  "Structural and provenance review of the downloaded artifact; NVDA was not re-executed for this display."
+ ],
+ "snapshot_sha256": "a3b06aa94effe8fb573c097576c230afbd89766201c2678c4911cce4b858e10b"
+}

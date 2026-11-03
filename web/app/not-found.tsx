@@ -1,2 +1,2 @@
 import Link from 'next/link';
-export default function Missing(){return <main id="main" className="error-page"><h1>There’s no record here.</h1><p>The journey, run or report you requested isn’t available.</p><Link className="button" href="/w/demo">Return to the workspace</Link></main>;}
+export default function Missing(){return <main id="main" className="error-page"><p className="eyebrow">404</p><h1>There’s no record here.</h1><p>The journey, run or report you requested doesn’t exist, or its address is malformed.</p><div className="actions"><Link className="button" href="/w/demo">Open the demo</Link><Link className="button secondary" href="/w/me">Your workspace</Link><Link className="button secondary" href="/status">Status</Link></div></main>;}

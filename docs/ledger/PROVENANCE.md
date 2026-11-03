@@ -60,3 +60,24 @@ All D8 installs used independent `packages/contracts/` or `web/` manifests/lockf
 
 | CI-H1 offline reliability harness | Explicit root-test classification, bounded Node supervisor and synthetic browser-launch rejection preload | Codex-authored during event; ours, synthetic; no dependency, fixture dataset or third-party code intake | No real browser/physical input/model execution |
 | R2 S7 verify-run, hosted workflow; R-1/R-2 process custody; D-88 integration | `scripts/tabwise-r2.mjs`, `scripts/tabwise/{r2-run,r2-policy,r2-proctree,r2-evidence}.mjs`, `.github/workflows/tabwise-r2.yml`, `test/r2-{review,proctree,evidence}.test.mjs` | Claude (S7, D-86; custody review and CR-1, D-87; integration, D-88) and Claude Cloud (custody design, D-87) during event; ours | No new dependency or data; action pins as in the D-86 row; no hosted run, NVDA, browser or real process termination |
+
+### W5 new work (2026-11-02T13:49:50Z)
+- Newly authored W5 admission modules, disabled policy, SQL proposal, evidence compatibility helper, tests and handoff in this worktree; project-owned event work. No external code/dependency/fixture/dataset added. Existing pinned dependency reference files copied hash-exact into ignored node_modules; no install.
+- References only: PostgreSQL18 official transaction/row-lock/privilege documentation retrieved with cached Context7 CLI, no code copied. Local PostgreSQL18.3 tools were already installed; no dependency ships with W5. Native/product qualification not claimed.
+
+### Local product integration (2026-11-02T14:35:27Z)
+- Existing project-owned frontend d79c066 integrated into R2/W5 d2d1854 without commit. Newly authored four-case API test and handoff; no third-party code/dataset/dependency/license added. Existing installed dependencies copied to ignored node_modules without install; source worktrees untouched.
+
+### Production bridge (2026-11-02T18:27:11Z)
+- Project-owned event work: signed execution-caller verifier, disabled Next.js admission boundary, R2/product contract and native-gated ingestion, regression fixtures and handoff. No new dependency, dataset or third-party code added; existing installed dependencies copied into ignored local directories without installation.
+- Reference only: official GitHub Actions OIDC claims/JWKS documentation and Next.js route/Turbopack documentation retrieved through cached Context7 CLI. No code copied. Cryptographic fixtures generated locally; signatures/claims/observation rows are tests, never native evidence. Existing frozen dependencies/licenses unchanged.
+
+### R3 new work - 2026-11-03
+Authored diagnosis bindings, immutable candidate SQL/API/UI, independent patch inspection and synthetic tests during event. No new third-party fixture, dataset or dependency. Installed PostgreSQL 18 (PostgreSQL License) reused locally for verification, not bundled. Existing dependencies unchanged.
+
+### R3 continuation new work - 2026-11-03
+Authored immutable rerun bindings, exact source consumer/loader/stager, admission/UI integration and synthetic browser task oracle during event. No external fixture/data/dependency added or installed. Offline task fixture is newly authored development data, not genuine withheld evaluation or recorded NVDA evidence. Existing installed PostgreSQL/Playwright reused.
+
+R3 continuation new work: repair source/native adapter, narrow snapshot oracle, immutable SQL lifecycle and inline synthetic test fixtures authored in this worktree; existing shipped Fernway reused under its recorded provenance; no new external dependency, dataset or asset.
+
+R3 bounded pass: locally authored dispatch-guard and oracle UI/database regression fixtures; mock approvals/observations are test data only. No new third-party dependency, fixture asset or dataset.

@@ -42,6 +42,7 @@ export async function runR2Session(runtime, data) {
   if (!isQualificationRuntime(runtime)) throw Error('R2 session requires the owned vendored runtime');
   if (used) throw Error('R2 session: one page per process');
   used = true;
+  const pageStart = performance.now(); // W3/W4 lifecycle origin: work, settle and guard bounds count from here.
   const {guard, getGate} = runtime;
   const authentic = () => {
     runtime.assertAuthentic();
@@ -57,10 +58,10 @@ export async function runR2Session(runtime, data) {
   authentic();
 
   const [{randomBytes, randomUUID}, {createServer}, {isAbsolute}, {chromium}, {AxeBuilder}, network, {createSpeechObserver}, {createGuardedPressExecutor},
-    {foregroundMismatch}, {settingsMismatch}, evidence, {installR2PageRecorder}] = await Promise.all([
+    {foregroundMismatch}, {settingsMismatch}, evidence, {installR2PageRecorder}, {createR2Lifecycle}] = await Promise.all([
     import('node:crypto'), import('node:http'), import('node:path'), import('@playwright/test'), import('@axe-core/playwright'), import('./network.mjs'),
     import('./observer.mjs'), import('./executor.mjs'), import('../../src/speech/foreground.mjs'), import('../../src/speech/validate.mjs'),
-    import('./r2-evidence.mjs'), import('../../src/r2/page-recorder.mjs')]);
+    import('./r2-evidence.mjs'), import('../../src/r2/page-recorder.mjs'), import('./r2-lifecycle.mjs')]);
   authentic();
   // Pure validation before any effect: served copy, step map and caps exactly as the writer and compose recompute them.
   if (!isAbsolute(input.evidenceDir)) throw Error('R2 session: evidence directory must be absolute');
@@ -73,13 +74,16 @@ export async function runR2Session(runtime, data) {
   const reasons = [], cleanup = [], unexpected = [];
   const reason = text => { if (reasons.length < REASONS) reasons.push(text); };
   const clock = Object.freeze({now: () => performance.now(), wait: ms => new Promise(done => setTimeout(done, ms))});
-  let loopback = null, writer = null, owned = null, probe = null, speech = null, compose = null, composeError = null, refusedBeforeInput = false;
+  // The single lifecycle owner: every owned resource is acquired and released through its slots, and the evidence
+  // writer is bound to it at construction, so only its finalize seals (W3/W4).
+  const lifecycle = createR2Lifecycle({pageStart, stopped: () => guard.isStopped()});
+  let loopback = null, writer = null, owned = null, probe = null, speech = null, compose = null, composeError = null;
 
   let observerAcquisition = null, observerClosing = null, observerClose = null, observerTeardown = false;
   let observerOwned = null;
   const closeOwnedObserver = () => {
     if (!observerOwned) return Promise.resolve();
-    observerClose ??= Promise.resolve().then(() => observerOwned.close());
+    observerClose ??= lifecycle.release('observer', () => observerOwned.close());
     observerClose.catch(() => {}); // retain rejection for every cleanup caller
     return observerClose;
   };
@@ -98,13 +102,36 @@ export async function runR2Session(runtime, data) {
     loopback = createServer((request, response) => { if (unexpected.length < 64) unexpected.push({method: request.method, url: String(request.url).slice(0, 256)}); response.writeHead(410); response.end(); });
     await within('loopback listen', () => new Promise((ok, fail) => { loopback.once('error', fail); loopback.listen(0, '127.0.0.1', ok); }), input.handleTimeoutMs);
     const port = loopback.address().port;
-    writer = evidence.createR2EvidenceWriter({enabled: true, dir: input.evidenceDir, page: {fixture_id: input.fixture_id, session, port}, fixture: input.fixture,
-      approved: input.approved, nonce, spec: input.spec});
+    writer = lifecycle.bindWriter(evidence.createR2EvidenceWriter({enabled: true, dir: input.evidenceDir, page: {fixture_id: input.fixture_id, session, port}, fixture: input.fixture,
+      approved: input.approved, nonce, spec: input.spec}));
 
+    let browserAbandoned = false, browserReady = false, requestCleanup, cleanupFinished;
     const launching = (async () => {
-      const server = await chromium.launchServer({headless: false, args: [...network.BROWSER_ARGS], handleSIGINT: false, handleSIGTERM: false, handleSIGHUP: false});
-      let browser, context;
+      let server, browser, context;
+      // Reserve only these fixed cleanup callbacks while operation admission is open.
+      // Their handles are private to this one launch; no late producer or second owner is admitted.
+      const cleanupRequested = new Promise(resolve => { requestCleanup = resolve; });
+      let previous = Promise.resolve();
+      for (const [label, close] of [
+        ['partial context close', () => context?.close()],
+        ['partial browser close', () => browser?.close()],
+        ['partial server kill', () => server?.kill()],
+      ]) {
+        const before = previous;
+        const operation = lifecycle.op(label, async () => {
+          const requested = await cleanupRequested;
+          await before;
+          if (requested) return close();
+        });
+        previous = cleanupRequested.then(async requested => {
+          await before;
+          if (requested) await within(label, () => operation, input.handleTimeoutMs);
+          else await operation;
+        }).catch(failure => { cleanup.push(`${label}: ${message(failure)}`); });
+      }
+      cleanupFinished = previous;
       try {
+        server = await chromium.launchServer({headless: false, args: [...network.BROWSER_ARGS], handleSIGINT: false, handleSIGTERM: false, handleSIGHUP: false});
         const pid = server.process()?.pid;
         if (!Number.isSafeInteger(pid) || pid <= 0) throw Error('owned Chromium PID missing');
         browser = await chromium.connect(server.wsEndpoint());
@@ -113,19 +140,32 @@ export async function runR2Session(runtime, data) {
         const page = await context.newPage();
         await page.goto(writer.identity.url, {waitUntil: 'load', timeout: input.handleTimeoutMs});
         await page.bringToFront();
+        browserReady = true;
+        if (browserAbandoned) throw Error('browser setup completed after acquisition abandonment');
         let closing;
         return {pid, version: browser.version(), page,
           close: () => closing ??= (async () => { try { await context.close(); } finally { try { await browser.close(); } finally { await server.close(); } } })()};
       } catch (error) {
-        await context?.close().catch(() => {}); await browser?.close().catch(() => {}); await server.kill().catch(() => {});
+        requestCleanup(true);
+        await previous; // bounded attempts; an unresolved callback stays in lifecycle.pending()
         throw error;
       }
     })();
-    // A launch that outlives its bound is closed when it settles; it is never handed to composition.
-    try { owned = await within('owned browser', () => launching, input.handleTimeoutMs); }
-    catch (error) { launching.then(late => late.close()).catch(() => {}); throw error; }
+    // A timed-out acquisition never hands a late browser to composition. The same reserved
+    // cleanup owner handles either late failure or late success, even after evidence is sealed.
+    try {
+      owned = await lifecycle.acquire('browser', () => launching, {label: 'owned browser', boundMs: input.handleTimeoutMs});
+      requestCleanup(false); // only the acquisition winner may hand cleanup to the normal owner
+      await cleanupFinished;
+    } catch (error) {
+      browserAbandoned = true;
+      // Covers setup resolving between the timeout firing and this catch observing it.
+      // Otherwise the still-running setup triggers its reserved cleanup when it settles.
+      if (browserReady) requestCleanup(true);
+      throw error;
+    }
     authentic();
-    probe = runtime.createForeground();
+    probe = await lifecycle.acquire('foreground', () => runtime.createForeground());
 
     // The S5a handle contract (r2-compose.mjs HANDLE_KEYS / METHODS), built only from the branded runtime and owned objects.
     const handles = {
@@ -146,11 +186,12 @@ export async function runR2Session(runtime, data) {
           snapshot: () => inner.snapshot(),
         });
       },
+      // W3/W4: start is the raw vendored start only (composition owns its slot); validate checks the started process.
       nvda: {
         press: (key, options) => runtime.nvda.press(key, options),
-        start: async () => {
+        start: () => { authentic(); return runtime.nvda.start({settings: structuredClone(runtime.cfg.nvda_settings)}); },
+        validate: async receipt => {
           authentic();
-          const receipt = await runtime.nvda.start({settings: structuredClone(runtime.cfg.nvda_settings)});
           const settings = runtime.nvda.getSettings();
           const readback = Object.fromEntries(Object.entries(runtime.cfg.nvda_settings).flatMap(([section, values]) => Object.keys(values).map(key => [`${section}.${key}`, settings?.[section]?.[key] ?? null])));
           const mismatch = settingsMismatch(runtime.cfg.nvda_settings, readback);
@@ -165,8 +206,8 @@ export async function runR2Session(runtime, data) {
         open: async receipt => {
           if (observerAcquisition || observerTeardown) throw Error('observer already opened or teardown started');
           observerAcquisition = Promise.resolve().then(async () => {
-            const acquired = await createSpeechObserver({NVDAClient: runtime.NVDAClient, guard, getGate, relayOwnerPid: runtime.relayOwnerPid, startupReceipt: receipt,
-              deadlineMs: clock.now() + input.handleTimeoutMs, now: clock.now});
+            const acquired = await lifecycle.acquire('observer', () => createSpeechObserver({NVDAClient: runtime.NVDAClient, guard, getGate, relayOwnerPid: runtime.relayOwnerPid,
+              startupReceipt: receipt, deadlineMs: clock.now() + input.handleTimeoutMs, now: clock.now}));
             observerOwned = acquired;
             if (observerTeardown) {
               await closeOwnedObserver();
@@ -180,20 +221,20 @@ export async function runR2Session(runtime, data) {
         read: () => { if (!speech || observerTeardown) throw Error('observer not open'); return speech.read(); },
         close: closeObserver,
       },
-      foreground: {check: async () => foregroundMismatch(await probe.check(), {pid: owned.pid, nonce}), close: () => probe.close()},
+      foreground: {check: async () => foregroundMismatch(await probe.check(), {pid: owned.pid, nonce}), close: () => lifecycle.release('foreground', () => probe.close())},
       page: {
         evaluate: fn => owned.page.evaluate(fn),
         screenshot: () => owned.page.screenshot({type: 'png'}),
         axe: async () => summarizeAxe(await new AxeBuilder({page: owned.page}).analyze()),
-        close: () => owned.close(),
+        close: () => lifecycle.release('browser', () => owned.close()),
       },
+      lifecycle,
     };
     try {
       compose = await composeR2Page(handles, {approved: input.approved, fixture_id: input.fixture_id, focusWaitMs: input.focusWaitMs,
         handleTimeoutMs: input.handleTimeoutMs, nonce, session, spec: input.spec});
     } catch (error) {
       composeError = message(error);
-      refusedBeforeInput = /^R2 compose refused before input:/.test(composeError);
     }
   } catch (error) {
     reason(message(error));
@@ -201,26 +242,33 @@ export async function runR2Session(runtime, data) {
   if (composeError) reason(composeError);
   if (compose && !compose.completed) for (const r of compose.reasons) reason(`compose: ${r}`);
 
-  // Bounded cleanup; each step runs. The browser is closed only with no live send (compose leaves it open otherwise).
+  // Bounded cleanup; each step runs. The browser is closed only with no live send and when composition did not retain it.
   const step = async (label, fn) => { try { await within(label, fn, CLEANUP_MS); } catch (error) { cleanup.push(`${label}: ${message(error)}`); } };
   const observerCleanup = closeObserver();
   let live = null;
   try { live = guard.status().live; } catch (error) { cleanup.push(`gate status: ${message(error)}`); }
-  if (owned && live === 0) await step('browser close', () => owned.close());
+  if (owned && lifecycle.slot('browser') === 'retained') cleanup.push('browser left open: retained by composition (live sends at teardown)');
+  else if (owned && live === 0) await step('browser close', () => lifecycle.release('browser', () => owned.close()));
   else if (owned) cleanup.push('browser left open: live sends at session teardown');
   await step('observer close (pending acquisition or unconfirmed close)', () => observerCleanup);
-  await step('foreground close', () => probe?.close());
-  if (writer && !compose && !composeError?.startsWith('R2 compose result refused')) {
-    await step('unsealed evidence', async () => { if (writer.failure() === null) await writer.seal({incomplete: [reasons[0] ?? 'session failed before composition']}); });
-  }
+  await step('foreground close', () => (probe ? lifecycle.release('foreground', () => probe.close()) : undefined));
+  // Composition finalized (and sealed) through the lifecycle unless it threw before or during its teardown; then this
+  // fallback finalize settles, records and seals incomplete evidence. It is bounded by the lifecycle settle and guard limits.
+  const life = await lifecycle.finalize({fallback: !compose, incomplete: [reasons[0] ?? 'session failed before composition']});
+  for (const r of life.reasons) if (!reasons.includes(`lifecycle: ${r}`)) reason(`lifecycle: ${r}`);
   if (loopback) await step('loopback close', () => new Promise(done => loopback.close(() => done())));
   let post = true;
   try { authentic(); } catch (error) { post = false; reason(`post-session authenticity: ${message(error)}`); }
   if (unexpected.length) reason('unexpected network request reached the loopback listener');
 
-  const order = compose?.teardown?.order ?? [], stopErrors = (compose?.teardown?.errors ?? []).filter(e => e.startsWith('NVDA stop'));
-  const nvda = compose ? (order.includes('NVDA stop') ? (stopErrors.length ? 'unconfirmed' : 'stopped') : 'not-started')
-    : (composeError && !refusedBeforeInput ? 'unconfirmed' : 'not-started');
+  // Session-end view: anything still owned, retained or unsettled, or any write refused after finalize, requires containment.
+  const after = lifecycle.status();
+  for (const [name, s] of Object.entries(after.slots)) if (!['released', 'never-acquired'].includes(s.state)) reason(`CONTAINMENT_REQUIRED:${name}:${s.state}`);
+  if (after.sticky > life.record.sticky.count) reason(`lifecycle refused ${after.sticky - life.record.sticky.count} operation(s) after finalize`);
+  if (after.pending.length) reason(`operations unsettled at session end: ${after.pending.join(', ')}`);
+  const nvdaSlot = lifecycle.slot('nvda');
+  const nvda = nvdaSlot === 'released' ? 'stopped' : nvdaSlot === 'never-acquired' ? 'not-started' : 'unconfirmed';
+  if (!life.clean || !after.clean) reason('lifecycle not clean: the page cannot complete');
   const completed = compose?.completed === true && post && !unexpected.length && !cleanup.length && !reasons.length && !guard.isStopped();
   if (!completed && !guard.isStopped()) guard.stop(`R2 session incomplete: ${reasons[0] ?? cleanup[0] ?? 'not completed'}`, 'protocol');
   const result = {
@@ -229,7 +277,7 @@ export async function runR2Session(runtime, data) {
     attestation: 'unavailable (O-10)', genuine_evidence: false,
     runtime_checks: {brand: true, post_session_authentic: post},
     browser: owned ? {pid: owned.pid, version: String(owned.version)} : null,
-    unexpected_loopback_requests: unexpected.length, cleanup_errors: cleanup, reasons, compose,
+    unexpected_loopback_requests: unexpected.length, cleanup_errors: cleanup, reasons, lifecycle: life.record, compose,
   };
   return JSON.parse(JSON.stringify(result));
 }
