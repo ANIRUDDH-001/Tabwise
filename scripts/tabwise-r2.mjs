@@ -54,7 +54,7 @@ async function runPage(gate) {
   let result = null, failure = null;
   try {
     const {runR2Session} = await import('./tabwise/r2-session.mjs');
-    result = await runR2Session(runtime, r2SessionData(gate.plan, page, gate.fixtures.get(page.id), join(runDir, page.id)));
+    result = await runR2Session(runtime, r2SessionData(gate.plan, page, gate.fixtures.get(page.id), join(runDir, page.id), gate.repair));
   } catch (error) {
     failure = message(error);
     abort('session refused');

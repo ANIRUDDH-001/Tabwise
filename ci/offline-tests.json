@@ -290,5 +290,17 @@
   "r2-capture-export.test.mjs": {
     "kind": "offline",
     "reason": "real captureJourney serialization with injected in-memory telemetry; no native execution, browser, credentials or external authority"
+  },
+  "tabwise-r3-native-source.test.mjs": {
+    "kind": "offline",
+    "reason": "data-only repair source binding and local staging cleanup; no browser, native runtime, hosted service or physical input"
+  },
+  "tabwise-r3-lifecycle.test.mjs": {
+    "kind": "offline",
+    "reason": "repair admission and genuine-handle refusal tests; no native execution or external service"
+  },
+  "tabwise-r3-recorder-browser.test.mjs": {
+    "kind": "browser",
+    "reason": "real local headless Chromium measures shipped Fernway recorder identities; no NVDA or physical input; run separately"
   }
 }

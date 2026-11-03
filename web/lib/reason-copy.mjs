@@ -1,6 +1,16 @@
 // Human copy for every reason code emitted by web/app/api/** and web/app/auth/** (T-P0-04, T-P1-04).
 // Copy never names environment variables, secrets or stack traces.
 export const REASON_COPY=Object.freeze({
+ repair_oracle_required:'Freeze a reviewed rerun check on the patch before requesting a rerun.',
+ native_repair_identity_pending:'The repair worker identity is not ready. Native execution remains blocked.',
+ repair_verdict_service_unavailable:'The stored repair result is temporarily unavailable.',
+ repair_record_unavailable:'A required saved repair record is unavailable.',
+ repair_patch_mismatch:'The candidate and reviewed patch do not match. Reload the record.',
+ explicit_oracle_review_required:'Choose the symptom and step, and provide a review reference before registering the check.',
+ oracle_registration_refused:'The reviewed check could not be saved. Check ownership and the saved patch revision.',
+ repair_evidence_unavailable:'The sealed native evidence is unavailable. No repair result was recorded.',
+ repair_verdict_persistence_refused:'The repair result could not be saved with its required evidence bindings.',
+
  repair_worker_source_binding_approval_pending:'Repair reruns are waiting for approval of the worker source binding. Your saved candidate is retained.',
  repair_input_unavailable:'The saved repair input is unavailable for this run.',
  repair_input_integrity_failed:'The saved repair input does not match this run. Execution is blocked.',

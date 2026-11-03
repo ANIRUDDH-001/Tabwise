@@ -77,3 +77,7 @@ Authored diagnosis bindings, immutable candidate SQL/API/UI, independent patch i
 
 ### R3 continuation new work - 2026-11-03
 Authored immutable rerun bindings, exact source consumer/loader/stager, admission/UI integration and synthetic browser task oracle during event. No external fixture/data/dependency added or installed. Offline task fixture is newly authored development data, not genuine withheld evaluation or recorded NVDA evidence. Existing installed PostgreSQL/Playwright reused.
+
+R3 continuation new work: repair source/native adapter, narrow snapshot oracle, immutable SQL lifecycle and inline synthetic test fixtures authored in this worktree; existing shipped Fernway reused under its recorded provenance; no new external dependency, dataset or asset.
+
+R3 bounded pass: locally authored dispatch-guard and oracle UI/database regression fixtures; mock approvals/observations are test data only. No new third-party dependency, fixture asset or dataset.

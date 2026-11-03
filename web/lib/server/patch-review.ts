@@ -10,7 +10,7 @@ export async function ownedPatchReview(id:string,userId:string){
  if(!patch)throw new HttpError(404,'patch_not_found');
  const {data:run}=await db.from('runs').select('id,user_id,status,evidence_status,spec,journey_version_id').eq('id',patch.run_id).maybeSingle();
  authorizeRun({id:userId},run);
- const {data:finding}=await db.from('findings').select('title,mechanism,evidence_refs,confidence,location').eq('id',patch.finding_id).eq('run_id',run!.id).maybeSingle();
+ const {data:finding}=await db.from('findings').select('title,step,mechanism,evidence_refs,confidence,location').eq('id',patch.finding_id).eq('run_id',run!.id).maybeSingle();
  if(!finding)throw new HttpError(409,'finding_unavailable');
  const {data:app}=await db.from('apps').select('base_sha256').eq('id','fernway').single();
  const source=(await readFile(join(process.cwd(),'../fixtures/fernway/index.html'),'utf8')).replace(/\r\n/g,'\n');

@@ -689,3 +689,16 @@ User: "Create an isolated integration branch from R3 a0dec78 and merge R2 33cfa8
 User: "Do not use blanket ours/theirs resolution. Preserve the already-tested candidate commits."
 User: "Create a separate local integration commit and return its SHA, exact diff, test results and remaining blockers."
 Consequence: union both histories/inventories, archive parent states, validate combined automatic runtime tree; local commit only, no remote/native/deploy/paid calls.
+
+## R3 continuation authorization 2026-11-03T06:48:39Z
+User answer: "Then implement the highest-value missing production components that can be completed and tested offline without bypassing qualification gates."
+Consequence: isolated zero-credit source adapter/cleanup implementation; no existing tests, CI or governance edits; full-green acceptance remains unmet.
+
+## R3 continuation second-slice authorization 2026-11-03T07:45:52Z
+User answer: "Register the new native-source test in the correct CI classification." / "Reconcile R2_FILES and source-digest membership with the new production adapter, preserving exact integrity guarantees."
+Consequence: explicit CI/scope assertion expansion, clean local dependency copy, guarded native packet/query wiring, pre-dispatch owner oracle and immutable verdict path; all runtime policies remain blocked.
+
+## R3 bounded pass — 2026-11-03T10:56:52Z
+User answer: "AUTHORIZE ONE BOUNDED R3 COMPLETION PASS."
+User requirement: "Preserve the complete original integrated docs/ledger/STATE.md as the prefix, appending R3 updates instead of replacing history."
+Consequence: sole implementation session; corrected confirmed legacy dispatch gap; verified local stable snapshot; restored exact base STATE prefix and retained R3 text; no activation or publication. Stop after report.

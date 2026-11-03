@@ -16,7 +16,8 @@ try{
  liveGate(process.env,head);
  if(spec.variant==='patched'){
   const {stagePatchedWorkerSource}=await import('./tabwise/repair-source.mjs');
-  await stagePatchedWorkerSource({spec,bundlePath:process.env.TABWISE_REPAIR_INPUT_PATH});
+  const staged=await stagePatchedWorkerSource({spec,bundlePath:process.env.TABWISE_REPAIR_INPUT_PATH});
+  try{throw Error('BLOCK: repaired execution requires the sole admitted R2 entry');}finally{await staged.dispose();}
  }
 
 }catch(error){console.error(`Tabwise worker refused: ${error.message}`);process.exitCode=2;}

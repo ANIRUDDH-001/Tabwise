@@ -23,3 +23,36 @@ Uncommitted: none after local integration commit; original R2/R3 candidate workt
 Verified by: node scripts/offline-tests.mjs --profile stress --seed 415682473 ->8x61 files/1112 tests PASS.
 Local commit: git log -1; parents a0dec78 +33cfa8e; full command evidence in cache/local-stabilization/INTEGRATION-RESULTS.json.
 Review needed from: user before any publication; Claude cross-tool review before qualification/integration acceptance.
+
+
+---
+R3 continuation history (preserved from this worktree):
+
+# STATE — R3 guarded lifecycle slice complete; native qualification BLOCKED
+Updated: 2026-11-03T07:45:52Z
+Base: 4ccc54442bdba81febe1cac7f1c97700ead3fe76
+Branch/worktree: feat/F-03-r3-executable-lifecycle / app-r3-executable
+Now: original five failures resolved; native packet/plan/query/source binding wired through sole guarded entry.
+Now: pre-dispatch owner oracle, qualified stored evidence reread, narrow focus verdict and immutable SQL audit/replay.
+Next: cross-tool review; owner-reviewed hosted packet/worker-ID/plan issuance procedure; R2 authentic qualification.
+Blocked: native startup/attester/quiescence; hosted migrations/provisioning; genuine R3 and R7 acceptance.
+Validation/status native verdicts explicitly INCONCLUSIVE; focus check is narrower than full task rescue.
+Last full root: 1190 registered / 1188 PASS / zero FAIL / 2 opt-in DB skips.
+Separate PostgreSQL: all migrations + rollback SQL + both concurrent opt-in tests PASS; cluster stopped.
+Web127/contracts21/browser-API15 PASS; types/build/frozen R1/preflight PASS; ordinary selected profile PASS.
+Same-model adversarial findings corrected; this does not replace cross-tool review or R7.
+Evidence: cache/r3-executable/*-complete.*, check JSONs; exact.diff.
+Handoff: docs/engineering/R3-executable-continuation.md.
+Uncommitted; no publication, native input, paid call, hosted change, install or co-author attribution.
+R3/R7 FEATURES and all activation policy bytes unchanged.
+
+
+## R3 bounded completion — 2026-11-03T10:56:52Z
+Original integrated STATE above and previous R3 text preserved; newest status follows.
+HEAD/base unchanged: 4ccc544; branch feat/F-03-r3-executable-lifecycle, app-r3-executable.
+Shared dispatch claim now enforces immutable owner/source/step oracle, including historical replay.
+Root1189 PASS/zero FAIL/3 DB skips; real PG3/3; web128/contracts21/browser16 PASS.
+Build/types/frozen/preflight and ordinary63 files PASS; 444 source files mechanically stable.
+Current handoff: docs/engineering/R3-bounded-completion.md; evidence: cache/r3-bounded/.
+Source ready for independent review; genuine R2/R3/R7 and hosted/native delivery remain BLOCKED.
+No agents, commits, remote/paid/native operations; no activation changes. Bounded pass complete; STOP.

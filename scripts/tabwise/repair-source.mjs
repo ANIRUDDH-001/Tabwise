@@ -1,4 +1,4 @@
-import {readFile,mkdtemp,writeFile} from 'node:fs/promises';
+import {readFile,mkdtemp,writeFile,rm} from 'node:fs/promises';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {loadRepairInput} from './repair-input.mjs';
@@ -10,6 +10,8 @@ export async function stagePatchedWorkerSource({spec,bundlePath,env,fetchImpl}){
  else bundle=await loadRepairInput({spec,env,fetchImpl});
  const source=consumePatchedSource({...bundle,spec,baseSource:bundle.application?.base_source});
  const root=await mkdtemp(join(tmpdir(),'tabwise-repair-'));
- await writeFile(join(root,'index.html'),source.files['index.html'],{flag:'wx'});
- return {...source,root};
+ try{await writeFile(join(root,'index.html'),source.files['index.html'],{flag:'wx'});}
+ catch(error){try{await rm(root,{recursive:true,force:true});}catch(cleanup){throw new AggregateError([error,cleanup],'repair staging and cleanup failed');}throw error;}
+ // Closure owns only the fresh directory created above; callers cannot redirect cleanup.
+ return Object.freeze({...source,root,dispose:()=>rm(root,{recursive:true,force:true})});
 }

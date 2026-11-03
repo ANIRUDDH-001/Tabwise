@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 const base=process.env.TABWISE_SMOKE_URL??'http://localhost:3127';
 if(!['localhost','127.0.0.1'].includes(new URL(base).hostname))throw Error('Local integration server required');
 const id='00000000-0000-4000-8000-000000000001';
-const writes=['/api/journeys','/api/runs',`/api/runs/${id}/cancel`,`/api/runs/${id}/diagnose`,`/api/patches/${id}`,'/api/ops/flags'];
+const writes=['/api/journeys','/api/runs',`/api/runs/${id}/cancel`,`/api/runs/${id}/diagnose`,`/api/patches/${id}`,`/api/patches/${id}/oracle`,`/api/verifications/${id}`,'/api/ops/flags'];
 test('integrated mutation APIs reject cross-origin requests before any work',async()=>{
  for(const path of writes){const response=await fetch(base+path,{method:'POST',headers:{origin:'https://untrusted.example','content-type':'application/json'},body:'{}'});
   assert.equal(response.status,403,path);assert.deepEqual(await response.json(),{reason:'same_origin_required'});}

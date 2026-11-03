@@ -638,3 +638,26 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - MEASURED combined acceptance: root1180 registered/1178 PASS/2 DB skips; both real DB tests separately PASS; web127/contracts21/browser-API15 PASS; types/webpack/frozen/preflight PASS.
 - Ordinary+8stress each61 files/1112 tests PASS, no watchdog/unconfirmed exit/stdio. Entire profile matrix used read-only tracked source/Guidepup files; saved attributes restored.
 - Resolution audit:430 automatic non-document blobs/modes preserved; both parent histories/inventories retained and STATE texts archived. Local PostgreSQL36 commands and connected synthetic R3 controls PASS; cluster stopped. Native acceptance unchanged/BLOCK.
+
+### F-03 / R3 executable lifecycle continuation
+User authorization: current chat, base 4ccc544, new isolated worktree.
+Goal: audit integrated lifecycle and implement safe source delivery/consumption without releasing native execution.
+Files: scripts/tabwise/{repair-session,repair-source,r2-run,r2-policy}.mjs; new test/tabwise-r3-native-source.test.mjs; engineering handoff and standard ledgers/CODEMAP.
+Acceptance: root/R2/R3/verdict node tests; contracts/web tests; browser/API; local PostgreSQL; web typecheck/build; frozen R1 and diff integrity. Failures disclosed, no threshold edits.
+Cost ceiling: $0 paid/model/hosted; no install; bounded current session.
+Out of scope: native input, live dispatch, qualification, hosted writes, deployments or git publication.
+Rollback: discard this uncommitted isolated branch only.
+
+### F-03 / R3 executable lifecycle continuation, second authorized slice
+User: "Resolve all five full-suite failures without weakening assertions." / "Wire authorized repair records into the sole guarded native entrypoint."
+Files: prior R3 adapter/source/entry/policy plus r2-evidence; CI registration and exact scope test; new lifecycle/recorder tests; verification API/UI/reason copy; owner repair-input API; repair-verdict service; one new migration and rollback SQL; handoff/normal ledgers.
+Acceptance: zero unexpected root failures; real isolated PostgreSQL; web/contracts/browser/API; typecheck/build; frozen R1/preflight; ordinary offline selection.
+Budget: $0; installed dependency copy only; no native, hosted, paid, install, commit or deployment.
+Scope: guarded source delivery, explicit pre-dispatch owner oracle and immutable independently recomputed narrow verdict; validation/status abstain; native qualification remains blocked.
+Rollback: discard only uncommitted changes in this isolated worktree after review.
+
+### F-03 / R3 bounded completion pass
+Approved: user current chat; one pass, sole implementation session, no publication/native/hosted/paid operations.
+Scope: prior-session exit inspection; latest oracle UI/API/admission proof; confirmed dispatch guard correction; SQL/browser negatives; full root/PG/web/contracts/browser/types/build/R1/preflight/ordinary on stable source; original STATE prefix preservation; complete diff/inventory/handoff.
+Files: existing uncommitted R3 slice, dispatch guard in new oracle-admission migration, existing PG regression plus new browser regression; standard ledgers and handoff artifacts.
+Budget: $0; no installs or agents. Stop after final report; no automatic continuation.

@@ -132,3 +132,10 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 | `test/r2-provenance.test.mjs` | Unchanged O10 policy/simulated-child boundary tests separated from evidence I/O suite; offline/stress selected | CI-O10-watchdog handoff |
 
 | `docs/engineering/R2-R3-parent-states.md` | Exact R2/R3 parent STATE handoffs retained during local integration | Parents a0dec78 and 33cfa8e | no qualification promotion |
+
+| `scripts/tabwise/repair-session.mjs` | Source-bound data adapter for existing native session-data builder; no execution or qualification authority | `preparePatchedSession`; `test/tabwise-r3-native-source.test.mjs` |
+
+| `web/lib/server/repair-verdict.mjs`, verification API/UI, `supabase/migrations/20261103020000_repair_verdict.sql` | Qualified sealed evidence re-read, pre-dispatch owner oracle, narrow focus result and immutable replay/audit; qualification stays disabled | lifecycle/SQL/recorder browser tests |
+
+| `src/repair/oracle.mjs`, `web/components/RepairOracleReview.tsx`, patch oracle API, `web/lib/oracle-state.mjs` | Explicit source-bound owner check registration/readback before admission | lifecycle/oracle-state and repair-oracle browser tests |
+| `supabase/migrations/20261103030000_repair_oracle_admission.sql` | Pre-admission oracle tuple plus shared live-dispatch guard; no execution clearance | real PostgreSQL concurrent registration/admission and legacy-dispatch negatives |
