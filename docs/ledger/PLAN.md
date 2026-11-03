@@ -581,6 +581,32 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - BLOCKED: authentic producer manifests cannot reach genuine-unqualified with current independent verifier; no signer/attester. Integration test uses generated surrounding identity, never genuine native evidence.
 - Rollback: discard only this task's listed diff/new files after review.
 
+## R3 complete - user request 2026-11-03
+- Goal: "Complete R3 AI diagnosis and repair, end-to-end. This is full implementation work, not a minimum demo."
+- Base d75f04335dc0ba6c9e64fb92fcedc408c5867cfc; isolated feat/tabwise-r3-complete.
+- Files: diagnosis/contracts, repair application/review/persistence, API/UI, new SQL/tests and normal handoff ledgers.
+- Ceiling: zero incremental budget. No installs or live calls.
+- Verification commands/results: docs/engineering/Tabwise-R3-complete-handoff.md.
+- "Commit and push only the R3 branch. No merging or modifications to main."
+- PARTIAL: candidate worker/rerun integration, live acceptance and Claude review pending. Frozen thresholds unchanged.
+
+## R3 continuation from 5de07e6
+- User priorities: stale-source fix/recovery; immutable candidate worker consumption and rerun admission; positive/negative offline rerun tests; preserve all R2/W2a gates.
+- Files: src/repair/application.mjs and rerun.mjs; worker source staging/loader and guarded entry; rerun migration/API/UI; new tests and normal handoff ledgers.
+- Acceptance: targeted28, web/contracts148, R2 809, worker/review15, DB concurrency/rollback, typecheck/build; details in R3 handoff.
+- Zero paid calls, deployment or live NVDA. Commit/push R3 branch only. R3 real-runtime acceptance still false.
+
+### F-03 / local-first R3 integration stabilization
+- Owner request: complete local integration/regression, zero spend, isolated from production/diagnostic, no push/native run/merge.
+- Files: approved ci/offline-tests.json classifications; test/tabwise-d67-timing.test.mjs; session ledgers; ignored local evidence/harnesses.
+- Acceptance: root, web/contracts, ordinary/stress seed415682473, TypeScript/webpack build, actual production browser/API, isolated PostgreSQL migrations/SQL/concurrency, synthetic connected R3 flow, frozen/preflight/diff checks; all exit0.
+- Root1177 PASS/2 opt-in DB skips; both DB tests pass separately; web127, contracts21, browser/API15 PASS; ordinary+8stress60 files/1111 tests each PASS.
+- Local PostgreSQL18.3: seven migrations x three fresh DBs, seven SQL suites, two concurrency tests PASS; cluster stopped. Auth/storage stand-ins are not hosted qualification.
+- Connected synthetic R3: healthy/correct/wrong/rejected, stale-source and duplicate controls PASS; production modules plus real PG/Chromium, mocked model/native/human choices, L0; no native acceptance.
+- D67 source/dependency closure, assertions and30s/100ms deadlines retained; measured setup optimization only; timeout not reproduced.
+- CI parity: protection applied during repeat-1; repeat-2 through mixed used read-only tracked source/Guidepup lib. Original attributes restored after completion.
+- Rollback: revert isolated local correction commit; no runtime, migration, dependency, lock, activation or FEATURES changes.
+
 ### F-03 / R2 integration verification and projector binding
 - User-authorized review/test/feature-only publication; merge explicitly blocked pending native qualification and end-to-end capture/ingestion.
 - Files: r2-policy.mjs and r2-review.test.mjs; session ledgers. Add missing projector to source scope with mutation regression, preserve disabled gates.
@@ -602,3 +628,13 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - 30000ms test allowance and100ms production freshness remain unchanged. Late101ms commit refusal/zero sends retained in frozen sendguard tests.
 - Owner reported hosted Windows run41568247343 PASS at30ba7b5; prior stress correction was not changed.
 - Rollback: revert this isolated local correction commit. No remote action authorized.
+
+### F-03 / local R2-R3 integration reconciliation
+- Approved parents: R3a0dec78 + R233cfa8e; isolated fix/F-03-r2-r3-local-integration; no candidate/main rewrite.
+- Files: four conflicting documentation files, parent STATE archive, normal session LOG; automatic nonconflicting merge retained exactly.
+- Goal: retain both workstream histories/module inventories and one accurate integrated status without gate/source changes from resolution.
+- Acceptance: full root/web/contracts; ordinary and eight stress profiles; actual production browser/API; isolated PostgreSQL migration/RLS/concurrency/rollback plus connected synthetic R3; TypeScript/webpack build; frozen R1/preflight; preserved parent records and automatic non-doc index identities; clean local integration commit.
+- Budget: ₹0; no installs, native input, remote writes, deployment, paid APIs or approval enablement. Rollback: discard only isolated integration branch after review; parents untouched.
+- MEASURED combined acceptance: root1180 registered/1178 PASS/2 DB skips; both real DB tests separately PASS; web127/contracts21/browser-API15 PASS; types/webpack/frozen/preflight PASS.
+- Ordinary+8stress each61 files/1112 tests PASS, no watchdog/unconfirmed exit/stdio. Entire profile matrix used read-only tracked source/Guidepup files; saved attributes restored.
+- Resolution audit:430 automatic non-document blobs/modes preserved; both parent histories/inventories retained and STATE texts archived. Local PostgreSQL36 commands and connected synthetic R3 controls PASS; cluster stopped. Native acceptance unchanged/BLOCK.

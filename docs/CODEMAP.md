@@ -123,4 +123,12 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 
 | src/r2/capture-export.mjs | Source-bound capture JSON-pointer projection for exporter and bridge | captureObservationSources | test/r2-capture-export.test.mjs |
 
+| `src/meta/input.mjs`, `src/repair/{application,verify-application}.mjs`, `web/app/api/patches/[id]/apply/` | Observed input, immutable candidate materialization and independent patch inspection; no execution/verdict | R3 input/application tests |
+| `supabase/migrations/20261103000000_repair_application.sql`, `supabase/tests/repair-application.sql`, `test/tabwise-r3-database.test.mjs` | Atomic private persistence, immutable review/audit and local concurrency/recovery tests | R3 handoff |
+
+| `src/repair/rerun.mjs`, `scripts/tabwise/repair-{input,source}.mjs`, `web/app/api/runs/[id]/repair-input/` | Independent exact patched source consumption/staging after liveGate; dedicated-project read-only or staged input | R3 rerun/worker-input tests |
+| `supabase/migrations/20261103010000_repair_rerun.sql`, `test/tabwise-r3-{continuation,rerun,rerun-database,worker-input}.test.mjs` | Saved base bytes, gate-preserving immutable rerun admission, stale-source/concurrency/offline browser task controls | R3 continuation handoff |
+
 | `test/r2-provenance.test.mjs` | Unchanged O10 policy/simulated-child boundary tests separated from evidence I/O suite; offline/stress selected | CI-O10-watchdog handoff |
+
+| `docs/engineering/R2-R3-parent-states.md` | Exact R2/R3 parent STATE handoffs retained during local integration | Parents a0dec78 and 33cfa8e | no qualification promotion |

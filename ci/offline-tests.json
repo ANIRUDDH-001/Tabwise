@@ -1,4 +1,32 @@
 {
+  "tabwise-r3-application.test.mjs": {
+    "kind": "offline",
+    "reason": "synthetic immutable candidate validation and injected persistence; no external service or native runtime"
+  },
+  "tabwise-r3-continuation.test.mjs": {
+    "kind": "offline",
+    "reason": "stale-source refusal before injected persistence; no external service or native runtime"
+  },
+  "tabwise-r3-input.test.mjs": {
+    "kind": "offline",
+    "reason": "synthetic observed-input and diagnosis contract validation; no model calls or native runtime"
+  },
+  "tabwise-r3-worker-input.test.mjs": {
+    "kind": "offline",
+    "reason": "source-bundle validation with injected HTTP responses; no external service or native runtime"
+  },
+  "tabwise-r3-rerun.test.mjs": {
+    "kind": "browser",
+    "reason": "launches real local Chromium for synthetic correct/wrong repair task controls; run separately"
+  },
+  "tabwise-r3-database.test.mjs": {
+    "kind": "process",
+    "reason": "opt-in isolated PostgreSQL connections and real concurrent candidate transactions; run separately"
+  },
+  "tabwise-r3-rerun-database.test.mjs": {
+    "kind": "process",
+    "reason": "opt-in isolated PostgreSQL connections and real concurrent rerun transactions; run separately"
+  },
   "r2-admission.test.mjs": {
     "kind": "harness",
     "reason": "signed receipt and simulated transaction tests; bounded controlled Node IPC children only; no native runtime"

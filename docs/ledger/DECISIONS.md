@@ -654,6 +654,22 @@ User answer: "Do not stop merely because test registration needs a narrowly scop
 User answer: "If an independent native signer/attester is unavailable, leave that requirement BLOCKED. Do not manufacture attestation or qualification PASS."
 Consequence: raw-capture exporter wiring and additive offline registration; no classification or authority promotion.
 
+## R3 user authorization - 2026-11-02T20:10:47Z
+User: "Tabwise: Complete R3 AI diagnosis and repair, end-to-end. This is full implementation work, not a minimum demo." "Use a new isolated worktree and branch feat/tabwise-r3-complete. Do not touch Codex 1's worktree." "₹0 incremental budget." "Commit and push only the R3 branch. No merging or modifications to main." No installs/paid calls performed. R3 acceptance remains incomplete.
+
+## R3 continuation authorization - 2026-11-02T20:26:45Z
+User: "Continue R3 from commit 5de07e6. Do not merge." "Correct the application-layer stale-source check; preserve safe idempotent recovery." "Implement qualified patched-source worker consumption and rerun admission using immutable candidate hashes and exact source binding." "Commit and push only the R3 branch." "No paid Muse calls, deployments, live NVDA or unrelated audits." All validation remained offline; execution/source-readiness gates left closed.
+
+## F-03 local stabilization inventory approval
+User answer: "Approve corrected inventory (Recommended): preserves CI capability boundaries; ₹0, no deadline changes."
+Consequence: classify four R3 offline files, one Chromium browser file and two opt-in PostgreSQL process files in ci/offline-tests.json; no watchdog/test/deadline change.
+User scope: "Keep R2 production, diagnostic and R3 changes isolated. No pushes, native reruns or merges without review."
+
+## F-03 local-first R3 task authorization
+User: "Complete local integration and regression checks." "Keep R2 production, diagnostic and R3 changes isolated."
+User: "You may commit corrections locally on the appropriate feature branches."
+Consequence: local fix/F-03-local-stabilization-r3 correction and handoff only; approved CI classification, D67 test setup, no runtime/activation/native/publication change.
+
 ## F-03 R2 verification and native diagnostic — owner priority updates
 User answer: "Do not merge into main until native capture, evidence verification, product ingestion and required qualification have passed."
 User answer: "Implement, test and push the diagnostic branch. Stop only when explicit approval or a genuine external dependency is required."
@@ -666,3 +682,10 @@ User: "Fix PR #19 CI failure without weakening tests." "Make the smallest eviden
 User: "Continue local-first stabilization"; "Investigate the D67 timing timeout without relaxing production guards."; "You may commit corrections locally on the appropriate feature branches."
 User: "Do not revisit the previous slow-fs-30 CI failure unless your local testing reveals a new regression."
 Consequence: isolated fix/F-03-local-stabilization-r2 from30ba7b5; instrument/optimize D67 fixture copy only; preserve existing stress fix and gates; no publication/native input.
+
+## F-03 local R2/R3 integration authorization
+User: "APPROVED: Local-only R2/R3 integration conflict reconciliation."
+User: "Create an isolated integration branch from R3 a0dec78 and merge R2 33cfa8e locally."
+User: "Do not use blanket ours/theirs resolution. Preserve the already-tested candidate commits."
+User: "Create a separate local integration commit and return its SHA, exact diff, test results and remaining blockers."
+Consequence: union both histories/inventories, archive parent states, validate combined automatic runtime tree; local commit only, no remote/native/deploy/paid calls.

@@ -1,21 +1,25 @@
-# STATE - production local engineering matrix green
-Updated: 2026-11-03T03:54:03Z
-Base: 30ba7b55fed77a8374ca449d17c2725128801def
-Branch: fix/F-03-local-stabilization-r2
+# STATE - integrated R2/R3 local engineering matrix green
+Updated: 2026-11-03T04:38:29Z
+Branch: fix/F-03-r2-r3-local-integration
+Parents: R3a0dec78d3268abc4dbf6584d8d2e92484bf14c25 + R233cfa8eb55846146e662f106ab4ece10e5cbaf36
 ## Now
-- MEASURED root1161, web127, contracts21, browser/API15 PASS; types/build/preflight/frozen/diff checks exit0.
-- Ordinary and all8 stress profiles:57/57 files,1099/1099 tests each; no watchdog/unconfirmed exit/stdio closure.
-- D67 full511-file closure retained; fixture-copy optimization and phase timings only; 30s/100ms limits unchanged.
-- Local timeout not reproduced; no claim that hosted timing variance is explained.
-- Runtime, qualification/activation/admission policies, frozen R1 and prior stress correction unchanged.
-- Separate Codex review found no actionable findings; Claude cross-tool review outstanding.
-- Original worktrees/branches left untouched; local correction/handoff committed together.
+- Four documentation conflicts reconciled by retaining both histories/inventories; no blanket side selection.
+- Both original STATE texts archived in docs/engineering/R2-R3-parent-states.md; candidate commits/main preserved.
+- MEASURED root1180 registered:1178 PASS, zero failures,2 opt-in DB skips; both DB tests passed separately.
+- Web127/contracts21/production browser-API15 PASS; types/webpack build/frozen R1/preflight/diff checks exit0.
+- Ordinary+8stress:61/61 files,1112/1112 tests each; no watchdog or unconfirmed exit/stdio closure.
+- Entire profile matrix used hosted-parity read-only protection; original file attributes restored.
+- Fresh local PG18.3:7 migrations x3 DBs,7 SQL suites,2 concurrency tests PASS; cluster stopped.
+- Connected synthetic R3 healthy/correct/wrong/rejected/stale/duplicate/source-staging controls PASS; L0 fixtures, no NVDA acceptance.
+- 430 non-document blobs/modes exactly match automatic merge; manual resolution changed no runtime/security control.
+- R2 capture-export scope/provenance split and R3 workflow preserved; qualification/activation/FEATURES records unchanged.
+- Independent Codex reviewer found no blocker; Claude cross-tool review remains outstanding.
 ## Next / blocked
-- Owner review local correction commit and consolidated cache/local-stabilization report.
-- No push, merge, native rerun or approval variable; R2/W2a/R3/R7 native qualification remains blocked.
-- R3 results remain isolated in its own worktree; consolidated report is copied into cache/local-stabilization.
+- User review new local integration commit and cache/local-stabilization/INTEGRATION-REPORT.md with exact parent/resolution diffs.
+- Native R2/W2a/R3/R7 acceptance, provider binding/quiescence/attestation and genuine withheld reruns remain blocked.
+- Hosted authenticated checks/CI not run. No push, remote merge, native execution, deployment, approvals or paid model calls.
 ## Handoff
-Uncommitted: none after the local correction/handoff commit.
-Verified by: node scripts/offline-tests.mjs --profile stress --seed 415682473 ->8x57 files/1099 tests PASS.
-Local commit: git log -1; evidence: cache/local-stabilization (raw logs and per-file profiles).
-Review needed from: user (Claude cross-tool review before integration).
+Uncommitted: none after local integration commit; original R2/R3 candidate worktrees untouched.
+Verified by: node scripts/offline-tests.mjs --profile stress --seed 415682473 ->8x61 files/1112 tests PASS.
+Local commit: git log -1; parents a0dec78 +33cfa8e; full command evidence in cache/local-stabilization/INTEGRATION-RESULTS.json.
+Review needed from: user before any publication; Claude cross-tool review before qualification/integration acceptance.
