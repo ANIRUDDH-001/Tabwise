@@ -592,3 +592,13 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Files: test/r2-evidence.test.mjs, new test/r2-provenance.test.mjs, ci/offline-tests.json selection, normal ledgers/handoff.
 - Acceptance: all original69 tests retained byte-equivalently; two files included in unchanged ordinary/stress budgets; targeted runs, harness regression, frozen R1.
 - Feature-only normal push; no merge; other session holding production pushes.
+
+### F-03 / local-first production engineering stabilization
+- Owner request: exact 30ba7b5 source, isolated local correction, zero spend, no push/native run/merge.
+- Files: test/tabwise-d67-timing.test.mjs and normal session ledgers. Runtime/guards/activation/frozen R1 unchanged.
+- Acceptance: root node --test --test-timeout=10000 "test/*.test.mjs"; scripts/offline-tests.mjs ordinary/stress seed415682473; web/contracts tests, types/build/browser, preflight/frozen R1/diff checks; exit0.
+- MEASURED: root1161; web127; contracts21; production browser/API15; ordinary57 files/1099 tests; eight stress profiles57 files/1099 tests each; no watchdog or unconfirmed process/stdio closure.
+- D67 timeout did not reproduce. Instrumented full511-file closure; copy-only setup improved1994.521ms to488.4676ms; full dependency copy and existing mutation assertions retained.
+- 30000ms test allowance and100ms production freshness remain unchanged. Late101ms commit refusal/zero sends retained in frozen sendguard tests.
+- Owner reported hosted Windows run41568247343 PASS at30ba7b5; prior stress correction was not changed.
+- Rollback: revert this isolated local correction commit. No remote action authorized.

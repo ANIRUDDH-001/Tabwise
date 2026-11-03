@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdirSync,mkdtempSync,rmSync,cpSync,chmodSync,readFileSync,writeFileSync,existsSync} from 'node:fs';
+import {mkdirSync,mkdtempSync,rmSync,cpSync,copyFileSync,chmodSync,readFileSync,writeFileSync,existsSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {resolve,dirname,join} from 'node:path';
 import {tmpdir} from 'node:os';
@@ -13,27 +13,39 @@ import {loadQualificationRuntime} from '../scripts/tabwise/qualification-loader.
 test('B1 actual source closure and frozen guard validation timings on this host; no physical transport',{timeout:30000},async t=>{
  const root=mkdtempSync(join(tmpdir(),'tabwise-d67-timing-'));
  const output=resolve(process.env.TABWISE_TIMING_OUTPUT??`cache/timing/d67-${process.pid}-${randomUUID()}.json`);let measurement;
+ const phases={};let started=performance.now();
+ const mark=name=>{const now=performance.now();phases[name]=now-started;started=now;};
  t.after(()=>{
-  rmSync(root,{recursive:true,force:true,maxRetries:10,retryDelay:100});assert.equal(existsSync(root),false,'disposable timing fixture cleanup');
-  mkdirSync(dirname(output),{recursive:true});writeFileSync(output,JSON.stringify({...measurement,fixture_cleaned:true},null,2),{flag:'wx'});
+  const cleanupStart=performance.now();rmSync(root,{recursive:true,force:true,maxRetries:10,retryDelay:100});assert.equal(existsSync(root),false,'disposable timing fixture cleanup');phases.cleanup_ms=performance.now()-cleanupStart;
+  mkdirSync(dirname(output),{recursive:true});writeFileSync(output,JSON.stringify({...measurement,phases,fixture_cleaned:true},null,2),{flag:'wx'});
   console.log(JSON.stringify({timing_evidence:output,fixture_cleaned:true}));
  });
  const git=(...args)=>execFileSync('git',['-c','core.autocrlf=false',...args],{cwd:root,encoding:'utf8'}).trim();
  const files=existsSync('../source-manifest.json')?JSON.parse(readFileSync('../source-manifest.json','utf8')).map(row=>row.path):execFileSync('git',['ls-files','-z'],{encoding:'utf8'}).split('\0').filter(Boolean);
- for(const file of new Set([...files,...QUALIFICATION_FILES])){mkdirSync(dirname(resolve(root,file)),{recursive:true});cpSync(resolve(file),resolve(root,file));}
+ // Preserve the complete tracked source closure. Each parent is created once;
+ // regular source files need a byte copy, not cp's recursive metadata traversal.
+ const parents=new Set();
+ for(const file of new Set([...files,...QUALIFICATION_FILES])){const destination=resolve(root,file),parent=dirname(destination);if(!parents.has(parent)){mkdirSync(parent,{recursive:true});parents.add(parent);}copyFileSync(resolve(file),destination);}
+ mark('fixture_copy_ms');
  cpSync('node_modules/@guidepup/guidepup',resolve(root,'node_modules/@guidepup/guidepup'),{recursive:true});
+ mark('dependency_copy_ms');
  chmodSync(resolve(root,'packages/contracts/limits.mjs'),0o600);
  git('init','-q');git('add','.');git('-c','user.name=Offline fixture','-c','user.email=offline@example.invalid','commit','-qm','offline fixture');
+ mark('git_init_ms');
  mkdirSync(resolve(root,'cache/ignored'),{recursive:true});writeFileSync(resolve(root,'cache/ignored/setup.txt'),'ignored setup simulation');
  writeFileSync(resolve(root,'node_modules/setup-ignored.txt'),'ignored dependency simulation');assert.equal(git('status','--porcelain','--untracked-files=all'),'');
  const phase=createQualificationIntegrity({root,head:git('rev-parse','HEAD'),reviewedDigest:qualificationDigest(root)});
+ mark('source_integrity_ms');
  const runtime=await loadQualificationRuntime({root,additionalIntegrity:phase.checkSend});
+ mark('runtime_load_ms');
  const guard=runtime.guard,ack=async()=>({ack:null,reasons:[]});ack.before=async()=>[];guard.setAck(ack);guard.setCheck(async()=>[]);
  const timings=[],refusals=[];
  for(let i=0;i<50;i++){
   guard.arm('offline timing');const start=performance.now();const token=await guard.admit({path:'nvda',keys:[{vk:162}]});const committed=guard.commit(token);timings.push(performance.now()-start);if(!committed){refusals.push(guard.status());assert.equal(guard.status().kind,'pre');break;}await guard.release(token);guard.disarm();
  }
+ mark('guard_execution_ms');
  assert.equal(phase.verifyPhase().ok,true);
+ mark('phase_verification_ms');
  const ordered=[...timings].sort((a,b)=>a-b),result={platform:process.platform,node:process.version,scope:'actual source identity + frozen vendor/guard validation; fake foreground and acknowledgement; no NVDA or transport',samples:timings.length,file_count:phase.receipt.file_count,min_ms:ordered[0],median_ms:ordered[Math.floor(ordered.length/2)],p95_ms:ordered[Math.floor((ordered.length-1)*.95)],max_ms:ordered.at(-1),refusals,threshold_ms:100,live_timing_clearance:false};
  measurement=result;console.log(JSON.stringify(result));
  assert.ok(result.samples>0); // Scheduling can exceed 100 ms: the frozen gate must refuse, never relax it.

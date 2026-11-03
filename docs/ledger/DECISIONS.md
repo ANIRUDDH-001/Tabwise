@@ -661,3 +661,8 @@ Consequence: draft PR19 for offline CI only; preserve reviewed digest-binding co
 
 ## CI O10 watchdog correction - 2026-11-02T20:40:37Z
 User: "Fix PR #19 CI failure without weakening tests." "Make the smallest evidence-backed fix." "Do not blindly extend timeouts, weaken assertions, disable stress tests or modify R2 qualification gates." "Commit and push the correction to the R2 branch only if justified. Coordinate with the other Codex session to avoid conflicting pushes. No merging." Scope: separate unchanged O10 tests into their own offline file and classify it for all stress profiles; existing deadline/profile budgets unchanged. Other session has left production branch untouched for this correction.
+
+## F-03 local-first production stabilization authorization
+User: "Continue local-first stabilization"; "Investigate the D67 timing timeout without relaxing production guards."; "You may commit corrections locally on the appropriate feature branches."
+User: "Do not revisit the previous slow-fs-30 CI failure unless your local testing reveals a new regression."
+Consequence: isolated fix/F-03-local-stabilization-r2 from30ba7b5; instrument/optimize D67 fixture copy only; preserve existing stress fix and gates; no publication/native input.

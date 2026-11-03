@@ -1,18 +1,21 @@
-# STATE - PR19 watchdog scheduling correction verified offline
-Updated: 2026-11-03T02:47:10Z
-Detached worktree app-r2-ci-o10 at fb93744 plus CI-only correction.
+# STATE - production local engineering matrix green
+Updated: 2026-11-03T03:38:53Z
+Base: 30ba7b55fed77a8374ca449d17c2725128801def
+Branch: fix/F-03-local-stabilization-r2
 ## Now
-- Artifact49 completed tests consume57711.1421ms of60000ms file allocation.
-- No proven O10-11 hang: isolated fake-child test passed157.9639ms; watchdog cleanup confirmed.
-- Unchanged O10 block moved to separate offline file14 tests; evidence retains55; total69.
-- All deadlines/profile budgets, assertions, runtime and qualification gates unchanged.
-## Verification (MEASURED ci-o10-41517337074)
-- Both files PASS ordinary, slow-fs-30, slow-fs-100, mixed; no skipped tests.
-- R2 regression810/810; CI harness22/22; frozen R1 ok:true/errors:[].
-- Exact test-block preservation mechanically checked; separate review no findings; diff check PASS.
-## Next / handoff
-- Normal push correction to feat/tabwise-r2-production-bridge only; no merge.
-- Other Codex session holds production pushes.
-- Hosted CI after push remains pending; no exact local60000ms slowdown reproduction claimed.
-- docs/engineering/CI-O10-watchdog.md contains evidence and limitations.
-- User also assigned native attempt2 diagnostic follow-up; separate worktree/commit, no rerun authorization.
+- MEASURED root1161, web127, contracts21, browser/API15 PASS; types/build/preflight/frozen/diff checks exit0.
+- Ordinary and all8 stress profiles:57/57 files,1099/1099 tests each; no watchdog/unconfirmed exit/stdio closure.
+- D67 full511-file closure retained; fixture-copy optimization and phase timings only; 30s/100ms limits unchanged.
+- Local timeout not reproduced; no claim that hosted timing variance is explained.
+- Runtime, qualification/activation/admission policies, frozen R1 and prior stress correction unchanged.
+- Separate Codex review found no actionable findings; Claude cross-tool review outstanding.
+- Original worktrees/branches left untouched; local correction/handoff committed together.
+## Next / blocked
+- Owner review local correction commit and consolidated cache/local-stabilization report.
+- No push, merge, native rerun or approval variable; R2/W2a/R3/R7 native qualification remains blocked.
+- R3 separate local stress matrix continues in its own worktree.
+## Handoff
+Uncommitted: none after the local correction/handoff commit.
+Verified by: node scripts/offline-tests.mjs --profile stress --seed415682473 ->8x57 files/1099 tests PASS.
+Local commit: git log -1; evidence: cache/local-stabilization (raw logs and per-file profiles).
+Review needed from: user (Claude cross-tool review before integration).
