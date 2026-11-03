@@ -23,3 +23,17 @@ Uncommitted: none after local integration commit; original R2/R3 candidate workt
 Verified by: node scripts/offline-tests.mjs --profile stress --seed 415682473 ->8x61 files/1112 tests PASS.
 Local commit: git log -1; parents a0dec78 +33cfa8e; full command evidence in cache/local-stabilization/INTEGRATION-RESULTS.json.
 Review needed from: user before any publication; Claude cross-tool review before qualification/integration acceptance.
+
+## Demo preparation update — 2026-11-03T06:31:45Z
+Task: F-03/demo-polish; feat/F-03-demo-polish; base/HEAD remains 4ccc54442bdba81febe1cac7f1c97700ead3fe76.
+- Integration record above is retained verbatim; its measurements are historical, not rerun by this demo task.
+- Local presentation polish and transcript-only labels; planned 2:30 product-led storyboard in docs/engineering/Tabwise-demo-plan.md.
+- MEASURED (owner report): GitHub 41584715963 attempt 2 — authorization PASS; installation PASS; NVDA startup failed on owner query timeout.
+- Same diagnostic: zero physical sends; artifact integrity PASS; native qualification BLOCK. No native run performed by this task.
+- No live Muse diagnosis, native repaired-journey verification or completed R7 acceptance claimed; qualification records unchanged.
+- MEASURED demo-polish-correction-20261103: web/contracts148, browser15, transcript links, types/build/R1/preflight/whitespace PASS; axe30 zero/layouts45 zero.
+- Last verification: node cache/demo-polish/revision/finalize.mjs + git diff --check; exact patches/inventory in cache/demo-polish/revision/.
+### Demo handoff (separate from integrated handoff above)
+Uncommitted: web/app/{globals.css,page.tsx,w/demo/page.tsx}; web/components/PassRunDetail.tsx; demo plan/results; normal ledger/CODEMAP records.
+Next: user/Claude cross-tool review; native/hosted acceptance remains blocked; no publication or execution authorized.
+No commits/push/merge/deploy/native execution/paid calls; other worktrees and regression guards preserved.

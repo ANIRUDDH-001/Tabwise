@@ -638,3 +638,19 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - MEASURED combined acceptance: root1180 registered/1178 PASS/2 DB skips; both real DB tests separately PASS; web127/contracts21/browser-API15 PASS; types/webpack/frozen/preflight PASS.
 - Ordinary+8stress each61 files/1112 tests PASS, no watchdog/unconfirmed exit/stdio. Entire profile matrix used read-only tracked source/Guidepup files; saved attributes restored.
 - Resolution audit:430 automatic non-document blobs/modes preserved; both parent histories/inventories retained and STATE texts archived. Local PostgreSQL36 commands and connected synthetic R3 controls PASS; cluster stopped. Native acceptance unchanged/BLOCK.
+
+### F-03/demo-polish — approved bounded demo task
+- Base: 4ccc54442bdba81febe1cac7f1c97700ead3fe76; feat/F-03-demo-polish; separate managed worktree.
+- Goal: coherent existing UI and an honest 2–3-minute hackathon storyboard/recording plan.
+- Files: web/app presentation, web/components presentation; docs/engineering/Tabwise-demo-{plan,results}.md; normal session ledgers/CODEMAP.
+- Acceptance: node --test web/test/*.test.mjs packages/contracts/test/*.test.mjs; npm run typecheck --prefix web; npm run build --prefix web -- --webpack.
+- Browser: node --test web/test/web-smoke.browser.mjs web/test/product-integration.browser.mjs web/test/recorder.browser.mjs (loopback); local axe/keyboard/mobile/print checks.
+- Preservation: node scripts/check-r1-baseline.mjs; node scripts/preflight.mjs; git diff --check; protected tracked blobs identical to base.
+- Ceiling: $0 paid services; two hours. No installs, test edits, native input, commit/push/deploy/merge, model calls or execution/qualification/evidence changes.
+- Rollback: discard only this task's isolated diff; other worktrees untouched.
+
+#### F-03/demo-polish — owner-requested correction
+- Preserve base integrated STATE verbatim; append separate demo status. Record owner-reported41584715963 attempt2 failure without native rerun.
+- Correct transcript-only labels in web/app/{page,w/demo/page}.tsx and web/components/PassRunDetail.tsx; revise existing demo plan/results and normal ledgers only.
+- Product interaction/provenance/fail-closed evidence dominate planned2:30; simulated repair explicitly labelled; no live Muse/native repair/R7 acceptance claims.
+- Same acceptance commands and zero-paid-services ceiling as above; no tests/guards/frozen files/runtime/APIs/workflows/policies/evidence changes.

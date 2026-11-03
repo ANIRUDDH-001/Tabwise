@@ -689,3 +689,17 @@ User: "Create an isolated integration branch from R3 a0dec78 and merge R2 33cfa8
 User: "Do not use blanket ours/theirs resolution. Preserve the already-tested candidate commits."
 User: "Create a separate local integration commit and return its SHA, exact diff, test results and remaining blockers."
 Consequence: union both histories/inventories, archive parent states, validate combined automatic runtime tree; local commit only, no remote/native/deploy/paid calls.
+
+## D-demo-polish 2026-11-03T05:40:02Z — bounded local demo preparation
+Question: approve F-03/demo-polish? | Options: bounded demo polish (recommended) / review and storyboard only.
+User answer: "Approve bounded demo polish (Recommended) — existing UI and demo documentation only; $0, up to two hours; local and reversible."
+Consequence: isolated feat/F-03-demo-polish at 4ccc54442bdba81febe1cac7f1c97700ead3fe76; web presentation and demo docs only.
+No installs, commits, remote writes, paid calls or native input; qualification, gates, provenance and frozen R1 unchanged.
+Reversal: discard this isolated task's diff after review.
+
+## D-demo-polish-correction 2026-11-03T06:31:45Z — scoped review corrections
+User instruction: "Review and correct the existing F-03/demo-polish candidate in the same isolated worktree."
+User instruction: "Preserve the full integrated R2/R3 engineering state in docs/ledger/STATE.md. Append the demo preparation as a separate update rather than replacing the prior integration evidence."
+Scope: owner-reported native diagnostic41584715963/attempt2, transcript labels, product-led storyboard, normal records; existing zero-paid-services ceiling.
+Acceptance: affected web/contracts/browser tests, typecheck/build, frozen R1, preflight, whitespace and exact protected-path diff.
+No runtime/API/workflow/qualification/evidence/guard changes, commits, remote writes or native execution.
