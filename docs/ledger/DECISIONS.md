@@ -669,3 +669,23 @@ User scope: "Keep R2 production, diagnostic and R3 changes isolated. No pushes, 
 User: "Complete local integration and regression checks." "Keep R2 production, diagnostic and R3 changes isolated."
 User: "You may commit corrections locally on the appropriate feature branches."
 Consequence: local fix/F-03-local-stabilization-r3 correction and handoff only; approved CI classification, D67 test setup, no runtime/activation/native/publication change.
+
+## F-03 R2 verification and native diagnostic — owner priority updates
+User answer: "Do not merge into main until native capture, evidence verification, product ingestion and required qualification have passed."
+User answer: "Implement, test and push the diagnostic branch. Stop only when explicit approval or a genuine external dependency is required."
+Consequence: draft PR19 for offline CI only; preserve reviewed digest-binding correction; new isolated NONQUALIFYING diagnostic and exact approval packet before native input. Production qualification/admission policies unchanged.
+
+## CI O10 watchdog correction - 2026-11-02T20:40:37Z
+User: "Fix PR #19 CI failure without weakening tests." "Make the smallest evidence-backed fix." "Do not blindly extend timeouts, weaken assertions, disable stress tests or modify R2 qualification gates." "Commit and push the correction to the R2 branch only if justified. Coordinate with the other Codex session to avoid conflicting pushes. No merging." Scope: separate unchanged O10 tests into their own offline file and classify it for all stress profiles; existing deadline/profile budgets unchanged. Other session has left production branch untouched for this correction.
+
+## F-03 local-first production stabilization authorization
+User: "Continue local-first stabilization"; "Investigate the D67 timing timeout without relaxing production guards."; "You may commit corrections locally on the appropriate feature branches."
+User: "Do not revisit the previous slow-fs-30 CI failure unless your local testing reveals a new regression."
+Consequence: isolated fix/F-03-local-stabilization-r2 from30ba7b5; instrument/optimize D67 fixture copy only; preserve existing stress fix and gates; no publication/native input.
+
+## F-03 local R2/R3 integration authorization
+User: "APPROVED: Local-only R2/R3 integration conflict reconciliation."
+User: "Create an isolated integration branch from R3 a0dec78 and merge R2 33cfa8e locally."
+User: "Do not use blanket ours/theirs resolution. Preserve the already-tested candidate commits."
+User: "Create a separate local integration commit and return its SHA, exact diff, test results and remaining blockers."
+Consequence: union both histories/inventories, archive parent states, validate combined automatic runtime tree; local commit only, no remote/native/deploy/paid calls.

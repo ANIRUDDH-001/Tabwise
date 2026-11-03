@@ -606,3 +606,35 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - D67 source/dependency closure, assertions and30s/100ms deadlines retained; measured setup optimization only; timeout not reproduced.
 - CI parity: protection applied during repeat-1; repeat-2 through mixed used read-only tracked source/Guidepup lib. Original attributes restored after completion.
 - Rollback: revert isolated local correction commit; no runtime, migration, dependency, lock, activation or FEATURES changes.
+
+### F-03 / R2 integration verification and projector binding
+- User-authorized review/test/feature-only publication; merge explicitly blocked pending native qualification and end-to-end capture/ingestion.
+- Files: r2-policy.mjs and r2-review.test.mjs; session ledgers. Add missing projector to source scope with mutation regression, preserve disabled gates.
+- Acceptance: full root1161/1161, R2810/810, web127/127, contracts21/21, browser/API15/15, TypeScript/build/frozen/preflight PASS; hosted PR19 CI pending.
+- Budget: no paid infrastructure/model calls/dependency changes. Rollback: revert feature correction; main untouched.
+
+## PR19 CI O10 file-watchdog correction
+- Approved user task: diagnose run41517337074 slow-fs-30 r2-evidence file watchdog; zero infrastructure, no gate/threshold changes.
+- Files: test/r2-evidence.test.mjs, new test/r2-provenance.test.mjs, ci/offline-tests.json selection, normal ledgers/handoff.
+- Acceptance: all original69 tests retained byte-equivalently; two files included in unchanged ordinary/stress budgets; targeted runs, harness regression, frozen R1.
+- Feature-only normal push; no merge; other session holding production pushes.
+
+### F-03 / local-first production engineering stabilization
+- Owner request: exact 30ba7b5 source, isolated local correction, zero spend, no push/native run/merge.
+- Files: test/tabwise-d67-timing.test.mjs and normal session ledgers. Runtime/guards/activation/frozen R1 unchanged.
+- Acceptance: root node --test --test-timeout=10000 "test/*.test.mjs"; scripts/offline-tests.mjs ordinary/stress seed415682473; web/contracts tests, types/build/browser, preflight/frozen R1/diff checks; exit0.
+- MEASURED: root1161; web127; contracts21; production browser/API15; ordinary57 files/1099 tests; eight stress profiles57 files/1099 tests each; no watchdog or unconfirmed process/stdio closure.
+- D67 timeout did not reproduce. Instrumented full511-file closure; copy-only setup improved1994.521ms to488.4676ms; full dependency copy and existing mutation assertions retained.
+- 30000ms test allowance and100ms production freshness remain unchanged. Late101ms commit refusal/zero sends retained in frozen sendguard tests.
+- Owner reported hosted Windows run41568247343 PASS at30ba7b5; prior stress correction was not changed.
+- Rollback: revert this isolated local correction commit. No remote action authorized.
+
+### F-03 / local R2-R3 integration reconciliation
+- Approved parents: R3a0dec78 + R233cfa8e; isolated fix/F-03-r2-r3-local-integration; no candidate/main rewrite.
+- Files: four conflicting documentation files, parent STATE archive, normal session LOG; automatic nonconflicting merge retained exactly.
+- Goal: retain both workstream histories/module inventories and one accurate integrated status without gate/source changes from resolution.
+- Acceptance: full root/web/contracts; ordinary and eight stress profiles; actual production browser/API; isolated PostgreSQL migration/RLS/concurrency/rollback plus connected synthetic R3; TypeScript/webpack build; frozen R1/preflight; preserved parent records and automatic non-doc index identities; clean local integration commit.
+- Budget: ₹0; no installs, native input, remote writes, deployment, paid APIs or approval enablement. Rollback: discard only isolated integration branch after review; parents untouched.
+- MEASURED combined acceptance: root1180 registered/1178 PASS/2 DB skips; both real DB tests separately PASS; web127/contracts21/browser-API15 PASS; types/webpack/frozen/preflight PASS.
+- Ordinary+8stress each61 files/1112 tests PASS, no watchdog/unconfirmed exit/stdio. Entire profile matrix used read-only tracked source/Guidepup files; saved attributes restored.
+- Resolution audit:430 automatic non-document blobs/modes preserved; both parent histories/inventories retained and STATE texts archived. Local PostgreSQL36 commands and connected synthetic R3 controls PASS; cluster stopped. Native acceptance unchanged/BLOCK.

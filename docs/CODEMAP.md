@@ -128,3 +128,7 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 
 | `src/repair/rerun.mjs`, `scripts/tabwise/repair-{input,source}.mjs`, `web/app/api/runs/[id]/repair-input/` | Independent exact patched source consumption/staging after liveGate; dedicated-project read-only or staged input | R3 rerun/worker-input tests |
 | `supabase/migrations/20261103010000_repair_rerun.sql`, `test/tabwise-r3-{continuation,rerun,rerun-database,worker-input}.test.mjs` | Saved base bytes, gate-preserving immutable rerun admission, stale-source/concurrency/offline browser task controls | R3 continuation handoff |
+
+| `test/r2-provenance.test.mjs` | Unchanged O10 policy/simulated-child boundary tests separated from evidence I/O suite; offline/stress selected | CI-O10-watchdog handoff |
+
+| `docs/engineering/R2-R3-parent-states.md` | Exact R2/R3 parent STATE handoffs retained during local integration | Parents a0dec78 and 33cfa8e | no qualification promotion |
