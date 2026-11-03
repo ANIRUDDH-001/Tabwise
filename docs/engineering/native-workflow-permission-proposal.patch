@@ -1,0 +1,54 @@
+--- a/.github/workflows/tabwise-r2.yml
++++ b/.github/workflows/tabwise-r2.yml
+@@ -41,6 +41,18 @@
+         description: SHA-256 of the exact plan bytes (must equal r2-status.json plan_sha256)
+         required: true
+         type: string
++      product_run_id:
++        description: Immutable admitted product UUID
++        required: true
++        type: string
++      product_request_sha256:
++        description: Exact stored request digest
++        required: true
++        type: string
++      product_nonce:
++        description: Persisted one-intent claim nonce
++        required: true
++        type: string
+ 
+ permissions:
+   contents: read
+@@ -50,7 +62,32 @@
+   cancel-in-progress: false
+ 
+ jobs:
++  product-bind:
++    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.run_attempt == '1'
++    runs-on: ubuntu-24.04
++    timeout-minutes: 3
++    permissions:
++      contents: read
++      id-token: write
++    env:
++      PRODUCT_RUN_ID: ${{ inputs.product_run_id }}
++      PRODUCT_REQUEST_SHA256: ${{ inputs.product_request_sha256 }}
++      PRODUCT_NONCE: ${{ inputs.product_nonce }}
++    steps:
++      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
++        with:
++          persist-credentials: false
++      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
++        with:
++          node-version: 24.22.1
++      - run: node scripts/tabwise/product-workflow-boundary.mjs
++      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
++        with:
++          name: tabwise-product-delivery-${{ github.run_id }}-1
++          path: ${{ runner.temp }}/tabwise-product-delivery/delivery.json
++          if-no-files-found: error
+   r2:
++    needs: product-bind
+     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.run_attempt == '1'
+     runs-on: windows-2025
+     timeout-minutes: 60

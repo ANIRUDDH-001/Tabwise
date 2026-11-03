@@ -14,6 +14,7 @@ export async function recordNativeDispatch({userId,runId,requestSha256,store,sen
   if(data.run_url!==`https://api.github.com/repos/ANIRUDDH-001/Tabwise/actions/runs/${id}`||data.html_url!==`https://github.com/ANIRUDDH-001/Tabwise/actions/runs/${id}`)throw Error('invalid dispatch response identity');
   return nativeRequestView(await store.transition(userId,runId,requestSha256,'accepted',id));
  }catch{
+  try{const recovered=await store.read(userId,runId);if(recovered?.request_sha256===requestSha256&&['DISPATCH_ACCEPTED','RUN_BOUND'].includes(recovered.state))return nativeRequestView(recovered);}catch{}
   // SQL failure after an accepted POST stays ambiguous too. This code never resends.
   try{return nativeRequestView(await store.transition(userId,runId,requestSha256,'unknown'));}catch{return {state:'DISPATCH_UNKNOWN',message:messages.DISPATCH_UNKNOWN,request_sha256:requestSha256,github_run_id:null,native_qualified:false,can_dispatch:false,persistence_uncertain:true};}
  }

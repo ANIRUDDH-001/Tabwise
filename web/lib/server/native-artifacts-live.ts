@@ -1,4 +1,5 @@
 import 'server-only';
+import {withVerificationDirectory} from './verification-directory.mjs';
 import {mkdtemp,mkdir,writeFile,readFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,dirname,resolve} from 'node:path';
@@ -21,15 +22,20 @@ export async function nativeIngestPOST(request:Request,id:string){return endpoin
   readRemote:async(gh:string)=>(await github(`/actions/runs/${gh}`)).data,
   listArtifacts:async(gh:string)=>(await github(`/actions/runs/${gh}/artifacts`)).data.artifacts,
   download:downloadArtifact,
-  verifyHosted:async(a:{files:Record<string,Uint8Array>,bundle:Uint8Array})=>{
+  verifyHosted:async(a:{files:Record<string,Uint8Array>,bundle:Uint8Array,ingest_sha256:string,forensics:{evidenceArchive:Uint8Array,attestationArchive:Uint8Array}})=>{
    if(!configuration.provenance?.policy||!configuration.provenance.trusted_root)throw Error('reviewed hosted verifier configuration missing');
-   const dir=await mkdtemp(join(tmpdir(),'tabwise-native-ingest-'));
+   return withVerificationDirectory(async(dir:string)=>{
    for(const [path,bytes] of Object.entries(a.files)){const target=resolve(dir,path);if(!target.startsWith(resolve(dir)+'/')&&!target.startsWith(resolve(dir)+'\\'))throw Error('native staging path');await mkdir(dirname(target),{recursive:true});await writeFile(target,bytes,{flag:'wx'});}
    const bundle=join(dir,'run-manifest.sigstore.jsonl');await writeFile(bundle,a.bundle,{flag:'wx'});
    const plan=reviewedR2Module('r2-run.mjs').parseR2Plan(a.files['plan.json']),fixtures=new Map();for(const page of plan.pages)fixtures.set(page.id,a.files[page.fixture]);
    const verification=await reviewedR2Module('r2-run.mjs').r2VerifyRun({plan,pages:plan.pages,fixtures},dir);
    if(!verification.ok||!verification.complete)throw Error('native run verifier refused');
    return (await verifyR2HostedProvenance({runDir:dir,bundle,trustedRoot:configuration.provenance.trusted_root,policy:configuration.provenance.policy})).handle;
+   },{preserveFailure:async()=>{
+    const prefix=id+'/forensics/'+a.ingest_sha256;
+    for(const [name,bytes] of Object.entries(a.forensics)){const {error}=await db.storage.from('tabwise-evidence').upload(prefix+'/'+name+'.zip',bytes,{contentType:'application/zip',upsert:false});if(error&&String(error.statusCode)!=='409')throw Error('forensic retention incomplete');}
+    const {error}=await db.from('audit_log').insert({actor:'native-verifier',action:'native_verification_refused',subject:id,detail:{prefix,ingest_sha256:a.ingest_sha256}});if(error)throw Error('forensic retention audit unavailable');
+   }});
   },
   reserve:(user:string,run:string,sha:string)=>rpc('reserve_native_ingestion',{p_user:user,p_run:run,p_sha:sha}),
   recoverStored:async(native:{manifest:{files:{path:string,sha256:string,bytes:number,kind:string}[]},files:Record<string,Uint8Array>})=>{

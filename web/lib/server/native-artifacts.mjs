@@ -16,7 +16,7 @@ export function prepareNativeArchives({userId,row,run,remote,artifacts,evidenceA
  const pinned={repository:'ANIRUDDH-001/Tabwise',workflow:r.workflow,revision:r.revision,actor:r.actor,github_run_id:row.github_run_id,github_run_attempt:1,r2_source_sha256:r.r2_source_sha256,qualification_sha256:r.qualification_sha256,plan_sha256:r.plan_sha256,page_id:r.page_id,fixture_sha256:r.fixture_sha256,product_run_id:r.product_run_id,spec_sha256:r.spec_sha256,app_hash:r.fixture_sha256};
  if(!i||Object.entries(pinned).some(([k,v])=>i[k]!==v)||sha256(files['product-spec.json']??'')!==r.spec_sha256||sha256(files['run-manifest.json'])!==i.run_manifest_sha256)throw Error('native export persisted identity mismatch');
  const attestation=parseUniqueJson(files['native-attestation.json'].toString('utf8'));delete files['native-attestation.json'];
- return {selected,files,attestation,expected:{...i,spec:parseUniqueJson(row.spec_text)},bundle:signed['run-manifest.sigstore.jsonl'],ingest_sha256:sha256(Buffer.concat([Buffer.from(row.request_sha256),Buffer.from(evidenceArchive),Buffer.from(attestationArchive)]))};
+ return {forensics:{evidenceArchive:Buffer.from(evidenceArchive),attestationArchive:Buffer.from(attestationArchive)},selected,files,attestation,expected:{...i,spec:parseUniqueJson(row.spec_text)},bundle:signed['run-manifest.sigstore.jsonl'],ingest_sha256:sha256(Buffer.concat([Buffer.from(row.request_sha256),Buffer.from(evidenceArchive),Buffer.from(attestationArchive)]))};
 }
 // Read-only crash recovery: finish only an already complete byte-identical storage set.
 // Partial or corrupt data is quarantined; this function has no write/remove capability.

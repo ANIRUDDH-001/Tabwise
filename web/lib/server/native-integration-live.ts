@@ -22,7 +22,7 @@ export function nativeIntegrationConfiguration(){
 export const nativeBindingPOST=createNativeBindingHandler({configuration:nativeIntegrationConfiguration,keys:githubExecutionKeys,client:()=>{
  const db=serviceClient();return {
   load:async(id:string)=>{const {data,error}=await db.from('native_product_requests').select('*').eq('product_run_id',id).maybeSingle();if(error)throw error;return data;},
-  claim:async(user:string,id:string,hash:string,ghId:string,nonce:string,jti:string)=>{const {data,error}=await db.rpc('bind_native_worker',{p_user:user,p_run:id,p_request_sha:hash,p_gh_run_id:ghId,p_nonce:nonce,p_jti_sha:jti});if(error)throw error;return data;}
+  claim:async(user:string,id:string,hash:string,ghId:string,nonce:string,jti:string)=>{const {data,error}=await db.rpc(nativeIntegrationConfiguration().recovery_enabled===true?'recover_native_worker':'bind_native_worker',{p_user:user,p_run:id,p_request_sha:hash,p_gh_run_id:ghId,p_nonce:nonce,p_jti_sha:jti});if(error)throw error;return data;}
  };
 }});
 export async function nativeDispatchPOST(request:Request,id:string){return endpoint(request,async()=>{
@@ -31,6 +31,6 @@ export async function nativeDispatchPOST(request:Request,id:string){return endpo
  const {data:run,error:runError}=await db.from('runs').select('*').eq('id',id).eq('user_id',user.id).maybeSingle();
  const {data:producer,error:producerError}=await db.from('run_producers').select('*').eq('product_run_id',id).maybeSingle();
  if(runError||!run||run.status!=='admitted'||producerLane({run,record:producer,error:producerError,native:row,nativeError:null})!=='native-r2')throw new HttpError(409,'native_dispatch_run_ineligible');
- const transitions=nativeRequestStore(db),store={...transitions,read:async()=>row};
+ const transitions=nativeRequestStore(db),store={...transitions,read:async()=>{const {data,error}=await db.from('native_product_requests').select('*').eq('product_run_id',id).eq('user_id',user.id).maybeSingle();if(error)throw error;return data;}};
  return Response.json(await dispatchNativeProduct({configuration:c,userId:user.id,runId:id,requestSha256:row.request_sha256,store,send:async(path:string,payload:unknown)=>(await github(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})).data}));
  },true);}

@@ -164,3 +164,7 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 | `supabase/migrations/20261103181501_native_integration_custody.sql` | Immutable producer, nonce/claim and ingestion custody; service-only RPCs with owner checks | native-integration-database.test.mjs |
 | `web/test/{native-product-replay,production-native-chain}.mjs`, `docs/engineering/Accelerated-integration-review.md` | Same real saved-run continuation with controlled transport and explicit native-refusal replay seam | cache/accelerated-sprint; never native acceptance |
 | `docs/engineering/R7-{independent-preregistration.md,preregistration-draft.json}` | Independent withheld custody/control protocol; unavailable identity/labels/results remain null | no R7 verdict |
+
+| `src/r2/product-{delivery,workflow-export}.mjs`, `scripts/tabwise/product-workflow-boundary.mjs` | Disabled exact source delivery and unsigned exporter / trusted-job adapter; no input authority | product-delivery.test.mjs |
+| `web/lib/server/verification-directory.mjs`, native_claim_recovery migration | Finally scratch cleanup, durable refusal retention and transactional claim recovery | native-readiness/native-recovery-database tests |
+| `docs/engineering/Native-workflow-readiness.md`, native-workflow-permission-proposal.patch | Remaining source/permission boundaries and unapplied exact trusted-job proposal | no workflow activation |
