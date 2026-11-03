@@ -56,3 +56,35 @@ Build/types/frozen/preflight and ordinary63 files PASS; 444 source files mechani
 Current handoff: docs/engineering/R3-bounded-completion.md; evidence: cache/r3-bounded/.
 Source ready for independent review; genuine R2/R3/R7 and hosted/native delivery remain BLOCKED.
 No agents, commits, remote/paid/native operations; no activation changes. Bounded pass complete; STOP.
+
+## Demo preparation update — 2026-11-03T06:31:45Z
+Task: F-03/demo-polish; feat/F-03-demo-polish; base/HEAD remains 4ccc54442bdba81febe1cac7f1c97700ead3fe76.
+- Integration record above is retained verbatim; its measurements are historical, not rerun by this demo task.
+- Local presentation polish and transcript-only labels; planned 2:30 product-led storyboard in docs/engineering/Tabwise-demo-plan.md.
+- MEASURED (owner report): GitHub 41584715963 attempt 2 — authorization PASS; installation PASS; NVDA startup failed on owner query timeout.
+- Same diagnostic: zero physical sends; artifact integrity PASS; native qualification BLOCK. No native run performed by this task.
+- No live Muse diagnosis, native repaired-journey verification or completed R7 acceptance claimed; qualification records unchanged.
+- MEASURED demo-polish-correction-20261103: web/contracts148, browser15, transcript links, types/build/R1/preflight/whitespace PASS; axe30 zero/layouts45 zero.
+- Last verification: node cache/demo-polish/revision/finalize.mjs + git diff --check; exact patches/inventory in cache/demo-polish/revision/.
+### Demo handoff (separate from integrated handoff above)
+Uncommitted: web/app/{globals.css,page.tsx,w/demo/page.tsx}; web/components/PassRunDetail.tsx; demo plan/results; normal ledger/CODEMAP records.
+Next: user/Claude cross-tool review; native/hosted acceptance remains blocked; no publication or execution authorized.
+No commits/push/merge/deploy/native execution/paid calls; other worktrees and regression guards preserved.
+
+## R3 + Demo integration checkpoint
+R3 source commit: 04f632f1294fdcb0753f6669fa2a8b44c1d490d0
+Demo presentation commit: 8e790b6fdebb690cd6eea848dd86a7de48c56883
+Both histories preserved; merge commit pending.
+Parent test results are historical; combined tests not yet run.
+R2 native, genuine R3/R7 and hosted qualification remain BLOCKED.
+No live Meta API call or native execution is authorized by this merge.
+
+## Final integration — current 2026-11-03T11:41:56Z
+Run: final-integration-20261103; branch feat/F-03-final-integration; original history above is historical.
+MEASURED combined snapshot: root1189 PASS/0FAIL/3DBskip; separate PG3/3; SQL8; migrations9x2; web128/contracts21/browser16 PASS.
+Ordinary63 files/1122 tests PASS;13 policy exclusions disclosed; types/production webpack build/frozen R1/preflight/dependency audits PASS.
+Visual30 scans/45 layouts zero violations/overflow;444 source hashes unchanged; source worktrees untouched.
+Now: validated two-parent merge ready for commit and PR. No production source fix needed; local dependency layout corrected.
+Blocked: main unprotected/no active rules; protected-merge condition not met. Native R2/R3/R7 and hosted/Meta live qualification unchanged/BLOCKED.
+Next: publish integration branch/PR; inspect CI; leave PR open if any requested gate is unavailable. No native/model/hosted DB operation authorized.
+Handoff: docs/engineering/Tabwise-final-integration.md; cache/final-integration/ contains fresh run evidence.

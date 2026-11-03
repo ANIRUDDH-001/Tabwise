@@ -702,3 +702,24 @@ Consequence: explicit CI/scope assertion expansion, clean local dependency copy,
 User answer: "AUTHORIZE ONE BOUNDED R3 COMPLETION PASS."
 User requirement: "Preserve the complete original integrated docs/ledger/STATE.md as the prefix, appending R3 updates instead of replacing history."
 Consequence: sole implementation session; corrected confirmed legacy dispatch gap; verified local stable snapshot; restored exact base STATE prefix and retained R3 text; no activation or publication. Stop after report.
+
+## D-demo-polish 2026-11-03T05:40:02Z — bounded local demo preparation
+Question: approve F-03/demo-polish? | Options: bounded demo polish (recommended) / review and storyboard only.
+User answer: "Approve bounded demo polish (Recommended) — existing UI and demo documentation only; $0, up to two hours; local and reversible."
+Consequence: isolated feat/F-03-demo-polish at 4ccc54442bdba81febe1cac7f1c97700ead3fe76; web presentation and demo docs only.
+No installs, commits, remote writes, paid calls or native input; qualification, gates, provenance and frozen R1 unchanged.
+Reversal: discard this isolated task's diff after review.
+
+## D-demo-polish-correction 2026-11-03T06:31:45Z — scoped review corrections
+User instruction: "Review and correct the existing F-03/demo-polish candidate in the same isolated worktree."
+User instruction: "Preserve the full integrated R2/R3 engineering state in docs/ledger/STATE.md. Append the demo preparation as a separate update rather than replacing the prior integration evidence."
+Scope: owner-reported native diagnostic41584715963/attempt2, transcript labels, product-led storyboard, normal records; existing zero-paid-services ceiling.
+Acceptance: affected web/contracts/browser tests, typecheck/build, frozen R1, preflight, whitespace and exact protected-path diff.
+No runtime/API/workflow/qualification/evidence/guard changes, commits, remote writes or native execution.
+
+## D-final-integration 2026-11-03T11:41:56Z — sole-agent R3 + Demo delivery
+User instruction: "Do the actual work. Do not merely draft a plan."
+User authorization: "You are explicitly authorized to inspect and modify files, run local tests, resolve defects, create commits, push branches, open pull requests, and merge into `main` **only when the acceptance gates below are satisfied**."
+User boundary: "No Claude or other agents." / "No Meta Model API requests."
+Consequence: continue the existing two-parent merge; zero paid calls; local dependency reuse; preserve diagnostic worktree and blocked qualification. Normal PR publication authorized; merging requires the stated local/remote/safety/protection gates. This current instruction supersedes earlier user-only Git and cross-tool execution requirements for this task; it grants no R7 qualification.
+Tooling: Context7 ctx7 0.9.0 ran via the user-prescribed npx command in npm cache only; no repository manifest or lock changed.

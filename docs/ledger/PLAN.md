@@ -661,3 +661,27 @@ Approved: user current chat; one pass, sole implementation session, no publicati
 Scope: prior-session exit inspection; latest oracle UI/API/admission proof; confirmed dispatch guard correction; SQL/browser negatives; full root/PG/web/contracts/browser/types/build/R1/preflight/ordinary on stable source; original STATE prefix preservation; complete diff/inventory/handoff.
 Files: existing uncommitted R3 slice, dispatch guard in new oracle-admission migration, existing PG regression plus new browser regression; standard ledgers and handoff artifacts.
 Budget: $0; no installs or agents. Stop after final report; no automatic continuation.
+
+### F-03/demo-polish — approved bounded demo task
+- Base: 4ccc54442bdba81febe1cac7f1c97700ead3fe76; feat/F-03-demo-polish; separate managed worktree.
+- Goal: coherent existing UI and an honest 2–3-minute hackathon storyboard/recording plan.
+- Files: web/app presentation, web/components presentation; docs/engineering/Tabwise-demo-{plan,results}.md; normal session ledgers/CODEMAP.
+- Acceptance: node --test web/test/*.test.mjs packages/contracts/test/*.test.mjs; npm run typecheck --prefix web; npm run build --prefix web -- --webpack.
+- Browser: node --test web/test/web-smoke.browser.mjs web/test/product-integration.browser.mjs web/test/recorder.browser.mjs (loopback); local axe/keyboard/mobile/print checks.
+- Preservation: node scripts/check-r1-baseline.mjs; node scripts/preflight.mjs; git diff --check; protected tracked blobs identical to base.
+- Ceiling: $0 paid services; two hours. No installs, test edits, native input, commit/push/deploy/merge, model calls or execution/qualification/evidence changes.
+- Rollback: discard only this task's isolated diff; other worktrees untouched.
+
+#### F-03/demo-polish — owner-requested correction
+- Preserve base integrated STATE verbatim; append separate demo status. Record owner-reported41584715963 attempt2 failure without native rerun.
+- Correct transcript-only labels in web/app/{page,w/demo/page}.tsx and web/components/PassRunDetail.tsx; revise existing demo plan/results and normal ledgers only.
+- Product interaction/provenance/fail-closed evidence dominate planned2:30; simulated repair explicitly labelled; no live Muse/native repair/R7 acceptance claims.
+- Same acceptance commands and zero-paid-services ceiling as above; no tests/guards/frozen files/runtime/APIs/workflows/policies/evidence changes.
+
+### F-03 / final R3 + Demo integration — authorized 2026-11-03T11:41:56Z
+Goal: audit existing 04f632f + 8e790b6 merge, validate combined snapshot and deliver through a normal GitHub PR.
+Files: existing 11-file staged merge, genuine integration fixes if required, integration handoff and normal ledgers/CODEMAP. No new feature or qualification change.
+Acceptance: serial root suite, ordinary classified suite, web/contracts, typecheck/production build, production browser/API and visual checks, isolated PostgreSQL migrations/SQL/concurrency, frozen R1/preflight/source and Git integrity; required remote CI and normal protected merge permission before main.
+Cost ceiling: $0 paid services; no model calls, new runtime dependencies, native input, deployments, hosted database changes or other agents. Preserve all historical STATE records.
+Measured local outcome: root1189 PASS/3 DB skips (PG3 PASS separately); web128/contracts21/browser16 PASS; ordinary63 files/1122 tests PASS with13 excluded files explicitly reported; SQL8/migrations9x2 PASS; types/build/R1/preflight PASS.
+Publication conditional: remote main9bb994c is an ancestor; GitHub currently reports main unprotected and no active branch rules. Do not change protection or bypass the requested protected-merge gate.
