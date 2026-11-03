@@ -594,3 +594,9 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Acceptance: node --test diagnostics/r2-native/test.mjs; hosted full root/web/contracts/browser/API/types/build/preflight/frozen checks; native and separate verifier only after exact explicit approval.
 - Bounds: one existing healthy page; Tab,Tab,Enter; worker stop150s, supervisor180s plus existing bounded custody; one run ID/attempt2; ₹0, no model/dependency changes.
 - Rollback: delete diagnostic branch; production and main unchanged. No new acceptance/qualification claim.
+
+### Native attempt2 cause retention and incomplete verifier
+- Source e165; actual artifact verification/standalone comparison; no native rerun.
+- Files: diagnostic policy/run/verify/new error tests, observational session callback, Ubuntu verifier command; normal handoff ledgers.
+- Acceptance: preserved/redacted nested causes, original rejection unchanged, actual failed artifact integrity-only RED/GREEN and3 tamper refusals; native verdict remains false.
+- Native underlying cause unknown because original chain was lost. Never extend deadline or reorder startup speculatively.

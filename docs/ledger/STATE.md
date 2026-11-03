@@ -1,17 +1,21 @@
-# STATE — NONQUALIFYING native diagnostic prepared; owner packet approval required
-- Branch diag/tabwise-r2-native; isolated app-r2-native-diagnostic; ancestor d75f043 plus reviewed projector binding fb93744.
-- Production, runtime, frozen R1, W5, qualification and product status gates unchanged, disabled/BLOCK.
-- Dedicated workflow first push runs only offline/full regression/build/browser checks; native cannot run on attempt1.
-- Manual attempt2 additionally requires an exact owner-approved packet in TABWISE_NATIVE_DIAGNOSTIC_APPROVAL.
-- Packet binds commit/source digest/run/attempt/actor/workflow/fixture/keys/bounds. Later attempts and stale packets refuse.
-- Fixture validation-healthy, f22a2f22be578e0609f990564acb703bab40bd8bf770079acc090775d79e9555; Tab,Tab,Enter; no text input.
-- Worker's 150s stop, supervisor180s plus original bounded custody/cleanup; GitHub-hosted Windows only; no model/API/signing credentials.
-- Reuses unchanged loader/session/guard/observer/lifecycle and original runR2Pages custody; no production entry or W5 receipts fabricated.
-- Separate Ubuntu job re-verifies sealed sources, projection, product refusal and tampering; grants no independent native attestation.
-- Product exporter/native bridge are expected to refuse real diagnostic identity and disabled qualification. Never relabel evidence.
-- MEASURED: new diagnostic tests28/28, syntax/YAML/local native refusal/frozen R1/preflight PASS.
-- Prior source fb93744: root1161/R2810/web127/contracts21/browser+API15, types+build PASS. Actual hosted bootstrap pending.
-- Independent subagent code review corrected baseline, custody/census/grace, pipeline status, source scope and cross-run verifier binding; no native approval implied.
-- Next: push reviewed diagnostic; observe offline bootstrap; generate exact run-specific approval packet from committed SHA; STOP before setting approval variable or native rerun.
-- Main unchanged; PR19 remains draft/nonmergeable by owner requirement. R3 untouched. No native input, paid service or model call.
-- Evidence: cache/native-diagnostic-review; integration logs at app-r2-production-bridge/cache/r2-merge-validation.
+# STATE - native attempt2 observability/verifier fixes; no rerun authorized
+Updated: 2026-11-03T02:56:29Z
+Producer: e1651678198383be08ffe0ea6bc9016acd0d120d; worktree app-r2-native-causes
+## Now
+- Actual native41519094642/2 and verifier artifacts retained; startup41514466149 compared.
+- Precise underlying startup cause UNKNOWN: uploaded message omitted nested causes.
+- Added diagnostic-only redacted cause/stack/code capture; original error still thrown.
+- Verifier accepts valid incomplete bytes and checks actual sealed manifest when capture absent.
+- Explicit integrity-only Ubuntu step cannot mark native interaction or qualification passed.
+## Verification MEASURED native-attempt2-causes
+- Original artifact CLI RED: ENOENT capture.json; corrected GREEN integrity:true/native:false.
+- Page/run remain incomplete; changed-source/missing-source/forged-pass rejected.
+- Final diagnostics34/34; prior combined diagnostics/binding101/101; final serializer-only fix covered.
+- Frozen R1 ok:true/errors:[]; syntax/diff checks PASS.
+- Approval variable listing[] confirmed after failed run and before commit.
+## Handoff / blocked
+- docs/engineering/R2-native-attempt2-causes.md: exact artifacts, facts, hypotheses and limits.
+- Other session handed off native ownership; its dirty checkout untouched.
+- Push diagnostic branch only; main untouched. No attempt3 or new approval packet/variable.
+- New native run requires fresh exact approval and explicit user authorization.
+- No underlying NVDA timing/sequence fix justified; no vendor, timeout or gate relaxation.

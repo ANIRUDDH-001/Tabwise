@@ -2,7 +2,7 @@ import {spawn,execFileSync} from 'node:child_process';
 import {readFileSync,writeFileSync,mkdirSync,existsSync} from 'node:fs';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {packetFor,sourceDigest,checkDiagnosticApproval,assertProductionBlocked,CLASSIFICATION,BASE,PAGE} from './policy.mjs';
+import {diagnosticErrorChain,packetFor,sourceDigest,checkDiagnosticApproval,assertProductionBlocked,CLASSIFICATION,BASE,PAGE} from './policy.mjs';
 import {inputFor,indexFiles,projectionFor} from './verify.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url)),entry=fileURLToPath(import.meta.url);
 const git=args=>execFileSync('git',args,{cwd:root,encoding:'utf8',windowsHide:true,timeout:10000}).trim();
@@ -35,7 +35,7 @@ if(process.argv[2]==='--packet'){
   const timer=setTimeout(stop,150000);
   try{
    const {runR2Session}=await import('../../scripts/tabwise/r2-session.mjs');
-   const result=await runR2Session(runtime,r2SessionData(plan,page,fixture,join(source,PAGE)));
+   const result=await runR2Session(runtime,r2SessionData(plan,page,fixture,join(source,PAGE)),{onStartupError:(error,timing)=>save('startup-errors.json',{...diagnosticErrorChain(error),...timing})});
    save('session.json',result);
    console.log(JSON.stringify(r2PageExit({page:PAGE,completed:result.completed,nvda:result.nvda,manifest_sha256:result.manifest_sha256,reasons:[...result.reasons,...result.cleanup_errors]})));
    process.exitCode=result.completed?0:1;

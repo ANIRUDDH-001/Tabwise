@@ -90,7 +90,7 @@ jobs:
           path: ${{ runner.temp }}/native-in
       - name: Recompute sealed source, attribution and refusal; reject tampering
         shell: bash
-        run: node diagnostics/r2-native/verify.mjs "$RUNNER_TEMP/native-in" | tee "$RUNNER_TEMP/verification.json"
+        run: node diagnostics/r2-native/verify.mjs "$RUNNER_TEMP/native-in" "$GITHUB_WORKSPACE" --integrity-only | tee "$RUNNER_TEMP/verification.json"
       - name: Preserve separate-runner verification result
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9

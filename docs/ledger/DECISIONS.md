@@ -663,3 +663,6 @@ Consequence: draft PR19 for offline CI only; preserve reviewed digest-binding co
 User answer: "Implement, test and push the diagnostic branch. Stop only when explicit approval or a genuine external dependency is required."
 User answer: "After authorization, exercise genuine NVDA keyboard interaction, speech observation, focus and page-event capture, source attribution and teardown."
 Consequence: build and push disabled native-input bootstrap; prepare exact owner packet from committed revision/run. No variable provisioning, rerun, input, qualification or merge before that explicit approval.
+
+## Native attempt2 follow-up - 2026-11-03T02:56:29Z
+User: "Preserve the complete nested NVDA startup error/cause chain in diagnostic-only evidence, without changing frozen vendor code or exposing credentials." "Fix only a demonstrated problem." "Do NOT rerun attempt 3: the existing approval is bound to attempt 2. Any new native run requires a new exact approval packet and my authorization." "Keep main untouched." Other session received direct user authorization to hand off edits/pushes. No native run, approval or paid infrastructure authorized/performed here.

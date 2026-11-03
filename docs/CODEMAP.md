@@ -123,3 +123,5 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 
 | src/r2/capture-export.mjs | Source-bound capture JSON-pointer projection for exporter and bridge | captureObservationSources | test/r2-capture-export.test.mjs |
 | diagnostics/r2-native/; .github/workflows/tabwise-r2-native-diagnostic.yml | Separate NONQUALIFYING owner-packet gate, unchanged guarded session/custody, source projection/refusal and separate-runner artifact/tamper verification; attempt1 offline only | run.mjs --packet RUN_ID; test.mjs; native input requires explicit approval |
+
+| diagnostics/r2-native/error-test.mjs; scripts/tabwise/r2-session.mjs optional diagnostic observer | Redacted nested startup errors in diagnostic-only artifact; unchanged rejection/cleanup; incomplete verifier integrity-only mode | R2-native-attempt2-causes.md |

@@ -47,3 +47,24 @@ export function assertProductionBlocked(root){
  const plan=JSON.parse(readFileSync(join(root,PLAN),'utf8')),page=plan.pages.find(p=>p.id===PAGE),expected=packetFor({});
  if(JSON.stringify(page?.task.map(t=>t.press))!==JSON.stringify(expected.actions)||JSON.stringify(plan.spec)!==JSON.stringify(expected.spec)||plan.handleTimeoutMs!==expected.handleTimeoutMs||plan.focusWaitMs!==expected.focusWaitMs||page.fixture_sha256!==FIXTURE_SHA)throw Error('diagnostic plan differs from fixed packet');
 }
+
+// Diagnostic-only error serialization; preserve nested causes without arbitrary error-owned data.
+export function diagnosticErrorChain(error,env=process.env){
+ const secrets=Object.entries(env).filter(([k,v])=>/TOKEN|SECRET|KEY|PASSWORD|AUTH|COOKIE|APPROVAL/i.test(k)&&typeof v==='string'&&v).map(([,v])=>v).sort((a,b)=>b.length-a.length);
+ let nodes=0,truncated=false;
+ const scrub=value=>{let text=String(value);if(text.length>1000000){truncated=true;return '[oversize field omitted]';}for(const secret of secrets)text=text.split(secret).join('[REDACTED]');return text.replace(/((?:authorization|cookie|set-cookie)\s*[:=])[^\r\n]+/gi,'$1[REDACTED]').replace(/(Bearer\s+)[^\s]+/gi,'$1[REDACTED]').replace(/(https?:\/\/)[^\s/@]+:[^\s/@]+@/gi,'$1[REDACTED]@').replace(/((?:password|token|secret|api_key)=)[^&\s]+/gi,'$1[REDACTED]');};
+ const read=(object,key)=>{try{return object?.[key];}catch{return '[unreadable property]';}};
+ const seen=new Set();
+ function visit(value,depth){
+  if(depth>=32||nodes>=64){truncated=true;return {omitted:'diagnostic node bound'};}nodes++;
+  if(value===null||typeof value!=='object'){const text=scrub(value);if(text.length>8192)truncated=true;return {message:text.slice(0,8192)};}
+  if(seen.has(value))return {omitted:'cycle'};seen.add(value);
+  const out={};for(const key of ['name','message','code','stack']){const v=read(value,key);if(['string','number'].includes(typeof v)){const text=scrub(v);if(text.length>8192)truncated=true;out[key]=text.slice(0,8192);}}
+  const cause=read(value,'cause');if(cause!==undefined)out.cause=visit(cause,depth+1);
+  const errors=read(value,'errors');if(Array.isArray(errors)){if(errors.length>16)truncated=true;out.errors=errors.slice(0,16).map(v=>visit(v,depth+1));}
+  return out;
+ }
+ const chain=visit(error,0),result={schema:'tabwise-diagnostic-error/1',chain,truncated};
+ if(Buffer.byteLength(JSON.stringify(result))>131072)return {schema:result.schema,chain:{omitted:'diagnostic byte bound'},truncated:true};
+ return result;
+}

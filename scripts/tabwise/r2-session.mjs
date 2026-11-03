@@ -38,7 +38,7 @@ const summarizeAxe = result => ({
  * handleTimeoutMs, focusWaitMs}. One call per process. Throws only before any effect (brand, reuse, data shape,
  * runtime authenticity, fixture/plan validation); afterwards it always cleans up and returns.
  */
-export async function runR2Session(runtime, data) {
+export async function runR2Session(runtime, data, diagnostics) {
   if (!isQualificationRuntime(runtime)) throw Error('R2 session requires the owned vendored runtime');
   if (used) throw Error('R2 session: one page per process');
   used = true;
@@ -189,7 +189,15 @@ export async function runR2Session(runtime, data) {
       // W3/W4: start is the raw vendored start only (composition owns its slot); validate checks the started process.
       nvda: {
         press: (key, options) => runtime.nvda.press(key, options),
-        start: () => { authentic(); return runtime.nvda.start({settings: structuredClone(runtime.cfg.nvda_settings)}); },
+        start: async () => {
+          authentic();const began=performance.now();
+          try{return await runtime.nvda.start({settings:structuredClone(runtime.cfg.nvda_settings)});}
+          catch(error){
+            // Observational hook only: never alter the original rejection, deadline, slot or cleanup.
+            try{diagnostics?.onStartupError?.(error,{elapsed_ms:performance.now()-began});}catch{}
+            throw error;
+          }
+        },
         validate: async receipt => {
           authentic();
           const settings = runtime.nvda.getSettings();
