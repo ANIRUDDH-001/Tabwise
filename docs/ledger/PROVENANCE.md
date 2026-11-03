@@ -81,3 +81,11 @@ Authored immutable rerun bindings, exact source consumer/loader/stager, admissio
 R3 continuation new work: repair source/native adapter, narrow snapshot oracle, immutable SQL lifecycle and inline synthetic test fixtures authored in this worktree; existing shipped Fernway reused under its recorded provenance; no new external dependency, dataset or asset.
 
 R3 bounded pass: locally authored dispatch-guard and oracle UI/database regression fixtures; mock approvals/observations are test data only. No new third-party dependency, fixture asset or dataset.
+
+### P0 reliability new work — 2026-11-03
+Authored bounded focus identity, additive native recorder metadata, terminal source projection/oracle refusal corrections and synthetic DOM/test cases during the event. Existing owned Fernway fixture and installed Playwright/PostgreSQL reused; recorded real Spark response used only as labelled local replay. No external dataset, third-party asset, dependency or install added. Original historical evidence remains unchanged.
+
+### P0 independent-review corrections — 2026-11-03
+Owned synthetic `fixtures/fernway/instrumented-v2/` is a new explicitly versioned derivative of our event-authored Fernway fixture, with its own byte/hash manifest; same ownership/license provenance as the original, no third-party code or data. Original pinned fixture restored unchanged. New adversarial browser/oracle/export/deployment tests and review/readiness reports authored during the event. Installed Context7, Playwright, Next.js and PostgreSQL reused; no dependency or tool install, hosted mutation, new model call or external payload upload. Recorded Spark responses remain labelled replay; no native or independent acceptance claim.
+
+P0 conditional-review continuation: authored symbolic/DOM event identity correction, inactive native product request/reconciliation helpers, synthetic fixtures, real filesystem persistence tests and phased execution plan during the event. Same owned-synthetic Fernway provenance; no third-party source/data/dependency or install. Diagnostic worktrees and historical evidence preserved. No native/model/hosted mutation or independent acceptance produced.

@@ -144,3 +144,12 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 
 | `src/meta/transport.mjs`, `test/meta-transport.test.mjs` | Bounded credential-safe nested transport diagnostics and reservation retention regressions | respond failure path |
 | `test/meta-patch-format.test.mjs`, `docs/engineering/Spark-bounded-campaign.md` | Complete patch-format prompt contract and measured non-native campaign report | Spark local qualification |
+
+| `web/test/{diagnosis-contract.ts,reviewed-loader.test.mjs,focus-identity.browser.mjs,repair-focus-identity.test.mjs,telemetry-export.test.mjs}` | P0 omission/type, bounded source loader, truthful browser/native identity, terminal oracle and sealed export regressions | engineering-only; no acceptance promotion |
+| `docs/engineering/{P0-reliability-checkpoint,Tabwise-UX-readiness-brief}.md` | Measured local checkpoint, explicit replay/native/hosted blockers and subsequent UX brief | consolidated ignored `cache/p0-reliability-20261103T152120Z/` |
+| `web/next.config.mjs`, `web/r2-trace-files.json`, `web/test/deployment-trace.check.mjs` | Exact raw native-source/digest closure in API deployment traces; post-build import/digest check from trace-only files | no runtime or policy activation |
+| `fixtures/fernway/instrumented-v2/` | Explicit page-authored telemetry variant and separate manifest; historical Fernway bytes retained | `web/test/p0-fixture-integrity.test.mjs`, focus browser checks |
+| `web/test/p0-{oracle-corrections,export-bounds,fixture-integrity,loader-cwd}.test.mjs`, `p0-recorder.browser.mjs` | P0 adversarial identity, legacy refusal, size, source and deployment-cwd regressions | engineering only |
+| `docs/engineering/P0-{corrections-review-response,hosted-and-probe-readiness,R7-review-package}.md` | Current review response, hosted/probe blockers and blocked independent-assessment package | `cache/p0-corrections/` raw evidence and corrected review patch |
+| `src/r2/product-dispatch.mjs`, `web/test/product-dispatch.test.mjs` | Inactive exact product/native request persistence, association and artifact-selection seam; no dispatch/native authority | filesystem concurrency/crash/identity negatives |
+| `web/test/logical-target.browser.mjs`, `docs/engineering/Tabwise-{end-to-end-execution-plan,plan-review-response}.md` | Conditional-review regressions, evidence-based critique and G0–G5 R1/R2/R3/R7 dependency/permission plan | `cache/p0-followup/`, `cache/plan-review-refinement/` |

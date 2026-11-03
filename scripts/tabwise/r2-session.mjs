@@ -136,7 +136,7 @@ export async function runR2Session(runtime, data) {
         if (!Number.isSafeInteger(pid) || pid <= 0) throw Error('owned Chromium PID missing');
         browser = await chromium.connect(server.wsEndpoint());
         context = await network.createIsolatedContext(browser, {port, source: writer.identity.served});
-        await context.addInitScript(installR2PageRecorder, {session});
+        await context.addInitScript(installR2PageRecorder, {session,identityVersion:2});
         const page = await context.newPage();
         await page.goto(writer.identity.url, {waitUntil: 'load', timeout: input.handleTimeoutMs});
         await page.bringToFront();
