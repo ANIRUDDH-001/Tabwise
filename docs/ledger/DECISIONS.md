@@ -666,3 +666,12 @@ Consequence: build and push disabled native-input bootstrap; prepare exact owner
 
 ## Native attempt2 follow-up - 2026-11-03T02:56:29Z
 User: "Preserve the complete nested NVDA startup error/cause chain in diagnostic-only evidence, without changing frozen vendor code or exposing credentials." "Fix only a demonstrated problem." "Do NOT rerun attempt 3: the existing approval is bound to attempt 2. Any new native run requires a new exact approval packet and my authorization." "Keep main untouched." Other session received direct user authorization to hand off edits/pushes. No native run, approval or paid infrastructure authorized/performed here.
+
+## F-03 native diagnostic offline coverage approval
+User answer: "Approve offline coverage fix (Recommended): aligns hosted coverage with local checks; ₹0, small test runtime increase."
+Consequence: existing offline workflow command runs diagnostics/r2-native/test.mjs and error-test.mjs; native jobs, approvals, flags and deadlines unchanged.
+
+## F-03 local-first diagnostic task authorization
+User: "Fix the native diagnostic's stale S5b-S1 signature assertion." "Investigate the D67 timing timeout without relaxing production guards."
+User: "You may commit corrections locally on the appropriate feature branches."
+Consequence: isolated fix/F-03-local-stabilization-diagnostic from bb7bea7; local correction commit only, no publication or native execution.

@@ -454,7 +454,9 @@ test('S5b-S1 static: exact imports, one export, the brand check is the first sta
   assert.match(code, /^import \{composeR2Page\} from '\.\/r2-compose\.mjs';$/m);
   assert.deepEqual([...code.matchAll(/^export\s+(?:async\s+)?(?:function|const|let|class)\s+(\w+)/gm)].map((m) => m[1]), ['runR2Session']);
   assert.doesNotMatch(code, /^export\s*\{/m, 'no export list');
-  const header = code.indexOf('export async function runR2Session(runtime, data) {');
+  // The separately gated diagnostic interface adds an observational third argument.
+  // No defaults or destructuring may execute before the body-level brand refusal.
+  const header = code.search(/^export async function runR2Session\(runtime, data(?:, diagnostics)?\) \{$/m);
   assert.ok(header > 0);
   const firstStatement = code.slice(header).split('\n')[1].trim();
   assert.equal(firstStatement, "if (!isQualificationRuntime(runtime)) throw Error('R2 session requires the owned vendored runtime');");

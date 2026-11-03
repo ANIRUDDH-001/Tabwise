@@ -26,7 +26,7 @@ jobs:
       - run: npm --prefix web ci --ignore-scripts
       - run: npm --prefix packages/contracts ci --ignore-scripts
       - run: npx --no-install playwright install chromium
-      - run: node --test diagnostics/r2-native/test.mjs
+      - run: node --test diagnostics/r2-native/test.mjs diagnostics/r2-native/error-test.mjs
       - run: npm test
       - run: npm --prefix web test
       - run: npm --prefix packages/contracts test

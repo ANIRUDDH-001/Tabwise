@@ -600,3 +600,11 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Files: diagnostic policy/run/verify/new error tests, observational session callback, Ubuntu verifier command; normal handoff ledgers.
 - Acceptance: preserved/redacted nested causes, original rejection unchanged, actual failed artifact integrity-only RED/GREEN and3 tamper refusals; native verdict remains false.
 - Native underlying cause unknown because original chain was lost. Never extend deadline or reorder startup speculatively.
+
+### F-03 / local-first native diagnostic stabilization
+- Owner request: fix thoroughly locally; preserve branding/import/runtime boundaries, zero spend, no push/native run/merge.
+- Files: test/r2-review.test.mjs; test/tabwise-d67-timing.test.mjs; approved offline command in .github/workflows/tabwise-r2-native-diagnostic.yml; session ledgers.
+- Acceptance: node --test --test-timeout=10000 "test/*.test.mjs"; node --test diagnostics/r2-native/test.mjs diagnostics/r2-native/error-test.mjs; preflight, frozen R1, git diff --check; all exit 0.
+- Root cause: static assertion required a two-argument spelling; authentic diagnostic accepts optional observational diagnostics after brand refusal.
+- D67: phase measurements and byte-copy setup optimization; all tracked files/full dependency copy and original assertions retained; 30s/100ms unchanged.
+- Rollback: revert isolated local correction commit. No dependency/install/runtime/approval variable or native execution change.

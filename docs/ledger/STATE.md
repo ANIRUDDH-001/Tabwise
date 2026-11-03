@@ -1,21 +1,19 @@
-# STATE - native attempt2 observability/verifier fixes; no rerun authorized
-Updated: 2026-11-03T02:56:29Z
-Producer: e1651678198383be08ffe0ea6bc9016acd0d120d; worktree app-r2-native-causes
+# STATE - native diagnostic local stabilization
+Updated: 2026-11-03T03:36:47Z
+Base: bb7bea77af36829dbbd6910a6724c28e7c78e67d
+Branch: fix/F-03-local-stabilization-diagnostic
 ## Now
-- Actual native41519094642/2 and verifier artifacts retained; startup41514466149 compared.
-- Precise underlying startup cause UNKNOWN: uploaded message omitted nested causes.
-- Added diagnostic-only redacted cause/stack/code capture; original error still thrown.
-- Verifier accepts valid incomplete bytes and checks actual sealed manifest when capture absent.
-- Explicit integrity-only Ubuntu step cannot mark native interaction or qualification passed.
-## Verification MEASURED native-attempt2-causes
-- Original artifact CLI RED: ENOENT capture.json; corrected GREEN integrity:true/native:false.
-- Page/run remain incomplete; changed-source/missing-source/forged-pass rejected.
-- Final diagnostics34/34; prior combined diagnostics/binding101/101; final serializer-only fix covered.
-- Frozen R1 ok:true/errors:[]; syntax/diff checks PASS.
-- Approval variable listing[] confirmed after failed run and before commit.
-## Handoff / blocked
-- docs/engineering/R2-native-attempt2-causes.md: exact artifacts, facts, hypotheses and limits.
-- Other session handed off native ownership; its dirty checkout untouched.
-- Push diagnostic branch only; main untouched. No attempt3 or new approval packet/variable.
-- New native run requires fresh exact approval and explicit user authorization.
-- No underlying NVDA timing/sequence fix justified; no vendor, timeout or gate relaxation.
+- Stale signature assertion corrected; brand-first/import/export restrictions retained.
+- D67 complete source/dependency fixture copy retained; setup instrumented/optimized; no deadline change.
+- Owner-approved offline workflow command includes error-test.mjs; native jobs unchanged.
+- MEASURED root-after-workflow: 1161/1161; diagnostic-after-workflow: 34/34; frozen/diff checks exit 0.
+- Preflight passed. Existing R2 production and diagnostic worktrees were not edited.
+- Independent Codex read-only review: no blocker; Claude cross-tool review not performed.
+## Next / blocked
+- Owner review of local correction commit; no push, native rerun, merge or new approval setting.
+- Native R2/W2a/R3/R7 qualification remains blocked; no status or FEATURES promotion.
+## Handoff
+Uncommitted: none after the local correction/handoff commit.
+Verified by: node --test --test-timeout=10000 test/*.test.mjs -> 1161 PASS; diagnostic suite -> 34 PASS.
+Local commit: git log -1; evidence: cache/local-stabilization.
+Review needed from: user (and Claude cross-tool review before integration).
