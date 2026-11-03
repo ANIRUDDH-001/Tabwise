@@ -1,4 +1,16 @@
 {
+  "meta-completion.test.mjs": {
+    "kind": "offline",
+    "reason": "synthetic diagnosis responses and local SQLite; no external service or native runtime"
+  },
+  "meta-transport.test.mjs": {
+    "kind": "offline",
+    "reason": "injected DNS/TLS/socket errors and local SQLite; no network or native runtime"
+  },
+  "meta-patch-format.test.mjs": {
+    "kind": "offline",
+    "reason": "pure diagnosis prompt contract; no external service or native runtime"
+  },
   "tabwise-r3-application.test.mjs": {
     "kind": "offline",
     "reason": "synthetic immutable candidate validation and injected persistence; no external service or native runtime"

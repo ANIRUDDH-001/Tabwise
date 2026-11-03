@@ -139,3 +139,8 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 
 | `src/repair/oracle.mjs`, `web/components/RepairOracleReview.tsx`, patch oracle API, `web/lib/oracle-state.mjs` | Explicit source-bound owner check registration/readback before admission | lifecycle/oracle-state and repair-oracle browser tests |
 | `supabase/migrations/20261103030000_repair_oracle_admission.sql` | Pre-admission oracle tuple plus shared live-dispatch guard; no execution clearance | real PostgreSQL concurrent registration/admission and legacy-dispatch negatives |
+
+| `test/meta-completion.test.mjs` | Optional Spark reasoning/output configuration and strict incomplete-response refusal; known usage settlement and uncertain reservation retention | diagnosis/client/broker focused regressions |
+
+| `src/meta/transport.mjs`, `test/meta-transport.test.mjs` | Bounded credential-safe nested transport diagnostics and reservation retention regressions | respond failure path |
+| `test/meta-patch-format.test.mjs`, `docs/engineering/Spark-bounded-campaign.md` | Complete patch-format prompt contract and measured non-native campaign report | Spark local qualification |
