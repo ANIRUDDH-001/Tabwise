@@ -586,3 +586,9 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Files: r2-policy.mjs and r2-review.test.mjs; session ledgers. Add missing projector to source scope with mutation regression, preserve disabled gates.
 - Acceptance: full root1161/1161, R2810/810, web127/127, contracts21/21, browser/API15/15, TypeScript/build/frozen/preflight PASS; hosted PR19 CI pending.
 - Budget: no paid infrastructure/model calls/dependency changes. Rollback: revert feature correction; main untouched.
+
+## PR19 CI O10 file-watchdog correction
+- Approved user task: diagnose run41517337074 slow-fs-30 r2-evidence file watchdog; zero infrastructure, no gate/threshold changes.
+- Files: test/r2-evidence.test.mjs, new test/r2-provenance.test.mjs, ci/offline-tests.json selection, normal ledgers/handoff.
+- Acceptance: all original69 tests retained byte-equivalently; two files included in unchanged ordinary/stress budgets; targeted runs, harness regression, frozen R1.
+- Feature-only normal push; no merge; other session holding production pushes.

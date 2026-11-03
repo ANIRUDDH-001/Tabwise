@@ -75,6 +75,10 @@
     "kind": "offline",
     "reason": "local files, pure contracts or injected fake providers; no physical runtime call"
   },
+  "r2-provenance.test.mjs": {
+    "kind": "offline",
+    "reason": "O10 provenance policy and simulated subprocess boundaries; moved unchanged from r2-evidence for independent bounded file scheduling"
+  },
   "r2-evidence.test.mjs": {
     "kind": "offline",
     "reason": "local files, pure contracts or injected fake providers; no physical runtime call"

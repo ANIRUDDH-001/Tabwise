@@ -658,3 +658,6 @@ Consequence: raw-capture exporter wiring and additive offline registration; no c
 User answer: "Do not merge into main until native capture, evidence verification, product ingestion and required qualification have passed."
 User answer: "Implement, test and push the diagnostic branch. Stop only when explicit approval or a genuine external dependency is required."
 Consequence: draft PR19 for offline CI only; preserve reviewed digest-binding correction; new isolated NONQUALIFYING diagnostic and exact approval packet before native input. Production qualification/admission policies unchanged.
+
+## CI O10 watchdog correction - 2026-11-02T20:40:37Z
+User: "Fix PR #19 CI failure without weakening tests." "Make the smallest evidence-backed fix." "Do not blindly extend timeouts, weaken assertions, disable stress tests or modify R2 qualification gates." "Commit and push the correction to the R2 branch only if justified. Coordinate with the other Codex session to avoid conflicting pushes. No merging." Scope: separate unchanged O10 tests into their own offline file and classify it for all stress profiles; existing deadline/profile budgets unchanged. Other session has left production branch untouched for this correction.
