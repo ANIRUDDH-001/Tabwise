@@ -19,6 +19,7 @@ export async function recordNativeDispatch({userId,runId,requestSha256,store,sen
  }
 }
 export function nativeRequestView(row){if(!row)return null;if(!Object.hasOwn(messages,row.state))throw Error('unknown native request state');return {state:row.state,message:messages[row.state],request_sha256:row.request_sha256,github_run_id:row.github_run_id??null,replayed:row.replayed===true,native_qualified:false,can_dispatch:false};}
+export function nativePreparationEligible(run){return run?.status==='admitted'&&(!run.kind||run.kind==='baseline')&&Boolean(run.journey_version_id)&&['healthy','broken'].includes(run.spec?.variant)&&Array.isArray(run.spec?.steps)&&run.spec.steps.length>0&&run.spec.steps.every(s=>s.key!=='type');}
 export function nativeRequestStore(client){
  const rpc=async(name,args)=>{const {data,error}=await client.rpc(name,args);if(error)throw Error(error.message??String(error));if(!data)throw Error('native request persistence unavailable');return data;};
  return {read:async(user,id)=>{if(client.read)return client.read(user,id);const {data,error}=await client.from('native_product_requests').select('state,request_sha256,github_run_id').eq('product_run_id',id).eq('user_id',user).maybeSingle();if(error)throw Error('native request schema unavailable');return data;},
@@ -32,7 +33,8 @@ export function createNativeRequestHandler({authenticate,ownedRun,context,store}
   if(!['GET','POST'].includes(request.method))return reply(405,{reason:'method_not_allowed'});
   if(request.method==='POST'&&request.headers.get('origin')!==new URL(request.url).origin)return reply(403,{reason:'same_origin_required'});
   const run=await ownedRun(user.id,id);if(!run)return reply(404,{reason:'run_not_found'});
-  if(request.method==='GET')return reply(200,nativeRequestView(await store.read(user.id,id))??{state:null,message:'No native execution request has been prepared.',native_qualified:false,can_dispatch:false});
+  if(request.method==='GET'){const row=await store.read(user.id,id);return reply(200,{...(nativeRequestView(row)??{state:null,message:nativePreparationEligible(run)?'No native execution request has been prepared.':'This run is not eligible for native request preparation.',native_qualified:false,can_dispatch:false}),can_prepare:!row&&nativePreparationEligible(run)});}
+  if(!nativePreparationEligible(run))return reply(409,{reason:'native_request_conflict'});
   const c=await context(user.id,run),p=prepareNativeProductRequest({...c,userId:user.id,run});
   return reply(200,nativeRequestView(await store.prepare(user.id,p,c)));
  }catch(error){if(error.status===401)return reply(401,{reason:'sign_in_required'});const conflict=/conflict|transition|binding|mismatch|required/.test(error.message??'');return reply(conflict?409:503,{reason:conflict?'native_request_conflict':'native_request_configuration_pending'});}

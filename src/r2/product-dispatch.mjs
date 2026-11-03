@@ -18,7 +18,7 @@ export function prepareNativeProductRequest({userId,run,specBytes,planBytes,fixt
  const plan=reviewedR2Module('r2-run.mjs').parseR2Plan(planBytes),page=plan.pages.find(p=>p.id===pageId);
  if(plan.repair||run.spec.variant==='patched')fail('repair requires separately bound R3 candidate');
  if(!page||page.fixture_sha256!==sha256(norm(fixture))||page.fixture_sha256!==run.spec.app_hash||page.task.length!==run.spec.steps.length||page.task.some((t,n)=>run.spec.steps[n].step!==n+1||t.press!==run.spec.steps[n].key||t.press==='type'))fail('plan/source/step binding');
- if(page.query&&page.query!==`?flow=${run.spec.journey_id.replace('fernway-','')}&variant=${run.spec.variant}`)fail('query/variant binding');
+ if(!['healthy','broken'].includes(run.spec.variant)||page.query!==`?flow=${run.spec.journey_id.replace('fernway-','')}&variant=${run.spec.variant}`)fail('query/variant binding');
  const body={schema:'tabwise-native-product-request/1',product_run_id:run.id,user_id:userId,journey_version_id:run.journey_version_id,spec_sha256:sha256(specBytes),plan_sha256:sha256(norm(planBytes)),plan_bytes_sha256:sha256(planBytes),fixture_sha256:page.fixture_sha256,page_id:page.id,plan_path:planPath,revision,actor,r2_source_sha256:r2SourceSha256,qualification_sha256:qualificationSha256,workflow:'.github/workflows/tabwise-r2.yml',execution_authorized:false};
  return Object.freeze({...body,request_sha256:sha256(stable(body))});
 }

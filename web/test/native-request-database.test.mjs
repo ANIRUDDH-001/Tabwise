@@ -5,6 +5,7 @@ import {createNativeBindingHandler} from '../lib/server/native-binding.mjs';
 import {binding as baseBinding,configuration,claims,token,jwks} from './helpers/r2-bridge-fixture.mjs';
 import {mkdtemp,readFile} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';
 import {writeNativeRequestPackage} from '../../src/r2/request-package.mjs';
+import {stable} from '../../packages/contracts/r2-product.mjs';
 const enabled=process.env.TABWISE_G2_LOCAL_DB==='g2local',owner='00000000-0000-4000-8000-000000000001',foreign='00000000-0000-4000-8000-000000000002',runId='00000000-0000-4000-8000-000000000011',version='00000000-0000-4000-8000-000000000021';
 const q=v=>v===null?'null':"'"+String(typeof v==='object'?JSON.stringify(v):v).replaceAll("'","''")+"'";
 const sql=s=>new Promise((yes,no)=>{const c=spawn('C:/Program Files/PostgreSQL/18/bin/psql.exe',['-X','-h','127.0.0.1','-p','55442','-U','g2test','-d','g2local','-At','-q','-v','ON_ERROR_STOP=1','-c',s],{windowsHide:true});let out='',err='';c.stdout.on('data',b=>out+=b);c.stderr.on('data',b=>err+=b);c.on('error',no);c.on('close',code=>code?no(Error(err)):yes(out.trim()));});
@@ -23,6 +24,12 @@ test('HTTP API + PostgreSQL: owned persistence, concurrency, unknown outcome and
   assert.equal(await sql('select count(*) from public.native_product_requests;'),'1');
   const changed={...context,revision:'e'.repeat(40)},wrong=prepareNativeProductRequest(changed);await assert.rejects(store.prepare(owner,wrong,changed),/conflict/);
   const p=prepareNativeProductRequest(context),act=(action,id=null)=>store.transition(owner,runId,p.request_sha256,action,id);
+  for(const [index,query] of [undefined,'','?flow=search&variant=broken','?flow=seat&variant=healthy'].entries()){
+   const id=`00000000-0000-4000-8000-${String(31+index).padStart(12,'0')}`,sp={...spec,run_id:id},c={...context,run:{...run,id,spec:sp},specBytes:Buffer.from(JSON.stringify(sp))};
+   await sql(`insert into public.runs(id,user_id,journey_id,journey_version_id,access_kind,status,spec,deadline_at) values(${q(id)},${q(owner)},'fernway-seat',${q(version)},'owner','admitted',${q(sp)},now()+interval '10 minutes');`);
+   const request={...prepareNativeProductRequest(c)},plan=JSON.parse(c.planBytes);if(query===undefined)delete plan.pages[0].query;else plan.pages[0].query=query;c.planBytes=Buffer.from(JSON.stringify(plan));request.plan_sha256=request.plan_bytes_sha256=sha256(c.planBytes);request.request_sha256=sha256(stable(Object.fromEntries(Object.entries(request).filter(([k])=>k!=='request_sha256'))));
+   await assert.rejects(store.prepare(owner,request,c),/binding/);assert.equal(await sql(`select count(*) from public.native_product_requests where product_run_id=${q(id)};`),'0');
+  }
   let sends=0;const lost=()=>recordNativeDispatch({userId:owner,runId,requestSha256:p.request_sha256,store,send:async()=>{sends++;throw Error('accepted request response lost at controlled boundary');}});
   assert.equal((await lost()).state,'DISPATCH_UNKNOWN');assert.equal((await lost()).state,'DISPATCH_UNKNOWN');assert.equal(sends,1);await assert.rejects(act('intent'),/transition/);
   await act('accepted','123');await act('accepted','123');await assert.rejects(act('accepted','124'),/conflict/);

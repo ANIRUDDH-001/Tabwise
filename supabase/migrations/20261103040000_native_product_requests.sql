@@ -39,13 +39,15 @@ begin
  then raise check_violation using message='invalid native request digest';end if;
  select * into r from public.runs where id=(p_request->>'product_run_id')::uuid and user_id=p_user for update;
  if not found then raise check_violation using message='owned admitted run required';end if;
+ select x into page from jsonb_array_elements(p_plan::jsonb->'pages') x where x->>'id'=p_request->>'page_id';
+ if coalesce(r.spec->>'variant','') not in ('healthy','broken') or page->>'query' is distinct from '?flow='||replace(r.journey_id,'fernway-','')||'&variant='||(r.spec->>'variant') then raise check_violation using message='native query binding mismatch';end if;
  select * into n from public.native_product_requests where product_run_id=r.id;
  if found then
   if n.request is distinct from p_request or n.spec_text is distinct from p_spec or n.plan_text is distinct from p_plan or n.fixture_text is distinct from p_fixture then raise check_violation using message='native request idempotency conflict';end if;
   return to_jsonb(n)||jsonb_build_object('replayed',true);
  end if;
  select * into v from public.journey_versions where id=r.journey_version_id and user_id=p_user;
- if r.status<>'admitted' or v.id is null or r.kind<>'baseline' or r.spec->>'variant'='patched' or p_request->>'journey_version_id' is distinct from v.id::text
+ if r.status<>'admitted' or v.id is null or r.kind<>'baseline' or coalesce(r.spec->>'variant','') not in ('healthy','broken') or p_request->>'journey_version_id' is distinct from v.id::text
  or r.spec is distinct from p_spec::jsonb or v.steps is distinct from r.spec->'steps'
  or r.spec->>'run_id' is distinct from r.id::text or r.spec->>'journey_id' is distinct from v.journey_id
  or encode(sha256(convert_to(p_spec,'UTF8')),'hex') is distinct from p_request->>'spec_sha256'
@@ -57,7 +59,7 @@ begin
  or encode(sha256(convert_to(replace(p_plan,E'\r\n',E'\n'),'UTF8')),'hex') is distinct from p_request->>'plan_sha256'
  or jsonb_array_length(page->'task') is distinct from jsonb_array_length(r.spec->'steps')
  or exists(select from jsonb_array_elements(page->'task') with ordinality t(x,n) where t.x->>'press' is distinct from r.spec->'steps'->(t.n::int-1)->>'key' or t.x->>'press'='type')
- or (page->>'query' is not null and page->>'query' is distinct from '?flow='||replace(v.journey_id,'fernway-','')||'&variant='||(r.spec->>'variant'))
+ or page->>'query' is distinct from '?flow='||replace(v.journey_id,'fernway-','')||'&variant='||(r.spec->>'variant')
  then raise check_violation using message='native plan/source binding mismatch';end if;
  insert into public.native_product_requests(product_run_id,user_id,request_sha256,request,spec_text,plan_text,fixture_text) values(r.id,p_user,p_request->>'request_sha256',p_request,p_spec,p_plan,p_fixture) returning * into n;
  insert into public.audit_log(actor,action,subject,detail) values(p_user::text,'native_request_prepared',r.id::text,jsonb_build_object('request_sha256',n.request_sha256,'execution_authorized',false));

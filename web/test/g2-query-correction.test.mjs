@@ -1,0 +1,6 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {sha256} from '../../packages/contracts/index.mjs';import {prepareNativeProductRequest} from '../../src/r2/product-dispatch.mjs';
+import {buildNativeRequestContext} from '../lib/server/native-request-context.mjs';
+import {input} from './helpers/native-request-correction.mjs';
+for(const query of [undefined,'','?flow=search&variant=broken','?flow=seat&variant=healthy'])test('exact Fernway query refuses '+String(query),()=>{const a=input(),c=buildNativeRequestContext(a),p=JSON.parse(c.planBytes);if(query===undefined)delete p.pages[0].query;else p.pages[0].query=query;assert.throws(()=>prepareNativeProductRequest({...c,run:a.run,userId:'owner',planBytes:Buffer.from(JSON.stringify(p))}));});
+for(const variant of ['healthy','broken'])test('live context uses stored '+variant+' variant',()=>{const a=input();a.run.spec.variant=variant;const c=buildNativeRequestContext(a);assert.equal(JSON.parse(c.planBytes).pages[0].query,`?flow=seat&variant=${variant}`);assert.equal(prepareNativeProductRequest({...c,run:a.run,userId:'owner'}).execution_authorized,false);});
+for(const variant of ['patched','unknown',undefined])test('unsupported variant '+variant+' refuses',()=>{const a=input();a.run.spec.variant=variant;assert.throws(()=>buildNativeRequestContext(a));});
