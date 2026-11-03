@@ -595,3 +595,14 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Files: src/repair/application.mjs and rerun.mjs; worker source staging/loader and guarded entry; rerun migration/API/UI; new tests and normal handoff ledgers.
 - Acceptance: targeted28, web/contracts148, R2 809, worker/review15, DB concurrency/rollback, typecheck/build; details in R3 handoff.
 - Zero paid calls, deployment or live NVDA. Commit/push R3 branch only. R3 real-runtime acceptance still false.
+
+### F-03 / local-first R3 integration stabilization
+- Owner request: complete local integration/regression, zero spend, isolated from production/diagnostic, no push/native run/merge.
+- Files: approved ci/offline-tests.json classifications; test/tabwise-d67-timing.test.mjs; session ledgers; ignored local evidence/harnesses.
+- Acceptance: root, web/contracts, ordinary/stress seed415682473, TypeScript/webpack build, actual production browser/API, isolated PostgreSQL migrations/SQL/concurrency, synthetic connected R3 flow, frozen/preflight/diff checks; all exit0.
+- Root1177 PASS/2 opt-in DB skips; both DB tests pass separately; web127, contracts21, browser/API15 PASS; ordinary+8stress60 files/1111 tests each PASS.
+- Local PostgreSQL18.3: seven migrations x three fresh DBs, seven SQL suites, two concurrency tests PASS; cluster stopped. Auth/storage stand-ins are not hosted qualification.
+- Connected synthetic R3: healthy/correct/wrong/rejected, stale-source and duplicate controls PASS; production modules plus real PG/Chromium, mocked model/native/human choices, L0; no native acceptance.
+- D67 source/dependency closure, assertions and30s/100ms deadlines retained; measured setup optimization only; timeout not reproduced.
+- CI parity: protection applied during repeat-1; repeat-2 through mixed used read-only tracked source/Guidepup lib. Original attributes restored after completion.
+- Rollback: revert isolated local correction commit; no runtime, migration, dependency, lock, activation or FEATURES changes.

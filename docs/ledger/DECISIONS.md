@@ -659,3 +659,13 @@ User: "Tabwise: Complete R3 AI diagnosis and repair, end-to-end. This is full im
 
 ## R3 continuation authorization - 2026-11-02T20:26:45Z
 User: "Continue R3 from commit 5de07e6. Do not merge." "Correct the application-layer stale-source check; preserve safe idempotent recovery." "Implement qualified patched-source worker consumption and rerun admission using immutable candidate hashes and exact source binding." "Commit and push only the R3 branch." "No paid Muse calls, deployments, live NVDA or unrelated audits." All validation remained offline; execution/source-readiness gates left closed.
+
+## F-03 local stabilization inventory approval
+User answer: "Approve corrected inventory (Recommended): preserves CI capability boundaries; ₹0, no deadline changes."
+Consequence: classify four R3 offline files, one Chromium browser file and two opt-in PostgreSQL process files in ci/offline-tests.json; no watchdog/test/deadline change.
+User scope: "Keep R2 production, diagnostic and R3 changes isolated. No pushes, native reruns or merges without review."
+
+## F-03 local-first R3 task authorization
+User: "Complete local integration and regression checks." "Keep R2 production, diagnostic and R3 changes isolated."
+User: "You may commit corrections locally on the appropriate feature branches."
+Consequence: local fix/F-03-local-stabilization-r3 correction and handoff only; approved CI classification, D67 test setup, no runtime/activation/native/publication change.

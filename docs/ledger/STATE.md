@@ -1,24 +1,23 @@
-# STATE - R3 continuation implemented offline; native acceptance BLOCKED
-Updated: 2026-11-02T20:26:45Z
-Branch/worktree: feat/tabwise-r3-complete / D:/Projects/Meta AI/app-r3-complete
-Continuation base: 5de07e60d1702482ae071f6682a8920f533ece1c
+# STATE - R3 local engineering matrix green; native acceptance BLOCKED
+Updated: 2026-11-03T03:58:01Z
+Base: d7af9c39db03f6277f8cad5814b8e5e42214cbb4
+Branch: fix/F-03-local-stabilization-r3
 ## Now
-- Fixed stale current-source validation before NEW materialization RPC; saved output recovery retained.
-- Added immutable rerun admission, saved base bytes, hash/exact-patch-bound worker source consumption.
-- Worker loading/staging occurs after liveGate; separate repair source-readiness approval gates API.
-- UI requests rerun with candidate-specific idempotency. No remote settings changed.
-## Verification - MEASURED r3-continuation-20261103
-- Targeted28/28; web/contracts148/148; R2 809/809; worker/review15/15.
-- Isolated PostgreSQL fresh migrations, concurrent admission, stale/foreign/conflict and rollback checks PASS.
-- Typecheck/build exit0; frozen R1 ok:true/errors:[]; diff check PASS.
-- Synthetic browser oracle: baseline FAIL, correct patch PASS, wrong patch FAIL; no NVDA observation claim.
+- Root1177 PASS, zero failures, two opt-in DB skips; both DB tests passed separately on local PostgreSQL18.3.
+- Web127/contracts21/production browser-API15 PASS; types/webpack build/preflight/frozen R1/diff checks exit0.
+- Ordinary+all8stress:60/60 files and1111/1111 tests each; no watchdog or unconfirmed exit/stdio closure.
+- Owner-approved CI classification fixes seven unclassified R3 files; browser/process boundaries retained.
+- D67 complete source/dependency closure retained; setup measured/optimized; 30s/100ms unchanged; no timeout reproduced.
+- Real local PG migrations/concurrency/rollback/RLS PASS; cluster stopped. Original read-only attributes restored.
+- Synthetic connected R3 healthy/correct/wrong/rejected/stale/duplicate controls PASS; model/native/human fixtures, L0.
+- No runtime, migration, dependency, activation, approval variable, frozen R1 or FEATURES changes.
+- Independent Codex review: no actionable finding; Claude cross-tool review outstanding.
 ## Next / blocked
-- Existing liveGate still refuses real provider binding/physical quiescence qualification.
-- Isolated source staging/credentials and repair readiness approval are not configured remotely.
-- Native R2 attestation, patched-source qualification and genuine withheld/wrong-patch reruns absent.
-- Hosted migration/auth/browser checks and Claude cross-tool review outstanding.
-- Legacy candidates without saved base bytes recover but cannot be admitted for rerun.
+- Owner review exact local commits and cache/local-stabilization/VERIFICATION-20261103.md before hosted offline validation.
+- Native R2/W2a/R3/R7 qualification, provider binding/quiescence/attestation and genuine withheld reruns remain blocked.
+- Authenticated hosted Supabase/browser checks remain unqualified; no remote changes were made.
 ## Handoff
-- docs/engineering/Tabwise-R3-complete-handoff.md continuation supersedes prior source/admission gaps.
-- R3 passes remains false. No paid calls, live NVDA, deployments, gate weakening or main modification.
-- Commit/push R3 branch only authorized. Local PostgreSQL stopped after tests.
+Uncommitted: none after local correction/handoff commit.
+Verified by: node scripts/offline-tests.mjs --profile stress --seed 415682473 ->8x60 files/1111 tests PASS.
+Local commit: git log -1; exact command/timing/count evidence: cache/local-stabilization/verification.json.
+Review needed from: user and Claude cross-tool reviewer before integration; no push/native rerun/merge authorized.
