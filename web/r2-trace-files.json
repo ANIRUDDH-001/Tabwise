@@ -12,6 +12,7 @@
   "scripts/tabwise-r2.mjs",
   "scripts/tabwise/executor.mjs",
   "scripts/tabwise/input-policy.mjs",
+  "scripts/tabwise/native-integration-policy.json",
   "scripts/tabwise/network.mjs",
   "scripts/tabwise/observer-qualification.mjs",
   "scripts/tabwise/observer.mjs",

@@ -21,6 +21,8 @@ export async function POST(request:Request){return endpoint(request,async()=>{
  const {data:run}=await db.from('runs').select('*').eq('id',admission.run_id).eq('user_id',user.id).single();
  if(!run)throw new HttpError(500,'admission_record_missing');
  if(run.journey_version_id!==version.id)throw new HttpError(409,'native_request_conflict');
+ const {error:producerError}=await db.rpc('register_run_producer',{p_user:user.id,p_run:run.id,p_producer:input.patch_id?'legacy':'native-r2'});
+ if(producerError)throw new HttpError(409,'run_producer_unresolved');
  if(!input.patch_id){
   const preparation=await nativeRequestRoute(request,run.id),value=await preparation.json();
   return Response.json({...value,run_id:run.id,status:run.status},{status:preparation.ok?202:preparation.status});

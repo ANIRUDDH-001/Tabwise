@@ -1,0 +1,7 @@
+{
+ "schema":"tabwise-native-integration-policy/1",
+ "enabled":false,
+ "sender_enabled":false,
+ "ingestion_enabled":false,
+ "binding":null
+}
