@@ -10,7 +10,7 @@ export function candidateWorkspaceViews(rows,userId){
  return rows.map(({product_run_id,journey_version_id,state,created_at})=>({product_run_id,journey_version_id,state,created_at,classification:CLASSIFICATION,production_qualified:false}));
 }
 export function candidateRunView(row){
- return {product_run_id:row.product_run_id,journey_version_id:row.journey_version_id,state:row.state,classification:CLASSIFICATION,production_qualified:false,github_run_id:row.github_run_id??null,request_sha256:row.request?.request_sha256??null,native_observations_available:row.state==='EVIDENCE_READY'&&row.readback?.native_interaction_pass===true};
+ return {product_run_id:row.product_run_id,journey_version_id:row.journey_version_id,state:row.state,classification:CLASSIFICATION,production_qualified:false,github_run_id:row.github_run_id??null,request_sha256:row.request?.request_sha256??null,native_observations_available:row.state==='EVIDENCE_READY'&&row.readback?.native_interaction_pass===true,...(row.repair?{repair:{baseline_run_id:row.repair.baseline_run_id,patch_sha256:row.repair.patch_sha256,source_sha256:row.repair.source_sha256,review:row.repair.review}}:{})};
 }
 export function candidateRunStore(db){
  const rpc=async(name,args)=>{const {data,error}=await db.rpc(name,args);if(error||!data)throw Error('candidate persistence conflict');return shape(data);};

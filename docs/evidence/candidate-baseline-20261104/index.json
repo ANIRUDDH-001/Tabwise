@@ -1,0 +1,29 @@
+{
+  "classification": "NONPRODUCTION_UNQUALIFIED",
+  "production_qualified": false,
+  "github_run_id": "41891175195",
+  "attempt": 2,
+  "revision": "2cfacfad0ead3ddc078c5dd5b9ff181881d1e3c4",
+  "product_run_id": "32e02e48-78a1-463d-9107-0b5b7048d3dd",
+  "native_artifact_id": "13355105324",
+  "separate_readback_artifact_id": "13353327679",
+  "private_stored_readback_sha256": "28798ef66210e3d4185558f5632aead61ddc1c4cfe02c54185b3de3c6aa6889c",
+  "files": {
+    "native-original.zip": {
+      "sha256": "a9632b0438735640c68b5cd1c7224b9e7ae4661993c4a34fbd16827237fb582b",
+      "bytes": 107898
+    },
+    "raw-replay-result.json": {
+      "sha256": "bde6aff1a4f507c5cdf90fa43581a81e7a8fba4a8cc2b46ce5407622ca8b3e70",
+      "bytes": 283
+    },
+    "readback-original.zip": {
+      "sha256": "2f4aade11d945c098fb738804b0727bf8666cc46bfb44cda5adbe262dccbf8fd",
+      "bytes": 3526
+    },
+    "verified-evidence.json": {
+      "sha256": "28798ef66210e3d4185558f5632aead61ddc1c4cfe02c54185b3de3c6aa6889c",
+      "bytes": 32614
+    }
+  }
+}

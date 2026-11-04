@@ -1,5 +1,11 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
 import * as evidence from '../lib/server/candidate-evidence.mjs';
+test('candidate sealed replay reads the actual CLI result envelope and rejects partial or promoted output',()=>{
+ const result={code:0,summary:{schema:'tabwise-r2-verify/1',ok:true,complete:true,run_class:'synthetic',errors:[],genuine_evidence:false}};
+ assert.equal(evidence.candidateReplayAccepted(result),true);
+ for(const edit of [r=>r.code=2,r=>r.summary.complete=false,r=>r.summary.ok=false,r=>r.summary.errors=['incomplete'],r=>r.summary.run_class='native',r=>r.summary.genuine_evidence=true]){const bad=structuredClone(result);edit(bad);assert.equal(evidence.candidateReplayAccepted(bad),false);}
+ assert.equal(evidence.candidateReplayAccepted(result.summary),false);
+});
 import {sha256} from '../../packages/contracts/index.mjs';
 test('original archive bytes roundtrip through the existing JSON-only private bucket',()=>{
  assert.equal(typeof evidence.encodeCandidateArchive,'function');assert.equal(typeof evidence.decodeCandidateArchive,'function');

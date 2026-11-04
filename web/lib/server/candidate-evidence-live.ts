@@ -6,7 +6,7 @@ import {resolve,dirname} from 'node:path';
 import {serviceClient,requireUser} from './supabase';
 import {candidateConfiguration} from './candidate-run-live';
 import {candidateRunStore} from './candidate-run.mjs';
-import {prepareCandidateEvidence,selectCandidateArtifacts,encodeCandidateArchive,decodeCandidateArchive} from './candidate-evidence.mjs';
+import {prepareCandidateEvidence,selectCandidateArtifacts,encodeCandidateArchive,decodeCandidateArchive,candidateReplayAccepted} from './candidate-evidence.mjs';
 import {reviewedSourceRoot,reviewedR2Module} from '../../../src/r2/node-review.mjs';
 import {withVerificationDirectory} from './verification-directory.mjs';
 import {stable,same} from '../../../packages/contracts/r2-product.mjs';
@@ -38,10 +38,12 @@ export async function candidateIngestPOST(request:Request,id:string){return endp
  const [nativeArchive,readbackArchive]=await Promise.all([downloadArtifact(String(selected.native.id)),downloadArtifact(String(selected.readback.id))]);
  const evidence=await prepareCandidateEvidence({...context,nativeArchive,readbackArchive,verifySealed:async({files,request:r}:{files:Record<string,Uint8Array>,request:unknown})=>withVerificationDirectory(async(dir:string)=>{
   const root=reviewedSourceRoot(),policy=rawRequire(/* webpackIgnore: true */ resolve(root,'diagnostics/r2-candidate/policy.mjs'));
-  const plan=reviewedR2Module('r2-run.mjs').parseR2Plan(files['plan.json']);if(!same(plan,policy.candidatePlan(r)))return false;
+  // The sealed run manifest binds the plan reconstructed from the exact owned
+  // request. Native output intentionally does not contain an unsealed plan.json.
+  const plan=reviewedR2Module('r2-run.mjs').parseR2Plan(Buffer.from(stable(policy.candidatePlan(r))));
   for(const [path,bytes] of Object.entries(files)){const dest=resolve(dir,path);if(!dest.startsWith(resolve(dir)+'/')&&!dest.startsWith(resolve(dir)+'\\'))throw Error('candidate scratch scope');await mkdir(dirname(dest),{recursive:true});await writeFile(dest,bytes,{flag:'wx'});}
-  const fixtures=new Map([['candidate-seat',Buffer.from(readFileSync(resolve(root,'fixtures/fernway/index.html'),'utf8').replaceAll('\r\n','\n'))]]);
-  const result=await reviewedR2Module('r2-run.mjs').r2VerifyRun({plan,pages:plan.pages,fixtures},dir);return result.ok&&result.complete;
+  const fixtures=new Map([['candidate-seat',policy.fixtureForCandidate(r,root)]]);
+  const result=await reviewedR2Module('r2-run.mjs').r2VerifyRun({plan,pages:plan.pages,fixtures},dir);return candidateReplayAccepted(result);
  })});
  const evidenceBytes=Buffer.from(stable(evidence)),digest=sha256(evidenceBytes),prefix='candidate/'+id+'/'+digest;
  // Preserve exact original ZIP bytes losslessly in the existing JSON-only

@@ -8,6 +8,7 @@ import {captureObservationSources} from '../../../src/r2/capture-export.mjs';
 import {validateRuntimeMetadata} from '../../../src/r2/runtime-metadata.mjs';
 import {verifyAdmissionRecord} from '../../../scripts/tabwise/r2-admission.mjs';
 const CLASS='NONPRODUCTION_UNQUALIFIED',fail=why=>{throw Error('candidate evidence refused: '+why);};
+export function candidateReplayAccepted(result){const s=result?.summary;return result?.code===0&&s?.schema==='tabwise-r2-verify/1'&&s.ok===true&&s.complete===true&&s.run_class==='synthetic'&&s.genuine_evidence===false&&Array.isArray(s.errors)&&s.errors.length===0;}
 export function encodeCandidateArchive(bytes,expected){
  if(!(bytes instanceof Uint8Array)||!/^\d+$/.test(expected?.id??'')||bytes.length!==expected.bytes||sha256(bytes)!==expected.sha256)fail('original archive wrapper binding');
  const wrapped=Buffer.from(stable({schema:'tabwise-candidate-original-archive/1',original_artifact_id:expected.id,encoding:'base64',sha256:expected.sha256,bytes:bytes.length,data:Buffer.from(bytes).toString('base64')}));

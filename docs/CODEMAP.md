@@ -214,3 +214,7 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 | `docs/engineering/Candidate-vertical-slice-20261104.md`, `docs/evidence/candidate-vertical-slice-20261104/` | Original bootstrap/failure bytes, indexed local tests, native/source scope separation and exact external configuration actions | Candidate-only checkpoint, no native acceptance |
 
 | `docs/evidence/candidate-runtime-recovery-20261104/` | Original W5-consumed pre-capture budget refusal, clean process custody and red/green budget correction | run41876894297/2; no accepted native capture |
+| `diagnostics/r2-candidate/repair.mjs`, `focus-restoration{.patch,-review.json}` | Exact owner-approved Fernway patch, fixed source hashes, bounded materialization and same candidate native path; no production authority | `repair.test.mjs`, `policy.test.mjs` |
+| `web/lib/server/candidate-repair{,-live}.*`, candidate `[id]/repair` route, `CandidateRepair.tsx` | Owned immutable repair preparation and actual review/provenance UI | `candidate-repair-database.test.mjs`, `candidate-repair.browser.mjs` |
+| `supabase/migrations/20261104185602_candidate_reviewed_repair.sql` | Separate candidate repair metadata/immutability and service-only exact reviewed-source creation; same global/daily run ceilings | `supabase/tests/candidate_reviewed_repair.sql` |
+| `docs/evidence/candidate-baseline-20261104/` | Original genuine candidate5 native/readback ZIPs, raw replay and25 observed rows with byte index; unqualified engineering evidence | immutable originals/index |
