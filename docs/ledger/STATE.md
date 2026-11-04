@@ -1,19 +1,12 @@
-# STATE - native diagnostic local stabilization
-Updated: 2026-11-03T03:36:47Z
-Base: bb7bea77af36829dbbd6910a6724c28e7c78e67d
-Branch: fix/F-03-local-stabilization-diagnostic
-## Now
-- Stale signature assertion corrected; brand-first/import/export restrictions retained.
-- D67 complete source/dependency fixture copy retained; setup instrumented/optimized; no deadline change.
-- Owner-approved offline workflow command includes error-test.mjs; native jobs unchanged.
-- MEASURED root-after-workflow: 1161/1161; diagnostic-after-workflow: 34/34; frozen/diff checks exit 0.
-- Preflight passed. Existing R2 production and diagnostic worktrees were not edited.
-- Independent Codex read-only review: no blocker; Claude cross-tool review not performed.
-## Next / blocked
-- Owner review of local correction commit; no push, native rerun, merge or new approval setting.
-- Native R2/W2a/R3/R7 qualification remains blocked; no status or FEATURES promotion.
-## Handoff
-Uncommitted: none after the local correction/handoff commit.
-Verified by: node --test --test-timeout=10000 test/*.test.mjs -> 1161 PASS; diagnostic suite -> 34 PASS.
-Local commit: git log -1; evidence: cache/local-stabilization.
-Review needed from: user (and Claude cross-tool review before integration).
+# STATE — G1 owner-query V2 source candidate
+Updated: 2026-11-04T04:09:32.928866Z
+- Isolated from published c9ee495b and original unfinished diagnostic worktree.
+- New bounded netstat resolver; fixed read-only identity query; no frozen/vendor/product changes.
+- MEASURED: 105 offline tests PASS; real local IPv4/IPv6 self-owner and absence checks PASS.
+- Failed initial parser measurements preserved in cache/owner-v2/.
+- Physical quiescence unverified; containment_required=true.
+- Legacy WMI query not launched locally without independent Job containment.
+- Next: independent review of exact new commit/inventory and owner-only publication/registration.
+- Fresh attempt1/attempt2/run-specific authorization required; V1 consumed approval invalid.
+- No publication/dispatch/native startup/input/hosted mutation/paid calls.
+- Product workflow integration remains separate and disabled.

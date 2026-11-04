@@ -675,3 +675,5 @@ Consequence: existing offline workflow command runs diagnostics/r2-native/test.m
 User: "Fix the native diagnostic's stale S5b-S1 signature assertion." "Investigate the D67 timing timeout without relaxing production guards."
 User: "You may commit corrections locally on the appropriate feature branches."
 Consequence: isolated fix/F-03-local-stabilization-diagnostic from bb7bea7; local correction commit only, no publication or native execution.
+
+Owner sprint bd81c229: "Codex may create scoped LOCAL commits under the previously approved waiver." "No rerun, new workflow dispatch or reuse of this packet is allowed." New G1 V2 source isolated; no publication or execution.
