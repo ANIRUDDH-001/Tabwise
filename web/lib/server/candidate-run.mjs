@@ -4,13 +4,14 @@ import {recordNativeDispatch} from './native-request.mjs';
 import {parseUniqueJson} from '../../../src/r2/strict-json.mjs';
 const uuid=v=>typeof v==='string'&&/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(v);
 const REF='refs/heads/feat/tabwise-r2-r7-product-completion',CLASSIFICATION='NONPRODUCTION_UNQUALIFIED';
+export function candidateConfigurationFromEnv(env){const revision=env.TABWISE_CANDIDATE_REVISION;return {enabled:env.TABWISE_CANDIDATE_ENABLED==='true'&&/^[a-f0-9]{40}$/.test(revision??''),userId:env.TABWISE_CANDIDATE_USER_ID,ref:env.TABWISE_CANDIDATE_REF,revision};}
 const shape=row=>row?{...row,request_sha256:row.request?.request_sha256??null}:null;
 export function candidateWorkspaceViews(rows,userId){
  if(!userId||!Array.isArray(rows)||rows.length>25||rows.some(r=>r.user_id!==userId||r.classification!==CLASSIFICATION||r.production_qualified!==false))throw Error('candidate workspace ownership/classification');
  return rows.map(({product_run_id,journey_version_id,state,created_at})=>({product_run_id,journey_version_id,state,created_at,classification:CLASSIFICATION,production_qualified:false}));
 }
 export function candidateRunView(row){
- return {product_run_id:row.product_run_id,journey_version_id:row.journey_version_id,state:row.state,classification:CLASSIFICATION,production_qualified:false,github_run_id:row.github_run_id??null,request_sha256:row.request?.request_sha256??null,native_observations_available:row.state==='EVIDENCE_READY'&&row.readback?.native_interaction_pass===true};
+ return {product_run_id:row.product_run_id,journey_version_id:row.journey_version_id,state:row.state,classification:CLASSIFICATION,production_qualified:false,github_run_id:row.github_run_id??null,request_sha256:row.request?.request_sha256??null,native_observations_available:row.state==='EVIDENCE_READY'&&row.readback?.native_interaction_pass===true,...(row.repair?{repair:{baseline_run_id:row.repair.baseline_run_id,patch_sha256:row.repair.patch_sha256,source_sha256:row.repair.source_sha256,review:row.repair.review}}:{})};
 }
 export function candidateRunStore(db){
  const rpc=async(name,args)=>{const {data,error}=await db.rpc(name,args);if(error||!data)throw Error('candidate persistence conflict');return shape(data);};

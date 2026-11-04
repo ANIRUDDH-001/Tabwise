@@ -48,6 +48,11 @@ export function assessNativeRepair({baselineCapture,rerunCapture,baselineEvidenc
   const i=snapshot?.active_identity;
   if(snapshot?.identity_version!==2||i?.available!==true||i.connected!==true||i.node_key!==snapshot.active||typeof i.is_body!=='boolean')return null;
   if(i.is_body)return i.tag==='body'&&snapshot.active==='body'?'body':null;
+  if(i.id===null&&i.id_unique===null&&i.tag==='input'&&i.input_type==='radio'&&i.role==='radio'&&/^input#[1-9][0-9]*$/.test(snapshot.active)){
+   const c=i.control_identity;
+   if(!c||Object.keys(c).sort().join(',')!=='kind,name,unique,value'||c.kind!=='named-radio/1'||c.unique!==true||typeof c.name!=='string'||typeof c.value!=='string'||!c.name.length||!c.value.length||c.name.length>256||c.value.length>256)return null;
+   return JSON.stringify(['named-radio/1',c.name,c.value]);
+  }
   if(typeof i.id!=='string'||!i.id||i.id_unique!==true||typeof i.tag!=='string'||!i.tag||i.tag==='body'||typeof snapshot.active!=='string'||!snapshot.active.startsWith(i.id+'#')||!/^[1-9][0-9]*$/.test(snapshot.active.slice(i.id.length+1)))return null;
   // Per-session node ordinals are not stable across original and patched DOMs.
   // Compare the observed unique DOM identity; names remain page-authored data.

@@ -13,3 +13,6 @@ docs/evidence/product-completion-20261104/*.json -text whitespace=cr-at-eol
 # Keep original candidate ZIP outputs, raw logs and their indexed byte hashes.
 docs/evidence/candidate-vertical-slice-20261104/** -text -diff
 docs/evidence/candidate-runtime-recovery-20261104/** -text -diff
+docs/evidence/candidate-baseline-20261104/** -text -diff
+docs/evidence/candidate-repair-20261104/** -text -diff
+docs/evidence/candidate-complete-20261104/** -text -diff

@@ -1,0 +1,15 @@
+{
+  "schema": "tabwise-candidate-human-review/1",
+  "decision": "approved",
+  "decision_text": "Approve this exact focus-restoration patch",
+  "reviewed_by": "6198bfc5-5937-46d9-8eac-9b7599cbee52",
+  "review_source": "owner reply to exact patch review in this engineering session",
+  "model_basis_run_id": "453627ed-abc1-4f89-bd48-7c5be69a2d76",
+  "model_basis_github_run_id": "41881566073",
+  "model_evidence_class": "MODEL",
+  "model_independence": "L1",
+  "base_sha256": "5ad4631558cdcc557770ae864957ffc167546cd0af58bd11258808e1c0e523be",
+  "patch_sha256": "015d122118b5306e9528048f83abf5f293cc5603422b6182bce06e06d743f739",
+  "source_sha256": "1860345c688f2adfe7241b97f05ba32fe345f08b0594cff8476d7b6e70e484ce",
+  "production_qualified": false
+}

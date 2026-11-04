@@ -4,9 +4,9 @@ import {resolve} from 'node:path';
 import {createRequire} from 'node:module';
 import {requireUser,serviceClient} from './supabase';
 import {reviewedSourceRoot} from '../../../src/r2/node-review.mjs';
-import {candidateRunStore,createCandidateRunHandler} from './candidate-run.mjs';
+import {candidateRunStore,createCandidateRunHandler,candidateConfigurationFromEnv} from './candidate-run.mjs';
 const rawRequire=createRequire(import.meta.url);
-export function candidateConfiguration(){return {enabled:process.env.TABWISE_CANDIDATE_ENABLED==='true',userId:process.env.TABWISE_CANDIDATE_USER_ID,ref:process.env.TABWISE_CANDIDATE_REF,revision:process.env.VERCEL_GIT_COMMIT_SHA??process.env.TABWISE_CANDIDATE_REVISION};}
+export function candidateConfiguration(){return candidateConfigurationFromEnv(process.env);}
 export async function candidateRunRoute(request:Request,id=''){
  let db:ReturnType<typeof serviceClient>|undefined;const store=()=>candidateRunStore(db??=serviceClient());
  const handler=createCandidateRunHandler({authenticate:async()=>requireUser(),configuration:candidateConfiguration,

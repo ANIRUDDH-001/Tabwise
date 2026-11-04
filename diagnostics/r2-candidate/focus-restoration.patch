@@ -1,0 +1,5 @@
+--- a/index.html
++++ b/index.html
+@@ -40,1 +40,1 @@
+-const close=()=>{dialog.close();if(healthy)opener.focus();else opener.blur();emit('dialog-close','seat-dialog');};
++const close=()=>{dialog.close();opener.focus();emit('dialog-close','seat-dialog');};

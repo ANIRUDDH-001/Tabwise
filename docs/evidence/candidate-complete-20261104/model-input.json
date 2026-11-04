@@ -1,0 +1,596 @@
+{
+  "version": "0.1.0",
+  "run_id": "453627ed-abc1-4f89-bd48-7c5be69a2d76",
+  "journey": [
+    {
+      "key": "Tab",
+      "step": 1,
+      "text": null,
+      "checkpoint": true
+    },
+    {
+      "key": "Enter",
+      "step": 2,
+      "text": null,
+      "checkpoint": true
+    },
+    {
+      "key": "Tab",
+      "step": 3,
+      "text": null,
+      "checkpoint": true
+    },
+    {
+      "key": "Tab",
+      "step": 4,
+      "text": null,
+      "checkpoint": true
+    },
+    {
+      "key": "Enter",
+      "step": 5,
+      "text": null,
+      "checkpoint": true
+    }
+  ],
+  "evidence_refs": [
+    "r2:keys:107",
+    "r2:focus:108",
+    "r2:speech:2",
+    "r2:speech:3",
+    "r2:keys:109",
+    "r2:focus:110",
+    "r2:focus:111",
+    "r2:app_events:112",
+    "r2:speech:4",
+    "r2:speech:5",
+    "r2:speech:6",
+    "r2:keys:113",
+    "r2:focus:114",
+    "r2:focus:115",
+    "r2:speech:7",
+    "r2:keys:116",
+    "r2:focus:117",
+    "r2:focus:118",
+    "r2:speech:8",
+    "r2:keys:119",
+    "r2:focus:120",
+    "r2:focus:121",
+    "r2:focus:122",
+    "r2:app_events:123",
+    "r2:speech:9"
+  ],
+  "timeline": [
+    {
+      "evidence_ref": "r2:keys:107",
+      "step": 1,
+      "seq": 107,
+      "clock": "page-monotonic-ms",
+      "t": 12594,
+      "kind": "keydown",
+      "text": "{\"identity_version\":2,\"source\":\"runner-page-recorder\",\"active\":\"body\",\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"body\",\"tag\":\"body\",\"input_type\":null,\"role\":null,\"name\":null,\"name_source\":null,\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":true,\"connected\":true,\"dialogs\":[],\"id_unique\":null,\"name_truncated\":false},\"target_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"body\",\"tag\":\"body\",\"input_type\":null,\"role\":null,\"name\":null,\"name_source\":null,\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":true,\"connected\":true,\"dialogs\":[],\"id_unique\":null,\"name_truncated\":false},\"related_identity\":null}",
+      "target": "body",
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:focus:108",
+      "step": 1,
+      "seq": 108,
+      "clock": "page-monotonic-ms",
+      "t": 12594.799999999988,
+      "kind": "focusin",
+      "text": "{\"identity_version\":2,\"source\":\"runner-page-recorder\",\"active\":\"choose-seat#26\",\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"choose-seat#26\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Choose your seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"choose-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[],\"id_unique\":true,\"name_truncated\":false},\"target_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"choose-seat#26\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Choose your seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"choose-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[],\"id_unique\":true,\"name_truncated\":false},\"related_identity\":{\"available\":false,\"reason\":\"unavailable\",\"node_key\":\"unknown\",\"tag\":null,\"input_type\":null,\"role\":null,\"name\":null,\"name_source\":null,\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":false,\"connected\":null,\"dialogs\":[]},\"terminal_focus\":{\"session\":\"2f8901f9-948d-490a-806c-58dfbb7f3b9f\",\"clock\":\"page-monotonic-ms\",\"t\":14097.399999999965,\"active\":\"choose-seat#26\",\"identity_version\":2,\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"choose-seat#26\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Choose your seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"choose-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[],\"id_unique\":true,\"name_truncated\":false},\"state\":{\"dialogs\":[],\"invalid\":[],\"live\":[]},\"cursor\":108,\"node_received\":{\"clock\":\"node-monotonic-ms\",\"t\":18081.2045}},\"terminal_focus_source\":\"/records/0/page/after\"}",
+      "target": "choose-seat#26",
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:speech:2",
+      "step": 1,
+      "seq": 2,
+      "clock": "node-monotonic-ms",
+      "t": 16771.3034,
+      "kind": "speech",
+      "text": "Fernway sample application, main landmark",
+      "target": null,
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:speech:3",
+      "step": 1,
+      "seq": 3,
+      "clock": "node-monotonic-ms",
+      "t": 16771.3265,
+      "kind": "speech",
+      "text": "Choose your seat, button",
+      "target": null,
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:keys:109",
+      "step": 2,
+      "seq": 109,
+      "clock": "page-monotonic-ms",
+      "t": 14248.899999999965,
+      "kind": "keydown",
+      "text": "{\"identity_version\":2,\"source\":\"runner-page-recorder\",\"active\":\"choose-seat#26\",\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"choose-seat#26\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Choose your seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"choose-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[],\"id_unique\":true,\"name_truncated\":false},\"target_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"choose-seat#26\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Choose your seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"choose-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[],\"id_unique\":true,\"name_truncated\":false},\"related_identity\":null}",
+      "target": "choose-seat#26",
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:focus:110",
+      "step": 2,
+      "seq": 110,
+      "clock": "page-monotonic-ms",
+      "t": 14252.599999999977,
+      "kind": "focusout",
+      "text": "{\"identity_version\":2,\"source\":\"runner-page-recorder\",\"active\":\"body\",\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"body\",\"tag\":\"body\",\"input_type\":null,\"role\":null,\"name\":null,\"name_source\":null,\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":true,\"connected\":true,\"dialogs\":[],\"id_unique\":null,\"name_truncated\":false},\"target_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"choose-seat#26\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Choose your seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"choose-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[],\"id_unique\":true,\"name_truncated\":false},\"related_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"input#46\",\"tag\":\"input\",\"input_type\":\"radio\",\"role\":\"radio\",\"name\":\"Window\",\"name_source\":\"label\",\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":null,\"name_truncated\":false}}",
+      "target": "choose-seat#26",
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:focus:111",
+      "step": 2,
+      "seq": 111,
+      "clock": "page-monotonic-ms",
+      "t": 14252.799999999988,
+      "kind": "focusin",
+      "text": "{\"identity_version\":2,\"source\":\"runner-page-recorder\",\"active\":\"input#46\",\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"input#46\",\"tag\":\"input\",\"input_type\":\"radio\",\"role\":\"radio\",\"name\":\"Window\",\"name_source\":\"label\",\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":null,\"name_truncated\":false},\"target_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"input#46\",\"tag\":\"input\",\"input_type\":\"radio\",\"role\":\"radio\",\"name\":\"Window\",\"name_source\":\"label\",\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":null,\"name_truncated\":false},\"related_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"choose-seat#26\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Choose your seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"choose-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[],\"id_unique\":true,\"name_truncated\":false}}",
+      "target": "input#46",
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:app_events:112",
+      "step": 2,
+      "seq": 112,
+      "clock": "page-monotonic-ms",
+      "t": 14253,
+      "kind": "mutation",
+      "text": "{\"identity_version\":2,\"source\":\"runner-page-recorder\",\"active\":\"input#46\",\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"input#46\",\"tag\":\"input\",\"input_type\":\"radio\",\"role\":\"radio\",\"name\":\"Window\",\"name_source\":\"label\",\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":null,\"name_truncated\":false},\"target_identity\":null,\"related_identity\":null,\"terminal_focus\":{\"session\":\"2f8901f9-948d-490a-806c-58dfbb7f3b9f\",\"clock\":\"page-monotonic-ms\",\"t\":15752.5,\"active\":\"input#46\",\"identity_version\":2,\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"input#46\",\"tag\":\"input\",\"input_type\":\"radio\",\"role\":\"radio\",\"name\":\"Window\",\"name_source\":\"label\",\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":null,\"name_truncated\":false},\"state\":{\"dialogs\":[\"dialog#28\"],\"invalid\":[],\"live\":[]},\"cursor\":112,\"node_received\":{\"clock\":\"node-monotonic-ms\",\"t\":19738.3609}},\"terminal_focus_source\":\"/records/1/page/after\"}",
+      "target": "dialog#28",
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:speech:4",
+      "step": 2,
+      "seq": 4,
+      "clock": "node-monotonic-ms",
+      "t": 18410.6254,
+      "kind": "speech",
+      "text": "Choose your seat, dialog, Window or aisle? It’s your journey. Seat preference",
+      "target": null,
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:speech:5",
+      "step": 2,
+      "seq": 5,
+      "clock": "node-monotonic-ms",
+      "t": 18410.6352,
+      "kind": "speech",
+      "text": "Seat preference, grouping",
+      "target": null,
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:speech:6",
+      "step": 2,
+      "seq": 6,
+      "clock": "node-monotonic-ms",
+      "t": 18410.6388,
+      "kind": "speech",
+      "text": "Window, radio button, checked, 1 of 2",
+      "target": null,
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:keys:113",
+      "step": 3,
+      "seq": 113,
+      "clock": "page-monotonic-ms",
+      "t": 15932.799999999988,
+      "kind": "keydown",
+      "text": "{\"identity_version\":2,\"source\":\"runner-page-recorder\",\"active\":\"input#46\",\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"input#46\",\"tag\":\"input\",\"input_type\":\"radio\",\"role\":\"radio\",\"name\":\"Window\",\"name_source\":\"label\",\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":null,\"name_truncated\":false},\"target_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"input#46\",\"tag\":\"input\",\"input_type\":\"radio\",\"role\":\"radio\",\"name\":\"Window\",\"name_source\":\"label\",\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":null,\"name_truncated\":false},\"related_identity\":null}",
+      "target": "input#46",
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:focus:114",
+      "step": 3,
+      "seq": 114,
+      "clock": "page-monotonic-ms",
+      "t": 15933,
+      "kind": "focusout",
+      "text": "{\"identity_version\":2,\"source\":\"runner-page-recorder\",\"active\":\"body\",\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"body\",\"tag\":\"body\",\"input_type\":null,\"role\":null,\"name\":null,\"name_source\":null,\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":true,\"connected\":true,\"dialogs\":[],\"id_unique\":null,\"name_truncated\":false},\"target_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"input#46\",\"tag\":\"input\",\"input_type\":\"radio\",\"role\":\"radio\",\"name\":\"Window\",\"name_source\":\"label\",\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":null,\"name_truncated\":false},\"related_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"confirm-seat#36\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Confirm seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"confirm-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":true,\"name_truncated\":false}}",
+      "target": "input#46",
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:focus:115",
+      "step": 3,
+      "seq": 115,
+      "clock": "page-monotonic-ms",
+      "t": 15933.200000000012,
+      "kind": "focusin",
+      "text": "{\"identity_version\":2,\"source\":\"runner-page-recorder\",\"active\":\"confirm-seat#36\",\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"confirm-seat#36\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Confirm seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"confirm-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":true,\"name_truncated\":false},\"target_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"confirm-seat#36\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Confirm seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"confirm-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":true,\"name_truncated\":false},\"related_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"input#46\",\"tag\":\"input\",\"input_type\":\"radio\",\"role\":\"radio\",\"name\":\"Window\",\"name_source\":\"label\",\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":null,\"name_truncated\":false},\"terminal_focus\":{\"session\":\"2f8901f9-948d-490a-806c-58dfbb7f3b9f\",\"clock\":\"page-monotonic-ms\",\"t\":17425,\"active\":\"confirm-seat#36\",\"identity_version\":2,\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"confirm-seat#36\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Confirm seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"confirm-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":true,\"name_truncated\":false},\"state\":{\"dialogs\":[\"dialog#28\"],\"invalid\":[],\"live\":[]},\"cursor\":115,\"node_received\":{\"clock\":\"node-monotonic-ms\",\"t\":21412.7427}},\"terminal_focus_source\":\"/records/2/page/after\"}",
+      "target": "confirm-seat#36",
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:speech:7",
+      "step": 3,
+      "seq": 7,
+      "clock": "node-monotonic-ms",
+      "t": 19923.4078,
+      "kind": "speech",
+      "text": "Confirm seat, button",
+      "target": null,
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:keys:116",
+      "step": 4,
+      "seq": 116,
+      "clock": "page-monotonic-ms",
+      "t": 17606.70000000001,
+      "kind": "keydown",
+      "text": "{\"identity_version\":2,\"source\":\"runner-page-recorder\",\"active\":\"confirm-seat#36\",\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"confirm-seat#36\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Confirm seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"confirm-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":true,\"name_truncated\":false},\"target_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"confirm-seat#36\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Confirm seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"confirm-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":true,\"name_truncated\":false},\"related_identity\":null}",
+      "target": "confirm-seat#36",
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:focus:117",
+      "step": 4,
+      "seq": 117,
+      "clock": "page-monotonic-ms",
+      "t": 17606.79999999999,
+      "kind": "focusout",
+      "text": "{\"identity_version\":2,\"source\":\"runner-page-recorder\",\"active\":\"body\",\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"body\",\"tag\":\"body\",\"input_type\":null,\"role\":null,\"name\":null,\"name_source\":null,\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":true,\"connected\":true,\"dialogs\":[],\"id_unique\":null,\"name_truncated\":false},\"target_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"confirm-seat#36\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Confirm seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"confirm-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":true,\"name_truncated\":false},\"related_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"close-seat#37\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Close\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"close-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":true,\"name_truncated\":false}}",
+      "target": "confirm-seat#36",
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:focus:118",
+      "step": 4,
+      "seq": 118,
+      "clock": "page-monotonic-ms",
+      "t": 17607.099999999977,
+      "kind": "focusin",
+      "text": "{\"identity_version\":2,\"source\":\"runner-page-recorder\",\"active\":\"close-seat#37\",\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"close-seat#37\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Close\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"close-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":true,\"name_truncated\":false},\"target_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"close-seat#37\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Close\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"close-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":true,\"name_truncated\":false},\"related_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"confirm-seat#36\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Confirm seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"confirm-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":true,\"name_truncated\":false},\"terminal_focus\":{\"session\":\"2f8901f9-948d-490a-806c-58dfbb7f3b9f\",\"clock\":\"page-monotonic-ms\",\"t\":19097.399999999965,\"active\":\"close-seat#37\",\"identity_version\":2,\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"close-seat#37\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Close\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"close-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":true,\"name_truncated\":false},\"state\":{\"dialogs\":[\"dialog#28\"],\"invalid\":[],\"live\":[]},\"cursor\":118,\"node_received\":{\"clock\":\"node-monotonic-ms\",\"t\":23086.4631}},\"terminal_focus_source\":\"/records/3/page/after\"}",
+      "target": "close-seat#37",
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:speech:8",
+      "step": 4,
+      "seq": 8,
+      "clock": "node-monotonic-ms",
+      "t": 21614.6449,
+      "kind": "speech",
+      "text": "Close, button",
+      "target": null,
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:keys:119",
+      "step": 5,
+      "seq": 119,
+      "clock": "page-monotonic-ms",
+      "t": 19288.399999999965,
+      "kind": "keydown",
+      "text": "{\"identity_version\":2,\"source\":\"runner-page-recorder\",\"active\":\"close-seat#37\",\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"close-seat#37\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Close\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"close-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":true,\"name_truncated\":false},\"target_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"close-seat#37\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Close\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"close-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":true,\"name_truncated\":false},\"related_identity\":null}",
+      "target": "close-seat#37",
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:focus:120",
+      "step": 5,
+      "seq": 120,
+      "clock": "page-monotonic-ms",
+      "t": 19289,
+      "kind": "focusout",
+      "text": "{\"identity_version\":2,\"source\":\"runner-page-recorder\",\"active\":\"body\",\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"body\",\"tag\":\"body\",\"input_type\":null,\"role\":null,\"name\":null,\"name_source\":null,\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":true,\"connected\":true,\"dialogs\":[],\"id_unique\":null,\"name_truncated\":false},\"target_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"close-seat#37\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Close\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"close-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":true,\"name_truncated\":false},\"related_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"choose-seat#26\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Choose your seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"choose-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[],\"id_unique\":true,\"name_truncated\":false}}",
+      "target": "close-seat#37",
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:focus:121",
+      "step": 5,
+      "seq": 121,
+      "clock": "page-monotonic-ms",
+      "t": 19289.20000000001,
+      "kind": "focusin",
+      "text": "{\"identity_version\":2,\"source\":\"runner-page-recorder\",\"active\":\"choose-seat#26\",\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"choose-seat#26\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Choose your seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"choose-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[],\"id_unique\":true,\"name_truncated\":false},\"target_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"choose-seat#26\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Choose your seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"choose-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[],\"id_unique\":true,\"name_truncated\":false},\"related_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"close-seat#37\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Close\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"close-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[\"dialog#28\"],\"id_unique\":true,\"name_truncated\":false}}",
+      "target": "choose-seat#26",
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:focus:122",
+      "step": 5,
+      "seq": 122,
+      "clock": "page-monotonic-ms",
+      "t": 19289.5,
+      "kind": "focusout",
+      "text": "{\"identity_version\":2,\"source\":\"runner-page-recorder\",\"active\":\"body\",\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"body\",\"tag\":\"body\",\"input_type\":null,\"role\":null,\"name\":null,\"name_source\":null,\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":true,\"connected\":true,\"dialogs\":[],\"id_unique\":null,\"name_truncated\":false},\"target_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"choose-seat#26\",\"tag\":\"button\",\"input_type\":null,\"role\":\"button\",\"name\":\"Choose your seat\",\"name_source\":\"contents\",\"name_trust\":\"page-authored-dom\",\"id\":\"choose-seat\",\"is_body\":false,\"connected\":true,\"dialogs\":[],\"id_unique\":true,\"name_truncated\":false},\"related_identity\":{\"available\":false,\"reason\":\"unavailable\",\"node_key\":\"unknown\",\"tag\":null,\"input_type\":null,\"role\":null,\"name\":null,\"name_source\":null,\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":false,\"connected\":null,\"dialogs\":[]}}",
+      "target": "choose-seat#26",
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:app_events:123",
+      "step": 5,
+      "seq": 123,
+      "clock": "page-monotonic-ms",
+      "t": 19289.5,
+      "kind": "mutation",
+      "text": "{\"identity_version\":2,\"source\":\"runner-page-recorder\",\"active\":\"body\",\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"body\",\"tag\":\"body\",\"input_type\":null,\"role\":null,\"name\":null,\"name_source\":null,\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":true,\"connected\":true,\"dialogs\":[],\"id_unique\":null,\"name_truncated\":false},\"target_identity\":null,\"related_identity\":null,\"terminal_focus\":{\"session\":\"2f8901f9-948d-490a-806c-58dfbb7f3b9f\",\"clock\":\"page-monotonic-ms\",\"t\":20787.599999999977,\"active\":\"body\",\"identity_version\":2,\"active_identity\":{\"available\":true,\"reason\":null,\"node_key\":\"body\",\"tag\":\"body\",\"input_type\":null,\"role\":null,\"name\":null,\"name_source\":null,\"name_trust\":\"page-authored-dom\",\"id\":null,\"is_body\":true,\"connected\":true,\"dialogs\":[],\"id_unique\":null,\"name_truncated\":false},\"state\":{\"dialogs\":[],\"invalid\":[],\"live\":[]},\"cursor\":123,\"node_received\":{\"clock\":\"node-monotonic-ms\",\"t\":24779.1383}},\"terminal_focus_source\":\"/records/4/page/after\"}",
+      "target": "dialog#28",
+      "duration_ms": null,
+      "artifact_path": null
+    },
+    {
+      "evidence_ref": "r2:speech:9",
+      "step": 5,
+      "seq": 9,
+      "clock": "node-monotonic-ms",
+      "t": 23285.9376,
+      "kind": "speech",
+      "text": "Fernway — a little further 18e 9ce 06, document, ￼",
+      "target": null,
+      "duration_ms": null,
+      "artifact_path": null
+    }
+  ],
+  "signals": [
+    {
+      "id": "candidate-context",
+      "kind": "NONPRODUCTION_UNQUALIFIED_LOCAL_NATIVE_REPLAY",
+      "step": 5,
+      "refs": [
+        "r2:keys:119",
+        "r2:focus:120",
+        "r2:focus:121",
+        "r2:focus:122",
+        "r2:app_events:123",
+        "r2:speech:9"
+      ]
+    },
+    {
+      "id": "verification-context",
+      "kind": "INDEPENDENT_TIMESTAMP_UNIT_CORRECTION_PENDING",
+      "step": 5,
+      "refs": []
+    },
+    {
+      "id": "axe-context",
+      "kind": "AXE_PRE_SNAPSHOT_COUNTS_INCLUDE_INCOMPLETE_AND_INAPPLICABLE",
+      "step": 1,
+      "refs": []
+    }
+  ],
+  "axe": {
+    "violations": 0,
+    "rules_checked": 91
+  },
+  "source": [
+    {
+      "path": "index.html",
+      "sha256": "5ad4631558cdcc557770ae864957ffc167546cd0af58bd11258808e1c0e523be",
+      "lines": [
+        {
+          "n": 1,
+          "text": "<!doctype html>"
+        },
+        {
+          "n": 2,
+          "text": "<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Fernway — a little further</title>"
+        },
+        {
+          "n": 3,
+          "text": "<style>"
+        },
+        {
+          "n": 4,
+          "text": ":root{color-scheme:light;font-family:Inter,Segoe UI,sans-serif;color:#17352e;background:#f3f7f2}*{box-sizing:border-box}body{margin:0}header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #cbd9cc;padding:20px 28px}.brand{font-size:25px;font-weight:750;letter-spacing:-1px}.caption{font-size:12px;color:#40564c}main{max-width:590px;margin:40px auto;padding:0 24px}h1{font-size:34px;letter-spacing:-1.4px;margin:12px 0}p{line-height:1.6}.ticket{border:1px solid #b8cdbd;border-radius:12px;background:#fff;padding:23px;box-shadow:0 12px 36px #17352e08;margin:24px 0}.route{display:flex;justify-content:space-between;align-items:center;font-size:22px;font-weight:650}.route span{font-weight:400;color:#3e6657}.muted{font-size:13px;color:#40564c}label{display:block;font-size:14px;font-weight:600;margin:21px 0 8px}input{display:block;width:100%;font:inherit;padding:12px;border:1px solid #8b9d90;border-radius:7px;background:white;color:#17352e}button{font:inherit;background:#1a4f3d;border:1px solid #1a4f3d;color:white;padding:12px 19px;border-radius:7px;margin-top:20px;cursor:pointer;font-weight:600}button.secondary{background:white;color:#17352e}button:focus-visible,input:focus-visible{outline:3px solid #0866ff;outline-offset:4px}#email-error{color:#a51e29;font-size:14px;min-height:22px}.status{min-height:25px;margin-top:20px}dialog{border:1px solid #8b9d90;border-radius:12px;padding:28px;max-width:380px}dialog::backdrop{background:#17352e55}.seat-options{display:flex;gap:12px}.seat-options label{margin:8px 0}input[type=radio]{display:inline;width:auto}footer{max-width:590px;padding:0 24px;margin:40px auto;font-size:12px;color:#40564c}section[hidden]{display:none}"
+        },
+        {
+          "n": 5,
+          "text": "</style></head><body>"
+        },
+        {
+          "n": 6,
+          "text": "<header aria-label=\"Fernway\"><div class=\"brand\">fernway<span aria-hidden=\"true\"> ↗</span></div><div class=\"caption\">A little further.</div></header>"
+        },
+        {
+          "n": 7,
+          "text": "<main aria-label=\"Fernway sample application\"><p class=\"muted\" id=\"flow-label\">Your next journey</p><h1 id=\"heading\">Make room for a change of scene.</h1><p id=\"intro\">A fictional rail booking app, built for accessibility testing.</p>"
+        },
+        {
+          "n": 8,
+          "text": "<div class=\"ticket\"><div class=\"route\">Bengaluru <span aria-hidden=\"true\">─────</span> Mysuru</div><p class=\"muted\">Sample route · synthetic booking · no payment</p></div>"
+        },
+        {
+          "n": 9,
+          "text": "<section id=\"passenger\" hidden><h2>Who’s travelling?</h2><form novalidate><label for=\"name\">Passenger name</label><input id=\"name\" name=\"name\" autocomplete=\"off\"><label for=\"email\">Email address</label><input id=\"email\" name=\"email\" type=\"email\" autocomplete=\"off\" aria-describedby=\"email-error\"><p id=\"email-error\"></p><button id=\"continue\" type=\"submit\">Continue to booking</button></form></section>"
+        },
+        {
+          "n": 10,
+          "text": "<section id=\"seat\" hidden><h2>A seat with a view.</h2><p>Choose a seat before continuing your booking.</p><button id=\"choose-seat\">Choose your seat</button><p id=\"chosen-seat\" class=\"status\">No seat selected.</p><dialog aria-labelledby=\"seat-title\"><h2 id=\"seat-title\">Choose your seat</h2><p>Window or aisle? It’s your journey.</p><fieldset><legend>Seat preference</legend><div class=\"seat-options\"><label><input type=\"radio\" name=\"seat\" value=\"Window\" checked> Window</label><label><input type=\"radio\" name=\"seat\" value=\"Aisle\"> Aisle</label></div></fieldset><button id=\"confirm-seat\">Confirm seat</button><button id=\"close-seat\" class=\"secondary\">Close</button></dialog></section>"
+        },
+        {
+          "n": 11,
+          "text": "<section id=\"search\" hidden><h2>Find your way out of the everyday.</h2><p>Search the sample route to check availability.</p><button id=\"search-trains\">Search trains</button><p id=\"search-status\" class=\"status\"></p></section>"
+        },
+        {
+          "n": 12,
+          "text": "</main><footer aria-label=\"Fernway sample details\">Fernway is an owned test application. No real reservations are made.</footer>"
+        },
+        {
+          "n": 13,
+          "text": "<script>"
+        },
+        {
+          "n": 14,
+          "text": "(()=>{'use strict';"
+        },
+        {
+          "n": 15,
+          "text": "const query=new URLSearchParams(location.search),flow=['passenger','seat','search'].includes(query.get('flow'))?query.get('flow'):'passenger',healthy=query.get('variant')==='healthy';"
+        },
+        {
+          "n": 16,
+          "text": "document.querySelector('#'+flow).hidden=false;"
+        },
+        {
+          "n": 17,
+          "text": "document.querySelector('#flow-label').textContent=flow==='passenger'?'Passenger details':flow==='seat'?'Seat selection':'Search updates';"
+        },
+        {
+          "n": 18,
+          "text": "document.querySelector('#heading').textContent=flow==='passenger'?'Your next chapter starts here.':flow==='seat'?'A good journey starts with a good seat.':'Find a change of scenery.';"
+        },
+        {
+          "n": 19,
+          "text": "const events=[];let sequence=0,complete=true,recording=false;"
+        },
+        {
+          "n": 20,
+          "text": "Object.defineProperty(window,'__tabwiseEvents',{value:events,writable:false});"
+        },
+        {
+          "n": 21,
+          "text": "Object.defineProperty(window,'__tabwiseComplete',{get:()=>complete});"
+        },
+        {
+          "n": 22,
+          "text": "Object.defineProperty(window,'__tabwiseSetRecording',{value:enabled=>{recording=enabled===true;}});"
+        },
+        {
+          "n": 23,
+          "text": "const emit=(type,target,detail={})=>{if(events.length>=5000){complete=false;return;}events.push({seq:++sequence,t:performance.now(),type,target,active:document.activeElement?.id||'body',...detail});};"
+        },
+        {
+          "n": 24,
+          "text": "window.addEventListener('keydown',e=>{"
+        },
+        {
+          "n": 25,
+          "text": " emit('keydown',e.target.id||'body',{key:e.key,shift:e.shiftKey});"
+        },
+        {
+          "n": 26,
+          "text": " if(recording&&e.key.length===1){e.preventDefault();parent.postMessage({type:'tabwise-palette-needed'},location.origin);return;}"
+        },
+        {
+          "n": 27,
+          "text": " if(recording)parent.postMessage({type:'tabwise-key',key:e.key,shift:e.shiftKey},location.origin);"
+        },
+        {
+          "n": 28,
+          "text": "},true);"
+        },
+        {
+          "n": 29,
+          "text": "window.addEventListener('focusin',e=>emit('focusin',e.target.id||'body'),true);"
+        },
+        {
+          "n": 30,
+          "text": "window.addEventListener('pointerdown',e=>{if(recording){e.preventDefault();parent.postMessage({type:'tabwise-pointer'},location.origin);}},true);"
+        },
+        {
+          "n": 31,
+          "text": "window.addEventListener('message',e=>{"
+        },
+        {
+          "n": 32,
+          "text": " if(e.origin!==location.origin||e.source!==parent)return;"
+        },
+        {
+          "n": 33,
+          "text": " if(e.data?.type==='tabwise-record')recording=e.data.enabled===true;"
+        },
+        {
+          "n": 34,
+          "text": " if(e.data?.type==='tabwise-palette'&&['test.user@example.com','AshaTest','invalid.email'].includes(e.data.value)&&document.activeElement instanceof HTMLInputElement){document.activeElement.value=e.data.value;document.activeElement.dispatchEvent(new Event('input',{bubbles:true}));}"
+        },
+        {
+          "n": 35,
+          "text": "});"
+        },
+        {
+          "n": 36,
+          "text": "const error=document.querySelector('#email-error');if(healthy)error.setAttribute('role','alert');"
+        },
+        {
+          "n": 37,
+          "text": "document.querySelector('form').addEventListener('submit',e=>{e.preventDefault();const valid=/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(document.querySelector('#email').value);error.textContent=valid?'':'Enter a valid email address to continue.';emit(valid?'booking-ready':'validation-error','email-error');});"
+        },
+        {
+          "n": 38,
+          "text": "const dialog=document.querySelector('dialog'),opener=document.querySelector('#choose-seat');"
+        },
+        {
+          "n": 39,
+          "text": "opener.addEventListener('click',()=>{dialog.showModal();emit('dialog-open','seat-dialog');});"
+        },
+        {
+          "n": 40,
+          "text": "const close=()=>{dialog.close();if(healthy)opener.focus();else opener.blur();emit('dialog-close','seat-dialog');};"
+        },
+        {
+          "n": 41,
+          "text": "dialog.addEventListener('cancel',e=>{e.preventDefault();close();});"
+        },
+        {
+          "n": 42,
+          "text": "document.querySelector('#close-seat').addEventListener('click',close);"
+        },
+        {
+          "n": 43,
+          "text": "document.querySelector('#confirm-seat').addEventListener('click',()=>{document.querySelector('#chosen-seat').textContent=document.querySelector('input[name=seat]:checked').value+' seat selected.';close();});"
+        },
+        {
+          "n": 44,
+          "text": "const status=document.querySelector('#search-status');if(healthy)status.setAttribute('role','status');"
+        },
+        {
+          "n": 45,
+          "text": "document.querySelector('#search-trains').addEventListener('click',()=>{status.textContent='Your train search is ready.';emit('search-ready','search-status');});"
+        },
+        {
+          "n": 46,
+          "text": "})();"
+        },
+        {
+          "n": 47,
+          "text": "</script></body></html>"
+        },
+        {
+          "n": 48,
+          "text": ""
+        }
+      ]
+    }
+  ]
+}

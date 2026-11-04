@@ -1,0 +1,38 @@
+{
+  "classification": "NONPRODUCTION_UNQUALIFIED",
+  "review_status": "pending",
+  "human_review_recorded": false,
+  "source_only_not_native_rerun": true,
+  "model_evidence_class": "MODEL",
+  "model_independence": "L1",
+  "contract": {
+    "version": "0.1.0",
+    "run_id": "453627ed-abc1-4f89-bd48-7c5be69a2d76",
+    "base_sha256": "5ad4631558cdcc557770ae864957ffc167546cd0af58bd11258808e1c0e523be",
+    "patch_sha256": "015d122118b5306e9528048f83abf5f293cc5603422b6182bce06e06d743f739",
+    "files": [
+      "index.html"
+    ],
+    "diff": "--- a/index.html\n+++ b/index.html\n@@ -40,1 +40,1 @@\n-const close=()=>{dialog.close();if(healthy)opener.focus();else opener.blur();emit('dialog-close','seat-dialog');};\n+const close=()=>{dialog.close();opener.focus();emit('dialog-close','seat-dialog');};\n",
+    "evidence_refs": [
+      "r2:keys:119",
+      "r2:focus:120",
+      "r2:focus:121",
+      "r2:focus:122",
+      "r2:app_events:123",
+      "r2:speech:9"
+    ],
+    "rationale": "Restore focus to the Choose your seat opener on dialog close so keyboard and screen-reader context is preserved.",
+    "expected_speech_after": [
+      "Choose your seat, button"
+    ]
+  },
+  "source_sha256": "1860345c688f2adfe7241b97f05ba32fe345f08b0594cff8476d7b6e70e484ce",
+  "checks": {
+    "base_hash_bound": true,
+    "evidence_refs_valid": true,
+    "applies_exactly": true,
+    "owned_file_only": true,
+    "bounded_diff": true
+  }
+}

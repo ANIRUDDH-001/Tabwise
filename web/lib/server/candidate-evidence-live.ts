@@ -6,7 +6,7 @@ import {resolve,dirname} from 'node:path';
 import {serviceClient,requireUser} from './supabase';
 import {candidateConfiguration} from './candidate-run-live';
 import {candidateRunStore} from './candidate-run.mjs';
-import {prepareCandidateEvidence,selectCandidateArtifacts} from './candidate-evidence.mjs';
+import {prepareCandidateEvidence,selectCandidateArtifacts,encodeCandidateArchive,decodeCandidateArchive,candidateReplayAccepted} from './candidate-evidence.mjs';
 import {reviewedSourceRoot,reviewedR2Module} from '../../../src/r2/node-review.mjs';
 import {withVerificationDirectory} from './verification-directory.mjs';
 import {stable,same} from '../../../packages/contracts/r2-product.mjs';
@@ -38,17 +38,21 @@ export async function candidateIngestPOST(request:Request,id:string){return endp
  const [nativeArchive,readbackArchive]=await Promise.all([downloadArtifact(String(selected.native.id)),downloadArtifact(String(selected.readback.id))]);
  const evidence=await prepareCandidateEvidence({...context,nativeArchive,readbackArchive,verifySealed:async({files,request:r}:{files:Record<string,Uint8Array>,request:unknown})=>withVerificationDirectory(async(dir:string)=>{
   const root=reviewedSourceRoot(),policy=rawRequire(/* webpackIgnore: true */ resolve(root,'diagnostics/r2-candidate/policy.mjs'));
-  const plan=reviewedR2Module('r2-run.mjs').parseR2Plan(files['plan.json']);if(!same(plan,policy.candidatePlan(r)))return false;
+  // The sealed run manifest binds the plan reconstructed from the exact owned
+  // request. Native output intentionally does not contain an unsealed plan.json.
+  const plan=reviewedR2Module('r2-run.mjs').parseR2Plan(Buffer.from(stable(policy.candidatePlan(r))));
   for(const [path,bytes] of Object.entries(files)){const dest=resolve(dir,path);if(!dest.startsWith(resolve(dir)+'/')&&!dest.startsWith(resolve(dir)+'\\'))throw Error('candidate scratch scope');await mkdir(dirname(dest),{recursive:true});await writeFile(dest,bytes,{flag:'wx'});}
-  const fixtures=new Map([['candidate-seat',Buffer.from(readFileSync(resolve(root,'fixtures/fernway/index.html'),'utf8').replaceAll('\r\n','\n'))]]);
-  const result=await reviewedR2Module('r2-run.mjs').r2VerifyRun({plan,pages:plan.pages,fixtures},dir);return result.ok&&result.complete;
+  const fixtures=new Map([['candidate-seat',policy.fixtureForCandidate(r,root)]]);
+  const result=await reviewedR2Module('r2-run.mjs').r2VerifyRun({plan,pages:plan.pages,fixtures},dir);return candidateReplayAccepted(result);
  })});
  const evidenceBytes=Buffer.from(stable(evidence)),digest=sha256(evidenceBytes),prefix='candidate/'+id+'/'+digest;
- const bytesByName={'native.zip':nativeArchive,'readback.zip':readbackArchive,'evidence.json':evidenceBytes};
+ // Preserve exact original ZIP bytes losslessly in the existing JSON-only
+ // private bucket. No MIME allowlist, access policy or object cap is widened.
+ const bytesByName={'native-archive.json':encodeCandidateArchive(nativeArchive,evidence.archives.native),'readback-archive.json':encodeCandidateArchive(readbackArchive,evidence.archives.readback),'evidence.json':evidenceBytes};
  // Content-addressed immutable staging: unknown outcomes retain originals. A
  // retry recovers only identical bytes, and never starts another native run.
  for(const [name,bytes] of Object.entries(bytesByName)){
-  const path=prefix+'/'+name,{error}=await db.storage.from('tabwise-evidence').upload(path,bytes,{contentType:name.endsWith('.zip')?'application/zip':'application/json',upsert:false});
+  const path=prefix+'/'+name,{error}=await db.storage.from('tabwise-evidence').upload(path,bytes,{contentType:'application/json',upsert:false});
   if(error){const saved=await db.storage.from('tabwise-evidence').download(path);if(saved.error||!saved.data||saved.data.size!==bytes.length||sha256(Buffer.from(await saved.data.arrayBuffer()))!==sha256(bytes))throw new HttpError(503,'candidate_evidence_unavailable');}
  }
  const {error}=await db.rpc('finish_candidate_native_evidence',{p_user:user.id,p_run:id,p_request_sha:row.request_sha256,p_gh_run_id:row.github_run_id,p_readback:evidence,p_sha:digest});
@@ -63,5 +67,6 @@ export async function candidateEvidenceGET(request:Request,id:string){return end
  if(error||!data||data.size>2000000)throw new HttpError(503,'candidate_evidence_unavailable');
  const bytes=Buffer.from(await data.arrayBuffer());
  if(sha256(bytes)!==row.readback_sha256||bytes.toString('utf8')!==stable(row.readback)||row.readback.classification!=='NONPRODUCTION_UNQUALIFIED'||row.readback.production_qualified!==false)throw new HttpError(409,'candidate_evidence_unavailable');
+ await Promise.all(['native','readback'].map(async kind=>{const saved=await db.storage.from('tabwise-evidence').download(prefix+'/'+kind+'-archive.json');if(saved.error||!saved.data||saved.data.size>4000000)throw new HttpError(503,'candidate_evidence_unavailable');decodeCandidateArchive(Buffer.from(await saved.data.arrayBuffer()),row.readback.archives[kind]);}));
  return Response.json(row.readback,{headers:{'Cache-Control':'private, no-store'}});
  });}

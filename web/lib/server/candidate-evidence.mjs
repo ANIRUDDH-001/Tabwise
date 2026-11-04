@@ -8,6 +8,18 @@ import {captureObservationSources} from '../../../src/r2/capture-export.mjs';
 import {validateRuntimeMetadata} from '../../../src/r2/runtime-metadata.mjs';
 import {verifyAdmissionRecord} from '../../../scripts/tabwise/r2-admission.mjs';
 const CLASS='NONPRODUCTION_UNQUALIFIED',fail=why=>{throw Error('candidate evidence refused: '+why);};
+export function candidateReplayAccepted(result){const s=result?.summary;return result?.code===0&&s?.schema==='tabwise-r2-verify/1'&&s.ok===true&&s.complete===true&&s.run_class==='synthetic'&&s.genuine_evidence===false&&Array.isArray(s.errors)&&s.errors.length===0;}
+export function encodeCandidateArchive(bytes,expected){
+ if(!(bytes instanceof Uint8Array)||!/^\d+$/.test(expected?.id??'')||bytes.length!==expected.bytes||sha256(bytes)!==expected.sha256)fail('original archive wrapper binding');
+ const wrapped=Buffer.from(stable({schema:'tabwise-candidate-original-archive/1',original_artifact_id:expected.id,encoding:'base64',sha256:expected.sha256,bytes:bytes.length,data:Buffer.from(bytes).toString('base64')}));
+ if(wrapped.length>4000000)fail('original archive exceeds existing storage object cap');return wrapped;
+}
+export function decodeCandidateArchive(wrapped,expected){
+ if(!(wrapped instanceof Uint8Array)||wrapped.length>4000000)fail('bounded original archive wrapper required');
+ const v=parseUniqueJson(Buffer.from(wrapped).toString('utf8'));
+ if(Object.keys(v).sort().join(',')!=='bytes,data,encoding,original_artifact_id,schema,sha256'||v.schema!=='tabwise-candidate-original-archive/1'||v.original_artifact_id!==expected.id||v.encoding!=='base64'||v.sha256!==expected.sha256||v.bytes!==expected.bytes||typeof v.data!=='string')fail('original archive wrapper identity');
+ const bytes=Buffer.from(v.data,'base64');if(bytes.toString('base64')!==v.data||bytes.length!==expected.bytes||sha256(bytes)!==expected.sha256)fail('original archive wrapper bytes');return bytes;
+}
 export function selectCandidateArtifacts({userId,row,remote,jobs,artifacts}){
  const r=row?.request,id=row?.github_run_id;
  if(!r||row.user_id!==userId||row.state!=='RUN_BOUND'||!id||String(remote?.id)!==id||remote.status!=='completed'||remote.conclusion!=='success'||remote.event!=='workflow_dispatch'||remote.path!==r.workflow||remote.head_sha!==r.revision||'refs/heads/'+remote.head_branch!==r.ref||remote.run_attempt!==2||remote.actor?.login!==r.actor||remote.triggering_actor?.login!==r.actor||remote.repository?.full_name!==r.repository)fail('owned successful exact candidate workflow required');

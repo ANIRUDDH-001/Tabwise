@@ -83,6 +83,15 @@ export function installR2PageRecorder(config) {
     const id=attribute(node,'id'),type=tag==='input'?inputType(node):null;
     base.id=id&&id.length<=256?id:null; base.input_type=type;
     base.id_unique=id?from(query(d,'[id]')).filter(ref=>attribute(ref,'id')===id).length===1:null;
+    // A radio may legitimately have no DOM id. Record a globally unique native
+    // DOM name/value tuple; never substitute a session ordinal or label text.
+    if(tag==='input'&&type==='radio'){
+      const name=attribute(node,'name'),value=attribute(node,'value'),inputs=from(query(d,'input'));
+      if(inputs.length>64)reason('page named-control count overflow');
+      if(typeof name==='string'&&typeof value==='string'&&name.length>0&&value.length>0&&name.length<=256&&value.length<=256){
+        base.control_identity={kind:'named-radio/1',name,value,unique:inputs.length<=64&&inputs.filter(ref=>inputType(ref)==='radio'&&attribute(ref,'name')===name&&attribute(ref,'value')===value).length===1};
+      }else{base.control_identity=null;if(name?.length>256||value?.length>256)reason('page named-control identity exceeds representable bound');}
+    }
     base.role=bounded(attribute(node,'role'))||(tag==='input'?({radio:'radio',checkbox:'checkbox',button:'button',submit:'button'}[type]||(['text','email','search','tel','url'].includes(type)?'textbox':null)):({button:'button',dialog:'dialog',textarea:'textbox',select:'combobox'}[tag]||null));
     let name=attribute(node,'aria-label');if(name)base.name_source='aria-label';
     if(!name){

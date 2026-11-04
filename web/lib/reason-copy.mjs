@@ -1,6 +1,8 @@
 // Human copy for every reason code emitted by web/app/api/** and web/app/auth/** (T-P0-04, T-P1-04).
 // Copy never names environment variables, secrets or stack traces.
 export const REASON_COPY=Object.freeze({
+ candidate_comparison_pending:'A comparison has not been saved yet.',
+ candidate_comparison_conflict:'The comparison could not be confirmed. Your original observations are retained.',
  candidate_evidence_unavailable:'Candidate observations are not ready or could not be confirmed. No verified result has been recorded.',
  candidate_execution_disabled:'Candidate testing is not enabled here. Your saved journey is retained.',
  candidate_owner_required:'This candidate test is limited to its configured owner.',
