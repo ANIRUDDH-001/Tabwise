@@ -816,3 +816,6 @@ The actual five-action native capture is locally source/custody verified after t
 
 ## 2026-11-04T18:55:00Z — actual human patch review
 Owner answer: “Approve this exact focus-restoration patch”. The reviewed exact diff removes `if(healthy)opener.focus();else opener.blur();` and uses `opener.focus();` in the dialog-close handler. Patch SHA256015d122118b5306e9528048f83abf5f293cc5603422b6182bce06e06d743f739, original fixture SHA2565ad4631558cdcc557770ae864957ffc167546cd0af58bd11258808e1c0e523be. This is a real human patch-review decision, not inferred routine execution approval. It does not assert successful application, native rerun, or independent qualification.
+
+## 2026-11-04T19:18:39Z — delegated decisions
+Owner: “make these types on decisions on yourself based on your reasoning and recommendations” and “also you are always welcome to counter with facts or reasoning”. Continue routine implementation/testing/release decisions within already delegated limits. The actual exact patch approval remains separately recorded; do not invent human review of different bytes or external independent qualification.

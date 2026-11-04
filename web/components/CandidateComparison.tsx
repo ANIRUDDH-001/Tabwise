@@ -1,0 +1,10 @@
+'use client';
+import {useEffect,useState} from 'react';
+import Panel from './ui/Panel';
+type Result={verdict:string;reason:string;baseline_run_id:string;patch_sha256:string;observed_terminal_focus:{baseline:string;rerun:string};checks:Record<string,boolean|null>};
+export default function CandidateComparison({id}:{id:string}){
+ const [result,setResult]=useState<Result|null>(null),[busy,setBusy]=useState(false),[status,setStatus]=useState('');
+ useEffect(()=>{const c=new AbortController();fetch('/api/candidate-runs/'+id+'/comparison',{cache:'no-store',signal:c.signal}).then(async r=>{if(r.ok){const v=await r.json();if(!c.signal.aborted)setResult(v);}}).catch(()=>{});return()=>c.abort();},[id]);
+ async function compare(){setBusy(true);setStatus('Reading both original archives and comparing the observations…');try{const r=await fetch('/api/candidate-runs/'+id+'/comparison',{method:'POST'}),v=await r.json();if(!r.ok)throw Error('The comparison could not be confirmed. Your original observations are retained.');setResult(v);setStatus('Comparison saved.');}catch(e){setStatus(e instanceof Error?e.message:'Comparison unavailable.');}finally{setBusy(false);}}
+ return <Panel title="Repair comparison"><p>Both original native captures are read back before a deterministic comparison. Unsupported observations remain inconclusive.</p>{result?<><h3>{result.verdict.replaceAll('_',' ')}</h3><p>{result.reason}</p><dl className="provenance"><dt>Original terminal focus</dt><dd>{result.observed_terminal_focus.baseline}</dd><dt>Repaired terminal focus</dt><dd>{result.observed_terminal_focus.rerun}</dd>{Object.entries(result.checks).map(([key,value])=><div key={key}><dt>{key.replaceAll('_',' ')}</dt><dd>{value===null?'Not established':value?'Yes':'No'}</dd></div>)}</dl><p>Machine comparison · L3 · Nonproduction / Unqualified</p><details><summary>Comparison provenance</summary><p className="mono">Baseline: {result.baseline_run_id}<br/>Patch: {result.patch_sha256}</p></details></>:<button className="button" disabled={busy} onClick={compare}>Compare baseline and rerun</button>}<p role="status" aria-live="polite">{status}</p></Panel>;
+}

@@ -14,3 +14,4 @@ docs/evidence/product-completion-20261104/*.json -text whitespace=cr-at-eol
 docs/evidence/candidate-vertical-slice-20261104/** -text -diff
 docs/evidence/candidate-runtime-recovery-20261104/** -text -diff
 docs/evidence/candidate-baseline-20261104/** -text -diff
+docs/evidence/candidate-repair-20261104/** -text -diff

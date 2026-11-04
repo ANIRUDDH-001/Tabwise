@@ -1,21 +1,22 @@
-# STATE — live UI merged; candidate verifier/storage corrections validated
-Updated: 2026-11-04T18:48:14Z
-- Worktree D:/Projects/Meta AI/tabwise-product-continuation; local main ec87db2, PR26 merged with required CI41882014532 attempt2 SUCCESS at009422f.
-- Production READY ec87db2: https://tabwise-meta.vercel.app/; homepage and candidate preparation HTTP200. Owner notified recording can begin.
-- Keep execution source ref feat/tabwise-r2-r7-product-completion; exact candidate binding, no main protection bypass.
-- Candidate453627ed-abc1-4f89-bd48-7c5be69a2d76/source009422f/run41881566073/2 native SUCCESS:5 actions,8 speech,25 projected observations; final focus body.
-- Native original13349792634 SHA11859943b36c22be1df880f0440aa0cd8a184b33be937bfa113b525576145d32 retained; separate verifier FAILED on FILETIME100ns vs microseconds equality.
-- Exact BigInt /10 conversion correction and strict refusal tests now pass; local full replay passes, explicitly not separate-runner acceptance.
-- JSON/base64 original archive wrappers preserve ZIP bytes within existing private bucket MIME/4MB cap; no bucket permissions expanded. Actual private forensic upload/download byte-identical; not baseline accepted.
-- Corrections verification: candidate diagnostics28 PASS; web365 PASS/4 opt-in skips; tsc/build/frozen preflight/diff check PASS. Logs cache/product-completion/candidate-corrections-*.
-- First genuine Meta diagnosis completed through existing client/broker:1/20 calls,credited$0.01522975,paid₹0; source/evidence-bound one-line focus restoration patch validated exactly.
-- Model result MODEL/L1; candidate remains NONPRODUCTION_UNQUALIFIED. Patch review package pending actual human decision; no fabricated approval.
-- Model/review artifacts: cache/product-completion/native-41881566073-2/model-bbfd446c1d6a07995e3da62d87fde527101ff5cab1066640230e02185fea8a87/.
-- Authoritative spend/intent state remains original app/cache/budget.sqlite and app/docs/ledger/COSTS.jsonl; preserve preexisting uncertain reservation. Campaign20 calls,$2 credit cap,$0.10/call.
-- Next publish validated corrections through a new protected-main PR while feature ref mirrors exact execution source; fresh candidate required, never attempt3.
-- Then genuine separate-runner acceptance -> authenticated immutable storage/readback -> real human patch decision -> same-runner repair/rerun -> deterministic comparison.
-- Measured protected-step gap: radio input has no unique DOMid; current oracle must remain INCONCLUSIVE until supported identity handling exists.
-- R2/R3/R7 false; production/native qualification policies remain BLOCK; no dev desktop NVDA/input.
+# STATE — genuine baseline and repair stored; fresh radio-identity pair next
+Updated: 2026-11-04T19:18:39Z
+- Worktree D:/Projects/Meta AI/tabwise-product-continuation; local main58b95c4; published execution ref feat/tabwise-r2-r7-product-completion; PR27 pending requiredCI.
+- PR26 merged ec87db2 with exact greenCI; production https://tabwise-meta.vercel.app/ READY/live for recording; no protection bypass.
+- Genuine baseline32e02e48-78a1-463d-9107-0b5b7048d3dd/run41891175195/2 source2cfacfa: native+separate Linux verifier SUCCESS,25 rows EVIDENCE_READY.
+- Baseline readback28798ef66210e3d4185558f5632aead61ddc1c4cfe02c54185b3de3c6aa6889c; original archives byte-readback confirmed; docs/evidence/candidate-baseline-20261104.
+- Actual human approved patch015d122118b5306e9528048f83abf5f293cc5603422b6182bce06e06d743f739; base5ad46315 preserved; applied source1860345c separate.
+- Genuine repaired3de4c6ce-8e3b-4ef8-8176-ff989d3e41b1/run41893882465/2 source58b95c4: native+separate verifier SUCCESS,25 rows EVIDENCE_READY.
+- Repaired readbackccb7a3d01d76c47933aaa4b290bd7d581b0bdedf2f09baaad3f313bf4fb2fda3; original archives byte-readback exact; docs/evidence/candidate-repair-20261104.
+- Actual terminal focus body -> choose-seat#26; immutable report671050b2404e6b5aa2fe6397f9a5453ad473bb0a273b61986e3d779500c151eb INCONCLUSIVE: protected radio had no stable DOMid.
+- New recorder-owned unique radio name/value identity implemented; duplicate/tampered/unknown identities refuse. Old captures/report remain unchanged and inconclusive; new baseline7/repair8 required.
+- Candidate persistence, original readback, exact approved source, comparison API/UI implemented.16 hosted migrations; candidate-only writes/RLS; production tables/qualification policies untouched.
+- Validation410 combined PASS/5 opt-in skips;1275 root PASS/3 opt-in skips;15 browser PASS;16 migrations/11 SQL/native+repair DB suites PASS;build/types/frozen preflight PASS;5 routes x166 raw source files traced.
+- Model1/20 actual calls,$0.01522975 credit,₹0 paid; no retries. Original app/cache/budget.sqlite + app/docs/ledger/COSTS.jsonl authoritative; preserve old uncertain reservation.
+- Model basis453627ed/run41881566073 had genuine capture/local corrected replay but failed original separate verifier; this limit remains explicit in review provenance. New baseline5 authenticated separately.
+- Next commit/push validated comparison+radio changes to PR27, new baseline7 bootstrap/packet/attempt2 -> store; then reviewed repair8 same source -> store/compare.
+- Global active1/day8 ceiling unchanged;6 candidates created so far. No attempt3. Remove spent repository approval after candidate6 terminal.
+- R2/R3/R7 FEATURES remain false; external independent qualification authority absent. No production success/qualified evidence claim.
 ## Handoff
-- Sole Codex; no subagents/routine approvals. User authorizes safe merge/push/run; retain requiredCI and exact source/packet checks.
-- Original artifacts unchanged; failed candidates retained. Local operator adapter updated to JSON wrappers, must require separate verifier SUCCESS.
+- Sole Codex; no subagents or routine approvals; user delegates safe merge/push/run and decisions. Main merge only exact passing requiredCI.
+- No dev desktop NVDA/input. All native activity isolated GitHub-hosted Windows with W5 one-use/custody/exact source packet.
+- Preserve original artifacts/failed candidates. Local operator scripts cache/product-completion; no secret values printed or committed.

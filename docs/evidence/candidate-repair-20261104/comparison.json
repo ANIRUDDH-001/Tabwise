@@ -1,0 +1,28 @@
+{
+  "schema": "tabwise-candidate-repair-comparison/1",
+  "classification": "NONPRODUCTION_UNQUALIFIED",
+  "production_qualified": false,
+  "independent_qualification": false,
+  "evidence_class": "MACHINE",
+  "independence": "L3",
+  "product_run_id": "3de4c6ce-8e3b-4ef8-8176-ff989d3e41b1",
+  "baseline_run_id": "32e02e48-78a1-463d-9107-0b5b7048d3dd",
+  "patch_sha256": "015d122118b5306e9528048f83abf5f293cc5603422b6182bce06e06d743f739",
+  "base_sha256": "5ad4631558cdcc557770ae864957ffc167546cd0af58bd11258808e1c0e523be",
+  "source_sha256": "1860345c688f2adfe7241b97f05ba32fe345f08b0594cff8476d7b6e70e484ce",
+  "baseline_readback_sha256": "28798ef66210e3d4185558f5632aead61ddc1c4cfe02c54185b3de3c6aa6889c",
+  "rerun_readback_sha256": "ccb7a3d01d76c47933aaa4b290bd7d581b0bdedf2f09baaad3f313bf4fb2fda3",
+  "baseline_workflow_id": "41891175195",
+  "rerun_workflow_id": "41893882465",
+  "observed_terminal_focus": {
+    "baseline": "body",
+    "rerun": "choose-seat#26"
+  },
+  "verdict": "INCONCLUSIVE",
+  "checks": {
+    "symptom_gone": null,
+    "other_steps_preserved": null,
+    "evidence_complete": false
+  },
+  "reason": "Protected steps require comparable terminal focus and complete action-bound speech."
+}
