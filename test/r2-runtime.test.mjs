@@ -18,6 +18,7 @@ test('unstarted owner cannot fall back to legacy discovery',async()=>{await asse
 test('unavailable executable refuses before spawn',async()=>{const l=createLifecycle({gate:{isStopped:()=>false},executable:()=>null});await assert.rejects(l.start(),/installed/);});
 
 test('dead owned process never invokes global quit',async()=>{const s=setup();const owned=await s.lifecycle.start();s.child.kill();assert.deepEqual(await s.lifecycle.quit({owned}),{listener_stopped:true});assert.equal(s.counts().kills,0);});
+test('owned native exit code survives cleanup without changing identity or ownership decisions',async()=>{const s=setup();assert.equal(s.lifecycle.processExit(),null);await s.lifecycle.start();s.child.exitCode=17;s.child.emit('exit',17,null);s.child.emit('close',17,null);assert.deepEqual(s.lifecycle.processExit(),{code:17,signal:null});await s.lifecycle.quit();assert.deepEqual(s.lifecycle.processExit(),{code:17,signal:null});});
 for(const phase of ['identity','listener'])test('cancellation during '+phase+' query bounds uncooperative helper',async()=>{
  let stopped=false,alive=false,count=0;const child=new EventEmitter();child.pid=123;child.exitCode=null;child.kill=()=>{alive=false;child.exitCode=0;child.emit('exit');child.emit('close');return true;};
  const gate={isStopped:()=>stopped};

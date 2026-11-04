@@ -1,6 +1,12 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import {resolve} from 'node:path';
 import {sendGate} from '../../src/speech/sendguard.mjs';import {loadR2Vendor} from '../../scripts/tabwise/r2-vendor-loader.mjs';
 import {runStartupOnly} from './startup-core.mjs';import {cleanupFailedStartup} from './startup-cleanup.mjs';
+test('NVDA log diagnostic is bounded, removes local paths and secrets, and tolerates absent logs',async()=>{
+ const {sanitizeNvdaLog}=await import('./startup-log.mjs');
+ const text=sanitizeNvdaLog('ERROR C:\\private\\file.py token=abc-secret\n'+ 'x'.repeat(40000),{API_TOKEN:'abc-secret'});
+ assert(Buffer.byteLength(text)<=17000);assert(!text.includes('abc-secret'));assert(!text.includes('C:\\private'));assert(text.includes('ERROR'));assert(text.includes('truncated'));
+ const {readNvdaLog}=await import('./startup-log.mjs');assert.deepEqual(readNvdaLog({TEMP:'Z:\\missing-r2-log-path'}),{available:false,text:null});
+});
 for(const retained of [false,true])test('actual frozen class startup failure '+(retained?'retains real teardown refusal':'does not mislabel already-clean not-running stop'),async()=>{
  const gate=sendGate();let quits=0;
  const lifecycle={start:async()=>{throw Error('PRIVATE original startup');},relayOwnerPid:async()=>1,observedProcess:()=>null,hasOwnedProcess:()=>false,quit:async()=>{quits++;if(retained)throw Error('PRIVATE cleanup');return {listener_stopped:true};}};

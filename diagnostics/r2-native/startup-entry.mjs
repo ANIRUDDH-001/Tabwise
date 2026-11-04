@@ -26,6 +26,7 @@ else if(context.mode==='--worker'){
  for(const signal of ['SIGINT','SIGTERM','SIGBREAK'])process.on(signal,cancel);
  try{
   const report=await superviseStartup({tools:windowsProcessTools({spawn,env:diagnosticEnv(process.env)}),signal:cancellation.signal,protect:[process.pid,process.ppid],launch:()=>spawn(process.execPath,[join(context.root,'diagnostics/r2-native/startup-entry.mjs'),'--worker'],{cwd:context.root,env,windowsHide:true,shell:false,stdio:['ignore','pipe','pipe','ipc']})});
+  const {readNvdaLog}=await import('./startup-log.mjs');report.nvda_log=readNvdaLog();
   context.saveResult('startup.json',report);process.exitCode=report.startup_pass?0:1;
  }finally{for(const signal of ['SIGINT','SIGTERM','SIGBREAK'])process.off(signal,cancel);}
 }

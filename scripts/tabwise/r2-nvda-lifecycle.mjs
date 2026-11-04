@@ -17,7 +17,7 @@ export async function processIdentity(pid,{deadline,signal,run=runBounded}={}){
  return Object.freeze(value);
 }
 export function createLifecycle({gate,executable,configPath,spawn=spawnProcess,running,query=resolveOwner,identify=processIdentity,pathHash=executableHash}){
- let owned=null,expected=null,lastObserved=null,stage='nvda-class-start';
+ let owned=null,expected=null,lastObserved=null,lastExit=null,stage='nvda-class-start';
  const active=()=>{if(gate.isStopped())throw Error('NVDA startup cancelled: gate stopped');};
  // Every helper has a bounded deadline and observes sticky gate cancellation, including during OS queries.
  async function operation(fn,deadlineMs,allowStopped=false){
@@ -47,7 +47,7 @@ export function createLifecycle({gate,executable,configPath,spawn=spawnProcess,r
   if(performance.now()>=until)throw Error('NVDA startup deadline exhausted');
   stage='initial-listener-query';if((await listeners(until)).outcome!=='absent')throw Error('NVDA listener already running; reset required');
   stage='spawn';active();const child=spawn(path,['--config-path',configPath()],{stdio:'ignore',windowsHide:true,shell:false});
-  let exited=false,closed=false,failed=null;child.on('error',e=>{failed=e;});child.once('exit',()=>{exited=true;});child.once('close',()=>{closed=true;});
+  let exited=false,closed=false,failed=null;child.on('error',e=>{failed=e;});child.once('exit',(code,signal)=>{exited=true;lastExit={code:Number.isInteger(code)?code:null,signal:typeof signal==='string'?signal:null};});child.once('close',()=>{closed=true;});
   const isAlive=()=>!exited&&!failed&&child.exitCode===null;
   owned={pid:child.pid,process:child,isAlive,isClosed:()=>closed};
   try{
@@ -94,5 +94,5 @@ export function createLifecycle({gate,executable,configPath,spawn=spawnProcess,r
   owned=null;expected=null;return {listener_stopped:true};
  }
  const tagged=fn=>async(...args)=>{try{return await fn(...args);}catch(error){if(!error.r2_stage)error.r2_stage=stage;throw error;}};
- return Object.freeze({start:tagged(start),relayOwnerPid,quit:tagged(quit),observedProcess:()=>lastObserved,hasOwnedProcess:()=>owned!==null,diagnostic:()=>({stage,code:gate.isStopped()?'cancelled':'operation-failed'})});
+ return Object.freeze({start:tagged(start),relayOwnerPid,quit:tagged(quit),observedProcess:()=>lastObserved,processExit:()=>lastExit,hasOwnedProcess:()=>owned!==null,diagnostic:()=>({stage,code:gate.isStopped()?'cancelled':'operation-failed'})});
 }

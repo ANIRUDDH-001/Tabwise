@@ -30,6 +30,7 @@ export async function superviseStartup({launch,tools,protect=[],signal=null,setT
    const value=parseUniqueJson(output);if(value.schema!=='tabwise-startup-only/1'||value.production_qualified!==false||value.native_interaction_pass!==false||value.physical_quiescence_verified!==false||value.sends!==0)throw Error();
    // Do not forward arbitrary child properties or error strings into the artifact.
    report.worker={startup_pass:value.startup_pass===true,sends:0,cleanup_error:value.cleanup_error===true,error:value.error===null?null:'worker-refused',receipt:value.receipt&&Number.isSafeInteger(value.receipt.pid)&&value.receipt.pid>0&&value.receipt.relay_pid===value.receipt.pid&&value.receipt.reset_confirmed===true?{pid:value.receipt.pid,relay_pid:value.receipt.pid,reset_confirmed:true}:null};
+   if(value.process_exit&&Number.isInteger(value.process_exit.code))report.worker.process_exit={code:value.process_exit.code};
    if(value.diagnostic)report.worker.diagnostic=safeDiagnostic(value.diagnostic);
    if(value.cleanup_diagnostic)report.worker.cleanup_diagnostic=safeDiagnostic(value.cleanup_diagnostic);
    const observed=value.observed_process;
