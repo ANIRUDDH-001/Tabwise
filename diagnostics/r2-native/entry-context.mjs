@@ -36,6 +36,6 @@ export function entryContext(mode,argv=process.argv.slice(2)){
  }};
 }
 export function diagnosticEnv(env){
- const out=Object.create(null);for(const [k,v] of Object.entries(env))if(typeof v==='string'&&/^(SYSTEMROOT|WINDIR|PATH|PATHEXT|TEMP|TMP|USERPROFILE|LOCALAPPDATA|APPDATA|PROGRAMFILES|PROGRAMFILES\(X86\))$/i.test(k))out[k]=v;
+ const out=Object.create(null);for(const [k,v] of Object.entries(env))if(typeof v==='string'&&/^(SYSTEMROOT|WINDIR|PATH|PATHEXT|TEMP|TMP|USERPROFILE|LOCALAPPDATA|APPDATA|PROGRAMFILES|PROGRAMFILES\(X86\)|PROCESSOR_ARCHITECTURE|PROCESSOR_ARCHITEW6432)$/i.test(k))out[k]=v;
  return out;
 }

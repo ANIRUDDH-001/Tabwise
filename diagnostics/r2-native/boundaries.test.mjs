@@ -58,8 +58,8 @@ test('probe budget includes synchronous launch delay; inherited secrets never re
  let time=0;const timers=[],child=Object.assign(new EventEmitter(),{pid:1,stdout:new PassThrough(),stderr:new PassThrough(),kill(){}});
  const promise=runReadOnlyProbe({spawn:()=>{time=28000;return child;},now:()=>time,setTimer:(fn,ms)=>{timers.push({fn,ms});return 1;},clearTimer:()=>{}});
  assert.equal(timers[0].ms,1);timers[0].fn();timers.at(-1).fn();await promise;
- const env=diagnosticEnv({PATH:'safe',SYSTEMROOT:'C:/Windows',META_API_KEY:'SECRET',GITHUB_TOKEN:'SECRET',NODE_OPTIONS:'evil',PSModulePath:'evil'});
- assert.deepEqual({...env},{PATH:'safe',SYSTEMROOT:'C:/Windows'});
+ const env=diagnosticEnv({PATH:'safe',SYSTEMROOT:'C:/Windows',PROCESSOR_ARCHITECTURE:'AMD64',PROCESSOR_ARCHITEW6432:'AMD64',META_API_KEY:'SECRET',GITHUB_TOKEN:'SECRET',NODE_OPTIONS:'evil',PSModulePath:'evil'});
+ assert.deepEqual({...env},{PATH:'safe',SYSTEMROOT:'C:/Windows',PROCESSOR_ARCHITECTURE:'AMD64',PROCESSOR_ARCHITEW6432:'AMD64'});
 });
 test('workflows remain manual, first attempt offline, separately approved and free of interpolated commands',()=>{
  for(const {workflow,variable} of Object.values(BOUNDARIES)){

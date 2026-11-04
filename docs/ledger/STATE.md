@@ -1,10 +1,9 @@
-# STATE — autonomous R2 recovery, Phase B exit diagnostic
-- Phase A hosted41795994791/1 PASS: identity14/14,cold2982ms/warm279ms; no timeout increase.
-- Phase B41795994791/2 failed: identity passed, NVDA exited before readiness; zero sends, cleanup/custody complete.
-- ZIP SHA25663aa3cad67de9157b1135f3cef221e99eea90661f8ee044499bf420ddbedd2a4 and index verified.
-- Approval variable revoked after check-only admission; authenticated listing confirmed absent.
-- Added bounded scrubbed fixed NVDA log and numeric native exit diagnostic; source pins refreshed.
-- MEASURED focused61/61 PASS before extra exit-code regression; prior root1190/1190 PASS.
-- Next: fresh source/run-bound hosted offline review and zero-key native diagnostic; fix NVDA exit then guarded journey.
-- Blocked: native startup; separate product independent signed-attestation authority remains unavailable/unconfigured.
-- Handoff: sole writer, ₹0 paid AI, frozen R1 untouched; no R3/R7 promotion.
+# STATE — Phase B measured NVDA environment correction
+- A PASS: hosted41795994791 identity14/14; serializer cmdlet stall fixed, no deadlines increased.
+- B diagnostic41796760196/2: native exit1; nvda.log KeyError PROCESSOR_ARCHITECTURE.
+- ZIP74ba9fcf47839d468207b8622e21f906acbc99f4f8471724f2517ebb5456d4bb/index verified; zero sends; custody complete.
+- Corrected startup environment allowlist for Windows architecture metadata; secrets/runtime injection still excluded.
+- Required env regression RED before correction; focused security/native runtime checks next.
+- Next: publish, fresh hosted offline packet and exact startup attempt; then real guarded journey/evidence.
+- No independent native signing authority configured; production gates retained.
+- Handoff: sole agent; incremental ₹0; no R3/R7 promotion.
