@@ -1,30 +1,35 @@
 --- a/.github/workflows/tabwise-r2.yml
 +++ b/.github/workflows/tabwise-r2.yml
-@@ -41,6 +41,18 @@
+@@ -41,6 +41,23 @@
          description: SHA-256 of the exact plan bytes (must equal r2-status.json plan_sha256)
          required: true
          type: string
++      product_bound:
++        description: Explicit product mode; standalone qualification remains default
++        required: false
++        default: false
++        type: boolean
 +      product_run_id:
 +        description: Immutable admitted product UUID
-+        required: true
++        required: false
 +        type: string
 +      product_request_sha256:
 +        description: Exact stored request digest
-+        required: true
++        required: false
 +        type: string
 +      product_nonce:
 +        description: Persisted one-intent claim nonce
-+        required: true
++        required: false
 +        type: string
  
  permissions:
    contents: read
-@@ -50,7 +62,32 @@
+@@ -50,8 +67,33 @@
    cancel-in-progress: false
  
  jobs:
 +  product-bind:
-+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.run_attempt == '1'
++    if: inputs.product_bound && github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.run_attempt == '1'
 +    runs-on: ubuntu-24.04
 +    timeout-minutes: 3
 +    permissions:
@@ -48,7 +53,9 @@
 +          path: ${{ runner.temp }}/tabwise-product-delivery/delivery.json
 +          if-no-files-found: error
    r2:
+-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.run_attempt == '1'
 +    needs: product-bind
-     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.run_attempt == '1'
++    if: always() && !cancelled() && (!inputs.product_bound || needs.product-bind.result == 'success') && github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.run_attempt == '1'
      runs-on: windows-2025
      timeout-minutes: 60
+     permissions:
