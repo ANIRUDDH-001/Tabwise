@@ -23,20 +23,22 @@ function authentic(envelope,key){
 }
 export function validateBinding(b){
  exact(b,['purpose','repository','workflow','revision','actor','owner_approval_ref','review_ref','reviewed_files','reviewed_sha256','qualification_sha256','plan_sha256','fixtures','permitted_attempt','expires_at']);
- if(!['r2-execution','w2a-qualification'].includes(b.purpose)||b.repository!=='ANIRUDDH-001/Tabwise'||!/^\.github\/workflows\/[a-z0-9-]+\.yml$/.test(b.workflow??'')||!REV.test(b.revision??'')||!ID.test(b.actor??'')||!/^D-[0-9]+$/.test(b.owner_approval_ref??'')||!text(b.review_ref))fail('binding identity');
+ const candidate=b.purpose==='candidate-execution';
+ if(!['r2-execution','w2a-qualification','candidate-execution'].includes(b.purpose)||b.repository!=='ANIRUDDH-001/Tabwise'||!/^\.github\/workflows\/[a-z0-9-]+\.yml$/.test(b.workflow??'')||!REV.test(b.revision??'')||!ID.test(b.actor??'')||!(candidate?/^CANDIDATE-[a-f0-9]{64}$/:/^D-[0-9]+$/).test(b.owner_approval_ref??'')||!text(b.review_ref))fail('binding identity');
  if(b.purpose==='r2-execution'&&b.workflow!=='.github/workflows/tabwise-r2.yml')fail('purpose/workflow mismatch');
- if(!Array.isArray(b.reviewed_files)||!b.reviewed_files.length||b.reviewed_files.length>256||b.reviewed_files.some(p=>typeof p!=='string'||p.length>256||p.includes('..')||!/^\.?[a-zA-Z0-9_/-][a-zA-Z0-9_./-]*$/.test(p))||!equal(b.reviewed_files,[...new Set(b.reviewed_files)].sort()))fail('reviewed scope');
- if(!['reviewed_sha256','qualification_sha256','plan_sha256'].every(k=>SHA.test(b[k]??''))||b.permitted_attempt!==1||!iso(b.expires_at))fail('digest, attempt or expiry');
+ if(candidate&&(b.workflow!=='.github/workflows/tabwise-r2-native-diagnostic.yml'||!/^NONPRODUCTION:[a-f0-9]{64}$/.test(b.review_ref)))fail('candidate purpose/workflow mismatch');
+ if(!Array.isArray(b.reviewed_files)||!b.reviewed_files.length||b.reviewed_files.length>256||b.reviewed_files.some(p=>typeof p!=='string'||p.length>256||p.includes('..')||p.split('/').some(s=>!s||s==='.')||!/^\.?[a-zA-Z0-9_-][a-zA-Z0-9_./\[\]-]*$/.test(p))||!equal(b.reviewed_files,[...new Set(b.reviewed_files)].sort()))fail('reviewed scope');
+ if(!['reviewed_sha256','qualification_sha256','plan_sha256'].every(k=>SHA.test(b[k]??''))||b.permitted_attempt!==(candidate?2:1)||!iso(b.expires_at))fail('digest, attempt or expiry');
  if(!Array.isArray(b.fixtures)||!b.fixtures.length||b.fixtures.length>64)fail('fixtures');
  for(const f of b.fixtures){exact(f,['id','sha256']);if(!/^[a-z][a-z0-9-]{0,63}$/.test(f.id??'')||!SHA.test(f.sha256??''))fail('fixture identity');}
  if(new Set(b.fixtures.map(f=>f.id)).size!==b.fixtures.length)fail('duplicate fixture');return copy(b);
 }
-function validateConsumer(c){exact(c,['run_id','attempt']);if(!/^[1-9][0-9]{0,19}$/.test(c.run_id??'')||c.attempt!==1)fail('initial run attempt required');return copy(c);}
+function validateConsumer(c,binding){exact(c,['run_id','attempt']);if(!/^[1-9][0-9]{0,19}$/.test(c.run_id??'')||c.attempt!==(binding?.purpose==='candidate-execution'?2:1))fail('initial run attempt or explicit candidate attempt required');return copy(c);}
 export function bindingFromGate(gate,{expires_at}){
  const s=gate.status;return validateBinding({purpose:'r2-execution',repository:'ANIRUDDH-001/Tabwise',workflow:'.github/workflows/tabwise-r2.yml',revision:gate.head,actor:s.actor,owner_approval_ref:s.owner_approval_ref,review_ref:s.review_ref,reviewed_files:s.reviewed_files,reviewed_sha256:s.reviewed_sha256,qualification_sha256:s.qualification_sha256,plan_sha256:s.plan_sha256,fixtures:gate.plan.pages.map(p=>({id:p.id,sha256:p.fixture_sha256})),permitted_attempt:1,expires_at});
 }
 function receiptPayload(p,{id,binding,consumer,now=Date.now(),historical=false}){
- exact(p,['schema','authorization_id','binding','consumer','coordinator_key','consumed_at','consumption_id']);validateBinding(p.binding);validateConsumer(p.consumer);publicKey(p.coordinator_key);
+ exact(p,['schema','authorization_id','binding','consumer','coordinator_key','consumed_at','consumption_id']);validateBinding(p.binding);validateConsumer(p.consumer,p.binding);publicKey(p.coordinator_key);
  if(p.schema!=='tabwise-r2-consumption/1'||!ID.test(id??'')||p.authorization_id!==id||!ID.test(p.authorization_id??'')||!iso(p.consumed_at)||!/^[a-f0-9-]{36}$/.test(p.consumption_id??'')||!equal(p.binding,binding)||!equal(p.consumer,consumer)||Date.parse(p.consumed_at)>=Date.parse(binding.expires_at)||Date.parse(p.consumed_at)>now)fail('receipt binding');
  if(!historical&&Date.parse(binding.expires_at)<=now)fail('authorization expired');return copy(p);
 }
@@ -48,7 +50,7 @@ export function createAuthority({rpc,authenticate,signingKey}){
  const key=typeof signingKey==='string'?createPrivateKey(signingKey):signingKey;if(key?.asymmetricKeyType!=='ed25519'||key.type!=='private')fail('authority signing key');
  return async(request,identity)=>{
   exact(request,request?.action==='consume'?['action','id','binding','consumer','coordinator_key']:['action','id','binding','consumer']);
-  const b=validateBinding(request.binding),c=validateConsumer(request.consumer);
+  const b=validateBinding(request.binding),c=validateConsumer(request.consumer,b);
   if(!['consume','read'].includes(request.action)||!ID.test(request.id??''))fail('authority action');
   const principal=await authenticate(copy(request),identity);
   if(!plain(principal)||['repository','workflow','revision','actor'].some(k=>principal[k]!==b[k])||principal.run_id!==c.run_id||principal.attempt!==c.attempt)fail('authenticated identity mismatch');
@@ -67,7 +69,7 @@ export function verifyPageGrant(grant,{id,challenge,binding,consumer,publicKey:k
  if(payload.schema!=='tabwise-r2-page-grant/1'||payload.receipt_sha256!==digest(grant.receipt)||!equal(payload.challenge,challenge)||!binding.fixtures.some(f=>f.id===challenge.page))fail('page grant binding');return payload;
 }
 export async function createCoordinator({id,binding,consumer,transport,publicKey:key}){
- binding=validateBinding(binding);consumer=validateConsumer(consumer);if(!ID.test(id??'')||typeof transport!=='function')fail('coordinator configuration');publicKey(key);
+ binding=validateBinding(binding);consumer=validateConsumer(consumer,binding);if(!ID.test(id??'')||typeof transport!=='function')fail('coordinator configuration');publicKey(key);
  const pair=generateKeyPairSync('ed25519');let response;
  try{response=await transport({action:'consume',id,binding,consumer,coordinator_key:publicText(pair.publicKey)});}catch{fail('consumption outcome uncertain; never retry launch');}
  exact(response,['fresh','receipt']);const receipt=verifyReceipt(response.receipt,{id,binding,consumer,publicKey:key});
