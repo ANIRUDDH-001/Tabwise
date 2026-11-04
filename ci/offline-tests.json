@@ -334,5 +334,9 @@
   "broker-request-limit.test.mjs": {
     "kind": "offline",
     "reason": "temporary SQLite request reservations and append-only local ledger recovery; no API, native runtime, credentials or network"
+  },
+  "r2-runtime-metadata.test.mjs": {
+    "kind": "offline",
+    "reason": "pure runtime metadata/profile validation and injected bounded helper results; actual Windows observation is a separate diagnostic test"
   }
 }

@@ -65,6 +65,7 @@
   "src/r2/page-source.mjs",
   "src/r2/preparation.mjs",
   "src/r2/product-bridge.mjs",
+  "src/r2/runtime-metadata.mjs",
   "src/r2/send-receipt.mjs",
   "src/r2/speech-payload.mjs",
   "src/r2/strict-json.mjs",

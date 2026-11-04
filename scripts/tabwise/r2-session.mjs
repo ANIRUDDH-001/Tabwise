@@ -206,6 +206,11 @@ export async function runR2Session(runtime, data, diagnostics) {
           if (mismatch.length) throw Error(`NVDA settings read-back: ${mismatch.join('; ')}`);
           const relay = await runtime.relayOwnerPid();
           if (relay !== receipt?.pid) throw Error('NVDA relay owner differs from the owned process');
+          const {buildRuntimeMetadata}=await import('../../src/r2/runtime-metadata.mjs');
+          const observed=await runtime.runtimeMetadata();
+          authentic();
+          const metadata=buildRuntimeMetadata({snapshot:observed,expectedIdentity:runtime.observedProcess(),settings:runtime.cfg.nvda_settings,readback});
+          writer.append('events',{phase:'native-runtime',runtime:metadata});
           return {pid: receipt.pid, relay_pid: receipt.relay_pid, reset_confirmed: receipt.reset_confirmed};
         },
         stop: () => runtime.nvda.stop(),

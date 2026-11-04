@@ -16,6 +16,14 @@ export async function processIdentity(pid,{deadline,signal,run=runBounded}={}){
  if(value?.pid!==pid||!/^([1-9][0-9]{10,19})$/.test(value.created??'')||!/^[a-f0-9]{64}$/.test(value.path_sha256??'')||Object.keys(value).sort().join()!=='created,path_sha256,pid')refuse('identity-output-invalid');
  return Object.freeze(value);
 }
+export async function processRuntimeMetadata(expected,{deadline,signal,run=runBounded}={}){
+ if(!expected||!Number.isSafeInteger(expected.pid)||expected.pid<1||expected.pid>2147483647||!/^[1-9][0-9]{10,19}$/.test(expected.created??'')||!/^[a-f0-9]{64}$/.test(expected.path_sha256??''))throw Error('runtime metadata expected process identity required');
+ const result=await run({file:systemExecutable('WindowsPowerShell/v1.0/powershell.exe'),args:['-NoProfile','-NonInteractive','-File',identityScript,'-ProcessId',String(expected.pid),'-RuntimeMetadata'],deadline,signal,maxBytes:4096});
+ if(!result.ok||!result.cleanup?.process_close_observed)throw Error('runtime metadata query incomplete');
+ const value=JSON.parse(result.stdout);
+ if(!value||Object.keys(value).sort().join(',')!=='created,executable_sha256,path_sha256,pid,product_version'||['pid','created','path_sha256'].some(k=>value[k]!==expected[k])||!/^[a-f0-9]{64}$/.test(value.executable_sha256??'')||!/^\d{1,4}(?:\.\d{1,5}){1,3}$/.test(value.product_version??''))throw Error('runtime metadata identity/output mismatch');
+ return Object.freeze(value);
+}
 export function createLifecycle({gate,executable,configPath,spawn=spawnProcess,running,query=resolveOwner,identify=processIdentity,pathHash=executableHash}){
  let owned=null,expected=null,lastObserved=null,lastExit=null,stage='nvda-class-start';
  const active=()=>{if(gate.isStopped())throw Error('NVDA startup cancelled: gate stopped');};
@@ -40,6 +48,13 @@ export function createLifecycle({gate,executable,configPath,spawn=spawnProcess,r
   const before=await identity(owned.pid,deadlineMs,allowStopped),result=await listeners(deadlineMs,allowStopped),after=await identity(owned.pid,deadlineMs,allowStopped);
   if(authenticateOwner({pids:result.pids,before,after,expected}).outcome!=='authenticated'||!owned.isAlive())throw Error('NVDA relay/process identity mismatch');
   return owned.pid;
+ }
+ async function runtimeMetadata(){
+  const deadlineMs=performance.now()+5000;
+  await relayOwnerPid({deadlineMs});
+  const value=await operation(options=>processRuntimeMetadata(expected,options),deadlineMs);
+  if(!owned?.isAlive())throw Error('runtime metadata owned process exited');
+  return value;
  }
  async function start({timeoutMs=15000,pollMs=100,probeMs=500,deadlineMs}={}){
   stage='installation-path';const path=executable();if(!path)throw Error('NVDA not installed');
@@ -94,5 +109,5 @@ export function createLifecycle({gate,executable,configPath,spawn=spawnProcess,r
   owned=null;expected=null;return {listener_stopped:true};
  }
  const tagged=fn=>async(...args)=>{try{return await fn(...args);}catch(error){if(!error.r2_stage)error.r2_stage=stage;throw error;}};
- return Object.freeze({start:tagged(start),relayOwnerPid,quit:tagged(quit),observedProcess:()=>lastObserved,processExit:()=>lastExit,hasOwnedProcess:()=>owned!==null,diagnostic:()=>({stage,code:gate.isStopped()?'cancelled':'operation-failed'})});
+ return Object.freeze({start:tagged(start),relayOwnerPid,runtimeMetadata,quit:tagged(quit),observedProcess:()=>lastObserved,processExit:()=>lastExit,hasOwnedProcess:()=>owned!==null,diagnostic:()=>({stage,code:gate.isStopped()?'cancelled':'operation-failed'})});
 }

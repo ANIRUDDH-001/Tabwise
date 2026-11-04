@@ -1358,6 +1358,7 @@ test('S7-I1 R2_FILES is exactly the union of the S7, custody, O-11 and W3/W4 lif
     "src/r2/product-bridge.mjs",
     "src/r2/send-receipt.mjs",
     "src/r2/speech-payload.mjs",
+    "src/r2/runtime-metadata.mjs",
     "src/r2/strict-json.mjs",
     "src/repair/apply.mjs",
     "src/repair/oracle.mjs",
