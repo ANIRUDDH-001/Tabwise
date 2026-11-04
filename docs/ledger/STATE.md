@@ -1,9 +1,9 @@
 # STATE — R2 runtime metadata continuation; product INCOMPLETE
-Updated: 2026-11-04T11:37:43Z
+Updated: 2026-11-04T11:59:30Z
 - Branch feat/tabwise-r2-r7-product-completion; latest runtime source 19d17a5098809406d5ff07041c6b44487718956c.
 - Draft PR26; main ea8bd7c unchanged; no production activation.
 - CI41818741025 PASS atdc41656:9 profiles x71 selected files; original artifacts preserved.
-- New metadata implementation at19d17a5 has separate fresh local checks; prior CI does not qualify new native source.
+- New metadata CI41822479229 atf6a07fa PASS:9 profiles x72 files, source/checkout locks PASS; artifact13319285925.
 - Own-process version/binary query + exact A15 readback -> sealed events -> verified export connection implemented.
 - New validator enters reviewed/per-send pin scope; original classes/archives/caps unchanged.
 - R2 digest507d0eb3b448f07a83f054508de7f0168a1d625e59b8e2a3045d00c3c85c74ee.
@@ -15,6 +15,8 @@ Updated: 2026-11-04T11:37:43Z
 - Blockers: independent authority; native class/producer contract; actual owned native ingestion/readback; repaired native delivery/rerun; R7; hosted OAuth.
 - Qualification/native/integration policies remain disabled. No self-trusted production key or signature.
 - Model requests0/20; paid incremental₹0; current credits unverified so no live calls.
+- UI follow-up b3fe53c rereads native capabilities on polled status changes; browser3/web328/build/types/traces PASS.
+- Current application source b3fe53c; runtime remains19d17a5. New branch-head checks remain separately authoritative.
 ## Handoff
 - Review docs/engineering/Product-completion-review-20261104.md and runtime evidence index.
 - Preserve historical failures and exact archived native diagnostics; never relabel them.

@@ -2,7 +2,7 @@
 
 **Status: INCOMPLETE. No R2, R3 or R7 acceptance checkpoint is claimed. Do not merge or activate production from this package.**
 
-Latest application/runtime source: `19d17a5098809406d5ff07041c6b44487718956c` on `feat/tabwise-r2-r7-product-completion`; see the continuation below. The initial candidate `e3d99addc066da88624728923de49a040784aa61` remains preserved in `candidate.json`. The owner confirmed: “No authority exists yet; prepare the review package”. This package supplies no signature, reviewer identity, private evaluation labels or qualification authority.
+Latest application source: `b3fe53ccf20c0761c2ec47dadfc55eec3b05dfee`; runtime source: `19d17a5098809406d5ff07041c6b44487718956c`, on `feat/tabwise-r2-r7-product-completion`. See the continuations below. The initial candidate `e3d99addc066da88624728923de49a040784aa61` remains preserved in `candidate.json`. The owner confirmed: “No authority exists yet; prepare the review package”. This package supplies no signature, reviewer identity, private evaluation labels or qualification authority.
 
 ## Source and evidence
 
@@ -104,3 +104,11 @@ MEASURED local validation: root 1,269 pass with three previously exercised DB op
 CITED API semantics: [Microsoft's process file-version documentation](https://github.com/microsoftdocs/powershell-docs/blob/main/reference/7.7/Microsoft.PowerShell.Management/Get-Process.md), fetched through Context7. The implementation uses the fixed .NET properties directly to avoid automatic module discovery; no third-party implementation was copied.
 
 The current R2 source digest is `507d0eb3b448f07a83f054508de7f0168a1d625e59b8e2a3045d00c3c85c74ee`. Qualification-source digest remains `1a2991eb6c4bc42ffef5fbc1060d89dd8dc136c456211eddcf8dacf459ddd672`. Any future authority must review this new source; the prior hosted offline pass cannot authorize it. See `runtime-continuation.json` and `runtime-evidence-index.json` for exact source/evidence hashes and the outstanding acceptance criteria.
+
+## Current metadata CI and UI follow-up
+
+MEASURED: [hosted preflight 41822479229](https://github.com/ANIRUDDH-001/Tabwise/actions/runs/41822479229) passed on `f6a07faaeced3ab1e14fdfdc9c67b1d1cf2f8d4d`, which contains the `19d17a5` runtime source. All nine profiles passed all 72 selected files. Final source locks, unchanged checkout and artifact upload passed. Artifact `13319285925` contains the original output; result JSON files are preserved under `ci-41822479229-` prefixes. This verifies the metadata source in offline CI, not its genuine NVDA/product execution.
+
+MEASURED: UI follow-up `b3fe53ccf20c0761c2ec47dadfc55eec3b05dfee` passes the live run status to the native request panel. When polling reaches an evidence-eligible state, the panel rereads server capabilities, so the evidence-retrieval action appears without a manual refresh. Aborted responses cannot replace the latest panel state. No client inference enables an action or grants qualification. The browser test first reproduced the stale panel while the displayed run already said `uploading`, then passed after the change. All three current native/repair UI browser controls pass; web 328 tests and build/TypeScript/nine route traces also pass. The runtime source/digest is unchanged by this UI fix. It was committed locally while metadata CI completed, then published with this receipt; GitHub checks for the new branch head remain separately authoritative.
+
+The remaining class/attester/product-owned source-delivery design must preserve sealed pre-execution identity and obtain genuine external authority. A passing offline source suite cannot authorize changing synthetic diagnostic class strings, invent a reviewer key, or substitute for a new owned product run. The repair-native packet/plan/admission connection and the actual baseline/rerun/R7 acceptance remain unfinished. This is an incomplete engineering review handoff, not final product or merge readiness.

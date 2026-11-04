@@ -1,0 +1,79 @@
+{
+  "schema": "tabwise-metadata-ci-ui-followup/1",
+  "authorizing": false,
+  "created_at": "2026-11-04T11:59:30Z",
+  "runtime_source": "19d17a5098809406d5ff07041c6b44487718956c",
+  "r2_source_sha256": "507d0eb3b448f07a83f054508de7f0168a1d625e59b8e2a3045d00c3c85c74ee",
+  "hosted": {
+    "run_id": "41822479229",
+    "branch_head": "f6a07faaeced3ab1e14fdfdc9c67b1d1cf2f8d4d",
+    "checkout_revision": "b6b89dffc79357953e2e04cb422dcfdbf7c8be7a",
+    "artifact_id": "13319285925",
+    "conclusion": "success",
+    "profiles": [
+      {
+        "profile": "mixed",
+        "files": 72,
+        "pass": 72
+      },
+      {
+        "profile": "ordinary",
+        "files": 72,
+        "pass": 72
+      },
+      {
+        "profile": "random-479229",
+        "files": 72,
+        "pass": 72
+      },
+      {
+        "profile": "repeat-1",
+        "files": 72,
+        "pass": 72
+      },
+      {
+        "profile": "repeat-2",
+        "files": 72,
+        "pass": 72
+      },
+      {
+        "profile": "serial",
+        "files": 72,
+        "pass": 72
+      },
+      {
+        "profile": "slow-fs-100",
+        "files": 72,
+        "pass": 72
+      },
+      {
+        "profile": "slow-fs-30",
+        "files": 72,
+        "pass": 72
+      },
+      {
+        "profile": "stall-40",
+        "files": 72,
+        "pass": 72
+      }
+    ],
+    "source_before": true,
+    "source_after": true
+  },
+  "ui_followup": {
+    "code_revision": "b3fe53ccf20c0761c2ec47dadfc55eec3b05dfee",
+    "browser_tests_pass": 3,
+    "web_tests_pass": 328,
+    "web_db_optins_previously_exercised": 3,
+    "build_types": "PASS",
+    "route_traces_pass": 9,
+    "runtime_changed": false
+  },
+  "model_requests": 0,
+  "incremental_paid_inr": 0,
+  "overall_status": "INCOMPLETE",
+  "native_qualification": "DISABLED",
+  "actual_native_product_readback": "NOT DEMONSTRATED",
+  "genuine_repaired_rerun": "NOT DEMONSTRATED",
+  "external_r7": "PENDING"
+}
