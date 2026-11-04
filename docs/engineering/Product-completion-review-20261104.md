@@ -2,13 +2,31 @@
 
 **Status: INCOMPLETE. No R2, R3 or R7 acceptance checkpoint is claimed. Do not merge or activate production from this package.**
 
-Latest application source: `b3fe53ccf20c0761c2ec47dadfc55eec3b05dfee`; runtime source: `19d17a5098809406d5ff07041c6b44487718956c`, on `feat/tabwise-r2-r7-product-completion`. See the continuations below. The initial candidate `e3d99addc066da88624728923de49a040784aa61` remains preserved in `candidate.json`. The owner confirmed: “No authority exists yet; prepare the review package”. This package supplies no signature, reviewer identity, private evaluation labels or qualification authority.
+Current checkpoint source snapshot: `f58b63065387b92044053ed7de9dc704ea9bbf85`; implementation: `3b8a74045e8fa5383cfeb0734ed15ecddb45245c`, on `feat/tabwise-r2-r7-product-completion`. The publication commit is an evidence/ledger-only descendant; PR26 records its exact HEAD. The initial candidate and subsequent historical evidence remain preserved. The owner confirmed: “No authority exists yet; prepare the review package”. This package supplies no production authority or independent qualification signature.
+
+## Current engineering checkpoint — 2026-11-04
+
+The owner requested the nearest coherent validated checkpoint, publication to draft PR26 and a pause for revised priorities. No new major workstream is started. Current source/evidence are frozen in `checkpoint-summary.json`, `checkpoint-source-manifest.json` and `checkpoint-evidence-index.json` under `docs/evidence/product-completion-20261104/`. Source inventories hash committed Git bytes and LF-normalized values; evidence hashes preserve original bytes.
+
+Implemented since `3fadeff`: one-consumption W5 coordinator delivery; immutable generated-plan staging outside checkout; product intent/result lifecycle around the existing **single** protected native-session call; separate signed producer-origin envelope; origin/request/runtime/result verification and original raw-capture projection export. Legacy writer and historical manifest classes are unchanged. The new producer can issue a separate `genuine-unqualified` record only after its internally configured authority, process grant, real runtime brand, fresh capture and cleanup checks. Its successful native branch is **not measured**. W5 origin signatures do not establish independent qualification or physical quiescence. Nonqualifying fixture inspection remains synthetic/incomplete; production opening never accepts caller-supplied test authorities.
+
+Two reproduced defects were corrected: healthy Fernway query URLs failed independent sealed verification; and unchanged speech could hide a protected-step focus regression. All six healthy/broken query controls now pass. The focus oracle compares unique logical terminal focus and unaffected speech, abstaining on missing/contradictory observations. Original saved RED outputs and the single-entry assertion failure are retained. That assertion was preserved by refactoring the producer lifecycle around the original session entry, not by weakening the test.
+
+MEASURED local: root **1,275 PASS / 3 DB opt-ins skipped**; web **356 PASS / 3 DB opt-ins skipped**; contracts **21 PASS**; diagnostics **140 PASS** (own Node/helper controls, no NVDA); synthetic browser controls **12 PASS**; production build, TypeScript, ten packaged route traces, frozen R1 and eleven runtime pins PASS. Root reported `71596.0085 ms`; this is a local suite timing, not a new native execution timing. No failed full-suite timing investigation remains open. Hosted CI [41830198222](https://github.com/ANIRUDDH-001/Tabwise/actions/runs/41830198222) passed at `3fadeff`: nine profiles each passed 72 selected files, both checkout/source locks passed. Original artifact `13323860779` is archived byte-for-byte. This is partial offline coverage, not genuine native acceptance. The newly published SHA requires its own hosted result.
+
+Original-material MIT licensing, root README and third-party notices are committed at `f58b630`. Owner-confirmed team: **Works on My Machine**; project **Tabwise**; tagline **“We finally tested it on yours, too.”**; contributors **Aniruddh Vijayvargia and Prachi Agarwalla**. The bounded scan examined current tracked/named checkpoint bytes, 1,740 historical blobs and four ZIP archives; only the explicit fake-fetch test key matched configured credential patterns. No non-example environment file is tracked. Historical personal engineering paths remain public; this scan does not prove absence of arbitrary sensitive data. GPL/LGPL/CC-BY and other third-party terms remain separate from the original-material MIT grant. README local links and seven external URLs were checked.
+
+Current R2 digest: `d09e58b0f9e0ccea39094c7295b80f9f2f629b1643e1a1ac70f5f41124d110be`. Qualification-source digest remains `1a2991eb6c4bc42ffef5fbc1060d89dd8dc136c456211eddcf8dacf459ddd672`. Requests **0/20**, incremental paid spend **₹0**. Main/production remain untouched; authority/qualification policies remain disabled/BLOCK.
+
+Critical gap: native approval currently pins `refs/heads/main`, while Preview refuses execution side effects (`r2-policy.mjs`, `r2-caller.mjs`, `deployment-execution.mjs`). Branch CI and a Preview build cannot provide a safe pre-merge product-native acceptance lane. A reviewed candidate identity/staging path, legitimate fresh W5 credentials and real independent authority are required. Do not spoof main identity, disable Preview guards or merge to bypass this dependency. Actual current-source NVDA metadata/producer/export, trusted ingestion, authenticated hosted readback, native patched rerun and independent R7 remain unaccepted.
+
+Earlier measurements below describe historical checkpoints and are retained.
 
 ## Source and evidence
 
 - MEASURED: `docs/evidence/product-completion-20261104/candidate.json` records the source digests, observed test counts, historical native archive hashes and pending acceptance criteria.
 - MEASURED: `source-manifest.json` freezes the existing literal-import source closure, explicit policy/lock/vendor roots and each normalized file hash. It is a review inventory, not execution authorization.
-- MEASURED: R2 source digest `fddc0e40603d54b67d61e916f95aa806398a203f04c6ec9d090829bd96960187`.
+- MEASURED initial-candidate R2 source digest `fddc0e40603d54b67d61e916f95aa806398a203f04c6ec9d090829bd96960187`.
 - MEASURED: qualification source digest `1a2991eb6c4bc42ffef5fbc1060d89dd8dc136c456211eddcf8dacf459ddd672`.
 - MEASURED: `evidence-index.json` hashes the original verification outputs, including failed/intermediate results. Successful local controls never replace the missing native product evidence.
 
@@ -26,7 +44,7 @@ The local project budget broker now reserves request slots alongside monetary re
 
 The hosted source inventory previously omitted native runtime files. It now covers the full enforced R2 scope, and route patterns include nested native and patch routes. Nine actual built route traces were checked. CITED: the tracing change follows the [Next.js output tracing documentation](https://github.com/vercel/next.js/blob/canary/docs/01-app/03-api-reference/05-config/01-next-config-js/output.mdx), retrieved through Context7.
 
-## Verification actually performed
+## Initial-candidate verification (historical)
 
 | Verification | MEASURED result | Original output |
 |---|---|---|
@@ -67,12 +85,12 @@ These artifacts retain their original synthetic/NONQUALIFYING manifest classific
 
 These are specific technical gaps, **not** a claim that all engineering is finished and only a signature is missing.
 
-1. **Native producer/qualification contract:** `r2-evidence.mjs` still emits synthetic/incomplete classes; `product-bridge.mjs` requires genuine-unqualified source plus an independent native attestation. Their producer/classification transition needs a reviewed design and implementation. Do not relabel an archived diagnostic artifact to bridge this mismatch.
+1. **Native producer/qualification contract:** the current implementation adds a fresh-session, separately signed origin path while preserving raw synthetic/incomplete classes. It is locally fixture-tested, not genuinely NVDA-tested or independently qualified. Review this transition and measure its actual native path; do not relabel an archived diagnostic artifact.
 2. **Sealed runtime metadata — engineering connection added:** the continuation at `19d17a5` queries owned-process executable metadata and settings readback, writes an event into the existing sealed journal, and reads it through the exporter. Actual hosted NVDA execution of this new metadata path remains unmeasured. Installed asset metadata is not used as an observation fallback.
-3. **Delivery and admission:** the product workflow remains a proposal. Exact per-request source delivery, durable one-use W5 admission, source/run-bound grant consumption, actual export orchestration and independent signing must be connected before an authorized product-owned baseline. Current committed authority/qualification/dispatch policies remain disabled.
+3. **Delivery and admission:** per-request staging, same-W5 issuance/coordinator consumption and source/run-bound producer/export code are now connected in the implementation. The product workflow remains a proposal, fresh credential provisioning is unavailable, and main-only identity plus Preview refusal leaves pre-merge live execution unresolved. Current authority/qualification/dispatch policies remain disabled.
 4. **Actual product ingestion/readback:** durable SQL/custody/storage/bridge code and negative controls exist, but a new legitimate native product artifact has not traversed authentication → saved version → dispatch → sealed source → storage → owned readback.
 5. **Genuine repaired native rerun:** approved immutable repair/source contracts and SQL/UI controls exist. Baseline native request preparation explicitly rejects patched variants; the repair run route currently selects the legacy producer. The repaired-source packet/plan/admission/worker association needs coherent native integration before the required new NVDA rerun.
-6. **Verifier scope:** the deterministic recorder-based focus check has synthetic positive/negative controls. Native validation/status trigger checks deliberately abstain. No genuine paired baseline/rerun or independent withheld-task R7 assessment exists. A MACHINE/L3 symptom check is not external R7 acceptance.
+6. **Verifier scope:** the deterministic recorder-based focus check now includes protected-step logical focus and speech preservation, with synthetic controls. Native validation/status trigger checks deliberately abstain. No genuine paired baseline/rerun or independent withheld-task R7 assessment exists. A MACHINE/L3 symptom check is not external R7 acceptance.
 7. **Product acceptance:** real hosted OAuth, complete owned product flow, stored native report and regression-case retention are not demonstrated. The UI/action controls and local SQL/browser checks do not establish full UI/backend completion.
 8. **Live model validation:** current credit eligibility/balance has not been verified. Calls used: zero of twenty, incremental paid cost ₹0. Do not make a live call until the credit and broker safeguards are verified.
 
@@ -80,7 +98,7 @@ These are specific technical gaps, **not** a claim that all engineering is finis
 
 Review this exact source/digest and the unresolved producer/admission/repair contracts before selecting a trusted qualification mechanism. Supply a genuinely independent reviewer identity, source-bound review record and public verification key/trust-root procedure through the owner. Keep private signing material outside source, native/page/browser processes and model payloads. The implementing agent must not mint production trust or sign its own qualification.
 
-Before qualification, define the producer/runtime metadata and class transition without modifying historical artifacts; bind a fresh product-owned run/spec/journey/version and exact source/plan to an expiring one-use grant; specify how the independent attester examines and signs the actual new capture. An external source review alone is insufficient to claim product readback or repair success.
+Before qualification, independently review the new producer/runtime metadata/origin transition, measure a fresh source-bound owned run, and specify how the independent attester replays original evidence and verifies runtime/custody before signing. An external source review alone is insufficient to claim product readback or repair success.
 
 After the missing contracts and authority exist, run the fresh authorized baseline through durable readback; obtain a genuine owner patch decision and frozen oracle; execute a distinct pinned repaired native run; then have the external R7 assessor evaluate frozen controls/withheld outcomes without tuning. Preserve failed attempts and inconclusive results.
 
@@ -103,9 +121,9 @@ MEASURED local validation: root 1,269 pass with three previously exercised DB op
 
 CITED API semantics: [Microsoft's process file-version documentation](https://github.com/microsoftdocs/powershell-docs/blob/main/reference/7.7/Microsoft.PowerShell.Management/Get-Process.md), fetched through Context7. The implementation uses the fixed .NET properties directly to avoid automatic module discovery; no third-party implementation was copied.
 
-The current R2 source digest is `507d0eb3b448f07a83f054508de7f0168a1d625e59b8e2a3045d00c3c85c74ee`. Qualification-source digest remains `1a2991eb6c4bc42ffef5fbc1060d89dd8dc136c456211eddcf8dacf459ddd672`. Any future authority must review this new source; the prior hosted offline pass cannot authorize it. See `runtime-continuation.json` and `runtime-evidence-index.json` for exact source/evidence hashes and the outstanding acceptance criteria.
+At the metadata checkpoint, the R2 source digest was `507d0eb3b448f07a83f054508de7f0168a1d625e59b8e2a3045d00c3c85c74ee`. Qualification-source digest remains `1a2991eb6c4bc42ffef5fbc1060d89dd8dc136c456211eddcf8dacf459ddd672`. Any future authority must review this new source; the prior hosted offline pass cannot authorize it. See `runtime-continuation.json` and `runtime-evidence-index.json` for exact source/evidence hashes and the outstanding acceptance criteria.
 
-## Current metadata CI and UI follow-up
+## Historical metadata CI and UI follow-up
 
 MEASURED: [hosted preflight 41822479229](https://github.com/ANIRUDDH-001/Tabwise/actions/runs/41822479229) passed on `f6a07faaeced3ab1e14fdfdc9c67b1d1cf2f8d4d`, which contains the `19d17a5` runtime source. All nine profiles passed all 72 selected files. Final source locks, unchanged checkout and artifact upload passed. Artifact `13319285925` contains the original output; result JSON files are preserved under `ci-41822479229-` prefixes. This verifies the metadata source in offline CI, not its genuine NVDA/product execution.
 

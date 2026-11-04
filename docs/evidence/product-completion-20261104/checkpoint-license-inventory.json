@@ -1,0 +1,41 @@
+{
+  "package-lock.json": {
+    "packages": 58,
+    "licenses": {
+      "MPL-2.0": 2,
+      "MIT": 45,
+      "Apache-2.0": 4,
+      "BSD-3-Clause": 1,
+      "GPL-3.0-or-later": 1,
+      "ISC": 3,
+      "UNSPECIFIED": 1,
+      "BlueOak-1.0.0": 1
+    },
+    "agpl_entries": 0
+  },
+  "web/package-lock.json": {
+    "packages": 132,
+    "licenses": {
+      "UNSPECIFIED": 2,
+      "MIT": 61,
+      "Apache-2.0": 37,
+      "LGPL-3.0-or-later": 10,
+      "Apache-2.0 AND LGPL-3.0-or-later AND MIT": 1,
+      "Apache-2.0 AND LGPL-3.0-or-later": 3,
+      "CC-BY-4.0": 1,
+      "ISC": 3,
+      "MPL-2.0": 12,
+      "BSD-3-Clause": 1,
+      "0BSD": 1
+    },
+    "agpl_entries": 0
+  },
+  "packages/contracts/package-lock.json": {
+    "packages": 5,
+    "licenses": {
+      "MIT": 4,
+      "BSD-3-Clause": 1
+    },
+    "agpl_entries": 0
+  }
+}

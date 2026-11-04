@@ -1,0 +1,121 @@
+{
+  "schema": "tabwise-engineering-checkpoint/1",
+  "created_at": "2026-11-04T13:39:13Z",
+  "source_snapshot_head": "f58b63065387b92044053ed7de9dc704ea9bbf85",
+  "implementation_commit": "3b8a74045e8fa5383cfeb0734ed15ecddb45245c",
+  "branch": "feat/tabwise-r2-r7-product-completion",
+  "pr": "https://github.com/ANIRUDDH-001/Tabwise/pull/26",
+  "status": "INCOMPLETE",
+  "native_qualified": false,
+  "new_source_genuine_nvda": "NOT_RUN",
+  "model_requests_used": 0,
+  "model_request_ceiling": 20,
+  "incremental_paid_spend_inr": 0,
+  "digests": {
+    "r2": "d09e58b0f9e0ccea39094c7295b80f9f2f629b1643e1a1ac70f5f41124d110be",
+    "qualification": "1a2991eb6c4bc42ffef5fbc1060d89dd8dc136c456211eddcf8dacf459ddd672"
+  },
+  "local": {
+    "root": {
+      "tests": 1278,
+      "pass": 1275,
+      "fail": 0,
+      "skipped_db_opt_ins": 3
+    },
+    "web": {
+      "tests": 359,
+      "pass": 356,
+      "fail": 0,
+      "skipped_db_opt_ins": 3
+    },
+    "contracts": 21,
+    "diagnostics": 140,
+    "browser_synthetic_controls": 12,
+    "types": "PASS",
+    "production_build": "PASS",
+    "packaged_route_traces": 10,
+    "frozen_r1": "PASS",
+    "runtime_pins": "PASS"
+  },
+  "previous_hosted_ci": {
+    "run_id": "41830198222",
+    "source_head": "3fadeff05d8498c640cdea12e40f03af447c4ada",
+    "status": "SUCCESS",
+    "artifact_id": "13323860779",
+    "profiles": [
+      {
+        "profile": "mixed",
+        "files": 72,
+        "pass": 72,
+        "fail": 0,
+        "partial_coverage": true
+      },
+      {
+        "profile": "ordinary",
+        "files": 72,
+        "pass": 72,
+        "fail": 0,
+        "partial_coverage": true
+      },
+      {
+        "profile": "random-198222",
+        "files": 72,
+        "pass": 72,
+        "fail": 0,
+        "partial_coverage": true
+      },
+      {
+        "profile": "repeat-1",
+        "files": 72,
+        "pass": 72,
+        "fail": 0,
+        "partial_coverage": true
+      },
+      {
+        "profile": "repeat-2",
+        "files": 72,
+        "pass": 72,
+        "fail": 0,
+        "partial_coverage": true
+      },
+      {
+        "profile": "serial",
+        "files": 72,
+        "pass": 72,
+        "fail": 0,
+        "partial_coverage": true
+      },
+      {
+        "profile": "slow-fs-100",
+        "files": 72,
+        "pass": 72,
+        "fail": 0,
+        "partial_coverage": true
+      },
+      {
+        "profile": "slow-fs-30",
+        "files": 72,
+        "pass": 72,
+        "fail": 0,
+        "partial_coverage": true
+      },
+      {
+        "profile": "stall-40",
+        "files": 72,
+        "pass": 72,
+        "fail": 0,
+        "partial_coverage": true
+      }
+    ],
+    "before_ok": true,
+    "after_ok": true
+  },
+  "remaining": [
+    "Reviewed candidate/staging execution identity: current native contract is main-only and Preview refuses execution.",
+    "Independent W5/native qualification authority and legitimate fresh execution credentials.",
+    "Actual current-source native metadata/producer/export, durable owned ingestion and authenticated hosted readback.",
+    "Native repaired-source delivery and genuine rerun; external R7 assessment.",
+    "Hosted OAuth and full product/UI acceptance."
+  ],
+  "pause_requested": "Return the checkpoint report in this Codex conversation and pause for revised execution priorities."
+}
