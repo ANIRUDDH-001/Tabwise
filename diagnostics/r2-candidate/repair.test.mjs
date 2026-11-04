@@ -16,3 +16,7 @@ test('unapproved, swapped or stale repair bytes cannot become native source',()=
  for(const edit of [c=>c.review.decision='rejected',c=>c.review.reviewed_by='foreign',c=>c.patch+=' ',c=>c.base+=' ',c=>c.review.patch_sha256='f'.repeat(64),c=>c.review.source_sha256='f'.repeat(64)]){const c=structuredClone(context);edit(c);assert.throws(()=>repair.materializeReviewedCandidate(c));}
  assert.equal(repair.materializeReviewedCandidate(context).production_qualified,false);
 });
+test('bundled web review source is byte-identical to the approved native source and cannot depend on deployment paths',()=>{
+ const c=repair.webRepairContext();assert.deepEqual(c,repair.repairContext());assert.equal(repair.materializeReviewedCandidate(c).source_sha256,repair.REPAIRED_SHA);
+ c.review.decision='rejected';assert.equal(repair.webRepairContext().review.decision,'approved','no shared mutable review context');
+});

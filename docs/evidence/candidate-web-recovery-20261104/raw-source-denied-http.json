@@ -1,0 +1,30 @@
+{
+  "actual_completed_repair_navigation": true,
+  "no_duplicate_native_request": true,
+  "stored_comparison_recovered": "FIXED",
+  "mobile_report_no_overflow": true,
+  "keyboard_skip_link": true,
+  "authentication": "ADMIN_ISSUED_ISOLATED_EXISTING_OWNER_SESSION",
+  "human_oauth_login_tested": false,
+  "no_email_sent": true,
+  "unauthenticated_status": 401,
+  "host": "http://127.0.0.1:3138",
+  "results": [
+    {
+      "id": "e2bf14b6-55c0-4653-af87-3a3ba2d9abe5",
+      "owned_api_status": 200,
+      "evidence_api_status": 200,
+      "rows": 25,
+      "actual_ui_speech_visible": true,
+      "comparison": null
+    },
+    {
+      "id": "8b77652c-bee8-45d2-b72d-2d40cb960a73",
+      "owned_api_status": 200,
+      "evidence_api_status": 200,
+      "rows": 25,
+      "actual_ui_speech_visible": true,
+      "comparison": "FIXED"
+    }
+  ]
+}

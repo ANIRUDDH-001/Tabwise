@@ -35,3 +35,11 @@ The first hosted repair-view check caught missing transitive raw-module files de
 MEASURED: using only the182 shipped source files, the actual owned baseline and repair are found, the existing repair is recovered without a new allocation, both private original archives are replayed, and the comparison remains FIXED with all three checks true. This packaged test does not substitute for the final hosted HTTP/browser test.
 
 Release procedure: retain the explicit execution revision pin, require the exact PR-head preflight, merge without bypass, verify the production deployment SHA/READY state, then exercise owned API readback, completed repair recovery, original-pair comparison recomputation and the real desktop/mobile/keyboard report. Do not call the release complete if any of these checks fail. Individual deployment/run status is preserved in the ledger checkpoint.
+
+## Completed-record deployment independence
+
+The approved original source, exact patch and actual owner review are included as a bounded web asset. Tests require byte equality with the native fixture/review context and exact5ad46315/015d1221/1860345c hashes before use. The native worker still reads its pinned original files under the same execution/custody gates; the original fixture is unchanged.
+
+Completed web records no longer require raw native-source paths to render or reopen the approved repair. A repeated comparison POST recovers its original immutable stored verdict after identity/hash/class checks; it does not claim to recompute the report. The initial deterministic comparison was genuinely computed against both original archive pairs and persists with source/readback/workflow hashes. Fresh native requests and initial comparisons remain on the trusted operator path.
+
+MEASURED:415 focused tests,1275 root tests,16 browser controls,build/types/frozen preflight pass. The complete local built HTTP/browser flow with the actual private baseline and repair also passes while raw source-root and repair-asset filesystem access are deliberately denied. It recovers FIXED,retains25 observations per capture,creates no native request,uses no model call,checks mobile overflow/keyboard navigation,and signs out the isolated session. Eight original-pair tamper controls still refuse. Final hosted release proof is a separate acceptance step.
