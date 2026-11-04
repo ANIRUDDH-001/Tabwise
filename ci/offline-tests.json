@@ -1,4 +1,20 @@
 {
+  "r2-native-query.test.mjs": {
+    "kind": "offline",
+    "reason": "raw evidence writer/verifier identity and query substitution; temporary files only, no native runtime"
+  },
+  "meta-completion.test.mjs": {
+    "kind": "offline",
+    "reason": "synthetic diagnosis responses and local SQLite; no external service or native runtime"
+  },
+  "meta-transport.test.mjs": {
+    "kind": "offline",
+    "reason": "injected DNS/TLS/socket errors and local SQLite; no network or native runtime"
+  },
+  "meta-patch-format.test.mjs": {
+    "kind": "offline",
+    "reason": "pure diagnosis prompt contract; no external service or native runtime"
+  },
   "tabwise-r3-application.test.mjs": {
     "kind": "offline",
     "reason": "synthetic immutable candidate validation and injected persistence; no external service or native runtime"
@@ -302,5 +318,29 @@
   "tabwise-r3-recorder-browser.test.mjs": {
     "kind": "browser",
     "reason": "real local headless Chromium measures shipped Fernway recorder identities; no NVDA or physical input; run separately"
+  },
+  "r2-runtime.test.mjs": {
+    "kind": "offline",
+    "reason": "injected startup/identity/ownership fakes only; no native launch or input"
+  },
+  "r2-runtime-class.test.mjs": {
+    "kind": "offline",
+    "reason": "actual frozen NVDA class under isolated R2 loader with controlled lifecycle/platform/client fakes; no native launch or input"
+  },
+  "r2-quiescence.test.mjs": {
+    "kind": "offline",
+    "reason": "actual read-only helper in isolated Worker with fake OS snapshots; process launches denied"
+  },
+  "r2-import-admission.test.mjs": {
+    "kind": "offline",
+    "reason": "actual page function body with denial/import hooks in isolated Worker; no runtime loads"
+  },
+  "broker-request-limit.test.mjs": {
+    "kind": "offline",
+    "reason": "temporary SQLite request reservations and append-only local ledger recovery; no API, native runtime, credentials or network"
+  },
+  "r2-runtime-metadata.test.mjs": {
+    "kind": "offline",
+    "reason": "pure runtime metadata/profile validation and injected bounded helper results; actual Windows observation is a separate diagnostic test"
   }
 }

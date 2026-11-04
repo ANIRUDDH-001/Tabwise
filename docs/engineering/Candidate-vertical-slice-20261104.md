@@ -1,0 +1,38 @@
+# Candidate engineering checkpoint
+
+Updated 2026-11-04T17:48:05Z; local verification ID candidate-local-20261104T174805Z.
+
+Implemented
+- Separate candidate request, actual attempt2 W5 authorization, durable one-use consumption and original guarded native/custody runner. Production execution remains disabled.
+- Owned immutable saved-version persistence and API, private candidate-only evidence import/readback, original archive digest checks, full raw sealed replay, separate-runner verification association and immutable stored completion.
+- Saved-version -> candidate preparation -> owned workspace candidate -> explicit evidence import -> original speech/focus/key/app-event timeline. All candidate views state NONPRODUCTION / UNQUALIFIED.
+- First measured hosted defect fixed: full frozen integrity includes installed upstream dependency bytes. Locked npm ci now precedes unchanged preflight and native setup still follows authorization.
+
+MEASURED (candidate-local-20261104T174805Z, MACHINE/L1)
+- Focused candidate/admission/API controls:56 PASS. Web:364 PASS,4 database opt-in skips.
+- Browser synthetic controls:3 PASS, desktop1280/mobile390, horizontal bounds, keyboard skip link, failed import, interrupted preparation idempotency, saved-version/workspace navigation. These controls are not NVDA.
+- Clean PostgreSQL:14 migrations,9 SQL suites,4 native/candidate database integrations and existing repair/database tests PASS; cluster stopped.
+- Build/types PASS. All147 reviewed source paths are packaged on each of3 candidate API routes. Frozen R1 remains unchanged/PASS.
+- Hosted candidate table RLS enabled, anonymous/browser writes denied; finish RPC callable only by service_role. Hosted accepted candidate count0.
+- Original bootstrap ZIP13346518212 hash90dc4191d2a69b614aaca4f112430d841c2d8b6fea3754eda53f7a3064f4310d matches GitHub digest.
+
+MEASURED (GitHub)
+- First candidate f5762254-73dc-4ef0-bf70-17afd9a2f1fe,run41875985195/2 failed preflight before native setup. Terminal FAILED; old approval removed; attempt3 never used.
+- Current candidate8c8528de-c0a4-4024-beea-a3baa9bd9684 binds actual owner6198bfc5-5937-46d9-8eac-9b7599cbee52 and saved seat version1ee1aac3-0a08-49bd-8661-533ba7e6fe54.
+- Request55ff13822a8e60b82d7adaf2bf6fa522394a1680d4df8cb41967e460a7faa1ae binds source2226068588e63bca52b086c6c372d20b951f6856. Original native source133 files is frozen in a separate clean read-only worktree. Later UI/import changes do not rewrite it.
+- Run41876894297 bootstrap finalized SUCCESS after GitHub status delays; authorized actual attempt2 is requested/queued. No native baseline acceptance yet. Packet expires2026-11-04T18:22:05.097Z; never renew or retry native execution silently.
+- CI41876805609 at2226068 has all job steps SUCCESS, including stress and post-test locks; GitHub overall status still in progress at snapshot. Earlier41873849745 was cancelled, with no failing test found.
+
+External configuration still required
+- Vercel Preview for branch feat/tabwise-r2-r7-product-completion lacks SUPABASE_SERVICE_ROLE_KEY and GH_PAT. Existing sensitive Supabase credential is production-only and cannot be read/copied by these tools. GitHub original artifact download returns401 without an Actions-read credential, even for this public repository.
+- Add the dedicated project's service credential and a repository-scoped Actions-read credential to that Preview branch only through its private environment settings; never paste values into a report. Candidate enabled/user/ref nonsecret settings are already scoped to that branch. Production settings were not widened.
+- Protected hosted user-session/API/storage readback is not claimed. Actual native original/separate-verifier artifacts are also still pending.
+
+Acceptance
+R2/R3/R7 acceptance remains false. No genuine diagnosis, human patch-review decision, applied repair/rerun or deterministic engineering repair verdict exists yet. Candidate signatures establish internal consistency and do not confer independent production qualification. No main merge, release, production activation, new dependency or live model call occurred. Session model calls0/20; paid₹0; free-credit eligibility unverified.
+
+Evidence
+Original and local artifacts are indexed under docs/evidence/candidate-vertical-slice-20261104/index.json. Source-only manifests distinguish the original native scope from the later147-file candidate source.
+
+Update 2026-11-04T17:53:13Z
+Run41876894297/2 is now measured FAIL_BEFORE_CAPTURE. Original ZIP13348208012 SHA5c96491fb3f59e8de9a62bbbc059f3ddc8498b21f46d56d67092b449bb8834cc and separate readback13347799305 SHA60333ee5514e196a732f79122eddc4e19025aef2cd3d7231f3b6bd6bd2614540 are preserved under candidate-runtime-recovery. One permanent W5 consumption and one IPC grant occurred; process custody confirmed cleanup. Worker budget refusal preceded capture. New poll100 plan reserves9479520 bytes under unchanged12000000 cap; all action and speech windows remain unchanged.58 focused tests PASS. Output now uses an exact fixed directory so upload/download/independent verifier roots agree. Failed child stderr is no longer masked by a missing session path. CI41876805609 finalized SUCCESS at2226068. New source/run/packet required; no attempt3 reuse.

@@ -16,7 +16,9 @@ export const RETIRED_APPROVALS=Object.freeze(['D-72','D-73','D-74']);
 // O-11 (D-89): arm-input custody (src/r2/arm-inputs.mjs) derives model inputs from sealed runs, so it is reviewed scope too.
 // C2: include the producer input policy, guarded executor and their shared press palette in enforced integrity.
 export const R2_FILES=Object.freeze([
- 'src/r2/strict-json.mjs', 'src/r2/approval-constants.mjs', 'src/r2/node-review.mjs',
+ 'diagnostics/r2-native/startup-cleanup.mjs','diagnostics/r2-native/startup-diagnostics.mjs',
+ 'scripts/tabwise/r2-listeners.mjs','scripts/tabwise/r2-quiescence.mjs','scripts/tabwise/r2-loader.mjs','scripts/tabwise/r2-vendor-loader.mjs','scripts/tabwise/r2-nvda-lifecycle.mjs','scripts/tabwise/r2-runtime-integrity.mjs','scripts/tabwise/r2-runtime-pins.json','diagnostics/owner-v2/resolver.mjs','diagnostics/owner-v2/identity.ps1',
+ 'src/r2/runtime-metadata.mjs', 'src/r2/strict-json.mjs', 'src/r2/approval-constants.mjs', 'src/r2/node-review.mjs',
  '.github/workflows/tabwise-r2.yml', 'packages/contracts/index.mjs', 'packages/contracts/limits.mjs',
  'packages/contracts/palette.mjs', 'packages/contracts/r2-product.mjs', 'packages/contracts/schemas.mjs',
  'scripts/tabwise-r2.mjs', 'scripts/tabwise/executor.mjs', 'scripts/tabwise/input-policy.mjs',
@@ -33,6 +35,10 @@ export const R2_FILES=Object.freeze([
  'web/app/api/runs/[id]/evidence/route.ts', 'web/lib/server/artifact-ingest.mjs', 'web/lib/server/artifact-store.mjs',
  'web/lib/server/artifact-zip.mjs', 'web/lib/server/core.mjs', 'web/lib/server/r2-admission-live.ts',
  'web/lib/server/r2-admission.mjs', 'web/lib/server/r2-caller.mjs', 'web/lib/server/r2-evidence-bridge.mjs',
+ 'web/lib/server/native-plan-admission.mjs', 'web/lib/server/native-integration-live.ts', 'web/app/api/r2/product-admission/route.ts', 'scripts/tabwise/product-workflow-boundary.mjs',
+ 'src/r2/native-plan.mjs', 'src/r2/product-worker.mjs', 'src/r2/product-delivery.mjs', 'src/r2/product-dispatch.mjs',
+ 'src/r2/product-producer.mjs', 'src/r2/product-coordinator.mjs',
+ 'src/r2/product-origin.mjs', 'src/r2/workflow-delivery.mjs', 'src/r2/product-export.mjs', 'src/r2/product-workflow-export.mjs', 'scripts/tabwise/product-windows-boundary.mjs',
  'web/lib/server/r2-product-context.mjs', 'web/lib/server/stored-evidence.mjs', 'web/lib/server/supabase.ts',
  'web/lib/server/repair-verdict.mjs', 'web/app/api/verifications/[id]/route.ts', 'supabase/migrations/20261103020000_repair_verdict.sql',
  'scripts/tabwise/verdict.mjs',

@@ -723,3 +723,85 @@ User authorization: "You are explicitly authorized to inspect and modify files, 
 User boundary: "No Claude or other agents." / "No Meta Model API requests."
 Consequence: continue the existing two-parent merge; zero paid calls; local dependency reuse; preserve diagnostic worktree and blocked qualification. Normal PR publication authorized; merging requires the stated local/remote/safety/protection gates. This current instruction supersedes earlier user-only Git and cross-tool execution requirements for this task; it grants no R7 qualification.
 Tooling: Context7 ctx7 0.9.0 ran via the user-prescribed npx command in npm cache only; no repository manifest or lock changed.
+
+## F-03 owner continuation: immutable native plan delivery
+User: "After the R2 runtime implementation stabilizes, continue the unfinished product source integration." Scope: new immutable external-plan module/tests, disabled delivery adapter and handoff; existing demo retained. $0, no hosted/native/paid action. Acceptance: targeted plan/W5/delivery tests; web/root/contracts/routes/PostgreSQL/browser/build. Separate local commit from runtime.
+
+## F-03 native diagnostic implementation authorization
+User answer: "Implement, test and push the diagnostic branch. Stop only when explicit approval or a genuine external dependency is required."
+User answer: "After authorization, exercise genuine NVDA keyboard interaction, speech observation, focus and page-event capture, source attribution and teardown."
+Consequence: build and push disabled native-input bootstrap; prepare exact owner packet from committed revision/run. No variable provisioning, rerun, input, qualification or merge before that explicit approval.
+
+## Native attempt2 follow-up - 2026-11-03T02:56:29Z
+User: "Preserve the complete nested NVDA startup error/cause chain in diagnostic-only evidence, without changing frozen vendor code or exposing credentials." "Fix only a demonstrated problem." "Do NOT rerun attempt 3: the existing approval is bound to attempt 2. Any new native run requires a new exact approval packet and my authorization." "Keep main untouched." Other session received direct user authorization to hand off edits/pushes. No native run, approval or paid infrastructure authorized/performed here.
+
+## F-03 native diagnostic offline coverage approval
+User answer: "Approve offline coverage fix (Recommended): aligns hosted coverage with local checks; ₹0, small test runtime increase."
+Consequence: existing offline workflow command runs diagnostics/r2-native/test.mjs and error-test.mjs; native jobs, approvals, flags and deadlines unchanged.
+
+## F-03 local-first diagnostic task authorization
+User: "Fix the native diagnostic's stale S5b-S1 signature assertion." "Investigate the D67 timing timeout without relaxing production guards."
+User: "You may commit corrections locally on the appropriate feature branches."
+Consequence: isolated fix/F-03-local-stabilization-diagnostic from bb7bea7; local correction commit only, no publication or native execution.
+
+Owner sprint bd81c229: "Codex may create scoped LOCAL commits under the previously approved waiver." "No rerun, new workflow dispatch or reuse of this packet is allowed." New G1 V2 source isolated; no publication or execution.
+
+
+## F-03 R2 integrated runtime (owner request 2026-11-04)
+User: "Integrate it into the real R2 runtime instead." "Continue until all safely executable tasks are complete."
+Scope: R2-only lifecycle/loader, R2 entry/session/policy, bounded process/workflow ownership, new tests, startup-only candidate and normal ledgers. Frozen R1 untouched. Acceptance: new runtime and diagnostic suites; root tests; frozen integrity; product separately validated. Ceiling $0, no paid calls/install/native execution/hosted mutation. Separate worktrees/commits requested. Rollback: retain branches; discard only authored changes after review.
+
+## F-03 final R2 regression closure — owner authorized
+User: "Resolve all 20 failures in one focused engineering cycle"; "Correct test harness module resolution without removing the original cleanup/fault assertions"; "Commit the corrected source locally." Scope: affected test harness/security/workflow/source-union checks, new negative tests and normal ledgers/handoff. Acceptance: focused, full npm test, frozen/runtime/source digests, startup-only offline tests and preflight; all pass. Ceiling $0; no installs/push/hosted/approval-variable/native/input. Existing runtime pins and frozen R1 preserved. Rollback: new local commit only, no history rewrite.
+
+## F-03 hosted startup autopsy — owner authorized
+User: "Determine and correct the first genuine hosted Windows NVDA startup failure. Do not run another hosted attempt." Scope: read-only GitHub artifact download/hash verification; diagnostic/core/worker/supervisor and R2 cleanup observability, new offline tests and pins; normal ledgers/handoff. Acceptance focused/full root/startup offline/frozen/pins/preflight PASS. $0; no native/input/push/hosted writes/approvals/paid calls. One new local correction commit.
+
+## F-03 measured identity boundary correction
+User: "Run the actual processIdentity implementation against an independently created and verified process." Scope: verified artifact download, real disposable Windows Node/PowerShell reproduction, exact identity helper/classifications, offline review gate, focused/full root once on final source, pins/preflight and minimal handoff. One local reviewed commit; $0; no native/input/hosted mutation/approvals/push/install.
+
+## F-03 autonomous R2 recovery authorization — 2026-11-04
+User answer: "You may commit and push directly to:" "fix/F-03-r2-native-runtime"; "Modify implementation, tests, diagnostics and R2-specific workflows."; "No subagents, parallel AI agents, delegated peer reviewers or unnecessary model calls."; "Incremental budget: ₹0."
+Consequence: sole-agent deterministic review, R2-only implementation/test/workflow edits, reviewed commits/push and source/run-bound hosted execution authorized. Existing identity, source, approval and isolation gates retained; no fabricated signature or qualification.
+
+## Full product completion mandate — owner authorization
+User: "The owner authorizes you to carry out the full engineering implementation." "Commit meaningful changes." "Push to a dedicated product-completion development branch." "Create or update a draft integration pull request." "Deploy controlled Preview candidates for actual acceptance testing." "No subagents whatsoever." "Incremental paid spend: ₹0." "Absolute ceiling: 20 external model API requests across this assignment." "Do not merge into main."
+Scope: R2/R3/R7, authenticated product evidence, frontend/backend, operational/security completion and exact-source checkpoint evidence. Mandate authorizes necessary R2 workflow implementation; it never authorizes fabricated external qualification or patch-owner decisions. No new dependencies currently required.
+
+## 2026-11-04T10:44:37Z — independent authority availability
+User answer: "No authority exists yet; prepare the review package".
+Consequence: no qualification policy activation, production key generation or fabricated reviewer signature. Publish exact-source engineering review material and explicitly retain missing product/native acceptance.
+
+## 2026-11-04T11:37:43Z — continuation after hosted CI
+User answer: "continue"; "CI also passed".
+Consequence: independently confirmed run41818741025 success atdc41656, nine profiles71/71; continue sole-agent engineering without native qualification activation or new spend. Implement bounded observed runtime metadata, preserve original classes/archives, record new source requiring review.
+
+## 2026-11-04T12:29:57Z — autonomous full-product engineering resumed
+User: "MODE: CONTINUE EXECUTION — NOT PLANNING OR STANDBY"; "NO SUBAGENTS. NO DELEGATION. NO REPEATED ROUTINE APPROVAL QUESTIONS."; "Use the existing integration branch."; "Implement a new source-bound product producer path"; "Only use confirmed eligible promotional/free credits."; "Incremental paid charges must remain ₹0."; "Do not merge into main without the final owner approval."; "Add MIT licensing and the complete README before final review."
+Consequence: continue source, tests, commits/push and controlled Preview/hosted validation on PR26; maintain 20-call durable ceiling and absent independent authority. No final merge, production activation, invented qualification or signing identity. Latest existing hosted CI41825434220 independently confirmed SUCCESS atd194721.
+
+## 2026-11-04T13:25:13Z — team and MIT attribution
+User answer to the copyright-holder question:
+> Team: Works on My Machine
+> Project: Tabwise
+> Tagline: “We finally tested it on yours, too.”
+> Team members:
+> - Aniruddh Vijayvargia
+> - Prachi Agarwalla
+
+Consequence: name both contributors in the original-material MIT license and credit their team/tagline in README. Preserve third-party notices and scope; no assignment of third-party rights to the team is implied.
+
+## 2026-11-04T13:34:38Z — owner-requested engineering checkpoint and pause
+User: "Finish the nearest coherent, testable unit of work already in progress." "Do not expand scope into another major subsystem merely to reach this checkpoint." "Commit all validated work to the existing development branch." "Push to PR #26." "Return the checkpoint report in this Codex conversation and pause for revised execution priorities."
+Consequence: publish the completed local producer/origin/query/verifier/license unit with original available test evidence; report fresh hosted CI status without waiting for the long run, preserve incomplete native/authority/staging/repair acceptance, and pause. This does not cancel the full-product mandate or authorize main merge/production activation.
+
+## 2026-11-04T14:22:17Z — resume first genuine vertical slice; delegated routine execution
+User: "dont ask for any of my approvals for runs or merge or push or anything but be cautious on meta api spends"; "if valid than do it"; "now plan accordingly"; "also the latest CI passed"; "whenever terminal working on sometihing which will take time then put it into background procress and work on something else"; "we need faster, smarter and more efficient result which actually make real progress now".
+Revised mandate: "Start with the safe candidate execution gap and continue implementing immediately." "Do not weaken these protections." "No subagents." "Maximum 20 model calls, ₹0 incremental paid spend." "Do not fabricate an approval."
+Consequence: previous pause is revoked; sole-agent candidate vertical-slice work resumes. Routine validated engineering commits/pushes and bounded candidate runs proceed under this authorization. Preserve real human patch-review attribution and independent qualification boundaries. Long checks use controlled asynchronous sessions while independent work progresses. CI41840087473 independently confirmed SUCCESS at34cec39.
+
+## 2026-11-04T17:03:56Z — implemented delegated candidate authorization
+Owner: “STOP PLANNING. START IMPLEMENTING.” “No subagents. No production gate weakening. No unapproved main merge. Keep the 20-call/₹0 budget.” Routine commit/push/run authorization is already delegated. Existing diagnostic bootstrap/rerun is retained: candidate W5 has a separate purpose bound to actual attempt 2; production remains attempt 1 and disabled. Full reviewed file list retained while fixing measured literal [id] path rejection. No human patch-review decision or independent qualification is inferred.
+
+## 2026-11-04T17:53:13Z — measured candidate budget and artifact-layout correction
+Owner mandate: “No production gate weakening.” Run41876894297/2 consumed W5 once, received one IPC grant, then refused before capture: five-action poll25 plan reserved17946720 bytes above unchanged12000000 cap. Snapshot polling is now100ms (9479520 worst-case bytes); keys,1000ms acknowledgement,1500ms observation and8000ms timeout windows are unchanged. Recorder events and raw NVDA speech remain continuously collected. The planner now runs during request preparation, before any authorization consumption. No page cap, event limit, test threshold or production policy was raised/lowered. Old candidate is terminal FAILED and its approval removed; next execution needs a new candidate/run/packet. Fixed artifact output directory removes the measured upload wildcard prefix mismatch; original failure archives remain intact.

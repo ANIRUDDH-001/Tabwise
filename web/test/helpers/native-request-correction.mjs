@@ -1,0 +1,2 @@
+import {sha256} from '../../../packages/contracts/index.mjs';
+export function input(){const fixture=Buffer.from('<button>Go</button>'),spec={version:'0.1.0',run_id:'00000000-0000-4000-8000-000000000011',journey_id:'fernway-seat',app_hash:sha256(fixture),variant:'broken',steps:[{step:1,key:'Tab',text:null,checkpoint:true}]};const run={id:spec.run_id,user_id:'owner',journey_version_id:'version',status:'admitted',kind:'baseline',spec};return {run,fixture,revision:'a'.repeat(40),actor:'owner',r2SourceSha256:'b'.repeat(64),qualificationSha256:'c'.repeat(64)};}

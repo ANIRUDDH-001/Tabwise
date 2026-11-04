@@ -6,9 +6,10 @@ import {SCHEMA,IDENTITY_KEYS,identity,exact,stable,same,safePath,validateR2Produ
 import {parseUniqueJson as uniqueJson} from './strict-json.mjs';
 import {reviewedR2Module} from './node-review.mjs';
 import {captureObservationSources} from './capture-export.mjs';
+import {verifyNativeProductOrigin} from './product-origin.mjs';
 const handles=new WeakMap(),copyFiles=f=>Object.fromEntries(Object.entries(f).map(([p,b])=>[p,Buffer.from(b)]));
 const parse=b=>uniqueJson(new TextDecoder('utf-8',{fatal:true}).decode(b));
-function inspect({files,expected}){
+function inspect({files,expected},producerAuthority){
  if(!files||Object.getPrototypeOf(files)!==Object.prototype||Object.keys(files).length>98)throw Error('source file map');
  let total=0;for(const [p,b] of Object.entries(files)){if(!safePath(p)||!(b instanceof Uint8Array))throw Error('source bytes/path');total+=b.length;}if(total>LIMITS.RUN_BYTES)throw Error('source total cap');
  const exp=parse(files['r2-export.json']);exact(exp,['schema','identity','source_files','step_map','observations','axe','stage_timings']);identity(exp.identity);const i=exp.identity;
@@ -22,12 +23,15 @@ function inspect({files,expected}){
  if(!p||p.fixture_sha256!==i.fixture_sha256||sha256(Buffer.from(new TextDecoder('utf-8',{fatal:true}).decode(files[p.fixture]).replace(/\r\n/g,'\n')))!==i.fixture_sha256)throw Error('plan fixture');
  if(sha256(files['run-manifest.json'])!==i.run_manifest_sha256||sha256(files[i.page_id+'/manifest.json'])!==i.page_manifest_sha256||files['run-manifest.sha256']?.toString()!==i.run_manifest_sha256+'  run-manifest.json\n'||files[i.page_id+'/manifest.sha256']?.toString()!==i.page_manifest_sha256+'  manifest.json\n')throw Error('sealed source identity');
  const run=parse(files['run-manifest.json']),page=parse(files[i.page_id+'/manifest.json']),capture=parse(files[i.page_id+'/capture.json']);
- if(run.schema!=='tabwise-r2-run-evidence/1'||run.run_class!=='genuine-unqualified'||'stopped_after' in run||run.plan_sha256!==sha256(stable(plan))||!same(run.order,plan.pages.map(p=>p.id))||run.pages.length!==plan.pages.length)throw Error('synthetic/incomplete/unbound R2 run');
+ const origin=files['product-producer/product-run.json']?verifyNativeProductOrigin({files,expected,authority:producerAuthority}):null;
+ if(origin&&(!Array.isArray(exp.observations)||exp.observations.some(p=>!p||!Object.hasOwn(p,'pointer'))||!Array.isArray(exp.axe)||exp.axe.length))throw Error('fresh producer requires original raw capture projections');
+ const rawClass=origin?'synthetic':'genuine-unqualified';
+ if(run.schema!=='tabwise-r2-run-evidence/1'||run.run_class!==rawClass||'stopped_after' in run||run.plan_sha256!==sha256(stable(plan))||!same(run.order,plan.pages.map(p=>p.id))||run.pages.length!==plan.pages.length)throw Error('synthetic/incomplete/unbound R2 run');
  for(const [n,entry] of run.pages.entries()){
-  if(entry.class!=='genuine-unqualified'||entry.exit_code!==0||entry.id!==entry.dir||entry.id!==run.order[n]||!files[entry.id+'/manifest.json']||sha256(files[entry.id+'/manifest.json'])!==entry.manifest_sha256||files[entry.id+'/manifest.sha256']?.toString()!==entry.manifest_sha256+'  manifest.json\n')throw Error('incomplete R2 page');
+  if(entry.class!==rawClass||entry.exit_code!==0||entry.id!==entry.dir||entry.id!==run.order[n]||!files[entry.id+'/manifest.json']||sha256(files[entry.id+'/manifest.json'])!==entry.manifest_sha256||files[entry.id+'/manifest.sha256']?.toString()!==entry.manifest_sha256+'  manifest.json\n')throw Error('incomplete R2 page');
  }
  const entry=run.pages.find(p=>p.id===i.page_id);
- if(entry?.manifest_sha256!==i.page_manifest_sha256||page.schema!=='tabwise-r2-page-evidence/1'||page.class!=='genuine-unqualified'||page.page?.fixture_id!==i.page_id||page.page.session!==i.session||page.transform?.fixture_sha256!==i.fixture_sha256||!Array.isArray(page.incomplete)||page.incomplete.length)throw Error('page/session binding');
+ if(entry?.manifest_sha256!==i.page_manifest_sha256||page.schema!=='tabwise-r2-page-evidence/1'||page.class!==rawClass||page.page?.fixture_id!==i.page_id||page.page.session!==i.session||page.transform?.fixture_sha256!==i.fixture_sha256||!Array.isArray(page.incomplete)||page.incomplete.length)throw Error('page/session binding');
  if(!Array.isArray(page.files))throw Error('page file table');for(const f of page.files){if(!safePath(f.path)||!files[i.page_id+'/'+f.path]||sha256(files[i.page_id+'/'+f.path])!==f.sha256||files[i.page_id+'/'+f.path].length!==f.bytes)throw Error('page source hash');}
  if(capture.schema!=='r2-capture/1'||capture.fixture_id!==i.page_id||capture.completed!==true||capture.outcome!=='COMPLETE'||!['nvda','observed-nvda'].includes(capture.source)||capture.reasons?.length||capture.unattributed?.length||capture.unattributed_page?.length||capture.records?.length!==p.task.length)throw Error('unverified native capture');
  if(!Array.isArray(exp.step_map)||exp.step_map.length!==expected.spec.steps.length||exp.step_map.length!==p.task.length)throw Error('step coverage');
@@ -74,7 +78,7 @@ function project(data,native=false,attestation=null){
  const manifest={schema:SCHEMA,version:'0.1.0',run_id:i.product_run_id,spec_sha256:i.spec_sha256,evidence_sha256:sha256(files['evidence.json']),files:Object.keys(files).sort().map(path=>({path,sha256:sha256(files[path]),bytes:files[path].length,kind:kind.get(path)})),stage_timings:structuredClone(data.exp.stage_timings),runner:{workflow:i.workflow,event:'workflow_dispatch',head_branch:'main',head_sha:i.revision,actor:i.actor,github_run_id:i.github_run_id,github_run_attempt:i.github_run_attempt,profile:i.profile,nvda_version:i.nvda_version},r2_identity:structuredClone(i),export_sha256:sha256(files['r2-export.json']),native_attestation_sha256:attestation?sha256(files['native-attestation.json']):null,evidence_status:evidence.evidence_status};
  const c=validateR2ProductArtifact(manifest,files);if(!c.ok)throw Error(c.errors.join('; '));return {manifest,evidence,files};
 }
-export function inspectR2ProductExport(input){try{return {ok:true,errors:[],source_verified:false,preview:project(inspect(input))};}catch(e){return {ok:false,errors:[e.message],source_verified:false,preview:null};}}
+export function inspectR2ProductExport(input){try{return {ok:true,errors:[],source_verified:false,preview:project(inspect(input,input.producerAuthority))};}catch(e){return {ok:false,errors:[e.message],source_verified:false,preview:null};}}
 function attest(data,envelope,policy){
  exact(policy,['schema','enabled','public_key','review_ref','qualification_sha256','source_scope_sha256','not_before','not_after']);
  if(policy.schema!=='tabwise-r2-native-product-policy/1'||policy.enabled!==true)throw Error('native qualification disabled');

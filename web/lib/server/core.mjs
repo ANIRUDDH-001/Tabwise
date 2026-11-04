@@ -1,5 +1,6 @@
 import {priceOf,worstCaseNano,settledNano} from '../../../src/budget/prices.mjs';
 import {LIMITS} from '../../../packages/contracts/limits.mjs';
+import {assertExecutionAllowed} from '../../../src/deployment-execution.mjs';
 export const PROJECT_ID='ueobjrtvsgvkigmjxkks';
 export class HttpError extends Error {constructor(status,reason){super(reason);this.status=status;this.reason=reason;}}
 export function assertProject(url){const u=new URL(url);if(u.origin!==`https://${PROJECT_ID}.supabase.co`||u.username||u.password||u.pathname!=='/'||u.search||u.hash)throw new HttpError(503,'wrong_supabase_project');return u.origin;}
@@ -22,6 +23,7 @@ export function createHostedBroker(rpc){
  const reservations=new Map();
  return {
   async reserve({model,inputTokens,maxOutputTokens,images=0,runId=null}){
+   assertExecutionAllowed();
    if(model!=='muse-spark-1.3'||!priceOf(model)||images!==0||![inputTokens,maxOutputTokens].every(n=>Number.isSafeInteger(n)&&n>=0))throw Error('unsupported hosted request');
    const worst=worstCaseNano({model,inputTokens,maxOutputTokens});
    if(!Number.isSafeInteger(worst)||worst<1||worst>LIMITS.HOSTED_CALL_CAP_NANO)throw Error('hosted per-call cap exceeded');

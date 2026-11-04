@@ -1,3 +1,4 @@
+import {producerLane,reconcileNativeRun} from './native-integration.mjs';
 import {github,downloadArtifact} from './github';
 import {serviceClient} from './supabase';
 import {HttpError,verifyWorkerIdentity} from './core.mjs';
@@ -5,10 +6,22 @@ import {reconcileRun} from './reconcile.mjs';
 import {ingestArchive} from './artifact-ingest.mjs';
 import {ingestDiagnosticArchive} from './diagnostic-ingest.mjs';
 import {createArtifactCompensation} from './artifact-store.mjs';
-type Run={id:string,status:string,deadline_at:string,created_at:string,gh_run_id:string|null,gh_head_sha:string|null,spec_sha256:string|null};
+import {isPreviewDeployment} from '../../../src/deployment-execution.mjs';
+type Run={id:string,user_id:string,status:string,deadline_at:string,created_at:string,gh_run_id:string|null,gh_head_sha:string|null,spec_sha256:string|null};
 type Remote={id:number,run_attempt:number,head_sha:string,display_title:string,created_at:string,path:string,event:string,head_branch:string,actor:{login:string},status:string,conclusion:string|null};
 export async function reconcileLive(run:Run){
+ if(isPreviewDeployment())return run;
  const db=serviceClient(),{data:flags}=await db.from('system_flags').select('*').single(),actor=process.env.GH_PAT_OWNER;
+ const {data:nativeRequest,error:nativeError}=await db.from('native_product_requests').select('*').eq('product_run_id',run.id).maybeSingle();
+ const {data:producer,error:producerError}=await db.from('run_producers').select('*').eq('product_run_id',run.id).maybeSingle();
+ const lane=producerLane({run,record:producer,error:producerError,native:nativeRequest,nativeError});
+ if(lane==='native-r2'&&nativeRequest)return reconcileNativeRun(run,nativeRequest,{
+  claim:async(id:string)=>{const {data,error}=await db.rpc('claim_reconcile',{p_run:id});return !error&&data===true;},
+  readRemote:async(id:string)=>(await github(`/actions/runs/${id}`)).data,
+  transition:async(id:string,from:string,to:string,reason:string|null)=>{const {error}=await db.rpc('run_transition',{p_id:id,p_from:from,p_to:to,p_reason:reason});if(error)throw new HttpError(409,'run_state_changed');},
+  cancel:async(id:string)=>{await github(`/actions/runs/${id}/cancel`,{method:'POST'});}
+ });
+ if(lane!=='legacy')return run; // Native and uncertain custody cannot enter legacy discovery.
  if(!actor||!flags||flags.worker_review_verdict!=='PASS'||!process.env.TABWISE_EXECUTION_APPROVAL_REF)return run;
  const transition=async(id:string,from:string,to:string,reason:string|null)=>{const {error}=await db.rpc('run_transition',{p_id:id,p_from:from,p_to:to,p_reason:reason});if(error)throw new HttpError(409,'run_state_changed');};
  const identity=(remote:Remote)=>flags.approved_worker_shas.includes(remote.head_sha)&&verifyWorkerIdentity(remote,{run_id:run.id,spec_sha256:run.spec_sha256,runner:{actor,head_sha:remote.head_sha,github_run_id:String(remote.id)}},{actor,sha:remote.head_sha,run_id:run.id,spec_sha256:run.spec_sha256}).ok;

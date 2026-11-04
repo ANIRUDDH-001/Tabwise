@@ -1,0 +1,20 @@
+✔ native request actions follow server capabilities and failed ingestion preserves unverified state (1351.5349ms)
+✔ native evidence action updates when live run status changes without manual refresh (5599.046ms)
+✔ recorder ignores page overrides of native DOM identity and name accessors (408.5152ms)
+✔ target with 199 ID characters never becomes a valid over-bound event (318.474ms)
+✔ target with 200 ID characters never becomes a valid over-bound event (357.791ms)
+✔ target with 256 ID characters never becomes a valid over-bound event (373.5998ms)
+✔ target with 2048 ID characters never becomes a valid over-bound event (290.4279ms)
+✔ event and byte caps fail closed and remain incomplete (517.6705ms)
+✔ duplicate label IDs are explicit and cannot silently select one name (257.4431ms)
+✔ over-bound native names are marked incomplete rather than silently accepted (259.6459ms)
+✔ real historical Fernway dialog identities drive the pure oracle in labelled browser controls (932.2053ms)
+✔ patch check requires explicit input and owned readback; lost response and stale readback fail closed (1409.1516ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7556.9694

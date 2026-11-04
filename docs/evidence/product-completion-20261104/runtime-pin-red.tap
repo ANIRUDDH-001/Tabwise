@@ -1,0 +1,43 @@
+✔ runtime metadata binds observed file version/executable identity and exact read-back profile (2.2229ms)
+✔ runtime metadata refuses pid substitution (0.2719ms)
+✔ runtime metadata refuses created substitution (0.1053ms)
+✔ runtime metadata refuses path substitution (0.0979ms)
+✔ runtime metadata refuses version substitution (0.173ms)
+✔ runtime metadata refuses hash substitution (0.1468ms)
+✔ runtime metadata refuses settings substitution (0.1314ms)
+✔ runtime metadata refuses readback substitution (0.1374ms)
+✔ runtime metadata rejects forged qualification and unexpected fields (0.2602ms)
+✔ bounded metadata query uses the fixed identity helper and exact observed-process binding (0.503ms)
+✔ metadata helper refuses failed (0.3104ms)
+✔ metadata helper refuses unclosed (0.1305ms)
+✔ metadata helper refuses pid (0.116ms)
+✔ metadata helper refuses created (0.1447ms)
+✔ metadata helper refuses extra (0.2511ms)
+✖ runtime integrity detects changed runtime metadata validator bytes (25.5756ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 15
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 118.2995
+
+✖ failing tests:
+
+test at test\r2-runtime-metadata.test.mjs:29:1
+✖ runtime integrity detects changed runtime metadata validator bytes (25.5756ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /runtime source changed/. Input:
+  
+  ''
+  
+      at TestContext.<anonymous> (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/test/r2-runtime-metadata.test.mjs:31:488)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '',
+    expected: /runtime source changed/,
+    operator: 'match',
+    diff: 'simple'
+  }

@@ -1,0 +1,9 @@
+PASS exact reviewed source scope: r2/admission
+PASS exact reviewed source scope: r2/product-binding
+PASS exact reviewed source scope: runs/[id]/native-request
+PASS exact reviewed source scope: runs/[id]/native-dispatch
+PASS exact reviewed source scope: runs/[id]/native-ingest
+PASS exact reviewed source scope: runs/[id]/diagnose
+PASS exact reviewed source scope: patches/[id]/apply
+PASS exact reviewed source scope: patches/[id]/oracle
+PASS exact reviewed source scope: verifications/[id]

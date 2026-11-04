@@ -1,14 +1,58 @@
-# Registration only. Reviewed source branch supplies the executable workflow.
+# Distinct zero-key startup lifecycle. No browser, fixture journey or physical interaction job.
 name: tabwise-startup-only
 on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: tabwise-startup-only
+  cancel-in-progress: false
 jobs:
-  registration:
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 1
+  review:
+    runs-on: windows-2025
+    timeout-minutes: 10
     steps:
-      - name: Registration only
-        run: echo "No NVDA executes on main. Use the separately reviewed source branch."
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24.22.1
+      - run: node --test diagnostics/r2-native/external-trace.test.mjs diagnostics/r2-native/boundaries.test.mjs diagnostics/r2-native/zero-key.test.mjs diagnostics/r2-native/startup-supervisor.test.mjs test/r2-runtime.test.mjs test/r2-runtime-class.test.mjs
+      - name: Measure cold and warm identity helper stages without NVDA
+        run: node diagnostics/owner-v2/identity-timing.mjs
+      - name: Qualify real Windows process identity without NVDA
+        run: node --test diagnostics/owner-v2/process-identity.test.mjs
+      - name: Exact future attempt 2 packet, no execution
+        shell: pwsh
+        run: node diagnostics/r2-native/startup-entry.mjs --packet $env:GITHUB_RUN_ID
+  startup:
+    needs: review
+    if: github.run_attempt == 2 && vars.TABWISE_STARTUP_ONLY_APPROVAL != ''
+    runs-on: windows-2025
+    timeout-minutes: 10
+    env:
+      TABWISE_STARTUP_ONLY_APPROVAL: ${{ vars.TABWISE_STARTUP_ONLY_APPROVAL }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24.22.1
+      - run: node diagnostics/r2-native/startup-entry.mjs --check-only
+      - run: npm ci --ignore-scripts
+      - run: node --test diagnostics/owner-v2/r2-loader.test.mjs
+      - run: npx --no-install guidepup setup --ci
+      - run: npx --no-install guidepup install nvda
+      - name: Startup and teardown only, under independent process custody
+        run: node diagnostics/r2-native/startup-entry.mjs --run
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: startup-only-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/tabwise-startup-${{ github.run_id }}-2/
+          if-no-files-found: warn
+          retention-days: 14

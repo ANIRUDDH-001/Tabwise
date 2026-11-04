@@ -11,10 +11,10 @@ test('verdict ingestion never accepts labels or predictions in place of native e
 import {assessNativeRepair} from '../web/lib/server/repair-verdict.mjs';
 // Pure synthetic oracle fixtures; these never mint qualified native evidence.
 test('sealed snapshot oracle uses final focus, not an earlier focusin, and refuses absent triggers',()=>{
- const cap=active=>({source:'nvda',completed:true,outcome:'COMPLETE',reasons:[],records:[{step:'a1',press:'Enter',capture_status:'observed-silence',reasons:[],page:{before:{state:{dialogs:['dialog#1']}},after:{active,state:{dialogs:[]}}}}]});
+ const cap=active=>({source:'nvda',completed:true,outcome:'COMPLETE',reasons:[],records:[{step:'a1',press:'Enter',capture_status:'observed-silence',reasons:[],page:{before:{state:{dialogs:['dialog#1']}},after:{identity_version:2,active_identity:{available:true,connected:true,node_key:active,is_body:active==='body',tag:active==='body'?'body':'button',id:active==='body'?null:'choose-seat',id_unique:active==='body'?null:true},active,state:{dialogs:[]}}}}]});
  const args={baselineCapture:cap('body'),rerunCapture:cap('choose-seat#1'),baselineEvidence:{lanes:{speech:[]}},rerunEvidence:{lanes:{speech:[]}},steps:[{step:1,key:'Enter'}],oracle:{kind:'focus',step:1}};
  assert.equal(assessNativeRepair(args).verdict,'FIXED');
- args.rerunCapture.records[0].page.after.active='body';assert.equal(assessNativeRepair(args).verdict,'NOT_FIXED');
+ args.rerunCapture.records[0].page.after=cap('body').records[0].page.after;assert.equal(assessNativeRepair(args).verdict,'NOT_FIXED');
  args.rerunCapture.completed=false;assert.equal(assessNativeRepair(args).verdict,'INCONCLUSIVE');
  args.rerunCapture=cap('choose-seat#1');args.oracle.kind='validation';assert.equal(assessNativeRepair(args).verdict,'INCONCLUSIVE');
  args.oracle.kind='focus';args.baselineCapture.records[0].page.before.state.dialogs=[];assert.equal(assessNativeRepair(args).verdict,'INCONCLUSIVE');

@@ -1,0 +1,208 @@
+✔ unchanged protected logical focus permits different per-session ordinals (1.9156ms)
+✖ unchanged speech cannot hide an unrelated focus regression (0.9316ms)
+✖ protected step cannot be certified with legacy (0.2731ms)
+✖ protected step cannot be certified with missing (0.1974ms)
+✖ protected step cannot be certified with detached (0.2115ms)
+✖ protected step cannot be certified with duplicate-id (0.1615ms)
+✖ protected step cannot be certified with contradictory-key (0.151ms)
+✖ protected step cannot be certified with missing-speech (0.1527ms)
+✖ protected step cannot be certified with null-speech (0.3132ms)
+✖ known loss of unaffected speech is a regression while absent lane is inconclusive (0.2507ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 1
+ℹ fail 9
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 105.1208
+
+✖ failing tests:
+
+test at web\test\repair-protected-steps.test.mjs:14:1
+✖ unchanged speech cannot hide an unrelated focus regression (0.9316ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'FIXED'
+  - 'REGRESSED'
+  
+      at TestContext.<anonymous> (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/web/test/repair-protected-steps.test.mjs:14:150)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'FIXED',
+    expected: 'REGRESSED',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at web\test\repair-protected-steps.test.mjs:15:117
+✖ protected step cannot be certified with legacy (0.2731ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'FIXED'
+  - 'INCONCLUSIVE'
+  
+      at TestContext.<anonymous> (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/web/test/repair-protected-steps.test.mjs:24:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'FIXED',
+    expected: 'INCONCLUSIVE',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at web\test\repair-protected-steps.test.mjs:15:117
+✖ protected step cannot be certified with missing (0.1974ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'FIXED'
+  - 'INCONCLUSIVE'
+  
+      at TestContext.<anonymous> (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/web/test/repair-protected-steps.test.mjs:24:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'FIXED',
+    expected: 'INCONCLUSIVE',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at web\test\repair-protected-steps.test.mjs:15:117
+✖ protected step cannot be certified with detached (0.2115ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'FIXED'
+  - 'INCONCLUSIVE'
+  
+      at TestContext.<anonymous> (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/web/test/repair-protected-steps.test.mjs:24:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'FIXED',
+    expected: 'INCONCLUSIVE',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at web\test\repair-protected-steps.test.mjs:15:117
+✖ protected step cannot be certified with duplicate-id (0.1615ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'FIXED'
+  - 'INCONCLUSIVE'
+  
+      at TestContext.<anonymous> (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/web/test/repair-protected-steps.test.mjs:24:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'FIXED',
+    expected: 'INCONCLUSIVE',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at web\test\repair-protected-steps.test.mjs:15:117
+✖ protected step cannot be certified with contradictory-key (0.151ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'FIXED'
+  - 'INCONCLUSIVE'
+  
+      at TestContext.<anonymous> (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/web/test/repair-protected-steps.test.mjs:24:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'FIXED',
+    expected: 'INCONCLUSIVE',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at web\test\repair-protected-steps.test.mjs:15:117
+✖ protected step cannot be certified with missing-speech (0.1527ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'FIXED'
+  - 'INCONCLUSIVE'
+  
+      at TestContext.<anonymous> (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/web/test/repair-protected-steps.test.mjs:24:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'FIXED',
+    expected: 'INCONCLUSIVE',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at web\test\repair-protected-steps.test.mjs:15:117
+✖ protected step cannot be certified with null-speech (0.3132ms)
+  TypeError [Error]: Cannot read properties of null (reading 'toLowerCase')
+      at normalize (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/web/lib/server/repair-verdict.mjs:40:23)
+      at file:///D:/Projects/Meta%20AI/tabwise-product-continuation/web/lib/server/repair-verdict.mjs:41:72
+      at Array.map (<anonymous>)
+      at speech (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/web/lib/server/repair-verdict.mjs:41:65)
+      at assessNativeRepair (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/web/lib/server/repair-verdict.mjs:44:16)
+      at TestContext.<anonymous> (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/web/test/repair-protected-steps.test.mjs:24:15)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+
+test at web\test\repair-protected-steps.test.mjs:26:1
+✖ known loss of unaffected speech is a regression while absent lane is inconclusive (0.2507ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'filter')
+      at speech (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/web/lib/server/repair-verdict.mjs:41:40)
+      at assessNativeRepair (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/web/lib/server/repair-verdict.mjs:44:54)
+      at TestContext.<anonymous> (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/web/test/repair-protected-steps.test.mjs:28:51)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)

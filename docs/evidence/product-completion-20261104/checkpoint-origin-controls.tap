@@ -1,0 +1,22 @@
+✔ real capture serialization projects exact source pointers and preserves both clocks (5.4671ms)
+✔ synthetic is refused after reserialization (2.397ms)
+✔ incomplete is refused after reserialization (0.999ms)
+✔ missing ack is refused after reserialization (1.1079ms)
+✔ unbound speech is refused after reserialization (0.8577ms)
+✔ captureJourney bytes reach exporter and independent bridge without native promotion (17.3273ms)
+✔ test-signed product origin permits inspection while preserving raw classes and refusing qualification (60.4677ms)
+✔ R2 positive projection preserves identity, clocks, sequences, citations and source bytes; fixture stays synthetic (17.5561ms)
+✔ R2 positive artifact contract validates shape independently of runtime permission (10.0926ms)
+✔ R2 identity/spec/plan/page/session/step/reference/file mismatches all refuse (6.1404ms)
+✔ R2 synthetic/incomplete raw manifests are never promoted, even with observed labels (0.7359ms)
+✔ R2 production opening requires independently qualified source policy; missing or forged handles refuse ingestion (3.2479ms)
+✔ R2 resealed source records cannot lose telemetry, duplicate refs, reverse clocks or cite absent assets (4.6457ms)
+✔ R2 cannot silently omit a nonrequired app event from an observation source (1.2482ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 232.4655

@@ -1,0 +1,33 @@
+
+> @tabwise/contracts@0.1.0 test
+> node --test --test-timeout=10000 test/*.test.mjs
+
+✔ version, lanes and bounded resources match owner decisions (3.6614ms)
+✔ journey: positive and negative fixtures, Ajv and runtime agree (114.3259ms)
+✔ run-spec: positive and negative fixtures, Ajv and runtime agree (20.2188ms)
+✔ artifact-manifest: positive and negative fixtures, Ajv and runtime agree (20.6688ms)
+✔ evidence-bundle: positive and negative fixtures, Ajv and runtime agree (72.5874ms)
+✔ diagnosis-input: positive and negative fixtures, Ajv and runtime agree (34.1112ms)
+✔ diagnosis-output: positive and negative fixtures, Ajv and runtime agree (16.3074ms)
+✔ patch: positive and negative fixtures, Ajv and runtime agree (11.7608ms)
+✔ verdict: positive and negative fixtures, Ajv and runtime agree (11.5444ms)
+✔ nested unknown fields and non-palette typed text fail closed (0.9745ms)
+✔ encoding hashes exact UTF-8 bytes and validates the dispatch envelope on decode (3.2766ms)
+✔ Meta schema uses a separately enforced strict subset (1.6431ms)
+✔ diagnosis rejects unknown refs, invalid source lines and contradictory abstention (3.6933ms)
+✔ manifest integrity checks hashes, missing/extra files, total bytes and screenshot limits (1.9141ms)
+✔ four verdicts are accepted, model outputs cannot attest to execution safety (0.9607ms)
+✔ manifest binds its evidence digest to exactly one evidence artifact (5.8804ms)
+✔ artifact paths reject directory aliases, trailing slashes and reserved control paths (2.1419ms)
+✔ manifest measures aggregate bytes and individual journal/screenshot caps (9.5481ms)
+✔ evidence refs are globally unique and observed silence has a positive qualified window (1.3474ms)
+✔ verdict consistency refuses missing integrity, same run and contradictory fixed assertions (0.9055ms)
+✔ input citations must originate in timeline/signals and source content hashes match (1.5702ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 837.7269

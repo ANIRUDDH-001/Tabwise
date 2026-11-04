@@ -81,3 +81,51 @@ Authored immutable rerun bindings, exact source consumer/loader/stager, admissio
 R3 continuation new work: repair source/native adapter, narrow snapshot oracle, immutable SQL lifecycle and inline synthetic test fixtures authored in this worktree; existing shipped Fernway reused under its recorded provenance; no new external dependency, dataset or asset.
 
 R3 bounded pass: locally authored dispatch-guard and oracle UI/database regression fixtures; mock approvals/observations are test data only. No new third-party dependency, fixture asset or dataset.
+
+### P0 reliability new work — 2026-11-03
+Authored bounded focus identity, additive native recorder metadata, terminal source projection/oracle refusal corrections and synthetic DOM/test cases during the event. Existing owned Fernway fixture and installed Playwright/PostgreSQL reused; recorded real Spark response used only as labelled local replay. No external dataset, third-party asset, dependency or install added. Original historical evidence remains unchanged.
+
+### P0 independent-review corrections — 2026-11-03
+Owned synthetic `fixtures/fernway/instrumented-v2/` is a new explicitly versioned derivative of our event-authored Fernway fixture, with its own byte/hash manifest; same ownership/license provenance as the original, no third-party code or data. Original pinned fixture restored unchanged. New adversarial browser/oracle/export/deployment tests and review/readiness reports authored during the event. Installed Context7, Playwright, Next.js and PostgreSQL reused; no dependency or tool install, hosted mutation, new model call or external payload upload. Recorded Spark responses remain labelled replay; no native or independent acceptance claim.
+
+P0 conditional-review continuation: authored symbolic/DOM event identity correction, inactive native product request/reconciliation helpers, synthetic fixtures, real filesystem persistence tests and phased execution plan during the event. Same owned-synthetic Fernway provenance; no third-party source/data/dependency or install. Diagnostic worktrees and historical evidence preserved. No native/model/hosted mutation or independent acceptance produced.
+
+G2 local checkpoint: owned request schema/RPCs, API/UI, signed-worker binding and source-delivery helpers authored during event; synthetic auth/signing/source data generated locally. Installed PostgreSQL18/Playwright/Next reused, no dependency install or external dataset. No production credential or genuine native observation is created by these tests.
+
+## F-03 accelerated integration new work — 2026-11-03T18:47:25Z
+Owned synthetic fixtures/replay only: explicit producer custody, disabled native dispatch/binding/ingestion, generated in-process RSA test keys, local PostgreSQL provider and original pinned Fernway source reused under their existing provenance entries. No external dataset or dependency added; no new third-party license is imported. Local same-run repair replay and G1 candidate census are engineering tests, not withheld/native evidence.
+
+## 2026-11-04T05:23:05Z Product native-plan continuation
+New immutable plan delivery, independent signed request-admission verification and synthetic signing/negative fixtures authored during event. Existing owned Fernway and PostgreSQL/Chromium fixtures reused; no new dependency/dataset/license or install. Synthetic signatures and provider replay never represent native acceptance.
+
+| 2026-11-03 | NONQUALIFYING native diagnostic wrapper, approval tests and separate verifier | Newly authored during event; existing project licensing | Reuses existing licensed validation fixture and pinned dependencies/actions; no new third-party code or dataset |
+
+## 2026-11-04T05:23:05Z R2-only runtime new work
+R2 lifecycle adaptation reuses Guidepup 0.36.4 MIT (Craig Morten, existing vendor license); evaluates byte-identical guarded class/client/dependencies in a private graph, forks no vendor files. New loader/lifecycle/pins/tests and read-only workflow census authored during event. G1 resolver/identity source reused byte-identically from e6c51f2. Installed dependencies copied locally without version changes or installation; no external fixture/dataset.
+
+Hosted-startup autopsy correction: new diagnostic cleanup/allowlist and controlled actual-class tests authored during event; existing MIT frozen Guidepup reused byte-identically. Existing GitHub artifact downloaded read-only with original provenance/hash, never relabelled. No dependency/install/new dataset/native or paid call.
+
+R2 recovery identity stage probe and fixed typed-field serializer: newly authored during event, existing project license; no new dependencies/fixtures/datasets. Node24 child-process close contract consulted via Context7; no external code copied.
+
+R2 autonomous recovery: new event-time journal binding, exact system-module foreground bootstrap and negative tests authored during event. Frozen R1/vendor unchanged; no new dependency/license/dataset. Archived native observations/screenshots use the existing approved project-owned synthetic fixture on isolated GitHub-hosted Windows; originals retain NONQUALIFYING/synthetic manifest classification. PowerShell/Node official documentation consulted via Context7; no external code copied.
+
+## 2026-11-04T10:44:37Z — product completion integration
+Merged previously authored native runtime and product lifecycle sources; reused the existing owned Fernway and frozen Guidepup under their recorded licenses. Added request-count reservations, native progress/control/Preview guards and isolated synthetic tests during the event. No dependency install, new dataset, third-party code or new license. Historical native archives remain byte-identical and NONQUALIFYING. Context7 Next.js tracing documentation consulted; no external code copied.
+
+## 2026-11-04T11:37:43Z — observed runtime metadata
+New event-time Windows process version/hash observer, fixed-profile data validator, sealed-journal exporter and negative fixtures authored during event. Reuses existing owned fixtures and installed Windows/.NET facilities; no dependency install/license/data added. Microsoft official property documentation retrieved via Context7; no external code copied. Read-only actual process test observes this Node executable, not NVDA; no desktop/input/native acceptance implied.
+
+## 2026-11-04T12:29:57Z — W5 product request admission
+New server issuer, bounded authenticated transport, generated-plan delivery correction and isolated generated-key tests authored during event. Reuses the existing W5 signing/consumption contract and owned synthetic fixtures; no new authority, library, dependency, dataset or external code. No native execution, real signing key or model call used by these tests.
+
+## 2026-11-04T13:25:13Z — fresh producer, verifier controls and release preparation
+New event-time product capture lifecycle/origin adapter, healthy-query verifier correction, protected focus/speech controls and generated signature fixtures. Existing protected session remains the only input caller; historical raw artifacts/classes and frozen R1/vendor remain unchanged. All signing keys in local tests are ephemeral test keys. No new native run, authority, dependency, migration or external model call. Root MIT copyright names Aniruddh Vijayvargia and Prachi Agarwalla per owner response; Works on My Machine is credited as the team. Existing third-party licenses remain separate. Measured lock metadata: root58/web132/contracts5 package records, zero AGPL labels; GPL/LGPL/CC-BY and unspecified entries are retained, not silently relicensed. Context7 official Supabase auth/migration documentation consulted for README; no upstream code copied.
+
+## 2026-11-04T17:03:56Z — isolated candidate execution
+New candidate-only policy, runner, durable built-in SQLite W5 adapter, offline verifier and tests authored during event. Reuses existing W5, original guarded NVDA session/custody, owned Fernway and pinned workflow actions; no dependency install, new dataset or external code copied. Candidate ephemeral issuer keys never leave supervisor memory and confer no production qualification. Context7 official GitHub Actions inputs/permissions documentation consulted. Existing root MIT covers original additions.
+
+## 2026-11-04T17:15:46Z — owned candidate persistence
+New isolated candidate table/RLS/service RPCs, API adapter/routes and local PostgreSQL integration tests authored during event. Existing immutable journey/version, original Fernway, native dispatch uncertainty mechanism and raw source packaging reused. No dependency install or external dataset. Context7 official Supabase privileges/functions docs consulted. Migration applied only after isolated SQL/API/database tests passed; hosted RLS and denied anonymous/browser writes rechecked.
+
+## 2026-11-04T17:48:05Z — candidate original-evidence readback and UI
+New candidate-only archive association/replay adapter, immutable completion RPC, content-addressed private original staging, authenticated readback and candidate preparation/timeline/workspace UI authored during event. Reuses existing ZIP parser, raw R2 verifier, native projection/runtime validator, private evidence bucket, journey versions and UI classes. No third-party code, dependency install or dataset. Synthetic browser/SQL fixtures are labelled and cannot establish native acceptance. Full14-migration/9-SQL clean PostgreSQL check and local API/repair regressions passed. New original ZIP/failure/test artifacts retained with byte hashes.

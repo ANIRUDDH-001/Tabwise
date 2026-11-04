@@ -1,0 +1,9 @@
+{
+  "classification": "ISOLATED LOCAL SQL; no hosted mutation, native input or model call",
+  "migrations": 12,
+  "sql_suites": 8,
+  "native_sql_integrations": "PASS",
+  "repair_sql_integrations": "PASS",
+  "stop_exit": 0,
+  "cluster": "C:\\Users\\ANIRUDDH\\AppData\\Local\\Temp\\Tabwise-Completion-l1wh4m2n"
+}

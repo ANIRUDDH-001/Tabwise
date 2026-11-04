@@ -1,0 +1,40 @@
+✖ sealed evidence independently reconstructs approved passenger/healthy identity (18.7811ms)
+✔ sealed evidence independently reconstructs approved passenger/broken identity (22.4535ms)
+✖ sealed evidence independently reconstructs approved seat/healthy identity (12.7337ms)
+✔ sealed evidence independently reconstructs approved seat/broken identity (19.9629ms)
+✖ sealed evidence independently reconstructs approved search/healthy identity (12.0815ms)
+✔ sealed evidence independently reconstructs approved search/broken identity (19.6997ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 3
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 197.2469
+
+✖ failing tests:
+
+test at test\r2-native-query.test.mjs:10:91
+✖ sealed evidence independently reconstructs approved passenger/healthy identity (18.7811ms)
+  Error: r2 evidence: sealed evidence does not verify: page identity: invalid port
+      at Object.seal (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/scripts/tabwise/r2-evidence.mjs:269:42)
+      at async TestContext.<anonymous> (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/test/r2-native-query.test.mjs:15:16)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
+
+test at test\r2-native-query.test.mjs:10:91
+✖ sealed evidence independently reconstructs approved seat/healthy identity (12.7337ms)
+  Error: r2 evidence: sealed evidence does not verify: page identity: invalid port
+      at Object.seal (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/scripts/tabwise/r2-evidence.mjs:269:42)
+      at async TestContext.<anonymous> (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/test/r2-native-query.test.mjs:15:16)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test\r2-native-query.test.mjs:10:91
+✖ sealed evidence independently reconstructs approved search/healthy identity (12.0815ms)
+  Error: r2 evidence: sealed evidence does not verify: page identity: invalid port
+      at Object.seal (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/scripts/tabwise/r2-evidence.mjs:269:42)
+      at async TestContext.<anonymous> (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/test/r2-native-query.test.mjs:15:16)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)

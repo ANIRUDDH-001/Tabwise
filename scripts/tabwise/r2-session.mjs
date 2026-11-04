@@ -10,7 +10,7 @@
 // Evidence: composeR2Page seals with no authenticity claim, so the S3 verdict is 'synthetic' or 'incomplete' even for a
 // real run. This module adds no claim and no class (no hosted-run attestation exists yet: owner decision O-10) and
 // reports genuine_evidence:false. The result is JSON only; no live handle leaves this function.
-import {isQualificationRuntime} from './qualification-loader.mjs';
+import {isR2Runtime} from './r2-loader.mjs';
 import {composeR2Page} from './r2-compose.mjs';
 
 const SESSION_SCHEMA = 'tabwise-r2-session-result/1';
@@ -38,8 +38,8 @@ const summarizeAxe = result => ({
  * handleTimeoutMs, focusWaitMs}. One call per process. Throws only before any effect (brand, reuse, data shape,
  * runtime authenticity, fixture/plan validation); afterwards it always cleans up and returns.
  */
-export async function runR2Session(runtime, data) {
-  if (!isQualificationRuntime(runtime)) throw Error('R2 session requires the owned vendored runtime');
+export async function runR2Session(runtime, data, diagnostics) {
+  if (!isR2Runtime(runtime)) throw Error('R2 session requires the owned vendored runtime');
   if (used) throw Error('R2 session: one page per process');
   used = true;
   const pageStart = performance.now(); // W3/W4 lifecycle origin: work, settle and guard bounds count from here.
@@ -136,7 +136,7 @@ export async function runR2Session(runtime, data) {
         if (!Number.isSafeInteger(pid) || pid <= 0) throw Error('owned Chromium PID missing');
         browser = await chromium.connect(server.wsEndpoint());
         context = await network.createIsolatedContext(browser, {port, source: writer.identity.served});
-        await context.addInitScript(installR2PageRecorder, {session});
+        await context.addInitScript(installR2PageRecorder, {session,identityVersion:2});
         const page = await context.newPage();
         await page.goto(writer.identity.url, {waitUntil: 'load', timeout: input.handleTimeoutMs});
         await page.bringToFront();
@@ -189,7 +189,15 @@ export async function runR2Session(runtime, data) {
       // W3/W4: start is the raw vendored start only (composition owns its slot); validate checks the started process.
       nvda: {
         press: (key, options) => runtime.nvda.press(key, options),
-        start: () => { authentic(); return runtime.nvda.start({settings: structuredClone(runtime.cfg.nvda_settings)}); },
+        start: async () => {
+          authentic();const began=performance.now();
+          try{return await runtime.nvda.start({settings:structuredClone(runtime.cfg.nvda_settings)});}
+          catch(error){
+            // Observational hook only: never alter the original rejection, deadline, slot or cleanup.
+            try{diagnostics?.onStartupError?.(error,{elapsed_ms:performance.now()-began});}catch{}
+            throw error;
+          }
+        },
         validate: async receipt => {
           authentic();
           const settings = runtime.nvda.getSettings();
@@ -198,6 +206,11 @@ export async function runR2Session(runtime, data) {
           if (mismatch.length) throw Error(`NVDA settings read-back: ${mismatch.join('; ')}`);
           const relay = await runtime.relayOwnerPid();
           if (relay !== receipt?.pid) throw Error('NVDA relay owner differs from the owned process');
+          const {buildRuntimeMetadata}=await import('../../src/r2/runtime-metadata.mjs');
+          const observed=await runtime.runtimeMetadata();
+          authentic();
+          const metadata=buildRuntimeMetadata({snapshot:observed,expectedIdentity:runtime.observedProcess(),settings:runtime.cfg.nvda_settings,readback});
+          writer.append('events',{phase:'native-runtime',runtime:metadata});
           return {pid: receipt.pid, relay_pid: receipt.relay_pid, reset_confirmed: receipt.reset_confirmed};
         },
         stop: () => runtime.nvda.stop(),

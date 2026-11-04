@@ -1,6 +1,8 @@
 import {encodeSpec,verifyManifest,validateContract} from '../../../packages/contracts/index.mjs';
 import {verifyArtifactIdentity} from './core.mjs';
+import {assertExecutionAllowed} from '../../../src/deployment-execution.mjs';
 export async function dispatchAdmitted(run,{claim,saveSpec,dispatch,transition}){
+ assertExecutionAllowed();
  const inputs=encodeSpec(run.spec);
  if(run.id!==inputs.run_id)throw Error('stored run/spec identity mismatch');
  const claimed=await claim(run.id);if(!claimed)return {run_id:run.id,status:run.status,replayed:true};

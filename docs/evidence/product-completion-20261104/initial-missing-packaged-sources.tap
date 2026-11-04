@@ -1,0 +1,44 @@
+✖ hosted source inventory carries the entire enforced native and repair integrity scope (7.3111ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 118.7699
+
+✖ failing tests:
+
+test at web\test\product-source-inventory.test.mjs:5:1
+✖ hosted source inventory carries the entire enforced native and repair integrity scope (7.3111ms)
+  AssertionError [ERR_ASSERTION]: a deployment must be able to recheck every reviewed file
+  + actual - expected
+  
+  + [
+  +   'diagnostics/owner-v2/identity.ps1',
+  +   'diagnostics/owner-v2/resolver.mjs',
+  +   'diagnostics/r2-native/startup-cleanup.mjs',
+  +   'diagnostics/r2-native/startup-diagnostics.mjs',
+  +   'scripts/tabwise/r2-listeners.mjs',
+  +   'scripts/tabwise/r2-loader.mjs',
+  +   'scripts/tabwise/r2-nvda-lifecycle.mjs',
+  +   'scripts/tabwise/r2-quiescence.mjs',
+  +   'scripts/tabwise/r2-runtime-integrity.mjs',
+  +   'scripts/tabwise/r2-runtime-pins.json',
+  +   'scripts/tabwise/r2-vendor-loader.mjs'
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/web/test/product-source-inventory.test.mjs:8:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 'diagnostics/owner-v2/identity.ps1', 'diagnostics/owner-v2/resolver.mjs', 'diagnostics/r2-native/startup-cleanup.mjs', 'diagnostics/r2-native/startup-diagnostics.mjs', 'scripts/tabwise/r2-listeners.mjs', 'scripts/tabwise/r2-loader.mjs', 'scripts/tabwise/r2-nvda-lifecycle.mjs', 'scripts/tabwise/r2-quiescence.mjs', 'scripts/tabwise/r2-runtime-integrity.mjs', 'scripts/tabwise/r2-runtime-pins.json', 'scripts/tabwise/r2-vendor-loader.mjs' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

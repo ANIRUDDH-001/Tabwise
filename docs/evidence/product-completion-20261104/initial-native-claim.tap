@@ -1,0 +1,44 @@
+✔ native polling advances a source-bound active run using the real identity matcher (16.1732ms)
+✔ successful workflow stops at evidence pending and cannot manufacture completion (0.8693ms)
+✔ failed native workflow terminates and preserves incomplete evidence (0.6241ms)
+✔ queued native run remains dispatched without invented progress (0.7017ms)
+✔ native polling rejects owner substitution before mutation (0.8438ms)
+✔ native polling rejects run substitution before mutation (0.5014ms)
+✔ native polling rejects source substitution before mutation (0.9868ms)
+✔ native polling rejects workflow substitution before mutation (0.513ms)
+✔ native polling rejects attempt substitution before mutation (0.5197ms)
+✔ deadline releases native capacity even when remote cancellation fails (0.7009ms)
+✔ unknown dispatch is never redispatched or discovered by title (0.4552ms)
+✔ terminal native polling performs no remote or durable effects (0.3993ms)
+✔ deadline does not retain worker capacity when GitHub cannot be read (0.4862ms)
+✔ expired run never cancels a remote execution with mismatched source identity (0.4635ms)
+✖ native polling honors the durable reconciliation claim before remote reads (1.3377ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 14
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 113.6227
+
+✖ failing tests:
+
+test at web\test\native-progress.test.mjs:22:1
+✖ native polling honors the durable reconciliation claim before remote reads (1.3377ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'running'
+  - 'dispatched'
+  
+      at TestContext.<anonymous> (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/web/test/native-progress.test.mjs:22:209)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'running',
+    expected: 'dispatched',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

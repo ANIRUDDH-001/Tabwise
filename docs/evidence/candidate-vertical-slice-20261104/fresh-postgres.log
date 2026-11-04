@@ -1,0 +1,113 @@
+SQL PASS admission.sql
+SQL PASS budget.sql
+SQL PASS candidate_native_runs.sql
+SQL PASS immutable.sql
+SQL PASS patch-review.sql
+SQL PASS persist-diagnosis.sql
+SQL PASS repair-application.sql
+SQL PASS repair-verdict.sql
+SQL PASS rls.sql
+LOCAL FIXTURE RPC: ERROR:  native request idempotency conflict
+CONTEXT:  PL/pgSQL function public.prepare_native_product_request(uuid,jsonb,text,text,text,text) line 18 at RAISE
+
+LOCAL FIXTURE RPC: ERROR:  native query binding mismatch
+CONTEXT:  PL/pgSQL function public.prepare_native_product_request(uuid,jsonb,text,text,text,text) line 15 at RAISE
+
+LOCAL FIXTURE RPC: ERROR:  native query binding mismatch
+CONTEXT:  PL/pgSQL function public.prepare_native_product_request(uuid,jsonb,text,text,text,text) line 15 at RAISE
+
+LOCAL FIXTURE RPC: ERROR:  native query binding mismatch
+CONTEXT:  PL/pgSQL function public.prepare_native_product_request(uuid,jsonb,text,text,text,text) line 15 at RAISE
+
+LOCAL FIXTURE RPC: ERROR:  native query binding mismatch
+CONTEXT:  PL/pgSQL function public.prepare_native_product_request(uuid,jsonb,text,text,text,text) line 15 at RAISE
+
+LOCAL FIXTURE RPC: ERROR:  illegal native request transition
+CONTEXT:  PL/pgSQL function public.transition_native_product_request(uuid,uuid,text,text,text) line 20 at RAISE
+
+LOCAL FIXTURE RPC: ERROR:  native execution conflict
+CONTEXT:  PL/pgSQL function public.transition_native_product_request(uuid,uuid,text,text,text) line 13 at RAISE
+
+LOCAL FIXTURE RPC: ERROR:  duplicate key value violates unique constraint "native_product_requests_github_run_id_key"
+DETAIL:  Key (github_run_id)=(123) already exists.
+CONTEXT:  SQL statement "update public.native_product_requests set state=next_state,github_run_id=p_gh_run_id,updated_at=clock_timestamp() where product_run_id=p_run returning *"
+PL/pgSQL function public.transition_native_product_request(uuid,uuid,text,text,text) line 21 at SQL statement
+
+LOCAL FIXTURE RPC: ERROR:  invalid native request digest
+CONTEXT:  PL/pgSQL function public.prepare_native_product_request(uuid,jsonb,text,text,text,text) line 11 at RAISE
+
+MEASURED owned API, six concurrent requests, immutable conflict, uncertain dispatch, no resend, RLS, RPC permissions; no native execution
+✔ HTTP API + PostgreSQL: owned persistence, concurrency, unknown outcome and conflicting execution correlations (3129.8607ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3265.7414
+
+SIMULATION ONLY: local custody metadata completed, not qualifying native observation
+✔ PostgreSQL producer/nonce/claim/ingestion custody, concurrency and RLS (1836.458ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1908.0145
+
+✔ real PostgreSQL unknown-dispatch claim recovery is unique and late-response safe (627.7311ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 700.7486
+
+ERROR:  candidate transition refused
+CONTEXT:  PL/pgSQL function public.transition_candidate_native_run(uuid,uuid,text,text,text) line 11 at RAISE
+ERROR:  candidate transition refused
+CONTEXT:  PL/pgSQL function public.transition_candidate_native_run(uuid,uuid,text,text,text) line 11 at RAISE
+ERROR:  candidate verified readback required
+CONTEXT:  PL/pgSQL function public.finish_candidate_native_evidence(uuid,uuid,text,text,jsonb,text) line 12 at RAISE
+ERROR:  owned bound candidate required
+CONTEXT:  PL/pgSQL function public.finish_candidate_native_evidence(uuid,uuid,text,text,jsonb,text) line 5 at RAISE
+ERROR:  immutable candidate readback conflict
+CONTEXT:  PL/pgSQL function public.finish_candidate_native_evidence(uuid,uuid,text,text,jsonb,text) line 15 at RAISE
+ERROR:  candidate transition refused
+CONTEXT:  PL/pgSQL function public.transition_candidate_native_run(uuid,uuid,text,text,text) line 11 at RAISE
+✔ candidate API persists owned immutable source; uncertain dispatch cannot repeat (1950.923ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2067.6144
+
+✔ actual concurrent requests serialize, recover one candidate, append one audit and freeze approval (476.8904ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 571.5197
+
+✔ real concurrent rerun admission keeps gates, exact hashes, immutable binding, replay and ownership (1646.9567ms)
+✔ oracle admission/dispatch gate covers concurrent registration, legacy replay and rejection (2066.1369ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3794.0406
+

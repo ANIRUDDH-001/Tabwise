@@ -5,6 +5,8 @@ import { createHash } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { priceOf } from '../budget/prices.mjs';
+import { transportDiagnostics } from './transport.mjs';
+import { assertExecutionAllowed } from '../deployment-execution.mjs';
 
 export const BASE_URL = 'https://api.meta.ai/v1';
 
@@ -30,8 +32,9 @@ function outputText(data) {
 export async function respond({
   broker, model, input, maxOutputTokens, images = 0, task = null, runId = null, inputClass = null, record = {},
   fetchImpl = fetch, apiKey = process.env.MODEL_API_KEY, baseUrl = BASE_URL, logDir = 'cache/payloads',
-  textFormat = null, maxInputBytes = 131072, perCallCapUsd, timeoutMs = 120000,
+  textFormat = null, maxInputBytes = 131072, perCallCapUsd, timeoutMs = 120000, reasoningEffort,
 }) {
+  assertExecutionAllowed();
   const redact = (s) => (apiKey ? String(s).split(apiKey).join('[redacted]') : String(s));
   if (!apiKey) throw new ClientError('MODEL_API_KEY is not set: add it to .env');
   // D-29 and Meta terms 6.1-6.2: Contributor inputs may train Meta's models, so only our own fixtures go there.
@@ -40,9 +43,11 @@ export async function respond({
   }
 
   if (!Number.isSafeInteger(maxOutputTokens) || maxOutputTokens < 0) throw new ClientError('bounded max_output_tokens required');
+  if (reasoningEffort !== undefined && !['minimal','low','medium','high','xhigh'].includes(reasoningEffort)) throw new ClientError('invalid Spark reasoning effort');
   if (!Number.isSafeInteger(maxInputBytes) || maxInputBytes < 1 || maxInputBytes > 1048576) throw new ClientError('invalid input byte cap');
   if (!Number.isFinite(timeoutMs) || timeoutMs < 1 || timeoutMs > 120000) throw new ClientError('invalid request timeout');
   const body = { model, input, max_output_tokens: maxOutputTokens };
+  if (reasoningEffort !== undefined) body.reasoning = { effort: reasoningEffort };
   if (textFormat !== null) {
     if (textFormat.type !== 'json_schema' || textFormat.strict !== true || typeof textFormat.name !== 'string' || !textFormat.schema) throw new ClientError('invalid strict text.format');
     body.text = { format: textFormat };
@@ -59,6 +64,7 @@ export async function respond({
   const started = Date.now();
   let res;
   let text;
+  let headersMs=null;
   try {
     res = await fetchImpl(`${baseUrl}/responses`, {
       method: 'POST',
@@ -66,9 +72,12 @@ export async function respond({
       body: bodyText,
       signal: AbortSignal.timeout(timeoutMs),
     });
+    headersMs=Date.now()-started;
     text = await res.text();
   } catch (e) {
-    throw new ClientError(`request failed, reservation ${r.id} kept open: ${redact(e?.message ?? e)}`);
+    const transport=transportDiagnostics(e,{endpoint:`${baseUrl}/responses`,elapsedMs:Date.now()-started,headersMs,redact});
+    writeFileSync(`${stem}-error.json`,JSON.stringify({reservation_id:r.id,transport}));
+    throw Object.assign(new ClientError(`request failed, reservation ${r.id} kept open: ${transport.classification}`),{transport});
   }
   const latency = Date.now() - started;
   writeFileSync(`${stem}-response.json`, redact(text));
@@ -85,7 +94,7 @@ export async function respond({
   const out = outputText(data);
   const settled = await broker.settle(r.id, {
     usage,
-    record: { latency_ms: latency, retries: 0, input_sha256: sha256(bodyText), output_sha256: sha256(out), ...record },
+    record: { latency_ms: latency, retries: 0, input_sha256: sha256(bodyText), output_sha256: sha256(out), ...(reasoningEffort === undefined ? {} : { reasoning_effort: reasoningEffort }), ...record },
   });
   return { text: out, data, usage, reservationId: r.id, ...settled };
 }

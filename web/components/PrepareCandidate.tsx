@@ -1,0 +1,8 @@
+'use client';
+import {useState} from 'react';import {useRouter} from 'next/navigation';import {reasonText} from '../lib/reason-copy.mjs';
+import PageHeader from './ui/PageHeader';
+export default function PrepareCandidate({version}:{version:string}){
+ const router=useRouter(),[busy,setBusy]=useState(false),[error,setError]=useState('');
+ async function prepare(){setBusy(true);setError('');try{const name='tabwise-candidate-'+version;let key=sessionStorage.getItem(name);if(!key){key=crypto.randomUUID();sessionStorage.setItem(name,key);}const r=await fetch('/api/candidate-runs',{method:'POST',headers:{'Content-Type':'application/json','Idempotency-Key':key},body:JSON.stringify({journey_version_id:version})}),data=await r.json();if(!r.ok)throw Error(reasonText(data.reason));router.push('/candidate-runs/'+encodeURIComponent(data.product_run_id));}catch(e){setError(e instanceof Error?e.message:'Candidate preparation is unavailable.');setBusy(false);}}
+ return <main id="main" className="container"><PageHeader title="Prepare candidate test" purpose="Use an immutable saved seat selection journey for an isolated engineering test." status={<span className="chip">Nonproduction · Unqualified</span>}/><p className="notice">Preparing a candidate saves its exact source and steps. Native execution requires a separate bounded authorization. Production execution remains unavailable.</p><p className="mono">Saved journey version: {version}</p><button className="button" disabled={busy||!version} onClick={prepare}>{busy?'Saving candidate…':'Save candidate request'}</button><p role="status" aria-live="polite">{error}</p></main>;
+}

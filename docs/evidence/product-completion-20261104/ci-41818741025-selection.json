@@ -1,0 +1,142 @@
+{
+  "included": [
+    "broker-request-limit.test.mjs",
+    "browser.test.mjs",
+    "ci-browser-cleanup.test.mjs",
+    "ci-offline-selection.test.mjs",
+    "client.test.mjs",
+    "engineering.test.mjs",
+    "meta-completion.test.mjs",
+    "meta-patch-format.test.mjs",
+    "meta-transport.test.mjs",
+    "r1-baseline.test.mjs",
+    "r2-admission-integration.test.mjs",
+    "r2-admission.test.mjs",
+    "r2-binding.test.mjs",
+    "r2-capture-boundaries.test.mjs",
+    "r2-capture-corrections.test.mjs",
+    "r2-capture-export.test.mjs",
+    "r2-capture-receipts-failclosed.test.mjs",
+    "r2-capture-receipts.test.mjs",
+    "r2-capture.test.mjs",
+    "r2-completion-integrity.test.mjs",
+    "r2-evidence-compatibility.test.mjs",
+    "r2-evidence.test.mjs",
+    "r2-import-admission.test.mjs",
+    "r2-lifecycle.test.mjs",
+    "r2-page-provider.test.mjs",
+    "r2-payload-context.test.mjs",
+    "r2-preparation-hardening.test.mjs",
+    "r2-preparation.test.mjs",
+    "r2-proctree.test.mjs",
+    "r2-product-export.test.mjs",
+    "r2-provenance.test.mjs",
+    "r2-quiescence.test.mjs",
+    "r2-review.test.mjs",
+    "r2-runtime-class.test.mjs",
+    "r2-runtime.test.mjs",
+    "r2-send-receipt.test.mjs",
+    "r2.test.mjs",
+    "sendguard.test.mjs",
+    "speech.test.mjs",
+    "tabwise-budget-alarm.test.mjs",
+    "tabwise-d65-executor.test.mjs",
+    "tabwise-d65-network.test.mjs",
+    "tabwise-d65-observer.test.mjs",
+    "tabwise-d67-crash.test.mjs",
+    "tabwise-d67-executor.test.mjs",
+    "tabwise-d67-integrity.test.mjs",
+    "tabwise-diagnosis-persistence.test.mjs",
+    "tabwise-diagnosis.test.mjs",
+    "tabwise-executor.test.mjs",
+    "tabwise-meta.test.mjs",
+    "tabwise-observer.test.mjs",
+    "tabwise-patch-review.test.mjs",
+    "tabwise-patch-validation.test.mjs",
+    "tabwise-qualification-core.test.mjs",
+    "tabwise-qualification-evidence.test.mjs",
+    "tabwise-qualification-loader.test.mjs",
+    "tabwise-qualification-providers.test.mjs",
+    "tabwise-r3-application.test.mjs",
+    "tabwise-r3-continuation.test.mjs",
+    "tabwise-r3-input.test.mjs",
+    "tabwise-r3-lifecycle.test.mjs",
+    "tabwise-r3-native-source.test.mjs",
+    "tabwise-r3-worker-input.test.mjs",
+    "tabwise-review-approval.test.mjs",
+    "tabwise-review-input.test.mjs",
+    "tabwise-review-integrity.test.mjs",
+    "tabwise-review-network.test.mjs",
+    "tabwise-verdict-integrity.test.mjs",
+    "tabwise-verdict.test.mjs",
+    "tabwise-worker.test.mjs",
+    "vendor.test.mjs"
+  ],
+  "excluded": [
+    {
+      "file": "broker.test.mjs",
+      "kind": "process",
+      "reason": "spawns real Node workers for SQLite contention"
+    },
+    {
+      "file": "fernway.test.mjs",
+      "kind": "browser",
+      "reason": "real Chromium execution; separately authorized browser coverage required"
+    },
+    {
+      "file": "r1-baseline-eol.test.mjs",
+      "kind": "process",
+      "reason": "spawns Git, Node digest workers and observer check-only entry"
+    },
+    {
+      "file": "tabwise-budget.test.mjs",
+      "kind": "process",
+      "reason": "spawns 50 real Node workers"
+    },
+    {
+      "file": "tabwise-d67-timing.test.mjs",
+      "kind": "process",
+      "reason": "spawns Git and loads runtime closure in a disposable repository"
+    },
+    {
+      "file": "tabwise-d73-admission.test.mjs",
+      "kind": "process",
+      "reason": "spawns PowerShell with shimmed dispatch commands; uncertain external effects"
+    },
+    {
+      "file": "tabwise-network-browser.test.mjs",
+      "kind": "browser",
+      "reason": "real Chromium execution; separately authorized browser coverage required"
+    },
+    {
+      "file": "tabwise-qualification-browser.test.mjs",
+      "kind": "browser",
+      "reason": "real Chromium execution; separately authorized browser coverage required"
+    },
+    {
+      "file": "tabwise-qualification-policy.test.mjs",
+      "kind": "process",
+      "reason": "spawns observer check-only entry (default-disabled refusal)"
+    },
+    {
+      "file": "tabwise-r3-database.test.mjs",
+      "kind": "process",
+      "reason": "opt-in isolated PostgreSQL connections and real concurrent candidate transactions; run separately"
+    },
+    {
+      "file": "tabwise-r3-recorder-browser.test.mjs",
+      "kind": "browser",
+      "reason": "real local headless Chromium measures shipped Fernway recorder identities; no NVDA or physical input; run separately"
+    },
+    {
+      "file": "tabwise-r3-rerun-database.test.mjs",
+      "kind": "process",
+      "reason": "opt-in isolated PostgreSQL connections and real concurrent rerun transactions; run separately"
+    },
+    {
+      "file": "tabwise-r3-rerun.test.mjs",
+      "kind": "browser",
+      "reason": "launches real local Chromium for synthetic correct/wrong repair task controls; run separately"
+    }
+  ]
+}

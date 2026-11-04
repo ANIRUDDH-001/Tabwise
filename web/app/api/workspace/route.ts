@@ -3,6 +3,8 @@ import {requireUser,serviceClient} from '../../../lib/server/supabase';
 import {loadOwnedWorkspace} from '../../../lib/server/workspace-data.mjs';
 import {catalogView} from '../../../lib/workspace-state.mjs';
 import {HttpError} from '../../../lib/server/core.mjs';
+import {candidateConfiguration} from '../../../lib/server/candidate-run-live';
+import {candidateWorkspaceViews} from '../../../lib/server/candidate-run.mjs';
 export async function GET(request:Request){return endpoint(request,async()=>{
  const user=await requireUser(),db=serviceClient();
  const data=await loadOwnedWorkspace(user.id,async(table:string,userId:string)=>{
@@ -14,5 +16,7 @@ export async function GET(request:Request){return endpoint(request,async()=>{
   if(error)throw new HttpError(503,'workspace_service_unavailable');return Boolean(data?.length);
  });
  const {data:catalog,error}=await db.from('journeys').select('id,app_id,name,supported').eq('app_id','fernway').limit(3);if(error)throw new HttpError(503,'workspace_service_unavailable');
- return Response.json({...data,catalog:catalogView(catalog)},{headers:{'Cache-Control':'private, no-store'}});
+ const candidate=candidateConfiguration();let candidates:unknown[]=[];
+ if(candidate.enabled&&candidate.userId===user.id){const {data:rows,error:candidateError}=await db.from('candidate_native_runs').select('product_run_id,journey_version_id,user_id,state,classification,production_qualified,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(25);if(candidateError)throw new HttpError(503,'workspace_service_unavailable');candidates=candidateWorkspaceViews(rows??[],user.id);}
+ return Response.json({...data,candidates,catalog:catalogView(catalog)},{headers:{'Cache-Control':'private, no-store'}});
  });}

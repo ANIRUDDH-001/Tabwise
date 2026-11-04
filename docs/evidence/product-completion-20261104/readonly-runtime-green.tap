@@ -1,0 +1,25 @@
+✔ internal startup and subsequent owner checks use authenticated resolver (3.6898ms)
+✔ refuses competing (0.5651ms)
+✔ refuses foreign (0.4439ms)
+✔ refuses PID reuse (0.3372ms)
+✔ refuses wrong executable (0.2076ms)
+✔ refuses stale (0.1464ms)
+✔ refuses stopped (0.1321ms)
+✔ unstarted owner cannot fall back to legacy discovery (0.3276ms)
+✔ unavailable executable refuses before spawn (0.1746ms)
+✔ dead owned process never invokes global quit (0.9622ms)
+✔ owned native exit code survives cleanup without changing identity or ownership decisions (0.3198ms)
+✔ cancellation during identity query bounds uncooperative helper (39.3587ms)
+✔ cancellation during listener query bounds uncooperative helper (31.0095ms)
+✔ hung direct child cleanup refuses physical quiescence (31.7571ms)
+✔ expired startup deadline launches nothing (0.3022ms)
+✔ source pins refuse changed lifecycle bytes and preserve frozen vendor isolation (20.2659ms)
+✔ dead child exit without close retains cleanup uncertainty (27.2496ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 247.1991

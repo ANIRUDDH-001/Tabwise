@@ -1,0 +1,16 @@
+{
+  "schema": "tabwise-r2-runtime-pins/1",
+  "files": {
+    "scripts/tabwise/r2-loader.mjs": "f09fbd21e21cebde4ca23caf2745e14fd38a434d8033aafff09bb2ab9e1a962c",
+    "scripts/tabwise/r2-vendor-loader.mjs": "5fbf83e697f0c4adc4b9a7246cf231050f7643649b29ea050f166da4682bdc5f",
+    "scripts/tabwise/r2-nvda-lifecycle.mjs": "3ec10c5e0ec6f195e81b2d503cea5908839409e0cec26e9ad3286e749f03e7d6",
+    "scripts/tabwise/r2-runtime-integrity.mjs": "f41a4adadc322adf157039ae60b0a263b362bf9e6627cde50c610412e245ef6b",
+    "diagnostics/owner-v2/resolver.mjs": "767b2531e73cc75a7a4f9d926864b04ff18f77563d9f347ecc82c0d6858612c6",
+    "diagnostics/owner-v2/identity.ps1": "41abb80f9db3615961a3e2c3333612c2a9f587e1e5b0699e728481be0e83364b",
+    "scripts/tabwise/r2-session.mjs": "08db356e3ed8ac22c977709b5a2402780470f31867cc1bdd16d80ccf0bb3258b",
+    "diagnostics/r2-native/startup-cleanup.mjs": "7a57ed1afaeb8a76f460fa573ac68b09fc96282905b3133aa27863c66564bad5",
+    "diagnostics/r2-native/startup-diagnostics.mjs": "aca96d9b51f3c3923f15aa476da284936cbaf5d3a79550ef41c11348fa470cc9",
+    "src/r2/runtime-metadata.mjs": "d66a5c9d17b2812f3f10c893d8e11c94e3b1cc253baa774de875e052d5b6df22",
+    "src/r2/product-producer.mjs": "59c7e7986e0dcf7af0b921adf8a59e28cbd1c00a24719174b02f7ac68bbcd49c"
+  }
+}

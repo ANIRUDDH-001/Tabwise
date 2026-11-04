@@ -23,6 +23,8 @@ import {checkR2Entry, r2RunDir, r2ChildEnv, r2PageCommand, r2SessionData, r2Page
 
 import {bindingFromGate, createCoordinator, requestPageAdmission, verifyAdmissionRecord} from './tabwise/r2-admission.mjs';
 import {loadAdmissionPolicy, createConfiguredTransport, admissionConsumer, admissionDirectory} from './tabwise/r2-admission-transport.mjs';
+import {prepareConfiguredNativeProductCoordinator,sealNativeProductRun} from '../src/r2/product-coordinator.mjs';
+import {beginConfiguredNativeProductPage,finishNativeProductPage} from '../src/r2/product-producer.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const entry = fileURLToPath(import.meta.url);
@@ -36,14 +38,14 @@ const message = error => error?.message ?? String(error);
 async function runPage(gate) {
   // W5: no protected import before the signed, one-process IPC challenge is accepted.
   const policy = loadAdmissionPolicy(), binding = bindingFromGate(gate, policy);
-  await requestPageAdmission({id:policy.authorization_id,binding, consumer: admissionConsumer(process.env), page: gate.pages[0].id, publicKey: policy.receipt_public_key});
+  const admission=await requestPageAdmission({id:policy.authorization_id,binding, consumer: admissionConsumer(process.env), page: gate.pages[0].id, publicKey: policy.receipt_public_key});
   const page = gate.pages[0], runDir = r2RunDir(process.env, root);
   const phase = createQualificationIntegrity({root, head: gate.head, reviewedDigest: gate.status.qualification_sha256});
   const r2Phase = () => (r2Digest(root) === gate.status.reviewed_sha256 ? [] : ['R2 reviewed content changed']);
   if (r2Phase().length) throw Error('BLOCK: R2 reviewed content changed before runtime load');
-  const {loadQualificationRuntime, isQualificationRuntime} = await import('./tabwise/qualification-loader.mjs');
-  const runtime = await loadQualificationRuntime({root, additionalIntegrity: phase.checkSend});
-  if (!isQualificationRuntime(runtime)) throw Error('BLOCK: authentic R2 runtime required');
+  const {loadR2Runtime, isR2Runtime} = await import('./tabwise/r2-loader.mjs');
+  const runtime = await loadR2Runtime({root, additionalIntegrity: phase.checkSend});
+  if (!isR2Runtime(runtime)) throw Error('BLOCK: authentic R2 runtime required');
   const abort = why => { if (!runtime.guard.isStopped()) runtime.guard.stop(`R2 page ${why}`, 'timeout'); };
   const onSignal = () => abort('signal');
   const removeCrash = installQualificationCrashHandlers({abort: () => abort('crash'), record: event => console.error(JSON.stringify({r2_page: page.id, ...event}))});
@@ -54,7 +56,10 @@ async function runPage(gate) {
   let result = null, failure = null;
   try {
     const {runR2Session} = await import('./tabwise/r2-session.mjs');
-    result = await runR2Session(runtime, r2SessionData(gate.plan, page, gate.fixtures.get(page.id), join(runDir, page.id), gate.repair));
+    const data=r2SessionData(gate.plan, page, gate.fixtures.get(page.id), join(runDir, page.id), gate.repair);
+    const product=await beginConfiguredNativeProductPage(runtime,data,admission);
+    result = await runR2Session(runtime,data);
+    if(product)await finishNativeProductPage(product,result);
   } catch (error) {
     failure = message(error);
     abort('session refused');
@@ -94,13 +99,16 @@ function launchAdmittedPage({id,gate,env,coordinator,admissionDir,cancel}) {
 // Sequential page children; never a runtime in this process. The run manifest is sealed and verified from disk.
 async function runAll(gate) {
   const policy = loadAdmissionPolicy(), binding = bindingFromGate(gate, policy), consumer = admissionConsumer(process.env);
-  const coordinator = await createCoordinator({id: policy.authorization_id, binding, consumer, publicKey: policy.receipt_public_key,
-    transport: createConfiguredTransport(policy, process.env)});
+  const transport=createConfiguredTransport(policy,process.env);
+  const product=await prepareConfiguredNativeProductCoordinator({gate,policy,root,transport});
+  const coordinator = product?.coordinator??await createCoordinator({id: policy.authorization_id, binding, consumer, publicKey: policy.receipt_public_key,transport});
+  const executableGate=product?{...gate,planPath:product.nativePlan.planPath}:gate;
   // Any failure after consumption burns this authorization. No recovery path can create another coordinator.
   const admissionDir = admissionDirectory(r2RunDir(process.env, root), consumer);
   mkdirSync(dirname(admissionDir), {recursive: true}); mkdirSync(admissionDir);
   writeFileSync(join(admissionDir, 'receipt.json'), JSON.stringify(coordinator.receipt), {flag: 'wx'});
   const runDir = r2RunDir(process.env, root), env = r2ChildEnv(process.env), forwarded = new Map();
+  if(product)Object.assign(env,product.childEnv);
   // R-1/R-2: OS process custody of every page child's tree, held here and never delegated to the child's own report.
   const processes = windowsProcessTools({spawn, env: process.env});
   mkdirSync(dirname(runDir), {recursive: true});
@@ -112,7 +120,7 @@ async function runAll(gate) {
   try {
     outcome = await runR2Pages({
       pages: gate.pages.map(p => p.id),
-      launch: id => launchAdmittedPage({id,gate,env,coordinator,admissionDir,cancel}),
+      launch: id => launchAdmittedPage({id,gate:executableGate,env,coordinator,admissionDir,cancel}),
       onStderr: (id, data) => { const used = forwarded.get(id) ?? 0; if (used < STDERR_CAP) { forwarded.set(id, used + data.length); process.stderr.write(data); } },
       processes, signal: cancel.signal, protect: [process.pid, process.ppid],
     });
@@ -132,6 +140,7 @@ async function runAll(gate) {
   const admission = coordinator.record(sealed.manifest_sha256);
   writeFileSync(join(admissionDir, 'admission.json'), JSON.stringify(admission), {flag: 'wx'});
   verifyAdmissionRecord(admission, {id:policy.authorization_id,binding, consumer, publicKey: policy.receipt_public_key, manifest: sealed.manifest_sha256, pages: outcome.pages.map(p => p.id)});
+  if(product)sealNativeProductRun({product,runDir,admissionDir,verification:verified,outcome});
   console.log(JSON.stringify({schema: 'tabwise-r2-run-summary/1', run_class: verified.run_class, verified: verified.ok, errors: verified.errors,
     run_manifest_sha256: sealed.manifest_sha256, pages: outcome.pages, stopped_after: outcome.stopped_after, genuine_evidence: false}));
   return r2RunExit(outcome, verified);

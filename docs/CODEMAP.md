@@ -139,3 +139,78 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 
 | `src/repair/oracle.mjs`, `web/components/RepairOracleReview.tsx`, patch oracle API, `web/lib/oracle-state.mjs` | Explicit source-bound owner check registration/readback before admission | lifecycle/oracle-state and repair-oracle browser tests |
 | `supabase/migrations/20261103030000_repair_oracle_admission.sql` | Pre-admission oracle tuple plus shared live-dispatch guard; no execution clearance | real PostgreSQL concurrent registration/admission and legacy-dispatch negatives |
+
+| `test/meta-completion.test.mjs` | Optional Spark reasoning/output configuration and strict incomplete-response refusal; known usage settlement and uncertain reservation retention | diagnosis/client/broker focused regressions |
+
+| `src/meta/transport.mjs`, `test/meta-transport.test.mjs` | Bounded credential-safe nested transport diagnostics and reservation retention regressions | respond failure path |
+| `test/meta-patch-format.test.mjs`, `docs/engineering/Spark-bounded-campaign.md` | Complete patch-format prompt contract and measured non-native campaign report | Spark local qualification |
+
+| `web/test/{diagnosis-contract.ts,reviewed-loader.test.mjs,focus-identity.browser.mjs,repair-focus-identity.test.mjs,telemetry-export.test.mjs}` | P0 omission/type, bounded source loader, truthful browser/native identity, terminal oracle and sealed export regressions | engineering-only; no acceptance promotion |
+| `docs/engineering/{P0-reliability-checkpoint,Tabwise-UX-readiness-brief}.md` | Measured local checkpoint, explicit replay/native/hosted blockers and subsequent UX brief | consolidated ignored `cache/p0-reliability-20261103T152120Z/` |
+| `web/next.config.mjs`, `web/r2-trace-files.json`, `web/test/deployment-trace.check.mjs` | Exact raw native-source/digest closure in API deployment traces; post-build import/digest check from trace-only files | no runtime or policy activation |
+| `fixtures/fernway/instrumented-v2/` | Explicit page-authored telemetry variant and separate manifest; historical Fernway bytes retained | `web/test/p0-fixture-integrity.test.mjs`, focus browser checks |
+| `web/test/p0-{oracle-corrections,export-bounds,fixture-integrity,loader-cwd}.test.mjs`, `p0-recorder.browser.mjs` | P0 adversarial identity, legacy refusal, size, source and deployment-cwd regressions | engineering only |
+| `docs/engineering/P0-{corrections-review-response,hosted-and-probe-readiness,R7-review-package}.md` | Current review response, hosted/probe blockers and blocked independent-assessment package | `cache/p0-corrections/` raw evidence and corrected review patch |
+| `src/r2/product-dispatch.mjs`, `web/test/product-dispatch.test.mjs` | Inactive exact product/native request persistence, association and artifact-selection seam; no dispatch/native authority | filesystem concurrency/crash/identity negatives |
+| `web/test/logical-target.browser.mjs`, `docs/engineering/Tabwise-{end-to-end-execution-plan,plan-review-response}.md` | Conditional-review regressions, evidence-based critique and G0–G5 R1/R2/R3/R7 dependency/permission plan | `cache/p0-followup/`, `cache/plan-review-refinement/` |
+| `supabase/migrations/20261103040000_native_product_requests.sql`, `web/lib/server/native-{request,request-live,binding}.*`, native-request API | Owned immutable native request preparation, correlation/recovery and tested signed worker-binding seam; no live sender/qualification | `web/test/native-{request-api,request-database,binding}.test.mjs` |
+| `src/r2/request-package.mjs`, `web/components/NativeRequestPanel.tsx`, `docs/engineering/G2-local-request-checkpoint.md` | Exclusive candidate delivery, truthful request UI and scoped local checkpoint evidence | `cache/g2-local/`; not native acceptance |
+
+| `web/lib/server/native-request-context.mjs`, `web/test/g2-query-correction.test.mjs`, `web/test/package-recovery.test.mjs` | Exact stored variant/query and explicit candidate recovery corrections | G2 focused review; no execution authority |
+| `web/test/native-route.production.mjs`, `web/test/helpers/{local-supabase-fetch,native-request-correction}.mjs` | Actual built route boundary regression with synthetic local provider and real disposable PostgreSQL | external traffic refused; no hosted authentication claim |
+| `docs/engineering/G2-focused-corrections-review.md` | Five review dispositions, measured checks, G1 separation and remaining qualification blockers | `cache/g2-correction-review/` |
+
+| `web/lib/server/native-{integration,artifacts}*`, native-dispatch/native-ingest/product-binding APIs, `src/r2/product-worker.mjs` | Disabled exact producer/dispatch, nonce OIDC claim, strict native archive adapter and read-only complete-set recovery | native integration/claim/artifact/worker tests and real SQL/routes |
+| `supabase/migrations/20261103181501_native_integration_custody.sql` | Immutable producer, nonce/claim and ingestion custody; service-only RPCs with owner checks | native-integration-database.test.mjs |
+| `web/test/{native-product-replay,production-native-chain}.mjs`, `docs/engineering/Accelerated-integration-review.md` | Same real saved-run continuation with controlled transport and explicit native-refusal replay seam | cache/accelerated-sprint; never native acceptance |
+| `docs/engineering/R7-{independent-preregistration.md,preregistration-draft.json}` | Independent withheld custody/control protocol; unavailable identity/labels/results remain null | no R7 verdict |
+
+| `src/r2/product-{delivery,workflow-export}.mjs`, `scripts/tabwise/product-workflow-boundary.mjs` | Disabled exact source delivery and unsigned exporter / trusted-job adapter; no input authority | product-delivery.test.mjs |
+| `web/lib/server/verification-directory.mjs`, native_claim_recovery migration | Finally scratch cleanup, durable refusal retention and transactional claim recovery | native-readiness/native-recovery-database tests |
+| `docs/engineering/Native-workflow-readiness.md`, native-workflow-permission-proposal.patch | Remaining source/permission boundaries and unapplied exact trusted-job proposal | no workflow activation |
+
+| `src/r2/workflow-delivery.mjs`, `scripts/tabwise/product-windows-boundary.mjs` | Disabled native-product delivery revalidation and forensic export package persistence; no input/qualification authority | verifyWindowsDelivery, persistExportPackage, CLI verify/export | web/test/workflow-delivery.test.mjs |
+| `docs/engineering/Final-sprint-*.md`, `tabwise-r2.product-proposal.yml` | Measured sprint/operational/demo handoff and unapplied workflow source | F-03 | exact proposal diff check |
+
+| `src/r2/native-plan.mjs`, `web/test/native-plan-materialization.test.mjs` | Exclusive external per-request plan/fixture delivery, independently signed W5 and exact request admission, byte checks and completion-last inventory; disabled native routing | `materializeNativePlan`, `readNativePlan`; Windows delivery adapter accepts explicit admitted source |
+
+| diagnostics/r2-native/; .github/workflows/tabwise-r2-native-diagnostic.yml | Separate NONQUALIFYING owner-packet gate, unchanged guarded session/custody, source projection/refusal and separate-runner artifact/tamper verification; attempt1 offline only | run.mjs --packet RUN_ID; test.mjs; native input requires explicit approval |
+
+| diagnostics/r2-native/error-test.mjs; scripts/tabwise/r2-session.mjs optional diagnostic observer | Redacted nested startup errors in diagnostic-only artifact; unchanged rejection/cleanup; incomplete verifier integrity-only mode | R2-native-attempt2-causes.md |
+
+| `diagnostics/owner-v2/` | Separate read-only netstat resolver, fixed process identity query, strict V2 source/run authorization and local Windows measurements; no native authority | resolver/entry/policy/measure | resolver, real-child, policy tests |
+
+| `scripts/tabwise/r2-{loader,vendor-loader,nvda-lifecycle,runtime-integrity}.mjs`, `r2-runtime-pins.json` | R2-only one-shot private frozen CJS graph and identity-checked bounded startup/owned-handle cleanup; never loads frozen startup/quit implementations | `loadR2Runtime`, `createLifecycle`; new runtime/class/loader tests |
+| `scripts/tabwise/r2-{listeners,quiescence}.mjs` | Bounded fixed-port resolver output and read-only global pre/post workflow census | no native start or input |
+
+| `test/r2-{quiescence,import-admission}.test.mjs` | Actual bounded helper and page authority/import ordering under isolated Worker module boundaries; no native launch | final R2 regression closure |
+
+| `diagnostics/r2-native/startup-{cleanup,diagnostics}.mjs`, `autopsy.test.mjs` | Source-bound failed-start cleanup confirmation and fixed stage/code diagnostic allowlist; actual-class offline negatives | no native authority |
+
+| `diagnostics/owner-v2/process-identity.test.mjs` | Real sanitized owned Windows Node/PowerShell identity qualification,rapid-exit/launch/deadline/output negatives and offline workflow gate | no NVDA or input |
+
+| `diagnostics/owner-v2/identity-timing.mjs` | Bounded owned Node cold/warm PowerShell identity stage measurements, no NVDA/input | offline hosted review diagnostic |
+
+| `diagnostics/r2-native/startup-log.mjs` | Fixed-path bounded scrubbed NVDA log diagnostic; no runtime authority | startup artifact |
+
+| `diagnostics/owner-v2/foreground-timing.mjs` | Hosted read-only unchanged foreground helper stage timing, omits window text, no keys/focus | journey offline review |
+
+| `docs/evidence/r2-recovery/`, `docs/engineering/R2-autonomous-recovery-handoff.md` | Immutable original successful startup/native/separate-verifier archives, derived summary, measured fixes and explicit product-qualification blocker | runtime90c13f4, run41801278982/2 |
+
+| `src/deployment-execution.mjs`, native request/progress helpers, `test/broker-request-limit.test.mjs`, `web/test/native-{progress,controls}*` | Preview execution refusal, durable request ceiling, owned native progress and server-derived UI controls | root/web/browser/SQL evidence in product completion package |
+| `docs/engineering/Product-completion-review-20261104.md`, `docs/evidence/product-completion-20261104/` | Exact-source incomplete engineering review, original test logs, native artifact hashes and unresolved authority/implementation criteria | candidate.json and evidence-index.json; no qualification authority |
+
+| `src/r2/runtime-metadata.mjs`, identity helper metadata switch, native session events; `test/r2-runtime-metadata.test.mjs`, `diagnostics/owner-v2/runtime-metadata.test.mjs` | Bounded owned-process file version/hash plus A15 readback; sealed event metadata export; no qualification | Runtime continuation evidence index; real Windows check uses own Node process only |
+| `web/lib/server/native-plan-admission.mjs`, `web/app/api/r2/product-admission/route.ts`, `web/test/native-plan-issuer.test.mjs` | Existing-W5 request receipt issuance after authenticated durable native association; independently verified worker transport; disabled in Preview and shipped policies | issuer -> real materializer plus identity/signature/source/expiry negatives; no native acceptance |
+| `src/r2/product-{producer,coordinator,origin}.mjs`, original protected entry and Windows delivery adapter | Fresh-capture intent/result lifecycle, one-consumption delivery, separate signed origin envelope and nonqualifying raw-preserving inspection | `web/test/product-origin.test.mjs`, native-plan issuer/staging controls; successful native path unmeasured |
+| `test/r2-native-query.test.mjs`, `web/test/repair-protected-steps.test.mjs` | Healthy/broken source query identity and protected focus/speech regression controls | pure filesystem/synthetic oracle; no native qualification |
+| `README.md`, `LICENSE`, `THIRD_PARTY_NOTICES.md` | Contributor setup, accurate availability and owner-attributed original-material MIT grant | local links, public URLs, dependency-license and bounded credential/history scan |
+
+| `diagnostics/r2-candidate/{policy,run,store,verify}.mjs`, adjacent focused tests; existing diagnostic workflow candidate jobs | Fixed five-key Fernway nonproduction request, separate attempt-2 W5 purpose, durable local consumption, original guarded session/custody and separate-runner readback/tamper checks | NONPRODUCTION_UNQUALIFIED only; no measured native baseline yet |
+
+| `web/lib/server/candidate-run{,-live}.{mjs,ts}`, `/api/candidate-runs`, `/api/candidate-runs/[id]`; `supabase/migrations/20261104170315_candidate_native_runs.sql` and focused SQL/API/database tests | Separate owned immutable candidate source/request, durable dispatch intent and unknown-state refusal; private owner readback | No production run/evidence/budget mutation; explicit candidate environment switch |
+
+| `web/lib/server/candidate-evidence{,-live}.{mjs,ts}`, candidate evidence API, `CandidateRun`/`PrepareCandidate`, saved-version/workspace links; migration20261104172612 and browser/API/database controls | Authenticated GitHub archive/custody replay, private immutable candidate readback and explicitly unqualified timeline | Hosted genuine baseline/credentials pending; no production acceptance |
+| `docs/engineering/Candidate-vertical-slice-20261104.md`, `docs/evidence/candidate-vertical-slice-20261104/` | Original bootstrap/failure bytes, indexed local tests, native/source scope separation and exact external configuration actions | Candidate-only checkpoint, no native acceptance |
+
+| `docs/evidence/candidate-runtime-recovery-20261104/` | Original W5-consumed pre-capture budget refusal, clean process custody and red/green budget correction | run41876894297/2; no accepted native capture |
