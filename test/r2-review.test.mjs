@@ -318,7 +318,7 @@ test('S5a static: r2-compose imports exactly the reviewed capability-free module
     '../../src/r2/send-receipt.mjs', '../../src/r2/speech-payload.mjs', '../../src/speech/sendguard.mjs', './r2-evidence.mjs']);
   assert.doesNotMatch(code, /\bimport\s*\(/, 'no dynamic import');
   assert.doesNotMatch(code, /\brequire\s*\(|createRequire|process\.binding|globalThis\[/, 'no other loading path');
-  for (const forbidden of ['playwright', '@axe-core', 'child_process', 'node:net', 'node:fs', 'qualification-loader', 'loadQualificationRuntime', 'isQualificationRuntime',
+  for (const forbidden of ['playwright', '@axe-core', 'child_process', 'node:net', 'node:fs', 'r2-loader', 'loadR2Runtime', 'isR2Runtime', 'qualification-loader', 'loadQualificationRuntime', 'isQualificationRuntime',
     'network.mjs', 'observer.mjs', 'executor.mjs', 'foreground.mjs', 'vendor/', 'guidepup', 'createR2EvidenceWriter', 'sealR2Run', 'owned-vendored-runtime', 'genuine-unqualified'])
     assert.equal(code.includes(forbidden), false, `r2-compose.mjs must not name ${forbidden}`);
   assert.deepEqual([...code.matchAll(/^export\s+(?:async\s+)?(?:function|const|let|class)\s+(\w+)/gm)].map((m) => m[1]), ['composeR2Page']);
@@ -351,7 +351,7 @@ test('S5a static: only the S5b session imports r2-compose (no entry or other mod
   const importers = sources.filter((f) => f !== 'scripts/tabwise/r2-compose.mjs' && importsOf(f).some((s) => s.endsWith('r2-compose.mjs')));
   assert.deepEqual(importers, ['scripts/tabwise/r2-session.mjs']);
   assert.deepEqual(importsOf('src/r2/speech-payload.mjs').sort(), ['../../scripts/tabwise/r2-evidence.mjs', './contract.mjs', './preparation.mjs', 'node:crypto', 'node:fs', 'node:path']);
-  assert.doesNotMatch(readS4('src/r2/speech-payload.mjs', 'utf8'), /\bimport\s*\(|playwright|child_process|qualification-loader|fetch\(|respond\(/);
+  assert.doesNotMatch(readS4('src/r2/speech-payload.mjs', 'utf8'), /\bimport\s*\(|playwright|child_process|r2-loader|qualification-loader|fetch\(|respond\(/);
 });
 
 test('S5a/C-3 scope: R2_FILES covers r2-compose and speech-payload; the pristine R2 fixture stays disabled/BLOCK', () => {
@@ -372,7 +372,7 @@ import { sendGate as sendGateS6 } from '../src/speech/sendguard.mjs';
 const S6_SESSION = 'scripts/tabwise/r2-session.mjs', S6_ENTRY = 'scripts/tabwise-r2.mjs', S6_RUN = 'scripts/tabwise/r2-run.mjs';
 const BRAND_ERROR = /^(Error: )?R2 session requires the owned vendored runtime$/;
 const CAPABILITY_SPEC = /playwright|@axe-core|network\.mjs|observer\.mjs|executor\.mjs|qualification-integrity|page-recorder|vendor\/|guidepup|node:http$|node:net$/;
-const ENTRY_RUNTIME_SPEC = /qualification-loader|r2-session|r2-compose|playwright|@axe-core|vendor\/|guidepup|network\.mjs|observer\.mjs|executor\.mjs/;
+const ENTRY_RUNTIME_SPEC = /qualification-loader|r2-vendor-loader|r2-nvda-lifecycle|r2-loader|r2-session|r2-compose|playwright|@axe-core|vendor\/|guidepup|network\.mjs|observer\.mjs|executor\.mjs/;
 
 // Worker thread (not a process): its own module graph, a resolve hook that records every specifier, an isolated env.
 const S6_WORKER = `
@@ -444,13 +444,13 @@ test('S5b-N4 refusal happens before any capability module is resolved (fresh mod
   assert.match(r.error, BRAND_ERROR);
   const capability = r.seen.filter((s) => CAPABILITY_SPEC.test(s) && s !== 'node:http');
   assert.deepEqual(capability, [], `no capability import before refusal: ${capability}`);
-  assert.equal(r.seen.some((s) => /qualification-loader\.mjs$/.test(s)), true, 'the loader module is resolved statically for isQualificationRuntime only');
+  assert.equal(r.seen.some((s) => /r2-loader\.mjs$/.test(s)), true, 'the loader module is resolved statically for isR2Runtime only');
 });
 
 test('S5b-S1 static: exact imports, one export, the brand check is the first statement and precedes every dynamic import', () => {
   const code = readS4(S6_SESSION, 'utf8');
-  assert.deepEqual(importsOf(S6_SESSION).sort(), ['./qualification-loader.mjs', './r2-compose.mjs']);
-  assert.match(code, /^import \{isQualificationRuntime\} from '\.\/qualification-loader\.mjs';$/m);
+  assert.deepEqual(importsOf(S6_SESSION).sort(), ['./r2-compose.mjs', './r2-loader.mjs']);
+  assert.match(code, /^import \{isR2Runtime\} from '\.\/r2-loader\.mjs';$/m);
   assert.match(code, /^import \{composeR2Page\} from '\.\/r2-compose\.mjs';$/m);
   assert.deepEqual([...code.matchAll(/^export\s+(?:async\s+)?(?:function|const|let|class)\s+(\w+)/gm)].map((m) => m[1]), ['runR2Session']);
   assert.doesNotMatch(code, /^export\s*\{/m, 'no export list');
@@ -459,12 +459,12 @@ test('S5b-S1 static: exact imports, one export, the brand check is the first sta
   const header = code.search(/^export async function runR2Session\(runtime, data(?:, diagnostics)?\) \{$/m);
   assert.ok(header > 0);
   const firstStatement = code.slice(header).split('\n')[1].trim();
-  assert.equal(firstStatement, "if (!isQualificationRuntime(runtime)) throw Error('R2 session requires the owned vendored runtime');");
+  assert.equal(firstStatement, "if (!isR2Runtime(runtime)) throw Error('R2 session requires the owned vendored runtime');");
   const brand = code.indexOf(firstStatement);
   const dynamic = [...code.matchAll(/\bimport\s*\(/g)].map((m) => m.index);
   assert.ok(dynamic.length >= 8, 'capabilities are loaded dynamically');
   for (const at of dynamic) assert.ok(at > brand, 'every dynamic import is after the brand check');
-  for (const forbidden of ['loadQualificationRuntime', 'runtimes', 'WeakSet', 'process.env', 'provenance', 'genuine-unqualified', 'owned-vendored-runtime', 'require(', 'createRequire', 'NODE_ENV', 'TABWISE_R2'])
+  for (const forbidden of ['loadQualificationRuntime','loadR2Runtime', 'runtimes', 'WeakSet', 'process.env', 'provenance', 'genuine-unqualified', 'owned-vendored-runtime', 'require(', 'createRequire', 'NODE_ENV', 'TABWISE_R2'])
     assert.equal(code.includes(forbidden), false, `r2-session.mjs must not name ${forbidden}`);
 });
 
@@ -482,10 +482,11 @@ test('S5b-S2 only the S6 entry reaches S5b (dynamically); only S5b imports S5a; 
   assert.deepEqual(sources.filter((f) => importsOf(f).some((s) => s.endsWith('r2-session.mjs'))), [], 'never a static import');
   assert.match(readS4(S6_ENTRY, 'utf8'), /await import\('\.\/tabwise\/r2-session\.mjs'\)/);
   assert.deepEqual(sources.filter((f) => f !== 'scripts/tabwise/r2-compose.mjs' && importsOf(f).some((s) => s.endsWith('r2-compose.mjs'))), [S6_SESSION]);
-  assert.deepEqual(mentions('loadQualificationRuntime'), ['scripts/tabwise-observer.mjs', S6_ENTRY, 'scripts/tabwise/qualification-loader.mjs']);
-  const loader = readS4('scripts/tabwise/qualification-loader.mjs', 'utf8');
+  assert.deepEqual(mentions('loadR2Runtime'), [S6_ENTRY, 'scripts/tabwise/r2-loader.mjs']);
+  assert.deepEqual(mentions('loadQualificationRuntime'), ['scripts/tabwise-observer.mjs', 'scripts/tabwise/qualification-loader.mjs']);
+  const loader = readS4('scripts/tabwise/r2-loader.mjs', 'utf8');
   assert.equal(loader.match(/runtimes\.add\(/g).length, 1, 'one brand site, in the loader');
-  assert.deepEqual(mentions('runtimes.add('), ['scripts/tabwise/qualification-loader.mjs']);
+  assert.deepEqual(mentions('runtimes.add('), ['scripts/tabwise/qualification-loader.mjs', 'scripts/tabwise/r2-loader.mjs']);
 });
 
 // ---- S6 pure helpers ----
@@ -777,15 +778,15 @@ test('S6-E2 invalid arguments refuse before the opt-in is consulted; still no ru
 test('S6-S1 static: the loader and session are imported only inside runPage, in order, around the brand check; --run and --check-only never reach it', () => {
   const code = readS4(S6_ENTRY, 'utf8').replace(/\r\n/g, '\n');
   const dynamic = [...code.matchAll(/await import\('([^']+)'\)/g)].map((m) => [m[1], m.index]);
-  assert.deepEqual(dynamic.map((d) => d[0]), ['./tabwise/qualification-loader.mjs', './tabwise/r2-session.mjs']);
+  assert.deepEqual(dynamic.map((d) => d[0]), ['./tabwise/r2-loader.mjs', './tabwise/r2-session.mjs']);
   assert.equal([...code.matchAll(/\bimport\s*\(/g)].length, 2, 'no other dynamic import');
   const start = code.indexOf('async function runPage('), end = code.indexOf('\n}\n', start);
   assert.ok(start > 0 && end > start);
   for (const [, at] of dynamic) assert.ok(at > start && at < end, 'dynamic imports only inside runPage');
   const body = code.slice(start, end);
-  const brand = body.indexOf('if (!isQualificationRuntime(runtime))');
-  assert.ok(brand > body.indexOf("import('./tabwise/qualification-loader.mjs')") && brand < body.indexOf("import('./tabwise/r2-session.mjs')"), 'brand check between loader and session');
-  assert.ok(body.indexOf('createQualificationIntegrity(') < body.indexOf("import('./tabwise/qualification-loader.mjs')"), 'source integrity before the loader');
+  const brand = body.indexOf('if (!isR2Runtime(runtime))');
+  assert.ok(brand > body.indexOf("import('./tabwise/r2-loader.mjs')") && brand < body.indexOf("import('./tabwise/r2-session.mjs')"), 'brand check between loader and session');
+  assert.ok(body.indexOf('createQualificationIntegrity(') < body.indexOf("import('./tabwise/r2-loader.mjs')"), 'source integrity before the loader');
   assert.equal(code.match(/\brunPage\(/g).length, 2, 'declared once, called once');
   assert.match(code, /if \(gate\.mode === 'page'\) return runPage\(gate\);/);
   for (const forbidden of ['composeR2Page', 'r2-compose', 'NODE_ENV', 'TABWISE_R2_TEST', 'synthetic', 'provenance', 'genuine-unqualified', 'owned-vendored-runtime'])
@@ -796,7 +797,7 @@ test('S6-S1 static: the loader and session are imported only inside runPage, in 
 
 test('S6-S2 r2-run is capability-free; R2_FILES covers S5b and S6; the pristine fixture stays disabled/BLOCK', () => {
   const code = readS4(S6_RUN, 'utf8').replace(/^\s*\/\/.*$/gm, '');
-  assert.doesNotMatch(code, /\bimport\s*\(|child_process|node:net|node:http|playwright|qualification-loader|r2-session|r2-compose|worker_threads/);
+  assert.doesNotMatch(code, /\bimport\s*\(|child_process|node:net|node:http|playwright|qualification-loader|r2-loader|r2-vendor-loader|r2-nvda-lifecycle|r2-session|r2-compose|worker_threads/);
   for (const file of [S6_SESSION, S6_ENTRY, S6_RUN]) assert.ok(R2_FILES.includes(file), file);
   const shipped = pristineBlockS4();
   assert.deepEqual([shipped.enabled, shipped.verdict, shipped.reviewed_sha256, shipped.plan_sha256], [false, 'BLOCK', null, null]);
@@ -880,7 +881,7 @@ const reviewDeferred = () => { let resolve, reject; const promise = new Promise(
 // Substitute only module boundaries in memory. No loader brand can be forged in the on-disk module.
 async function reviewSessionHarness(createObserver, composeFn) {
   let code = readS4(S6_SESSION, 'utf8');
-  code = code.replace("import {isQualificationRuntime} from './qualification-loader.mjs';", 'const isQualificationRuntime = () => true;')
+  code = code.replace("import {isR2Runtime} from './r2-loader.mjs';", 'const isR2Runtime = () => true;')
     .replace("import {composeR2Page} from './r2-compose.mjs';", 'const composeR2Page = globalThis.__r2Review.compose;')
     .replace('const CLEANUP_MS = 10000;', 'const CLEANUP_MS = 80;');
   const begin = code.indexOf('await Promise.all(['), end = code.indexOf(']);',begin)+3;
@@ -1047,7 +1048,7 @@ test('S7-S1 static: --verify-run is read-only; it never seals, spawns, writes, o
   const start = code.indexOf('async function verifyRun('), end = code.indexOf('\n}\n', start);
   assert.ok(start > 0 && end > start, 'verifyRun is declared');
   const body = code.slice(start, end);
-  for (const forbidden of ['import(', 'spawn', 'mkdirSync', 'writeFile', 'sealR2Run', 'runPage', 'runAll', 'runR2Pages', 'loadQualificationRuntime', 'r2PageCommand', 'r2ChildEnv'])
+  for (const forbidden of ['import(', 'spawn', 'mkdirSync', 'writeFile', 'sealR2Run', 'runPage', 'runAll', 'runR2Pages', 'loadQualificationRuntime','loadR2Runtime', 'r2PageCommand', 'r2ChildEnv'])
     assert.equal(body.includes(forbidden), false, `verifyRun must not use ${forbidden}`);
   assert.match(body, /r2VerifyRun\(gate, r2RunDir\(process\.env, root\)\)/);
   // The entry cannot run past BLOCK offline, so its print-and-return is pinned statically.
@@ -1103,8 +1104,17 @@ function s7Step(job, name) {
 }
 const s7Minutes = (step) => Number(/\n        timeout-minutes: ([0-9]+)\n/.exec(step ?? '')?.[1] ?? NaN);
 // budgetMs is R2_RUN_STEP_BUDGET_MS from r2-run.mjs: the R2 run step timeout and the plan budget gate share it (W17).
-function s7CheckWorkflow(text, budgetMs) {
+const s7Helpers=()=>Object.fromEntries(['quiescence','listeners','proctree'].map(name=>[name,readS4(`scripts/tabwise/r2-${name}.mjs`,'utf8').replace(/\r\n/g,'\n')]));
+function s7CheckWorkflow(text, budgetMs, helpers=s7Helpers()) {
   const errors = [], err = (m) => errors.push(m);
+  for(const need of ["await windowsProcessTools({spawn,env:process.env}).snapshot()","scope:'global'","page_custody:'not claimed:","...quiescenceOf(snapshot)","physical_quiescence_verified:false","containment_required:true","{flag:'wx'}","if(!result.quiescent)process.exitCode=1"])
+    if(!helpers.quiescence.includes(need))err('W15 helper missing '+need);
+  if(/\.terminate\(|\.kill\(|\bspawn\(|nvda\.start|loadQualificationRuntime|loadR2Runtime|Get-NetTCPConnection/.test(helpers.quiescence))err('W15 helper must only observe');
+  for(const need of ['port:6837','deadline:performance.now()+5000','!result.query_completed','!result.measurement.cleanup.process_close_observed'])
+    if(!helpers.listeners.includes(need))err('W15 bounded listener helper missing '+need);
+  const census=helpers.proctree.split('export const PROCESS_TERMINATE_PS')[0];
+  for(const need of ['Get-CimInstance -ClassName Win32_Process','if($LASTEXITCODE -ne 0)','HELPER_TIMEOUT_MS = 15_000'])if(!census.includes(need))err('W15 bounded census missing '+need);
+  if(/Get-NetTCPConnection|Stop-Process|taskkill|\.Kill\(/.test(census))err('W15 census must use bounded read-only discovery');
   if (!/^on:\n  workflow_dispatch:/m.test(text)) err('W1 trigger must be workflow_dispatch only');
   if (/pull_request|push:|schedule:|workflow_run|repository_dispatch|workflow_call/.test(text)) err('W1 non-manual trigger present');
   if (!/^permissions:\n  contents: read\n\n/m.test(text)) err('W2 top-level permissions must be exactly contents: read');
@@ -1133,7 +1143,7 @@ function s7CheckWorkflow(text, budgetMs) {
   if ((text.match(/TABWISE_R2_ENABLED: 'true'/g) ?? []).length !== 3 || (text.match(/TABWISE_R2_ENABLED/g) ?? []).length !== 3) err('W10 TABWISE_R2_ENABLED only on the three gated steps');
   if (/TABWISE_R2_ENABLED/.test(r2.slice(0, Math.max(0, r2.indexOf('steps:'))))) err('W10 opt-in must not be job-wide');
   for (const s of ['scripts/tabwise-r2.mjs --check-only', 'scripts/tabwise-r2.mjs --run', 'scripts/tabwise-r2.mjs --verify-run']) if (!r2.includes(s)) err(`W10 missing ${s}`);
-  if (/r2-session|r2-compose|qualification-loader|r2-run\.mjs|r2-evidence\.mjs/.test(text)) err('W10 workflow must reach R2 only through scripts/tabwise-r2.mjs');
+  if (/r2-session|r2-compose|qualification-loader|r2-loader|r2-vendor-loader|r2-nvda-lifecycle|r2-run\.mjs|r2-evidence\.mjs/.test(text)) err('W10 workflow must reach R2 only through scripts/tabwise-r2.mjs');
   if (!/verified=true/.test(r2) || !/steps\.verify\.outputs\.verified/.test(r2)) err('W10 verified output must come from the verify step');
   // PowerShell -ne $true accepts "true" and 1; .NET $ accepts a trailing newline (both measured offline, S7).
   for (const need of ["$v.schema -isnot [string] -or $v.schema -cne 'tabwise-r2-verify/1'", '$v.ok -isnot [bool] -or -not $v.ok', '$v.complete -isnot [bool] -or -not $v.complete',
@@ -1167,12 +1177,11 @@ function s7CheckWorkflow(text, budgetMs) {
     for (const [phase, step] of [['pre', pre], ['post', post]]) {
       if (s7Minutes(step) !== 2) err(`W15 ${phase} quiescence must be bounded (timeout-minutes: 2)`);
       if (!step.includes(`TABWISE_R2_QUIESCENCE_PHASE: ${phase}\n`)) err(`W15 ${phase} quiescence must record its phase`);
-      for (const need of ["$ErrorActionPreference = 'Stop'", 'Get-CimInstance -ClassName Win32_Process', "-match '^nvda(_[a-z0-9]+)?\\.exe\\z'",
-        'Get-NetTCPConnection -State Listen', '$_.LocalPort -eq 6837', "scope = 'global'", "page_custody = 'not claimed", "'tabwise-r2/diagnostics'",
-        'quiescence-$($env:TABWISE_R2_QUIESCENCE_PHASE).json', 'if (-not $q.quiescent) { throw'])
-        if (!step.includes(need)) err(`W15 ${phase} quiescence must include: ${need}`);
-      if (/Stop-Process|taskkill|\.Kill\(|Kill\(|Remove-Item|Start-Process|Invoke-WebRequest|guidepup|playwright|chromium|npx|npm|node |TABWISE_R2_ENABLED|continue-on-error/i.test(step))
-        err(`W15 ${phase} quiescence must be read-only (no termination, cleanup, launch or R2 opt-in)`);
+      const bodies=s7RunBodies(step).map(x=>typeof x==='string'?x:x.body);
+      const expectedBody='node scripts/tabwise/r2-quiescence.mjs\nif ($LASTEXITCODE -ne 0) { throw "R2 global process/listener quiescence refused" }';
+      if(bodies.length!==1||bodies[0].split('\n').map(line=>line.trim()).join('\n').trim()!==expectedBody)err(`W15 ${phase} requires the exact read-only helper and fail-closed exit check`);
+      if (/Stop-Process|taskkill|\.Kill\(|Kill\(|Remove-Item|Start-Process|Invoke-WebRequest|guidepup|playwright|chromium|npx|npm|TABWISE_R2_ENABLED|continue-on-error/i.test(step))
+        err(`W15 ${phase} quiescence must remain read-only and cannot mask refusal`);
     }
   }
   if (/continue-on-error/.test(r2)) err('W15 no r2 step may mask a failure with continue-on-error');
@@ -1225,6 +1234,8 @@ const S7_MUTATIONS = [
   ['self-hosted runner', (t) => t.replace('runs-on: windows-2025', 'runs-on: [self-hosted, windows]')],
   ['re-run attempts allowed', (t) => t.replace("&& github.ref == 'refs/heads/main' && github.run_attempt == '1'\n    runs-on: windows-2025", "&& github.ref == 'refs/heads/main'\n    runs-on: windows-2025")],
   ['secret used', (t) => t.replace('          node-version: 24.22.1', '          node-version: 24.22.1\n          token: ${{ secrets.META_KEY }}')],
+  ['legacy loader reached directly',t=>t.replace('node scripts/tabwise-r2.mjs --run --plan','node scripts/tabwise/qualification-loader.mjs --run --plan')],
+  ['R2 loader reached directly',t=>t.replace('node scripts/tabwise-r2.mjs --run --plan','node scripts/tabwise/r2-loader.mjs --run --plan')],
   ['session reached directly', (t) => t.replace('node scripts/tabwise-r2.mjs --run --plan', 'node scripts/tabwise/r2-session.mjs --run --plan')],
   ['bundle upload tolerates no files', (t) => t.replace(/(name: tabwise-r2-attestation-[\s\S]*?if-no-files-found: )error/, '$1ignore')],
   ['third job added', (t) => t + '\n  extra:\n    runs-on: ubuntu-24.04\n    steps:\n      - run: echo hi\n'],
@@ -1233,12 +1244,19 @@ const S7_MUTATIONS = [
   ['post-run quiescence removed', (t) => t.replace('      - name: Post-run process quiescence\n', '      - name: Post-run process check\n')],
   ['post-run quiescence only on success', (t) => t.replace("        if: always() && steps.run.outcome != 'skipped'\n        timeout-minutes: 2", '        timeout-minutes: 2')],
   ['post-run quiescence masks failure', (t) => t.replace("        if: always() && steps.run.outcome != 'skipped'\n        timeout-minutes: 2", "        if: always() && steps.run.outcome != 'skipped'\n        continue-on-error: true\n        timeout-minutes: 2")],
-  ['quiescence terminates NVDA', (t) => t.replace('          if (-not $q.quiescent) { throw', '          $nvda | ForEach-Object { Stop-Process -Id $_.pid -Force }\n          if (-not $q.quiescent) { throw')],
-  ['quiescence launches NVDA', (t) => t.replace("          $ErrorActionPreference = 'Stop'\n", "          $ErrorActionPreference = 'Stop'\n          npx --no-install guidepup install nvda\n")],
-  ['quiescence ignores the relay port', (t) => t.replace(/ \| Where-Object \{ \$_\.LocalPort -eq 6837 \}/g, '')],
-  ['quiescence never fails', (t) => t.replace(/          if \(-not \$q\.quiescent\) \{ throw[^\n]*\n/g, '')],
-  ['global absence claimed as page custody', (t) => t.replace(/scope = 'global'/g, "scope = 'page'")],
-  ['quiescence errors tolerated', (t) => t.replace(/          \$ErrorActionPreference = 'Stop'\n/g, "          $ErrorActionPreference = 'Continue'\n")],
+  ['quiescence terminates NVDA', (t) => t.replace('          node scripts/tabwise/r2-quiescence.mjs', '          Stop-Process -Name nvda -Force\n          node scripts/tabwise/r2-quiescence.mjs')],
+  ['quiescence launches NVDA', (t) => t.replace('          node scripts/tabwise/r2-quiescence.mjs', '          npx --no-install guidepup install nvda\n          node scripts/tabwise/r2-quiescence.mjs')],
+  ['quiescence ignores the relay port', t=>t, h=>({...h,listeners:h.listeners.replace('port:6837','port:6838')})],
+  ['quiescence never fails', (t) => t.replace('if ($LASTEXITCODE -ne 0) { throw "R2 global process/listener quiescence refused" }','')],
+  ['global absence claimed as page custody', t=>t, h=>({...h,quiescence:h.quiescence.replace("scope:'global'","scope:'page'")})],
+  ['quiescence errors tolerated', (t) => t.replace('if ($LASTEXITCODE -ne 0) { throw "R2 global process/listener quiescence refused" }', 'if ($LASTEXITCODE -ne 0) { Write-Warning "ignored" }')],
+  ['quiescence helper suppresses refusal', t=>t, h=>({...h,quiescence:h.quiescence.replace('if(!result.quiescent)process.exitCode=1','process.exitCode=0')})],
+  ['quiescence helper claims physical verification', t=>t, h=>({...h,quiescence:h.quiescence.replace('physical_quiescence_verified:false','physical_quiescence_verified:true')})],
+  ['quiescence helper overwrites evidence', t=>t, h=>({...h,quiescence:h.quiescence.replace("{flag:'wx'}","{flag:'w'}")})],
+  ['listener helper unbounded', t=>t, h=>({...h,listeners:h.listeners.replace('deadline:performance.now()+5000','deadline:Infinity')})],
+  ['listener helper accepts incomplete query', t=>t, h=>({...h,listeners:h.listeners.replace('!result.query_completed','false')})],
+  ['listener helper accepts unclosed child', t=>t, h=>({...h,listeners:h.listeners.replace('!result.measurement.cleanup.process_close_observed','false')})],
+  ['census ignores helper failure', t=>t, h=>({...h,proctree:h.proctree.replace('if($LASTEXITCODE -ne 0)','if($false)')})],
   ['quiescence unbounded', (t) => t.replace(/(name: Pre-run process quiescence\n        )timeout-minutes: 2\n/, '$1')],
   ['summary outside the uploaded directory', (t) => t.replace("$out = Join-Path $diag 'run-summary.json'", "$out = Join-Path $env:RUNNER_TEMP 'tabwise-r2-summary.json'")],
   ['upload only on success', (t) => t.replace(/(      - name: Upload sealed run evidence\n)        if: always\(\)\n/, '$1')],
@@ -1257,10 +1275,11 @@ test('S7-W1 the committed tabwise-r2 workflow satisfies the S7 static policy (W1
 test('S7-W2 every named weakening of the workflow is refused by the static policy', async () => {
   const { R2_RUN_STEP_BUDGET_MS } = await runModule();
   const base = readS4(S7_WORKFLOW, 'utf8').replace(/\r\n/g, '\n');
-  for (const [name, mutate] of S7_MUTATIONS) {
+  for (const [name, mutate, mutateHelpers] of S7_MUTATIONS) {
     const mutated = mutate(base);
-    assert.notEqual(mutated, base, `mutation applies: ${name}`);
-    assert.ok(s7CheckWorkflow(mutated, R2_RUN_STEP_BUDGET_MS).length > 0, `refused: ${name}`);
+    const helpers=s7Helpers(),changed=mutateHelpers?mutateHelpers(helpers):helpers;
+    if(mutateHelpers)assert.notDeepEqual(changed,helpers,`helper mutation applies: ${name}`);else assert.notEqual(mutated, base, `mutation applies: ${name}`);
+    assert.ok(s7CheckWorkflow(mutated, R2_RUN_STEP_BUDGET_MS,changed).length > 0, `refused: ${name}`);
   }
   assert.ok(s7CheckWorkflow(base, R2_RUN_STEP_BUDGET_MS + 60_000).length > 0, 'a budget constant that disagrees with the run step timeout is refused');
 });
@@ -1289,11 +1308,13 @@ test('S7-W3 the workflow path is the one the R2 policy pins; the pristine fixtur
 // O-11 (D-89) adds arm-inputs; C2 adds input-policy, executor and palette (exact-membership expansion disclosed).
 test('S7-I1 R2_FILES is exactly the union of the S7, custody, O-11 and W3/W4 lifecycle reviewed scopes; r2Digest is the CRLF-normalized per-file digest over it', () => {
   assert.deepEqual([...R2_FILES], [
+    'diagnostics/owner-v2/identity.ps1', 'diagnostics/owner-v2/resolver.mjs',
     '.github/workflows/tabwise-r2.yml', 'packages/contracts/index.mjs', 'packages/contracts/limits.mjs',
     'packages/contracts/palette.mjs', 'packages/contracts/r2-product.mjs', 'packages/contracts/schemas.mjs',
     'scripts/tabwise-r2.mjs', 'scripts/tabwise/executor.mjs', 'scripts/tabwise/input-policy.mjs',
     'scripts/tabwise/r2-admission-policy.json', 'scripts/tabwise/r2-admission-server-policy.json', 'scripts/tabwise/r2-admission-transport.mjs',
     'scripts/tabwise/r2-admission.mjs', 'scripts/tabwise/r2-compose.mjs', 'scripts/tabwise/r2-evidence.mjs',
+    'scripts/tabwise/r2-listeners.mjs','scripts/tabwise/r2-quiescence.mjs','scripts/tabwise/r2-loader.mjs','scripts/tabwise/r2-vendor-loader.mjs','scripts/tabwise/r2-nvda-lifecycle.mjs','scripts/tabwise/r2-runtime-integrity.mjs','scripts/tabwise/r2-runtime-pins.json',
     'scripts/tabwise/r2-lifecycle.mjs', 'scripts/tabwise/r2-policy.mjs', 'scripts/tabwise/r2-proctree.mjs',
     'scripts/tabwise/r2-product-policy.json', 'scripts/tabwise/r2-run.mjs', 'scripts/tabwise/r2-session.mjs',
     'src/budget/prices.mjs', 'src/r2/approval-constants.mjs', 'src/r2/arm-inputs.mjs',
@@ -1307,7 +1328,7 @@ test('S7-I1 R2_FILES is exactly the union of the S7, custody, O-11 and W3/W4 lif
     'web/lib/server/r2-admission.mjs', 'web/lib/server/r2-caller.mjs', 'web/lib/server/r2-evidence-bridge.mjs',
     'web/lib/server/r2-product-context.mjs', 'web/lib/server/stored-evidence.mjs', 'web/lib/server/supabase.ts',
     'web/package-lock.json', 'web/package.json'
-  ]);
+  ].sort());
   // Recomputed independently here from the files on disk: no reviewed digest is pinned (the shipped status has none).
   const outer = hashS4('sha256');
   for (const file of R2_FILES) outer.update(`${file}\0${hashS4('sha256').update(readS4(file, 'utf8').replace(/\r\n/g, '\n')).digest('hex')}\n`);
@@ -1419,4 +1440,23 @@ test('A5-N2 the pristine fixture is not approved: it names no plan and every ent
   // Even a status that is otherwise approved refuses a plan digest it does not name.
   const g = s6Gate({ planDir: { dir: tmpS4(joinS4(tmpdirS4(), 'a5 ')), path: A5_PLAN, text: a5Text() }, status: { plan_sha256: 'f'.repeat(64) } });
   try { assert.throws(() => checkR2Entry(g.input), /run plan identity mismatch/); } finally { rmS4(g.dir, { recursive: true, force: true }); }
+});
+
+test('R2 closure pins and all nine new reviewed source members refuse one-byte substitution',async()=>{
+ const {runtimeIntegrity}=await import('../scripts/tabwise/r2-runtime-integrity.mjs');
+ const added=['diagnostics/owner-v2/identity.ps1','diagnostics/owner-v2/resolver.mjs','scripts/tabwise/r2-listeners.mjs','scripts/tabwise/r2-quiescence.mjs','scripts/tabwise/r2-loader.mjs','scripts/tabwise/r2-vendor-loader.mjs','scripts/tabwise/r2-nvda-lifecycle.mjs','scripts/tabwise/r2-runtime-integrity.mjs','scripts/tabwise/r2-runtime-pins.json'];
+ const tmp=tmpS4(joinS4(tmpdirS4(),'r2-closure-mutation-'));
+ try{
+  for(const file of R2_FILES){mkdirS4(dirnameS4(joinS4(tmp,file)),{recursive:true});copyWritableS4(file,joinS4(tmp,file));}
+  const original=r2Digest();assert.equal(r2Digest(tmp),original);assert.deepEqual(runtimeIntegrity(tmp),[]);
+  const pins=JSON.parse(readS4(joinS4(tmp,'scripts/tabwise/r2-runtime-pins.json'),'utf8'));
+  for(const file of added){const path=joinS4(tmp,file),before=readS4(path);writeS4(path,Buffer.concat([before,Buffer.from(' ')]));assert.notEqual(r2Digest(tmp),original,file);if(Object.hasOwn(pins.files,file))assert.ok(runtimeIntegrity(tmp).length,file);writeS4(path,before);assert.equal(r2Digest(tmp),original,file);}
+  assert.deepEqual(runtimeIntegrity(tmp),[]);
+ }finally{rmS4(tmp,{recursive:true,force:true});}
+});
+
+test('quiescence helpers have only their reviewed read-only imports and no runtime capability',()=>{
+ assert.deepEqual(importsOf('scripts/tabwise/r2-quiescence.mjs').sort(),['./r2-proctree.mjs','node:child_process','node:fs','node:path']);
+ assert.deepEqual(importsOf('scripts/tabwise/r2-listeners.mjs'),['../../diagnostics/owner-v2/resolver.mjs']);
+ const q=readS4('scripts/tabwise/r2-quiescence.mjs','utf8');assert.doesNotMatch(q,/loadR2Runtime|qualification-loader|r2-session|r2-compose|\.terminate\(|\.kill\(|\bspawn\(/);
 });

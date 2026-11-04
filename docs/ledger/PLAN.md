@@ -613,3 +613,6 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 ## F-03 R2 integrated runtime (owner request 2026-11-04)
 User: "Integrate it into the real R2 runtime instead." "Continue until all safely executable tasks are complete."
 Scope: R2-only lifecycle/loader, R2 entry/session/policy, bounded process/workflow ownership, new tests, startup-only candidate and normal ledgers. Frozen R1 untouched. Acceptance: new runtime and diagnostic suites; root tests; frozen integrity; product separately validated. Ceiling $0, no paid calls/install/native execution/hosted mutation. Separate worktrees/commits requested. Rollback: retain branches; discard only authored changes after review.
+
+## F-03 final R2 regression closure — owner authorized
+User: "Resolve all 20 failures in one focused engineering cycle"; "Correct test harness module resolution without removing the original cleanup/fault assertions"; "Commit the corrected source locally." Scope: affected test harness/security/workflow/source-union checks, new negative tests and normal ledgers/handoff. Acceptance: focused, full npm test, frozen/runtime/source digests, startup-only offline tests and preflight; all pass. Ceiling $0; no installs/push/hosted/approval-variable/native/input. Existing runtime pins and frozen R1 preserved. Rollback: new local commit only, no history rewrite.

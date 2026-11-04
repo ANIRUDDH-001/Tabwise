@@ -266,5 +266,13 @@
   "r2-runtime-class.test.mjs": {
     "kind": "offline",
     "reason": "actual frozen NVDA class under isolated R2 loader with controlled lifecycle/platform/client fakes; no native launch or input"
+  },
+  "r2-quiescence.test.mjs": {
+    "kind": "offline",
+    "reason": "actual read-only helper in isolated Worker with fake OS snapshots; process launches denied"
+  },
+  "r2-import-admission.test.mjs": {
+    "kind": "offline",
+    "reason": "actual page function body with denial/import hooks in isolated Worker; no runtime loads"
   }
 }

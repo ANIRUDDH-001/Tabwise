@@ -338,7 +338,7 @@ test('S-1 static: the lifecycle module imports nothing and names no capability; 
   assert.doesNotMatch(code, /\bimport\s*\(|\brequire\s*\(|process\.|child_process|playwright|guidepup|vendor\/|node:/);
   assert.deepEqual([...code.matchAll(/^export\s+(?:async\s+)?(?:function|const|let|class)\s+(\w+)/gm)].map(x => x[1]), ['createR2Lifecycle']);
   const session = readFileSync('scripts/tabwise/r2-session.mjs', 'utf8');
-  const brand = session.indexOf("if (!isQualificationRuntime(runtime)) throw Error('R2 session requires the owned vendored runtime');");
+  const brand = session.indexOf("if (!isR2Runtime(runtime)) throw Error('R2 session requires the owned vendored runtime');");
   const at = session.indexOf("import('./r2-lifecycle.mjs')");
   assert.ok(brand > 0 && at > brand, 'dynamic lifecycle import after the brand check');
   assert.equal(readFileSync('scripts/tabwise/r2-compose.mjs', 'utf8').includes('r2-lifecycle'), false, 'compose receives the lifecycle as a handle, never imports it');
@@ -412,7 +412,7 @@ test('COR-C partial acquisition attempts browser and server cleanup after stalle
     {applyTitleNonce: () => ({record: {fixture_sha256: 'hash'}}), buildR2StepMap() {}, planR2EvidenceCaps() {}, createR2EvidenceWriter: () => writer}, {},
     {createR2Lifecycle: o => createR2Lifecycle({...o, settleMs: 80})}];
   let code = readFileSync('scripts/tabwise/r2-session.mjs', 'utf8')
-    .replace("import {isQualificationRuntime} from './qualification-loader.mjs';", 'const isQualificationRuntime = () => true;')
+    .replace("import {isR2Runtime} from './r2-loader.mjs';", 'const isR2Runtime = () => true;')
     .replace("import {composeR2Page} from './r2-compose.mjs';", 'const composeR2Page = () => {throw Error("unexpected composition");};');
   const begin = code.indexOf('await Promise.all(['), end = code.indexOf(']);', begin) + 3;
   assert.ok(begin > 0 && end > begin);
@@ -467,7 +467,7 @@ for (const mode of ['during-finalize', 'after-seal', 'late-success']) test(`COR-
       }});
     }}];
   let code = readFileSync('scripts/tabwise/r2-session.mjs', 'utf8')
-    .replace("import {isQualificationRuntime} from './qualification-loader.mjs';", 'const isQualificationRuntime = () => true;')
+    .replace("import {isR2Runtime} from './r2-loader.mjs';", 'const isR2Runtime = () => true;')
     .replace("import {composeR2Page} from './r2-compose.mjs';", 'const composeR2Page = () => {throw Error("unexpected composition");};');
   const begin = code.indexOf('await Promise.all(['), end = code.indexOf(']);', begin) + 3;
   assert.ok(begin > 0 && end > begin);

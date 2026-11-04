@@ -15,7 +15,8 @@ test('W5 source binds all runtime admission dependencies and SQL authority',()=>
 });
 test('W5 production page admission precedes runtime import and coordinator admission precedes launches',()=>{
  const page=entry.slice(entry.indexOf('async function runPage'),entry.indexOf('async function runAll'));
- assert.ok(page.indexOf('await requestPageAdmission(')>=0);assert.ok(page.indexOf('await requestPageAdmission(')<page.indexOf("await import('./tabwise/qualification-loader.mjs')"));
+ const admission=page.indexOf('await requestPageAdmission('),load=page.indexOf("await import('./tabwise/r2-loader.mjs')");
+ assert.ok(admission>=0&&load>admission,'W5 admission must precede R2 runtime import');
  const run=entry.slice(entry.indexOf('async function runAll'),entry.indexOf('async function verifyRun'));
  assert.ok(run.indexOf('await createCoordinator(')>=0);assert.ok(run.indexOf('await createCoordinator(')<run.indexOf('await runR2Pages('));
  assert.match(entry,/verifyAdmissionRecord\(/);assert.match(entry,/coordinator\.grant\(/);

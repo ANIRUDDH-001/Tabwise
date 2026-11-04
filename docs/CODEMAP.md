@@ -130,3 +130,5 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 
 | `scripts/tabwise/r2-{loader,vendor-loader,nvda-lifecycle,runtime-integrity}.mjs`, `r2-runtime-pins.json` | R2-only one-shot private frozen CJS graph and identity-checked bounded startup/owned-handle cleanup; never loads frozen startup/quit implementations | `loadR2Runtime`, `createLifecycle`; new runtime/class/loader tests |
 | `scripts/tabwise/r2-{listeners,quiescence}.mjs` | Bounded fixed-port resolver output and read-only global pre/post workflow census | no native start or input |
+
+| `test/r2-{quiescence,import-admission}.test.mjs` | Actual bounded helper and page authority/import ordering under isolated Worker module boundaries; no native launch | final R2 regression closure |
