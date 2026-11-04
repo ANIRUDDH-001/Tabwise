@@ -1,0 +1,31 @@
+✔ configured diagnosis sends medium/6000 and unchanged strict schema, logs and settles (29.5213ms)
+✔ default diagnosis retains 3000 and omits reasoning configuration (19.9231ms)
+✔ invalid diagnosis options refuse before reserve {"reasoningEffort":"none"} (12.8271ms)
+✔ invalid diagnosis options refuse before reserve {"reasoningEffort":"invalid"} (11.6983ms)
+✔ invalid diagnosis options refuse before reserve {"reasoningEffort":null} (11.2308ms)
+✔ invalid diagnosis options refuse before reserve {"maxOutputTokens":-1} (10.4535ms)
+✔ invalid diagnosis options refuse before reserve {"maxOutputTokens":0} (9.6759ms)
+✔ invalid diagnosis options refuse before reserve {"maxOutputTokens":1.5} (10.0076ms)
+✔ invalid diagnosis options refuse before reserve {"maxOutputTokens":null} (10.8407ms)
+✔ direct client refuses unsupported reasoning before transport (8.7569ms)
+✔ incomplete response rejects even parseable findings, reports reason and settles known usage 283 (15.5717ms)
+✔ incomplete response rejects even parseable findings, reports reason and settles known usage 13 (15.5758ms)
+✔ complete output with invented citations remains refused (16.9491ms)
+✔ incomplete without usage retains reservation (13.052ms)
+✔ diagnosis instructs complete bounded patch syntax instead of bare +/- lines (0.7794ms)
+✔ safe nested transport diagnosis ENOTFOUND (19.5722ms)
+✔ safe nested transport diagnosis CERT_HAS_EXPIRED (17.3896ms)
+✔ safe nested transport diagnosis UND_ERR_CONNECT_TIMEOUT (18.7927ms)
+✔ safe nested transport diagnosis ECONNRESET (16.7799ms)
+✔ native repair delivery refuses missing or forged run/owner/revision/attempt authorization (1.0894ms)
+✔ verdict ingestion never accepts labels or predictions in place of native evidence (0.4601ms)
+✔ sealed snapshot oracle uses final focus, not an earlier focusin, and refuses absent triggers (0.873ms)
+✔ owner must explicitly freeze a source-bound check before rerun admission (1.0675ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 317.4758

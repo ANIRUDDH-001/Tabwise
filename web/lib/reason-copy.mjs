@@ -1,6 +1,15 @@
 // Human copy for every reason code emitted by web/app/api/** and web/app/auth/** (T-P0-04, T-P1-04).
 // Copy never names environment variables, secrets or stack traces.
 export const REASON_COPY=Object.freeze({
+ run_producer_unresolved:'The saved run has no confirmed worker path. Execution is paused while its identity is checked.',
+ native_sender_disabled:'Native execution is not available yet. Your saved request is retained.',
+ native_request_not_found:'This native request is unavailable for your account.',
+ native_dispatch_run_ineligible:'This run cannot start native execution in its current state.',
+ native_ingestion_disabled:'Native evidence import is not available yet. No result has been accepted.',
+ native_evidence_state_unavailable:'The saved evidence association is temporarily unavailable. No result has been accepted.',
+ method_not_allowed:'This action is not supported. Reload the page and try again.',
+ native_request_conflict:'The saved request no longer matches this journey or source. Reload its details before continuing.',
+ native_request_configuration_pending:'Native request preparation is awaiting server setup. No worker has started.',
  repair_oracle_required:'Freeze a reviewed rerun check on the patch before requesting a rerun.',
  native_repair_identity_pending:'The repair worker identity is not ready. Native execution remains blocked.',
  repair_verdict_service_unavailable:'The stored repair result is temporarily unavailable.',

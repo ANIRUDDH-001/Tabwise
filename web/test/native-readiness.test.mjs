@@ -1,0 +1,4 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {existsSync} from 'node:fs';import {withVerificationDirectory} from '../lib/server/verification-directory.mjs';
+for(const failure of [false,true])test('temporary verification cleanup '+failure,async()=>{let directory;const run=()=>withVerificationDirectory(async dir=>{directory=dir;if(failure)throw Error('refused');return 42;});if(failure)await assert.rejects(run,/refused/);else assert.equal(await run(),42);assert.equal(existsSync(directory),false);});
+
+test('retention failure still removes only its scratch directory',async()=>{let directory,retained=0;await assert.rejects(()=>withVerificationDirectory(async dir=>{directory=dir;throw Error('verification refused');},{preserveFailure:async()=>{retained++;throw Error('durable retention failed');}}),/retention failed/);assert.equal(retained,1);assert.equal(existsSync(directory),false);});

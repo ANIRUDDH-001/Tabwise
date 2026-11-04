@@ -151,7 +151,7 @@ export function applyTitleNonce(fixture, nonce) {
     original_title, nonce, match_offset: match.index}};
 }
 
-export function nativeFixtureQuery(query=''){if(query!==''&&!/^\?flow=(passenger|seat|search)&variant=broken$/.test(query))fail('unapproved native fixture query');return query;}
+export function nativeFixtureQuery(query=''){if(query!==''&&!/^\?flow=(passenger|seat|search)&variant=(healthy|broken)$/.test(query))fail('unapproved native fixture query');return query;}
 function pageIdentity(page,query='') {
   if (!object(page) || !sameKeys(page, ['fixture_id', 'port', 'session'])) fail('page identity must be exactly {fixture_id, session, port}');
   if (!TASK_ID.test(page.fixture_id ?? '')) fail('page identity: invalid fixture_id');

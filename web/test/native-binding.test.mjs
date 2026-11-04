@@ -1,0 +1,10 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {createNativeBindingHandler} from '../lib/server/native-binding.mjs';
+import {binding,configuration,claims,token,jwks} from './helpers/r2-bridge-fixture.mjs';
+const id='00000000-0000-4000-8000-000000000001',hash='e'.repeat(64);
+test('signed native caller binds only its previously correlated request; no input authority',async()=>{const b=binding(),c={...configuration(b),binding:b},row={user_id:'owner',state:'DISPATCH_ACCEPTED',request_sha256:hash,github_run_id:'123',request:{revision:b.revision,actor:b.actor,plan_sha256:b.plan_sha256,r2_source_sha256:b.reviewed_sha256,qualification_sha256:b.qualification_sha256,page_id:b.fixtures[0].id,fixture_sha256:b.fixtures[0].sha256}};let clients=0,binds=0;const h=createNativeBindingHandler({configuration:()=>c,keys:()=>jwks,client:()=>{clients++;return {load:async()=>row,bind:async()=>{binds++;return {...row,state:'RUN_BOUND'};}};}});const req=(jwt=token(),extra={})=>new Request('https://owner-app.example/api/r2/product-binding',{method:'POST',headers:{authorization:'Bearer '+jwt,'content-type':'application/json',...extra},body:JSON.stringify({product_run_id:id,request_sha256:hash,github_run_id:'123'})});
+ const r=await h(req());assert.equal(r.status,200);assert.equal((await r.json()).native_qualified,false);assert.equal(binds,1);
+ clients=0;assert.equal((await h(req(token(claims({run_id:'124'}))))).status,403);assert.equal(clients,0);assert.equal((await h(req(token(),{origin:'https://owner-app.example'}))).status,403);assert.equal(clients,0);
+ row.request.fixture_sha256='0'.repeat(64);assert.equal((await h(req())).status,409);row.request.fixture_sha256=b.fixtures[0].sha256;row.github_run_id='999';assert.equal((await h(req())).status,409);assert.equal(binds,1);
+});
+test('disabled native configuration refuses before token keys or database',async()=>{let touched=0;const h=createNativeBindingHandler({configuration:()=>({policy:{enabled:false}}),keys:()=>{touched++;},client:()=>{touched++;}});assert.equal((await h(new Request('https://owner-app.example'))).status,503);assert.equal(touched,0);});

@@ -1,0 +1,10 @@
+✔ real concurrent rerun admission keeps gates, exact hashes, immutable binding, replay and ownership (1528.8806ms)
+✔ oracle admission/dispatch gate covers concurrent registration, legacy replay and rejection (2316.2138ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3933.5299

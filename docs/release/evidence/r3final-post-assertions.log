@@ -1,0 +1,8 @@
+BEGIN
+DO
+                 result                 
+----------------------------------------
+ PASS schema/permission/gate assertions
+(1 row)
+
+ROLLBACK

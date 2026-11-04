@@ -27,8 +27,14 @@ export function assessNativeRepair({baselineCapture,rerunCapture,baselineEvidenc
  const index=steps.findIndex(s=>s.step===oracle.step);if(index<0)return inconclusive('Oracle step absent.');
  for(const c of [baselineCapture,rerunCapture]){
   const p=c.records[index].page;
-  if(!Array.isArray(p?.before?.state?.dialogs)||p.before.state.dialogs.length!==1||!/^dialog#[1-9][0-9]*$/.test(p.before.state.dialogs[0])||!Array.isArray(p?.after?.state?.dialogs)||p.after.state.dialogs.length!==0||typeof p.after.active!=='string'||!p.after.active)return inconclusive('Recorder did not establish a dialog closing and its final focus.');
+  if(!Array.isArray(p?.before?.state?.dialogs)||p.before.state.dialogs.length!==1||!/^(?:dialog|seat-dialog)#[1-9][0-9]*$/.test(p.before.state.dialogs[0])||!Array.isArray(p?.after?.state?.dialogs)||p.after.state.dialogs.length!==0||typeof p.after.active!=='string'||!p.after.active)return inconclusive('Recorder did not establish a dialog closing and its final focus.');
  }
+ for(const c of [baselineCapture,rerunCapture]){
+  const after=c.records[index].page.after,i=after.active_identity;
+  if(after.identity_version!==2)return inconclusive('Legacy terminal focus remains readable but cannot establish a new repair acceptance.');
+  if(!i||i.available!==true||i.connected!==true||typeof i.is_body!=='boolean'||i.is_body!==(after.active==='body')||i.node_key!==after.active||(i.is_body&&i.tag!=='body')||(!i.is_body&&(i.tag!=='button'||i.id!=='choose-seat'||i.id_unique!==true||!/^choose-seat#[1-9][0-9]*$/.test(i.node_key))))return inconclusive('Terminal element identity is missing, detached or contradictory.');
+ }
+ if(baselineCapture.records[index].page.after.active!=='body')return inconclusive('Baseline did not establish actual terminal body focus.');
  const restored=c=>/^choose-seat(?:#[1-9][0-9]*)?$/.test(c.records[index].page.after.active);
  if(restored(baselineCapture))return inconclusive('Baseline already has restored focus.');
  const normalize=s=>s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,'').replace(/\s+/g,' ').trim();

@@ -1,0 +1,16 @@
+{
+  "app": "fernway",
+  "version": "0.1.0-instrumented-v2",
+  "source": "owned-synthetic",
+  "instrumentation": "page-authored; not native evidence",
+  "historical_source_sha256": "5ad4631558cdcc557770ae864957ffc167546cd0af58bd11258808e1c0e523be",
+  "base_sha256": "e8298abbb60cba5ff4adad771d56e3ea6ee55d0e8c3bc38242a2d1e6cf4ca0b8",
+  "files": [
+    {
+      "path": "index.html",
+      "sha256": "e8298abbb60cba5ff4adad771d56e3ea6ee55d0e8c3bc38242a2d1e6cf4ca0b8",
+      "bytes": 10652
+    }
+  ],
+  "native_binding": "Candidate only. A new plan must explicitly bind these bytes; no existing plan, database app hash, native artifact or historical record is migrated."
+}

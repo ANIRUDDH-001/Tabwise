@@ -1,0 +1,9 @@
+BEGIN
+INSERT 0 1
+DO
+                         result                         
+--------------------------------------------------------
+ PASS immutable report and disabled inference admission
+(1 row)
+
+ROLLBACK

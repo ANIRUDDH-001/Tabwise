@@ -139,3 +139,5 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 
 | `src/repair/oracle.mjs`, `web/components/RepairOracleReview.tsx`, patch oracle API, `web/lib/oracle-state.mjs` | Explicit source-bound owner check registration/readback before admission | lifecycle/oracle-state and repair-oracle browser tests |
 | `supabase/migrations/20261103030000_repair_oracle_admission.sql` | Pre-admission oracle tuple plus shared live-dispatch guard; no execution clearance | real PostgreSQL concurrent registration/admission and legacy-dispatch negatives |
+
+| `scripts/release/`, `docs/release/` | Hosted release qualification, canonical atomic owner rollout, create-only preview publication and acceptance packet | F-03 local engineering; hosted/native acceptance blocked |

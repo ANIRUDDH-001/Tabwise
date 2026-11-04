@@ -1,0 +1,18 @@
+BEGIN
+INSERT 0 2
+SET
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"00000000-0000-4000-8000-000000000001","role":"authenticated"}
+(1 row)
+
+DO
+SET
+DO
+RESET
+                                          result                                          
+------------------------------------------------------------------------------------------
+ PASS authenticated isolation, anonymous demo-only reads, no browser writes or broker RPC
+(1 row)
+
+ROLLBACK

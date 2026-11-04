@@ -723,3 +723,8 @@ User authorization: "You are explicitly authorized to inspect and modify files, 
 User boundary: "No Claude or other agents." / "No Meta Model API requests."
 Consequence: continue the existing two-parent merge; zero paid calls; local dependency reuse; preserve diagnostic worktree and blocked qualification. Normal PR publication authorized; merging requires the stated local/remote/safety/protection gates. This current instruction supersedes earlier user-only Git and cross-tool execution requirements for this task; it grants no R7 qualification.
 Tooling: Context7 ctx7 0.9.0 ran via the user-prescribed npx command in npm cache only; no repository manifest or lock changed.
+
+## Hosted release scope — 2026-11-04T05:31:36Z
+User answer: "Create an isolated, scoped local release commit. No push or merge."
+User answer: "No production DB changes, hosted deployments, GitHub pushes, PR merges, OAuth configuration changes, paid calls or native execution."
+Consequence: local F-03 product/SQL qualification and owner handoff only; $0 paid services.

@@ -1,0 +1,8 @@
+BEGIN
+DO
+                                                                     result                                                                     
+------------------------------------------------------------------------------------------------------------------------------------------------
+ PASS approval, ownership, stale source, rollback, recovery, immutable candidate/audit, replay conflict, private privileges and no verification
+(1 row)
+
+ROLLBACK

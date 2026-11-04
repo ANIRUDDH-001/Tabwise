@@ -1,0 +1,39 @@
+LOCAL FIXTURE RPC: ERROR:  native request idempotency conflict
+CONTEXT:  PL/pgSQL function public.prepare_native_product_request(uuid,jsonb,text,text,text,text) line 18 at RAISE
+
+LOCAL FIXTURE RPC: ERROR:  native query binding mismatch
+CONTEXT:  PL/pgSQL function public.prepare_native_product_request(uuid,jsonb,text,text,text,text) line 15 at RAISE
+
+LOCAL FIXTURE RPC: ERROR:  native query binding mismatch
+CONTEXT:  PL/pgSQL function public.prepare_native_product_request(uuid,jsonb,text,text,text,text) line 15 at RAISE
+
+LOCAL FIXTURE RPC: ERROR:  native query binding mismatch
+CONTEXT:  PL/pgSQL function public.prepare_native_product_request(uuid,jsonb,text,text,text,text) line 15 at RAISE
+
+LOCAL FIXTURE RPC: ERROR:  native query binding mismatch
+CONTEXT:  PL/pgSQL function public.prepare_native_product_request(uuid,jsonb,text,text,text,text) line 15 at RAISE
+
+LOCAL FIXTURE RPC: ERROR:  illegal native request transition
+CONTEXT:  PL/pgSQL function public.transition_native_product_request(uuid,uuid,text,text,text) line 20 at RAISE
+
+LOCAL FIXTURE RPC: ERROR:  native execution conflict
+CONTEXT:  PL/pgSQL function public.transition_native_product_request(uuid,uuid,text,text,text) line 13 at RAISE
+
+LOCAL FIXTURE RPC: ERROR:  duplicate key value violates unique constraint "native_product_requests_github_run_id_key"
+DETAIL:  Key (github_run_id)=(123) already exists.
+CONTEXT:  SQL statement "update public.native_product_requests set state=next_state,github_run_id=p_gh_run_id,updated_at=clock_timestamp() where product_run_id=p_run returning *"
+PL/pgSQL function public.transition_native_product_request(uuid,uuid,text,text,text) line 21 at SQL statement
+
+LOCAL FIXTURE RPC: ERROR:  invalid native request digest
+CONTEXT:  PL/pgSQL function public.prepare_native_product_request(uuid,jsonb,text,text,text,text) line 11 at RAISE
+
+MEASURED owned API, six concurrent requests, immutable conflict, uncertain dispatch, no resend, RLS, RPC permissions; no native execution
+✔ HTTP API + PostgreSQL: owned persistence, concurrency, unknown outcome and conflicting execution correlations (3451.9686ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3597.9754

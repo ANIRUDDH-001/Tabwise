@@ -1,0 +1,2 @@
+PASS local SIMULATION: persisted finding -> review -> candidate -> distinct rerun -> pending independent verdict; native seam REFUSED
+PASS actual saved-run request continued through controlled dispatch, signed binding, artifact selection and labelled persisted repair replay

@@ -1,0 +1,62 @@
+[
+  {
+    "path": "supabase/migrations/20261028184550_tabwise_data_plane.sql",
+    "sha256": "0af868bb7f4b279503ccf5c6cf8a7f22d1cddadf5b4609ad83962008812b83af",
+    "checkout_sha256": "2f67a7c574ab366ec90005050df85bbeae23e1526cbde8fa14cfe64b0b2ad170"
+  },
+  {
+    "path": "supabase/migrations/20261028190656_immutable_and_diagnosis.sql",
+    "sha256": "e28535d34a57d5bb083bfd0c76c40da51eca1f4245aec9d098161bfab775224f",
+    "checkout_sha256": "c0f8e14368c709b2a44b9f673d316fa523f1e11b6c8bac411bc636fd0c8d8b62"
+  },
+  {
+    "path": "supabase/migrations/20261028191011_bind_admission.sql",
+    "sha256": "644a5df1c25dd723def9ecdca7d12fb4a1a881b04dd552057ed819c4fe0881a4",
+    "checkout_sha256": "49cb9744fdf91887c7b8ff72ea40c2ef9a5782ce1dc9719a2f067b27d1bb88e0"
+  },
+  {
+    "path": "supabase/migrations/20261028194909_persist_diagnosis.sql",
+    "sha256": "889c56f9ac89bfaad837f814a8923c46149355983b53b577f6735fbe4c1d61cc",
+    "checkout_sha256": "be0e46e6ddf234564115d0b3089f935eca7feb09306bd42ef58fd99b2a1500e8"
+  },
+  {
+    "path": "supabase/migrations/20261028222448_patch_review.sql",
+    "sha256": "1d0f7f083ac05d51ca02b0028fab0728fe484726d22b48910100c2ba5ca3647c",
+    "checkout_sha256": "c41b0b1ac5f02ed69f17832e178f205c81151147a015f5648576b0a8aeccc09d"
+  },
+  {
+    "path": "supabase/migrations/20261103000000_repair_application.sql",
+    "sha256": "314a0b647a4da15c63c11f8f78f312058edd920dbe88f1b9050be5e4097782a1",
+    "checkout_sha256": "16ef737ccb7f824775f55dfc36f0367b4a47367abc654c5c6573bf58bf9d21e0"
+  },
+  {
+    "path": "supabase/migrations/20261103010000_repair_rerun.sql",
+    "sha256": "0c9bfe1afe17d95f96415b6ec49f7d9465ab99c98e2236bdfbe3db3c0d7149ac",
+    "checkout_sha256": "6efe0fba8e849f6785cad7cdfa93853093ab142acfd560ec294e9537a4226f26"
+  },
+  {
+    "path": "supabase/migrations/20261103020000_repair_verdict.sql",
+    "sha256": "ef08b1c8f97c77a8dc5797528ddbc220b458df9074c7e61b9e534003c30e9f4a",
+    "checkout_sha256": "0578ed400c5d6ef31b12728d5617ddecfbb26581980b97d4f4d30eb16525cdca"
+  },
+  {
+    "path": "supabase/migrations/20261103030000_repair_oracle_admission.sql",
+    "sha256": "77a0cf83329b73e7a0ecc6b9eaaac39d9adad264465389a702096a5012aad3ca",
+    "checkout_sha256": "8e6e9d13ce6ec915232c97a2067e23aadc5922da7f0b40ffd536d9a22ec0e943"
+  },
+  {
+    "path": "supabase/migrations/20261103040000_native_product_requests.sql",
+    "sha256": "b002a9ed06ce709bc9c18dbf663e5514dfbe45513725ffeb181968aebf36d17b",
+    "checkout_sha256": "8d3fa7072a4da619c0556c6776d6f79a6664b4b78b14ef3150a0286bc9167b61"
+  },
+  {
+    "path": "supabase/migrations/20261103181501_native_integration_custody.sql",
+    "sha256": "2ebbab7bc5957141ee5bb0cdbe264f4358f2b57eb1e0199408ec9b16c85d8039",
+    "checkout_sha256": "e38d58eb5636e644a084255cd3d661cc36cdb18ac61e772a186671e1b607d0b6"
+  },
+  {
+    "path": "supabase/migrations/20261103190318_native_claim_recovery.sql",
+    "sha256": "aaa4238b99025d18c2ce98476c8445fadabf1b93baadb69b791849092bd62abf",
+    "checkout_sha256": "7fcb733d020d331cd6a862f9c9cb2d704497149ad917a8682d4624aa382e7c03"
+  }
+]

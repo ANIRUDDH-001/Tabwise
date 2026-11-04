@@ -81,3 +81,5 @@ Authored immutable rerun bindings, exact source consumer/loader/stager, admissio
 R3 continuation new work: repair source/native adapter, narrow snapshot oracle, immutable SQL lifecycle and inline synthetic test fixtures authored in this worktree; existing shipped Fernway reused under its recorded provenance; no new external dependency, dataset or asset.
 
 R3 bounded pass: locally authored dispatch-guard and oracle UI/database regression fixtures; mock approvals/observations are test data only. No new third-party dependency, fixture asset or dataset.
+
+| Hosted release tooling (scripts/release, docs/release) | Original event work; PostgreSQL/Node standard libraries; installed packages reused, no added dependency/dataset | Local qualification and owner handoff, no native qualification |

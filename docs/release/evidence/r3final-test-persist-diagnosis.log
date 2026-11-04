@@ -1,0 +1,8 @@
+BEGIN
+DO
+                                        result                                        
+--------------------------------------------------------------------------------------
+ PASS atomic diagnosis persistence, idempotency, owner restriction and browser denial
+(1 row)
+
+ROLLBACK

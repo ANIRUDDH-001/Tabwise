@@ -1,0 +1,8 @@
+BEGIN
+DO
+                                                          result                                                          
+--------------------------------------------------------------------------------------------------------------------------
+ PASS admission, idempotency, reserved slot, transitions, lazy timeout, dynamic limits, kill switch, RPC permissions, RLS
+(1 row)
+
+ROLLBACK

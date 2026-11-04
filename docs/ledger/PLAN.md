@@ -685,3 +685,11 @@ Acceptance: serial root suite, ordinary classified suite, web/contracts, typeche
 Cost ceiling: $0 paid services; no model calls, new runtime dependencies, native input, deployments, hosted database changes or other agents. Preserve all historical STATE records.
 Measured local outcome: root1189 PASS/3 DB skips (PG3 PASS separately); web128/contracts21/browser16 PASS; ordinary63 files/1122 tests PASS with13 excluded files explicitly reported; SQL8/migrations9x2 PASS; types/build/R1/preflight PASS.
 Publication conditional: remote main9bb994c is an ancestor; GitHub currently reports main unprotected and no active branch rules. Do not change protection or bypass the requested protected-merge gate.
+
+### F-03 / hosted release readiness — owner-authorized sprint
+- Goal: exact seven-migration qualification, scoped production-parent preview source, acceptance tooling and owner packet.
+- Files: product web/src/scripts-tabwise/fixtures/supabase/test from bcc3a61; scripts/release, docs/release and ledgers.
+- Cost ceiling: $0 paid/model/native/hosted writes; installed packages reused, no dependency install.
+- Acceptance: local PostgreSQL migration+SQL+isolation+concurrency; build/typecheck/web; route closure and controlled built routes.
+- Results: PASS local gates; hosted OAuth/preparation/egress and cross-tool acceptance remain BLOCKED/unrun.
+- Publication, DB rollout, configuration and protected main actions remain owner-only.

@@ -1,7 +1,7 @@
 'use client';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import Link from 'next/link';
-import {PALETTE,KEYS} from '@tabwise/contracts/palette';
+import {PALETTE,KEYS} from '../../packages/contracts/palette.mjs';
 import {saveJourneyToAccount} from '../lib/account-save.mjs';
 import {STEP_LIMIT,editorRules,saveDraft,readDraft,clearDraft,readSavedJourney,listVersions,legacyVersions,readVersion,storeLocalVersion,journeyDigest,renumber,sameSteps,relativeTime} from '../lib/local-drafts.mjs';
 import InlineStatus from './ui/InlineStatus';

@@ -1,0 +1,3 @@
+import {mkdtemp,rm} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join,resolve,dirname,basename} from 'node:path';
+// Only scratch created here is removed. Durable downloaded/sealed evidence is never a target.
+export async function withVerificationDirectory(verify,{preserveFailure}={}){const parent=resolve(tmpdir()),dir=await mkdtemp(join(parent,'tabwise-native-ingest-'));try{return await verify(dir);}catch(error){if(preserveFailure)await preserveFailure();throw error;}finally{if(dirname(resolve(dir))!==parent||!basename(dir).startsWith('tabwise-native-ingest-'))throw Error('scratch cleanup scope');await rm(dir,{recursive:true,force:true});}}

@@ -1,0 +1,8 @@
+BEGIN
+DO
+                                                   result                                                   
+------------------------------------------------------------------------------------------------------------
+ PASS explicit digest-bound owner review, idempotency, conflict and browser denial; no verification created
+(1 row)
+
+ROLLBACK

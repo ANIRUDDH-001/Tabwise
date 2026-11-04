@@ -172,7 +172,7 @@ export async function captureJourney({ fixture_id, actions, speech, page, execut
     if (events.some((e,i) => e?.seq !== i + 1 || typeof e.type !== 'string' || !Number.isFinite(e.t) || (i > 0 && e.t < events[i-1].t) || e.t > sample.t)) reject('page event ordering/gap invalid');
     if (previousPage && (sample.session !== previousPage.session || sample.t < previousPage.t || events.length < previousPage.events.length || !same(events.slice(0, previousPage.events.length), previousPage.events))) reject('page session/log reset or prefix rewritten');
     const delta = previousPage ? events.slice(previousPage.events.length) : [];
-    const snapshot = { session: sample.session, clock: PAGE_CLOCK, t: sample.t, active: sample.active, state: sample.state, cursor: events.length, node_received: { clock: NODE_CLOCK, t: now() } };
+    const snapshot = { session: sample.session, clock: PAGE_CLOCK, t: sample.t, active: sample.active, ...(sample.identity_version===2?{identity_version:2,active_identity:sample.active_identity}:{}), state: sample.state, cursor: events.length, node_received: { clock: NODE_CLOCK, t: now() } };
     previousPage = sample;
     const stop = gateStop('page read');
     if (stop || (boundary && delta.length)) {
