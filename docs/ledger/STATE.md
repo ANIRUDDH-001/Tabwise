@@ -1,11 +1,10 @@
-# STATE — Phase B PASS, guarded native journey next
-- A PASS: actual hosted Windows identity14/14; serializer stall fixed without deadline increases.
-- B PASS: dc3ad31 run41797208434/2 artifact13306111472, NVDA2026.2 pid1508 same relay/executable identity.
-- Zero sends; valid receipt; cleanup stopped; independent root custody exact/confirmed, no residue/listener/helper.
-- ZIP9c4e4313e2b90cf6ebae4be5b0d3358da03c6c0fa3b17525c09f91d92f12d743/index verified.
-- Approval revoked after admission and absent.
-- C: bind existing diagnostic workflow manually to authorized fix/F-03-r2-native-runtime; exact source/run/attempt/fixture/key packet retained.
-- Required fixture actions Tab,Tab,Enter only; guarded executor/foreground/owned browser unchanged; classification NONQUALIFYING.
-- Next: focused diagnostics, publish, hosted offline checks then fresh exact attempt2 journey, inspect raw speech/custody.
-- Product gap: independent native signed-attestation authority and enabled reviewed policies unavailable; do not fabricate.
+# STATE — C foreground startup measurement
+- A/B PASS: actual Windows identity; real NVDA startup/receipt/relay/teardown/custody at dc3ad31 run41797208434/2.
+- C run41797751450/2 at c5e098c fails pre-input foreground helper timeout; zero sends; NVDA stopped, cleanup/custody complete.
+- Artifact13306751223 index verified; ZIP digest recorded by API, download verification pending.
+- Hosted full root1191/web127/contracts21/browserAPI15/build/types/frozen/preflight PASS. Local all diagnostic173/173 PASS, pins/frozen PASS.
+- New read-only hosted foreground stage probe uses unchanged frozen helper source; no local desktop probe.
+- R2 iterative workflow checks now focused; full root already passed on prior candidate and required again at final stability.
+- Next: publish stage probe, measure before timeout fix, execute fresh exact native journey if gate passes.
+- Product independent signed-attestation authority/configuration still unavailable; policies preserved.
 - Handoff: sole agent; incremental ₹0; no R3/R7 promotion.

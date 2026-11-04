@@ -21,20 +21,12 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: 24.22.1
-      - run: npm ci --ignore-scripts
-      - run: npm --prefix web ci --ignore-scripts
-      - run: npm --prefix packages/contracts ci --ignore-scripts
-      - run: npx --no-install playwright install chromium
-      - run: node --test diagnostics/r2-native/test.mjs diagnostics/r2-native/error-test.mjs
-      - run: npm test
-      - run: npm --prefix web test
-      - run: npm --prefix packages/contracts test
+      - name: Measure unchanged foreground helper stages without input
+        run: node diagnostics/owner-v2/foreground-timing.mjs
+      - name: Qualify identity and R2 authorization, runtime, custody and evidence negatives
+        run: node --test diagnostics/owner-v2/process-identity.test.mjs diagnostics/owner-v2/resolver.test.mjs diagnostics/r2-native/test.mjs diagnostics/r2-native/error-test.mjs diagnostics/r2-native/autopsy.test.mjs diagnostics/r2-native/boundaries.test.mjs diagnostics/r2-native/zero-key.test.mjs diagnostics/r2-native/startup-supervisor.test.mjs test/r2-runtime.test.mjs test/r2-runtime-class.test.mjs test/r2-lifecycle.test.mjs test/r2-completion-integrity.test.mjs
       - run: node scripts/check-r1-baseline.mjs
-      - run: node scripts/preflight.mjs --clean
-      - run: npm --prefix web run build -- --webpack
-      - run: npm --prefix web run typecheck
-      - run: node --test web/test/recorder.browser.mjs
-      - run: node diagnostics/r2-native/web-check.mjs
+
   native:
     needs: checks
     # Attempt 1 cannot execute native input even if a stale variable is present. The packet binds run ID,
