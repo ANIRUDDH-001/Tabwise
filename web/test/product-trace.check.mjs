@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {resolve,dirname} from 'node:path';
 import {R2_FILES} from '../../scripts/tabwise/r2-policy.mjs';
 const root=resolve(import.meta.dirname,'../..');
-const routes=['r2/admission','r2/product-binding','runs/[id]/native-request','runs/[id]/native-dispatch','runs/[id]/native-ingest','runs/[id]/diagnose','patches/[id]/apply','patches/[id]/oracle','verifications/[id]'];
+const routes=['r2/admission','r2/product-binding','r2/product-admission','runs/[id]/native-request','runs/[id]/native-dispatch','runs/[id]/native-ingest','runs/[id]/diagnose','patches/[id]/apply','patches/[id]/oracle','verifications/[id]'];
 for(const route of routes){
  const path=resolve(root,'web/.next/server/app/api',route,'route.js.nft.json'),manifest=JSON.parse(readFileSync(path));
  const files=new Set(manifest.files.map(p=>resolve(dirname(path),p)));

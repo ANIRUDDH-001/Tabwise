@@ -114,3 +114,6 @@ Merged previously authored native runtime and product lifecycle sources; reused 
 
 ## 2026-11-04T11:37:43Z — observed runtime metadata
 New event-time Windows process version/hash observer, fixed-profile data validator, sealed-journal exporter and negative fixtures authored during event. Reuses existing owned fixtures and installed Windows/.NET facilities; no dependency install/license/data added. Microsoft official property documentation retrieved via Context7; no external code copied. Read-only actual process test observes this Node executable, not NVDA; no desktop/input/native acceptance implied.
+
+## 2026-11-04T12:29:57Z — W5 product request admission
+New server issuer, bounded authenticated transport, generated-plan delivery correction and isolated generated-key tests authored during event. Reuses the existing W5 signing/consumption contract and owned synthetic fixtures; no new authority, library, dependency, dataset or external code. No native execution, real signing key or model call used by these tests.

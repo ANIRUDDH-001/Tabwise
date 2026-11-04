@@ -32,6 +32,8 @@ function outside(root,directory){
  if(!rel||rel.split(/[\\/]/)[0]!=='..'&&!isAbsolute(rel))fail('output inside checkout');
  return actual;
 }
+// Signature and source validation without persistence or execution authority.
+export function verifyNativePlanAdmission(args){check(args);return true;}
 export function materializeNativePlan(args){
  const {d,r,fixture}=check(args),directory=outside(args.root,args.outputDir),write=args.write??writeFileSync;
  mkdirSync(directory);const files={'plan.json':Buffer.from(d.plan_text),[fixture]:Buffer.from(d.fixture_text)},inventory=[];

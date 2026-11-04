@@ -35,6 +35,8 @@ export const R2_FILES=Object.freeze([
  'web/app/api/runs/[id]/evidence/route.ts', 'web/lib/server/artifact-ingest.mjs', 'web/lib/server/artifact-store.mjs',
  'web/lib/server/artifact-zip.mjs', 'web/lib/server/core.mjs', 'web/lib/server/r2-admission-live.ts',
  'web/lib/server/r2-admission.mjs', 'web/lib/server/r2-caller.mjs', 'web/lib/server/r2-evidence-bridge.mjs',
+ 'web/lib/server/native-plan-admission.mjs', 'web/lib/server/native-integration-live.ts', 'web/app/api/r2/product-admission/route.ts', 'scripts/tabwise/product-workflow-boundary.mjs',
+ 'src/r2/native-plan.mjs', 'src/r2/product-worker.mjs', 'src/r2/product-delivery.mjs', 'src/r2/product-dispatch.mjs',
  'web/lib/server/r2-product-context.mjs', 'web/lib/server/stored-evidence.mjs', 'web/lib/server/supabase.ts',
  'web/lib/server/repair-verdict.mjs', 'web/app/api/verifications/[id]/route.ts', 'supabase/migrations/20261103020000_repair_verdict.sql',
  'scripts/tabwise/verdict.mjs',

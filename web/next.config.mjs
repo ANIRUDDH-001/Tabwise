@@ -5,6 +5,6 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 // Escape literal route-directory brackets because tracing include values are glob patterns.
 export default {
  turbopack:{root},outputFileTracingRoot:root,
- outputFileTracingIncludes:Object.fromEntries(['/api/r2/admission','/api/r2/product-binding','/api/runs/*','/api/runs/*/*','/api/patches/*','/api/patches/*/*','/api/runs/*/diagnose','/api/runs/*/evidence','/api/runs/*/report','/api/verifications/*'].map(route=>[route,r2TraceFiles.map(file=>'../'+file.replaceAll('[','\\[').replaceAll(']','\\]'))])),
+ outputFileTracingIncludes:Object.fromEntries(['/api/r2/admission','/api/r2/product-binding','/api/r2/product-admission','/api/runs/*','/api/runs/*/*','/api/patches/*','/api/patches/*/*','/api/runs/*/diagnose','/api/runs/*/evidence','/api/runs/*/report','/api/verifications/*'].map(route=>[route,r2TraceFiles.map(file=>'../'+file.replaceAll('[','\\[').replaceAll(']','\\]'))])),
  poweredByHeader:false,
 };

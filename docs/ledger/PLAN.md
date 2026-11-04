@@ -741,3 +741,5 @@ Files: existing native/product/repair/web/budget boundaries and task-specific ve
 Acceptance: genuine owned R2 ingestion/readback, approved native repair/rerun and external R7, plus root/web/contracts/diagnostic/SQL/browser/build/type/Preview checks.
 Ceiling: 20 external model requests; incremental paid spend ₹0; current requests 0. Exact source/evidence: docs/evidence/product-completion-20261104/candidate.json.
 External authority absent by owner answer; review package is engineering progress, not R2/R3/R7 acceptance or completed product.
+
+Continuation 2026-11-04: remove committed-plan assumption from trusted product delivery; issue request-bound admission using the existing W5 key and consumed receipt after authenticated stored RUN_BOUND lookup. Acceptance for this slice: actual issuer -> materializer, authenticated route/transport negatives, Preview refusal, root/web/type/build and ten packaged route traces. This does not complete coordinator token handoff, new observed producer classification or genuine owned native acceptance. No new authority, dependency, migration or model call.
