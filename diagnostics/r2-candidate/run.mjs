@@ -14,12 +14,13 @@ const git=(...args)=>execFileSync('git',args,{cwd:root,encoding:'utf8',windowsHi
 const save=(dir,name,value)=>writeFileSync(join(dir,name),JSON.stringify(value,null,2)+'\n');
 const readPublic=path=>{const s=lstatSync(path);if(!s.isFile()||s.isSymbolicLink()||s.size>100000)throw Error('candidate public context refused');return parseUniqueJson(readFileSync(path,'utf8'));};
 export function assertChildCompleted(child,hasSession){if(child?.exit_code!==0||child?.outcome!=='accepted')throw Error('candidate page failed; inspect original stderr.log and custody');if(!hasSession)throw Error('candidate page completed without original session record');}
+export function packetWindow(now=Date.now()){return {issuedAt:new Date(now).toISOString(),expiresAt:new Date(now+3600000).toISOString()};}
 
 async function main(){
  const mode=process.argv[2]??'--run',env=process.env,head=git('rev-parse','HEAD'),scope=sourceDigest(root);
  const input=readCandidateEnvelope(env.TABWISE_CANDIDATE_REQUEST_JSON,{head,scope}),r=input.request;
  if(mode==='--packet'||mode==='--bootstrap'){
-  const runId=mode==='--packet'?process.argv[3]:env.GITHUB_RUN_ID,issuedAt=new Date().toISOString(),expiresAt=new Date(Date.now()+3600000).toISOString();
+  const runId=mode==='--packet'?process.argv[3]:env.GITHUB_RUN_ID,{issuedAt,expiresAt}=packetWindow();
   if(git('status','--porcelain','--untracked-files=all'))throw Error('candidate refused: clean source required for packet');
   assertProductionBlocked(root);
   const packet=candidatePacket({request:r,githubRunId:runId,issuedAt,expiresAt});

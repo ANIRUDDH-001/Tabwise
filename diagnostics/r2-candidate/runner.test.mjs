@@ -1,6 +1,12 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';import {readFileSync} from 'node:fs';
-import {assertChildCompleted} from './run.mjs';
+import {assertChildCompleted,packetWindow} from './run.mjs';
+
+test('bootstrap uses one clock reading so a millisecond boundary cannot exceed its one-hour ceiling',()=>{
+ const now=1793818185575,window=packetWindow(now);
+ assert.equal(window.issuedAt,new Date(now).toISOString());
+ assert.equal(Date.parse(window.expiresAt)-Date.parse(window.issuedAt),3600000);
+});
 test('failed worker preserves its original cause instead of masking it with a missing session path',()=>{
  assert.throws(()=>assertChildCompleted({exit_code:2,outcome:'failed'},false),/inspect original stderr/);
  assert.throws(()=>assertChildCompleted({exit_code:0,outcome:'accepted'},false),/without original session/);
