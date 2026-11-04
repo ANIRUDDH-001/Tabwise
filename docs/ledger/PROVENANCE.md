@@ -79,3 +79,5 @@ R2 lifecycle adaptation reuses Guidepup 0.36.4 MIT (Craig Morten, existing vendo
 Hosted-startup autopsy correction: new diagnostic cleanup/allowlist and controlled actual-class tests authored during event; existing MIT frozen Guidepup reused byte-identically. Existing GitHub artifact downloaded read-only with original provenance/hash, never relabelled. No dependency/install/new dataset/native or paid call.
 
 R2 recovery identity stage probe and fixed typed-field serializer: newly authored during event, existing project license; no new dependencies/fixtures/datasets. Node24 child-process close contract consulted via Context7; no external code copied.
+
+R2 autonomous recovery: new event-time journal binding, exact system-module foreground bootstrap and negative tests authored during event. Frozen R1/vendor unchanged; no new dependency/license/dataset. Archived native observations/screenshots use the existing approved project-owned synthetic fixture on isolated GitHub-hosted Windows; originals retain NONQUALIFYING/synthetic manifest classification. PowerShell/Node official documentation consulted via Context7; no external code copied.

@@ -142,3 +142,5 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 | `diagnostics/r2-native/startup-log.mjs` | Fixed-path bounded scrubbed NVDA log diagnostic; no runtime authority | startup artifact |
 
 | `diagnostics/owner-v2/foreground-timing.mjs` | Hosted read-only unchanged foreground helper stage timing, omits window text, no keys/focus | journey offline review |
+
+| `docs/evidence/r2-recovery/`, `docs/engineering/R2-autonomous-recovery-handoff.md` | Immutable original successful startup/native/separate-verifier archives, derived summary, measured fixes and explicit product-qualification blocker | runtime90c13f4, run41801278982/2 |

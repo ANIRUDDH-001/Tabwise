@@ -629,3 +629,6 @@ Scope: owner-v2 identity/resolver diagnostics; R2 lifecycle/loader/session/entry
 Acceptance: actual Windows identity and negative tests; hosted offline review and fresh exact packet; real startup artifact; guarded native journey/evidence/readback; focused security/custody/source tests, frozen R1, final npm test. Missing evidence means incomplete.
 Ceiling: ₹0 incremental, zero paid AI calls. No subagents or unrelated infrastructure/R3/R7 changes.
 Publication: owner explicitly permits reviewed commits/push to fix/F-03-r2-native-runtime and bounded hosted runs under existing exact authorization architecture. Rollback by new revert commit, never history rewrite.
+
+- Recovery outcome: real hosted native3-step journey/speech/teardown PASS at90c13f4 run41801278982/2, separate verification/tamper checks PASS; root1199 and diagnostics174 PASS.
+- Full R2 remains incomplete: independent native qualification/signing authority and real product-owned run binding unavailable; exporter/readback refuse. Original artifacts/handoff archived; no R3/R7 or product policy promotion.

@@ -1,0 +1,74 @@
+{
+  "revision": "90c13f402edf778ec6f25bc5eba469bbeefd7847",
+  "source_digest": "879af4bb6a32e0bc9e2a11b8359d4fe90b23556fbafb945ecd3019a1138ccfa2",
+  "verification": {
+    "integrity_pass": true,
+    "native_interaction_pass": true,
+    "w2a_qualified": false,
+    "production_qualified": false,
+    "page_class": "synthetic",
+    "run_class": "synthetic",
+    "observation_rows": 13,
+    "product_refused": true
+  },
+  "tamper": [
+    {
+      "type": "changed-source",
+      "refused": true
+    },
+    {
+      "type": "missing-source",
+      "refused": true
+    },
+    {
+      "type": "forged-pass",
+      "refused": true
+    }
+  ],
+  "payload_check": {
+    "eligible": true,
+    "source_verified": false,
+    "late_phrases": 1
+  },
+  "steps": [
+    {
+      "step": "a1",
+      "press": "Tab",
+      "status": "speech",
+      "text": "main landmark\nform landmark\nEmail, edit, blank",
+      "ack_seq": 39,
+      "release": 15216.4032,
+      "observations": 3
+    },
+    {
+      "step": "a2",
+      "press": "Tab",
+      "status": "speech",
+      "text": "Subscribe, button",
+      "ack_seq": 41,
+      "release": 16776.7225,
+      "observations": 1
+    },
+    {
+      "step": "a3",
+      "press": "Enter",
+      "status": "speech",
+      "text": "Enter your email address, for example name at example dot com",
+      "ack_seq": 44,
+      "release": 18346.9796,
+      "observations": 1
+    }
+  ],
+  "projection_rows": 13,
+  "custody_confirmed": true,
+  "residue": 0,
+  "post_quiescent": true,
+  "product": {
+    "accepted": false,
+    "reason": "native qualification disabled"
+  },
+  "exporter": {
+    "accepted": false,
+    "reason": "bridge fields"
+  }
+}
