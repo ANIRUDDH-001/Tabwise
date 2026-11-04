@@ -168,6 +168,7 @@
   "web/package-lock.json",
   "web/package.json",
   "web/test/candidate-comparison.test.mjs",
+  "web/test/candidate-configuration.test.mjs",
   "web/test/candidate-evidence.test.mjs",
   "web/test/candidate-repair-database.test.mjs",
   "web/test/candidate-run-database.test.mjs",
