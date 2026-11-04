@@ -26,4 +26,12 @@ Independent production qualification authority does not exist. R2/R3/R7 producti
 
 Hosted owned metadata/evidence and real speech rendering passed using an isolated admin-issued existing-owner session; signed-out reads returned401 and the test session was revoked. This did not test the human GitHub OAuth login interaction. Final live release verification is recorded separately after deployment.
 
-Validation:1275 root tests pass/3 database opt-in skips;412 combined tests pass/5 opt-in skips;16 browser controls pass;17 clean migrations,11 SQL suites and actual native/candidate/repair database integrations pass;production build/types/frozen preflight pass. Final required hosted CI and deployment must pass before release completion is claimed.
+Validation:1275 root tests pass/3 database opt-in skips;413 combined tests pass/5 opt-in skips;16 browser controls pass;17 clean migrations,11 SQL suites and actual native/candidate/repair database integrations pass;production build/types/frozen preflight pass. Required CI41899810357 passed on exact11eb13a;PR27 merged as50f3828. Deployment packaging was then corrected in PR28, whose exact required CI and hosted release verification are checked separately before final completion.
+
+## Deployment packaging and release verification
+
+The first hosted repair-view check caught missing transitive raw-module files despite a successful build and complete reviewed-source path inventory. The new isolated-package test copies only the declared deployment trace files and imports both adapters, reproducing the missing native-request.mjs and verification-directory.mjs before the fix. Both files are now shipped and included in the reviewed scope. The regression passes without the repository as a fallback.
+
+MEASURED: using only the182 shipped source files, the actual owned baseline and repair are found, the existing repair is recovered without a new allocation, both private original archives are replayed, and the comparison remains FIXED with all three checks true. This packaged test does not substitute for the final hosted HTTP/browser test.
+
+Release procedure: retain the explicit execution revision pin, require the exact PR-head preflight, merge without bypass, verify the production deployment SHA/READY state, then exercise owned API readback, completed repair recovery, original-pair comparison recomputation and the real desktop/mobile/keyboard report. Do not call the release complete if any of these checks fail. Individual deployment/run status is preserved in the ledger checkpoint.
