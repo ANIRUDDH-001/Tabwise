@@ -6,7 +6,6 @@ import {resolve,sep} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {runtimeIntegrity} from './r2-runtime-integrity.mjs';
 import {checkFrozenIntegrity} from '../check-r1-baseline.mjs';
-import {systemExecutable} from '../../diagnostics/owner-v2/resolver.mjs';
 // Fixed system module path avoids unbounded automatic command/module discovery on hosted Windows.
 export const R2_FOREGROUND_BOOTSTRAP="$PSModuleAutoLoadingPreference='None'; Import-Module ($PSHOME+'\\Modules\\Microsoft.PowerShell.Utility\\Microsoft.PowerShell.Utility.psd1') -ErrorAction Stop;\n";
 const ROOT=fileURLToPath(new URL('../../',import.meta.url)),runtimes=new WeakSet();let claimed=false;
@@ -14,10 +13,11 @@ export const isR2Runtime=runtime=>runtimes.has(runtime);
 export async function loadR2Runtime({root=ROOT,additionalIntegrity=()=>[]}={}){
  if(claimed)throw Error('R2 runtime already claimed; one-shot process required');claimed=true;
  const initial=checkFrozenIntegrity(root);initial.errors.push(...runtimeIntegrity(root));initial.ok=initial.errors.length===0;if(!initial.ok)throw Error(initial.errors.join('; '));
- const [{sendGate},tree,{foregroundProbe,PROBE_PS}]=await Promise.all([
+ const [{sendGate},tree,{foregroundProbe,PROBE_PS},{systemExecutable}]=await Promise.all([
   import(pathToFileURL(resolve(root,'src/speech/sendguard.mjs')).href),
   import(pathToFileURL(resolve(root,'src/speech/vendortree.mjs')).href),
   import(pathToFileURL(resolve(root,'src/speech/foreground.mjs')).href),
+  import(pathToFileURL(resolve(root,'diagnostics/owner-v2/resolver.mjs')).href),
  ]);
  const vendor=resolve(root,'vendor/guidepup-0.36.4-r1'),require=createRequire(resolve(vendor,'package.json'));
  if(Object.keys(require.cache).some(file=>file.toLowerCase().startsWith((vendor+sep).toLowerCase())))throw Error('qualification frozen modules already loaded; one-shot process required');

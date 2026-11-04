@@ -339,6 +339,21 @@ test('M2D-03: speech first seen after a valid release is associated with the act
 
 // Runs at the ledger's release entry: the wrapper stamps released_at, then calls this R1 reader synchronously.
 const atRelease = fn => frozen => Object.assign(token=>{fn();return frozen(token);},{before:token=>frozen.before(token)});
+test('observer receipt times establish fast speech after release even when the polling interval straddles it',async()=>{
+ let f;const observations=[];
+ f=rig({r1:atRelease(()=>f.later(1,()=>{f.phrases.push('fast button');observations.push({seq:1,t:f.now(),clock:'node-monotonic-ms',text:'fast button'});})),pollMs:25});
+ const read=f.options.speech.read;f.options.speech.read=async c=>({...await read(c),observations:structuredClone(observations)});
+ const r=await captureOfflineJourney(f.options);assert.equal(r.completed,true,reasons(r));assert.equal(r.records[0].text,'fast button');assert.equal(r.raw[0].timing,'observer-receipt');assert.equal(r.raw[0].arrived_after.t,observations[0].t);assert(r.raw[0].arrived_after.t>r.records[0].ack_timing.release_at);
+});
+for(const kind of ['future','clock','text','sequence','backdated'])test('observer receipt journal refuses '+kind+' timing without laundering early speech',async()=>{
+ let f;const observations=[];f=rig({r1:atRelease(()=>f.later(1,()=>{f.phrases.push('fast button');observations.push({seq:1,t:f.now(),clock:'node-monotonic-ms',text:'fast button'});})),pollMs:25});
+ const read=f.options.speech.read;f.options.speech.read=async c=>{const value=await read(c),events=structuredClone(observations);if(events.length){if(kind==='future')events[0].t=f.now()+100;if(kind==='clock')events[0].clock='page-monotonic-ms';if(kind==='text')events[0].text='other';if(kind==='sequence')events[0].seq=2;if(kind==='backdated')events[0].t=-1;}return {...value,observations:events};};
+ const r=await captureOfflineJourney(f.options);assert.equal(r.completed,false);assert.match(reasons(r),/observer|journal|timestamp/);
+});
+test('timed observer speech before release stays ambiguous and unattributed',async()=>{
+ const observations=[];const f=rig({transport:sendAnd(async e=>{e.phrases.push('early native');observations.push({seq:1,t:e.now(),clock:'node-monotonic-ms',text:'early native'});await e.sleep(30);})});
+ const read=f.options.speech.read;f.options.speech.read=async c=>({...await read(c),observations:structuredClone(observations)});assertPremature(await captureOfflineJourney(f.options),'early native');
+});
 
 test('M2D-04: a delayed speech read revealing early and release-time phrases together cannot launder the early one',async()=>{
   let f;

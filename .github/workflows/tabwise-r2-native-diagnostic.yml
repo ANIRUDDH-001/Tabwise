@@ -23,8 +23,9 @@ jobs:
           node-version: 24.22.1
       - name: Measure unchanged foreground helper stages without input
         run: node diagnostics/owner-v2/foreground-timing.mjs
+      - run: npm ci --ignore-scripts
       - name: Qualify identity and R2 authorization, runtime, custody and evidence negatives
-        run: node --test diagnostics/owner-v2/process-identity.test.mjs diagnostics/owner-v2/resolver.test.mjs diagnostics/r2-native/test.mjs diagnostics/r2-native/error-test.mjs diagnostics/r2-native/autopsy.test.mjs diagnostics/r2-native/boundaries.test.mjs diagnostics/r2-native/zero-key.test.mjs diagnostics/r2-native/startup-supervisor.test.mjs test/r2-runtime.test.mjs test/r2-runtime-class.test.mjs test/r2-lifecycle.test.mjs test/r2-completion-integrity.test.mjs
+        run: node --test diagnostics/owner-v2/process-identity.test.mjs diagnostics/owner-v2/resolver.test.mjs diagnostics/r2-native/test.mjs diagnostics/r2-native/error-test.mjs diagnostics/r2-native/autopsy.test.mjs diagnostics/r2-native/boundaries.test.mjs diagnostics/r2-native/zero-key.test.mjs diagnostics/r2-native/startup-supervisor.test.mjs test/r2-runtime.test.mjs test/r2-runtime-class.test.mjs test/r2-lifecycle.test.mjs test/r2-completion-integrity.test.mjs test/r2-review.test.mjs test/r2-capture-receipts.test.mjs test/r2-payload-context.test.mjs test/tabwise-observer.test.mjs test/r2-evidence.test.mjs
       - run: node scripts/check-r1-baseline.mjs
 
   native:

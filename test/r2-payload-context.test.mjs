@@ -67,6 +67,11 @@ function c3Evidence({ texts = ['email, edit text', 'Submit, button', null], pre 
   return { capture, stepMap: structuredClone(C3_MAP), speech: [speech], transform: { ...C3_TRANSFORM }, fixture_id: C3_ID };
 }
 const c3 = (mutate, options) => { const e = c3Evidence(options); mutate?.(e); return assessR2SpeechPayload(e); };
+test('observer receipt timing is preserved and bound to sealed speech; missing or tampered journals refuse',()=>{
+ const e=c3Evidence();for(const p of e.capture.raw)p.timing='observer-receipt';const lane=e.speech[0];lane.observations=lane.phrases.map((text,i)=>({seq:i+1,text,clock:NODE,t:e.capture.raw.find(p=>p.seq===i+1)?.arrived_after.t??0}));
+ assert.equal(assessR2SpeechPayload(e).model_eligible,true);const record=speechLaneRecord(lane);assert.deepEqual(record.observations,lane.observations);record.observations[0].text='changed';assert.notEqual(record.observations[0].text,lane.observations[0].text);
+ for(const mutate of [x=>delete x.speech[0].observations,x=>x.speech[0].observations[1].t++,x=>x.speech[0].observations[1].clock='page-monotonic-ms',x=>x.speech[0].observations[1].seq=9,x=>delete x.capture.raw[0].timing]){const bad=structuredClone(e);mutate(bad);assert.equal(assessR2SpeechPayload(bad).model_eligible,false);}
+});
 function c3Refused(result, pattern, where) {
   assert.equal(result.model_eligible, false, where);
   assert.equal(result.payload, null, `${where}: no payload on refusal`);

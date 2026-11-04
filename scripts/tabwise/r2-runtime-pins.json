@@ -1,7 +1,7 @@
 {
   "schema": "tabwise-r2-runtime-pins/1",
   "files": {
-    "scripts/tabwise/r2-loader.mjs": "f851e5c060221b02bdd6fcf17dc4cd5ec61f3f4fce99da1330f37a0716e31cd8",
+    "scripts/tabwise/r2-loader.mjs": "5d11703f21f68d9d961ec1ec184ebea2c9b69f7993de10de3c59cfdaace90bd2",
     "scripts/tabwise/r2-vendor-loader.mjs": "5fbf83e697f0c4adc4b9a7246cf231050f7643649b29ea050f166da4682bdc5f",
     "scripts/tabwise/r2-nvda-lifecycle.mjs": "a21de43a4e4192a109d0b968300fe91b1831d80be86802180c1213ff88a5ff2d",
     "scripts/tabwise/r2-runtime-integrity.mjs": "9aca50571ea7e073b6d9848d13535db64fe55579919555295db9c53eeb52ca1b",
