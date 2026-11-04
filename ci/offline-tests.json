@@ -1,4 +1,8 @@
 {
+  "r2-native-query.test.mjs": {
+    "kind": "offline",
+    "reason": "raw evidence writer/verifier identity and query substitution; temporary files only, no native runtime"
+  },
   "meta-completion.test.mjs": {
     "kind": "offline",
     "reason": "synthetic diagnosis responses and local SQLite; no external service or native runtime"

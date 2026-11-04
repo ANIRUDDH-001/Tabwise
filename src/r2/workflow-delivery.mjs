@@ -4,7 +4,22 @@ import {validateProductDelivery} from './product-delivery.mjs';
 import {sha256,LIMITS} from '../../packages/contracts/index.mjs';
 import {safePath} from '../../packages/contracts/r2-product.mjs';
 import {mkdirSync,writeFileSync,readFileSync,lstatSync,readdirSync} from 'node:fs';
-import {dirname,join} from 'node:path';
+import {dirname,basename,join,resolve,relative,isAbsolute} from 'node:path';
+import {realpathSync} from 'node:fs';
+import {parseUniqueJson} from './strict-json.mjs';
+export function stageWindowsProductSource({delivery,root,outputDir}){
+ const d=validateProductDelivery(delivery),plan=parseUniqueJson(d.plan_text);
+ if(plan.pages.length!==1||plan.pages[0].id!==d.request.page_id)throw Error('one product source page required');
+ const candidate=resolve(outputDir),parent=dirname(candidate);
+ const lexical=relative(realpathSync(root),candidate);
+ if(!lexical||!isAbsolute(lexical)&&lexical.split(/[\\/]/)[0]!=='..')throw Error('product source staging inside checkout');
+ if(lstatSync(parent).isSymbolicLink()||!lstatSync(parent).isDirectory())throw Error('regular external source parent required');
+ const directory=join(realpathSync(parent),basename(candidate)),rel=relative(realpathSync(root),directory);
+ if(!rel||!isAbsolute(rel)&&rel.split(/[\\/]/)[0]!=='..')throw Error('product source staging inside checkout');
+ const fixture=plan.pages[0].fixture;
+ const stored=persistExportPackage({outputDir:directory,files:{'plan.json':Buffer.from(d.plan_text),[fixture]:Buffer.from(d.fixture_text)}});
+ return {...stored,planPath:join(directory,'plan.json'),fixturePath:join(directory,fixture),request_sha256:d.request.request_sha256,input_authorized:false};
+}
 export function verifyWindowsDelivery({delivery,github,sourceDigest,qualificationDigest,requestSha256,productRunId,read,planAdmission}){
  const d=validateProductDelivery(delivery),r=d.request,g=github;
  if(g?.workflow!==r.workflow||g.ref!=='refs/heads/main'||g.revision!==r.revision||g.actor!==r.actor||g.triggeringActor!==r.actor||g.attempt!==1||!/^[1-9][0-9]{0,19}$/.test(g.runId??''))throw Error('Windows workflow identity mismatch');

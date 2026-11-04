@@ -8,7 +8,7 @@ import {inspectR2ProductExport} from './product-bridge.mjs';
 import {captureObservationSources} from './capture-export.mjs';
 const parse=b=>parseUniqueJson(new TextDecoder('utf-8',{fatal:true}).decode(b));
 
-export function buildR2ProductExport({files,expected,stage_timings}) {
+export function buildR2ProductExport({files,expected,stage_timings,producerAuthority}) {
  if(!files||Object.keys(files).length>97||Object.hasOwn(files,'r2-export.json'))throw Error('sealed source map required');
  const copied={};let total=0;
  for(const [path,bytes] of Object.entries(files)){
@@ -37,7 +37,7 @@ export function buildR2ProductExport({files,expected,stage_timings}) {
   const m=parse(copied[expected.page_id+'/manifest.json']).step_map.actions[n];return {task:m.task,action:m.action,step:step.step};
  }),observations,axe,stage_timings:structuredClone(stage_timings)};
  copied['r2-export.json']=Buffer.from(JSON.stringify(exp));
- const result=inspectR2ProductExport({files:copied,expected});
+ const result=inspectR2ProductExport({files:copied,expected,producerAuthority});
  if(!result.ok)throw Error(result.errors.join('; '));
  if(!same(result.preview.manifest.r2_identity,exp.identity))throw Error('export identity');
  return {export:exp,files:copied,source_verified:false,blockers:['Independent native attester unavailable; qualification remains BLOCK.']};

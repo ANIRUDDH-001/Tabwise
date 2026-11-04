@@ -618,7 +618,7 @@ export async function verifyR2PageEvidence(dir, {fixture, approved} = {}) {
     if (!CLASSES.includes(manifest.class)) fail('manifest class unknown');
     if (manifest.evidence_scope !== EVIDENCE_SCOPE) fail('evidence scope');
     if (!object(manifest.page) || !object(manifest.spec) || !object(manifest.transform)) fail('manifest identity fields');
-    const port = Number(/^http:\/\/127\.0\.0\.1:(\d+)\/index\.html(?:\?flow=(?:passenger|seat|search)&variant=broken)?$/.exec(manifest.page.url)?.[1]);
+    const port = Number(/^http:\/\/127\.0\.0\.1:(\d+)\/index\.html(?:\?flow=(?:passenger|seat|search)&variant=(?:healthy|broken))?$/.exec(manifest.page.url)?.[1]);
     const ctx = prepare({page: {fixture_id: manifest.page.fixture_id, session: manifest.page.session, port}, fixture, approved, nonce: manifest.transform.nonce, spec: manifest.spec});
     if (canonical(ctx.identity) !== canonical(manifest.page)) fail('page identity does not recompute');
     if (canonical(ctx.step_map) !== canonical(manifest.step_map)) fail('step map differs from the approved task list');

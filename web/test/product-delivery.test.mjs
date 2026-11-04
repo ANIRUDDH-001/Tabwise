@@ -5,6 +5,20 @@ for(const k of ['spec_text','plan_text','fixture_text'])test('delivery substitut
 
 import {buildWorkflowProductExport} from '../../src/r2/product-workflow-export.mjs';
 import * as boundary from '../../scripts/tabwise/product-workflow-boundary.mjs';
+import * as windowsDelivery from '../../src/r2/workflow-delivery.mjs';
+import {mkdtempSync,readFileSync,existsSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join,resolve} from 'node:path';
+
+test('Windows stages immutable generated plan outside checkout without claiming W5 admission',()=>{
+ assert.equal(typeof windowsDelivery.stageWindowsProductSource,'function','unadmitted generated source staging is missing');
+ const delivery=sample(),root=resolve('..'),outputDir=join(mkdtempSync(join(tmpdir(),'tw-generated-source-')),'source');
+ const staged=windowsDelivery.stageWindowsProductSource({delivery,root,outputDir});
+ assert.equal(staged.input_authorized,false);assert.equal(staged.native_qualified,false);
+ assert.equal(readFileSync(staged.planPath,'utf8'),delivery.plan_text);assert.equal(readFileSync(staged.fixturePath,'utf8'),delivery.fixture_text);
+ assert.throws(()=>windowsDelivery.stageWindowsProductSource({delivery,root,outputDir}),'staging is never resumed');
+ const forbidden=join(root,'cache','must-not-stage-product-source');assert.throws(()=>windowsDelivery.stageWindowsProductSource({delivery,root,outputDir:forbidden}),/checkout/);assert.equal(existsSync(forbidden),false);
+});
 
 test('trusted delivery accepts generated request source without requiring a committed plan',()=>{
  assert.equal(typeof boundary.verifyBoundProductDelivery,'function','generated delivery source boundary is missing');

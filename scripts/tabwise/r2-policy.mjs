@@ -37,6 +37,8 @@ export const R2_FILES=Object.freeze([
  'web/lib/server/r2-admission.mjs', 'web/lib/server/r2-caller.mjs', 'web/lib/server/r2-evidence-bridge.mjs',
  'web/lib/server/native-plan-admission.mjs', 'web/lib/server/native-integration-live.ts', 'web/app/api/r2/product-admission/route.ts', 'scripts/tabwise/product-workflow-boundary.mjs',
  'src/r2/native-plan.mjs', 'src/r2/product-worker.mjs', 'src/r2/product-delivery.mjs', 'src/r2/product-dispatch.mjs',
+ 'src/r2/product-producer.mjs', 'src/r2/product-coordinator.mjs',
+ 'src/r2/product-origin.mjs', 'src/r2/workflow-delivery.mjs', 'src/r2/product-export.mjs', 'src/r2/product-workflow-export.mjs', 'scripts/tabwise/product-windows-boundary.mjs',
  'web/lib/server/r2-product-context.mjs', 'web/lib/server/stored-evidence.mjs', 'web/lib/server/supabase.ts',
  'web/lib/server/repair-verdict.mjs', 'web/app/api/verifications/[id]/route.ts', 'supabase/migrations/20261103020000_repair_verdict.sql',
  'scripts/tabwise/verdict.mjs',

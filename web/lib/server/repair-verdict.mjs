@@ -38,13 +38,31 @@ export function assessNativeRepair({baselineCapture,rerunCapture,baselineEvidenc
  const restored=c=>/^choose-seat(?:#[1-9][0-9]*)?$/.test(c.records[index].page.after.active);
  if(restored(baselineCapture))return inconclusive('Baseline already has restored focus.');
  const normalize=s=>s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,'').replace(/\s+/g,' ').trim();
- const speech=(e,step)=>e.lanes.speech.filter(x=>x.step===step).map(x=>normalize(x.text));
+ const speech=(e,step)=>{
+  if(!Array.isArray(e?.lanes?.speech))return null;
+  const rows=e.lanes.speech.filter(x=>x?.step===step);
+  if(rows.some(x=>typeof x.text!=='string'||!normalize(x.text)))return null;
+  return rows.map(x=>normalize(x.text));
+ };
+ const focus=snapshot=>{
+  const i=snapshot?.active_identity;
+  if(snapshot?.identity_version!==2||i?.available!==true||i.connected!==true||i.node_key!==snapshot.active||typeof i.is_body!=='boolean')return null;
+  if(i.is_body)return i.tag==='body'&&snapshot.active==='body'?'body':null;
+  if(typeof i.id!=='string'||!i.id||i.id_unique!==true||typeof i.tag!=='string'||!i.tag||i.tag==='body'||typeof snapshot.active!=='string'||!snapshot.active.startsWith(i.id+'#')||!/^[1-9][0-9]*$/.test(snapshot.active.slice(i.id.length+1)))return null;
+  // Per-session node ordinals are not stable across original and patched DOMs.
+  // Compare the observed unique DOM identity; names remain page-authored data.
+  return JSON.stringify([i.id,i.tag,i.role??null,i.input_type??null]);
+ };
  let preserved=true;
  for(const s of steps.filter(s=>s.step!==oracle.step)){
-  const before=speech(baselineEvidence,s.step),after=speech(rerunEvidence,s.step);let n=0;
+  const at=steps.indexOf(s),before=speech(baselineEvidence,s.step),after=speech(rerunEvidence,s.step);
+  const original=focus(baselineCapture.records[at].page?.after),patched=focus(rerunCapture.records[at].page?.after);
+  if(original===null||patched===null||before===null||after===null||!before.length||baselineCapture.records[at].capture_status!=='speech'||(rerunCapture.records[at].capture_status==='speech')!==!!after.length)return inconclusive('Protected steps require comparable terminal focus and complete action-bound speech.');
+  if(original!==patched)preserved=false;
+  let n=0;
   for(const text of after)if(n<before.length&&text===before[n])n++;
   if(n!==before.length)preserved=false;
  }
  const gone=restored(rerunCapture);
- return {verdict:!preserved?'REGRESSED':gone?'FIXED':'NOT_FIXED',checks:{symptom_gone:gone,other_steps_preserved:preserved,evidence_complete:true},reason:!preserved?'Unaffected speech was lost.':gone?'Recorder observed dialog closure with restored focus and preserved unaffected speech.':'Recorder observed dialog closure without restored focus.'};
+ return {verdict:!preserved?'REGRESSED':gone?'FIXED':'NOT_FIXED',checks:{symptom_gone:gone,other_steps_preserved:preserved,evidence_complete:true},reason:!preserved?'Protected focus changed or unaffected speech was lost.':gone?'Recorder observed dialog closure with restored focus and preserved protected focus and speech.':'Recorder observed dialog closure without restored focus.'};
 }
