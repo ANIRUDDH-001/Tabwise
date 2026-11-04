@@ -1,0 +1,94 @@
+{
+  "schema": "tabwise-product-completion-review/1",
+  "authorizing": false,
+  "created_at": "2026-11-04T10:50:28Z",
+  "code_revision": "e3d99addc066da88624728923de49a040784aa61",
+  "branch": "feat/tabwise-r2-r7-product-completion",
+  "overall_status": "INCOMPLETE",
+  "r2_source_sha256": "fddc0e40603d54b67d61e916f95aa806398a203f04c6ec9d090829bd96960187",
+  "qualification_sha256": "1a2991eb6c4bc42ffef5fbc1060d89dd8dc136c456211eddcf8dacf459ddd672",
+  "source_manifest_sha256": "55034b7bb6ca7fcdfc10f567aa61514ec8d7ef3454651b6d879d69a74141cf77",
+  "tests": {
+    "root": {
+      "pass": 1252,
+      "fail": 0,
+      "skipped": 3,
+      "command": "npm test"
+    },
+    "web": {
+      "pass": 321,
+      "fail": 0,
+      "skipped": 3,
+      "command": "npm --prefix web test"
+    },
+    "contracts": {
+      "pass": 21,
+      "fail": 0
+    },
+    "diagnostics": {
+      "pass": 139,
+      "fail": 0
+    },
+    "browser_controls": {
+      "pass": 17,
+      "classification": "HEADLESS SYNTHETIC CONTROLS; no native input or qualification"
+    },
+    "database": {
+      "migrations": 12,
+      "sql_suites": 8,
+      "native_integrations": 3,
+      "repair_checks": 3,
+      "all_pass": true,
+      "classification": "FRESH DISPOSABLE LOCAL POSTGRESQL; actual hosted migrations not repeated"
+    },
+    "hosted_schema": {
+      "expected_migrations_present": 12,
+      "public_tables": 27,
+      "rls_enabled_tables": 27,
+      "classification": "READ-ONLY SUPABASE MCP INSPECTION"
+    }
+  },
+  "native_history": {
+    "source_commit": "90c13f402edf778ec6f25bc5eba469bbeefd7847",
+    "source_digest": "879af4bb6a32e0bc9e2a11b8359d4fe90b23556fbafb945ecd3019a1138ccfa2",
+    "run": "41801278982",
+    "attempt": 2,
+    "artifact_id": "13306859138",
+    "separate_verifier_artifact_id": "13307932535",
+    "classification": "HISTORICAL NONQUALIFYING DIAGNOSTIC; not a product-owned run or repaired rerun",
+    "archives": [
+      {
+        "path": "docs/evidence/r2-recovery/native-41801278982-2.zip",
+        "sha256": "6ee3042549f9cc3f8be77208b2f631e9fd56ba5d006f79211e354ce976c5c42f"
+      },
+      {
+        "path": "docs/evidence/r2-recovery/startup-41797208434-2.zip",
+        "sha256": "9c4e4313e2b90cf6ebae4be5b0d3358da03c6c0fa3b17525c09f91d92f12d743"
+      },
+      {
+        "path": "docs/evidence/r2-recovery/verification-41801278982-2.zip",
+        "sha256": "d7da34322ae10f993283e46d49345ee3a28d3ed00745503073a836af7da670de"
+      }
+    ]
+  },
+  "model_requests": {
+    "used": 0,
+    "maximum": 20,
+    "incremental_paid_inr": 0,
+    "current_credit_eligibility": "NOT VERIFIED; no live calls permitted"
+  },
+  "authority": {
+    "reviewer": null,
+    "public_key": null,
+    "signed_qualification": null,
+    "owner_answer": "No authority exists yet; prepare the review package"
+  },
+  "acceptance": {
+    "r2_product_readback": "NOT DEMONSTRATED",
+    "r3_native_repair_rerun": "NOT DEMONSTRATED",
+    "r7_independent_assessment": "NOT DEMONSTRATED",
+    "hosted_oauth": "NOT VERIFIED",
+    "release_ready": false,
+    "merge_ready": false
+  }
+}

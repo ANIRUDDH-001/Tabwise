@@ -767,3 +767,7 @@ Consequence: sole-agent deterministic review, R2-only implementation/test/workfl
 ## Full product completion mandate — owner authorization
 User: "The owner authorizes you to carry out the full engineering implementation." "Commit meaningful changes." "Push to a dedicated product-completion development branch." "Create or update a draft integration pull request." "Deploy controlled Preview candidates for actual acceptance testing." "No subagents whatsoever." "Incremental paid spend: ₹0." "Absolute ceiling: 20 external model API requests across this assignment." "Do not merge into main."
 Scope: R2/R3/R7, authenticated product evidence, frontend/backend, operational/security completion and exact-source checkpoint evidence. Mandate authorizes necessary R2 workflow implementation; it never authorizes fabricated external qualification or patch-owner decisions. No new dependencies currently required.
+
+## 2026-11-04T10:44:37Z — independent authority availability
+User answer: "No authority exists yet; prepare the review package".
+Consequence: no qualification policy activation, production key generation or fabricated reviewer signature. Publish exact-source engineering review material and explicitly retain missing product/native acceptance.

@@ -1,0 +1,23 @@
+✔ ID-less radio is truthful, bounded and distinct from body; final healthy and broken focus independently observed (2351.2951ms)
+✔ native recorder distinguishes missing related nodes and preserves terminal identity with nested dialogs and removal (3561.2041ms)
+✔ reserved IDs, duplicate IDs, detached related nodes, rapid focus and bounded names remain explicit (4952.474ms)
+✔ symbolic dialog targets survive separately from unavailable DOM identity (2355.1849ms)
+✔ duplicate IDs and ID-less controls retain distinct actual node keys (7158.4682ms)
+✔ symbolic lookup with duplicate IDs retains logical intent and refuses a DOM association (1308.7083ms)
+✔ recorder ignores page overrides of native DOM identity and name accessors (2545.7285ms)
+✔ target with 199 ID characters never becomes a valid over-bound event (8666.1505ms)
+✔ target with 200 ID characters never becomes a valid over-bound event (684.9347ms)
+✔ target with 256 ID characters never becomes a valid over-bound event (627.2308ms)
+✔ target with 2048 ID characters never becomes a valid over-bound event (600.0917ms)
+✔ event and byte caps fail closed and remain incomplete (953.5294ms)
+✔ duplicate label IDs are explicit and cannot silently select one name (423.007ms)
+✔ over-bound native names are marked incomplete rather than silently accepted (405.6023ms)
+✔ real historical Fernway dialog identities drive the pure oracle in labelled browser controls (1338.2518ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17738.2439

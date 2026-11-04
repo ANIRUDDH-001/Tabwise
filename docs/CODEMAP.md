@@ -196,3 +196,6 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 | `diagnostics/owner-v2/foreground-timing.mjs` | Hosted read-only unchanged foreground helper stage timing, omits window text, no keys/focus | journey offline review |
 
 | `docs/evidence/r2-recovery/`, `docs/engineering/R2-autonomous-recovery-handoff.md` | Immutable original successful startup/native/separate-verifier archives, derived summary, measured fixes and explicit product-qualification blocker | runtime90c13f4, run41801278982/2 |
+
+| `src/deployment-execution.mjs`, native request/progress helpers, `test/broker-request-limit.test.mjs`, `web/test/native-{progress,controls}*` | Preview execution refusal, durable request ceiling, owned native progress and server-derived UI controls | root/web/browser/SQL evidence in product completion package |
+| `docs/engineering/Product-completion-review-20261104.md`, `docs/evidence/product-completion-20261104/` | Exact-source incomplete engineering review, original test logs, native artifact hashes and unresolved authority/implementation criteria | candidate.json and evidence-index.json; no qualification authority |

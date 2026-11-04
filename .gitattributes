@@ -4,3 +4,8 @@ docs/ledger/COSTS.jsonl merge=union
 
 # Vendored upstream bytes (D-39): never convert line endings, so files stay byte-identical to npm's
 vendor/** -text
+
+# Original test outputs are byte-preserved evidence, including terminal whitespace.
+docs/evidence/product-completion-20261104/*.tap -text -diff
+docs/evidence/product-completion-20261104/*.log -text -diff
+docs/evidence/product-completion-20261104/*.json -text whitespace=cr-at-eol

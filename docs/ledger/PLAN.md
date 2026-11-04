@@ -734,3 +734,10 @@ Publication: owner explicitly permits reviewed commits/push to fix/F-03-r2-nativ
 
 - Recovery outcome: real hosted native3-step journey/speech/teardown PASS at90c13f4 run41801278982/2, separate verification/tamper checks PASS; root1199 and diagnostics174 PASS.
 - Full R2 remains incomplete: independent native qualification/signing authority and real product-owned run binding unavailable; exporter/readback refuse. Original artifacts/handoff archived; no R3/R7 or product policy promotion.
+
+## F-03 — full product completion mandate (active, incomplete)
+Owner-approved goal: integrated R2/R3/R7 product, supported owned applications, UI/backend, security and release review package. Sole agent; no main merge or production activation.
+Files: existing native/product/repair/web/budget boundaries and task-specific verification/ledgers. No new dependencies or hosted migrations needed in this slice.
+Acceptance: genuine owned R2 ingestion/readback, approved native repair/rerun and external R7, plus root/web/contracts/diagnostic/SQL/browser/build/type/Preview checks.
+Ceiling: 20 external model requests; incremental paid spend ₹0; current requests 0. Exact source/evidence: docs/evidence/product-completion-20261104/candidate.json.
+External authority absent by owner answer; review package is engineering progress, not R2/R3/R7 acceptance or completed product.

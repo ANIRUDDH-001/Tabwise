@@ -1,0 +1,79 @@
+# Tabwise product completion — engineering progress review
+
+**Status: INCOMPLETE. No R2, R3 or R7 acceptance checkpoint is claimed. Do not merge or activate production from this package.**
+
+Candidate code: `e3d99addc066da88624728923de49a040784aa61` on `feat/tabwise-r2-r7-product-completion`. Later evidence-only commits do not change this code revision. The owner confirmed: “No authority exists yet; prepare the review package”. This package supplies no signature, reviewer identity, private evaluation labels or qualification authority.
+
+## Source and evidence
+
+- MEASURED: `docs/evidence/product-completion-20261104/candidate.json` records the source digests, observed test counts, historical native archive hashes and pending acceptance criteria.
+- MEASURED: `source-manifest.json` freezes the existing literal-import source closure, explicit policy/lock/vendor roots and each normalized file hash. It is a review inventory, not execution authorization.
+- MEASURED: R2 source digest `fddc0e40603d54b67d61e916f95aa806398a203f04c6ec9d090829bd96960187`.
+- MEASURED: qualification source digest `1a2991eb6c4bc42ffef5fbc1060d89dd8dc136c456211eddcf8dacf459ddd672`.
+- MEASURED: `evidence-index.json` hashes the original verification outputs, including failed/intermediate results. Successful local controls never replace the missing native product evidence.
+
+## Integrated behavior and scope
+
+The clean product continuation `f0cc39a` was reconciled with native runtime branch `0ca170f` in `640b6d5`. Both native and repair integrity scopes and assertions were retained. Current main ea8bd7c was merged into the development branch in e3d99ad with an identical tested source tree; three registration-workflow conflicts retain the existing gated native-branch source. Main itself was not changed. Review those workflow differences before any future main merge. The merged native session retains the product recorder's v2 identity data and the native loader/startup/foreground/speech corrections. Its exact session pin was refreshed; it has **not** been exercised in a new hosted native run.
+
+The Preview execution restrictions from `342518f` were carried into the integration line. Additional guards refuse native ingestion, native dispatch and cancellation in Preview. Save/read/preparation remains available. No production execution flags were enabled.
+
+Native polling now checks persisted owner/request association and the exact GitHub workflow/revision/actor/attempt before mutation. It reports queued/running/failed/cancelled/deadline outcomes. A successful workflow stops at pending evidence; only the existing trusted ingestion path can establish completed evidence. Unknown dispatch outcomes never trigger title-based discovery or a second POST. A cancellation failure at deadline is retained as `deadline_exceeded_cancel_pending`; it does not establish physical quiescence.
+
+The owned request API derives available actions from server policy and persisted state. The UI exposes run and evidence-retrieval controls when eligible and keeps refused evidence unverified. Disabled qualification is still visibly unavailable; no client flag grants a capability.
+
+The local project budget broker now reserves request slots alongside monetary reservations, counts uncertain requests, retains slots after settlement, rejects a raised/replaced campaign and recovers counts from the append-only costs ledger if SQLite is lost. The campaign limit is twenty. This does not claim a distributed hosted request counter or verified remaining promotional credit. No live model request was made.
+
+The hosted source inventory previously omitted native runtime files. It now covers the full enforced R2 scope, and route patterns include nested native and patch routes. Nine actual built route traces were checked. CITED: the tracing change follows the [Next.js output tracing documentation](https://github.com/vercel/next.js/blob/canary/docs/01-app/03-api-reference/05-config/01-next-config-js/output.mdx), retrieved through Context7.
+
+## Verification actually performed
+
+| Verification | MEASURED result | Original output |
+|---|---|---|
+| `npm test` | 1,252 pass; zero failures; three DB opt-ins skipped | `root-final.tap` |
+| `npm --prefix web test` | 321 pass; zero failures; three DB opt-ins skipped | `web-final.tap` |
+| Contracts | 21 pass | `contracts.tap` |
+| Selected native/owner diagnostic suites | 139 pass; no NVDA launched | `diagnostics.tap` |
+| Headless request/repair UI and recorder/oracle controls | 17 pass; synthetic controls | both browser TAP files |
+| Fresh local PostgreSQL schema | twelve existing migrations; eight SQL suites pass | `postgres.log`, `postgres-result.json` |
+| Native persistence/custody/recovery and repair concurrency | all six skipped DB checks executed separately and pass | `postgres.log` |
+| Production build and TypeScript | pass | `build.log`; build includes TypeScript |
+| Full reviewed scope in nine built API route packages | pass | `route-traces.log` |
+| Actual built HTTP Preview/Production boundary controls | pass, including Preview cancellation refusal | `preview-http.log` |
+| Frozen R1, runtime pins, preflight and diff checks | pass | `frozen-r1.json`, `preflight.json`; candidate pins rechecked |
+| Hosted schema, read-only MCP | twelve expected migrations present; 27/27 public tables RLS-enabled | `candidate.json`; no production migration repeated |
+
+Initial failures are preserved: merged-session pin drift, a parallel browser timeout, the new test's missing offline classification, missing packaged native sources, missing request limits/progress controls, and the Preview cancellation gap. The browser test also exposed misleading ingestion-error wording, which was corrected. No failing assertion or threshold was weakened. No new dependency was installed.
+
+## Historical native evidence — not this candidate's acceptance
+
+The unchanged native archive at `docs/evidence/r2-recovery/` refers to runtime `90c13f402edf778ec6f25bc5eba469bbeefd7847`, source digest `879af4bb6a32e0bc9e2a11b8359d4fe90b23556fbafb945ecd3019a1138ccfa2`.
+
+- [Startup run 41797208434, attempt 2](https://github.com/ANIRUDDH-001/Tabwise/actions/runs/41797208434): historical zero-key native startup.
+- [Journey run 41801278982, attempt 2](https://github.com/ANIRUDDH-001/Tabwise/actions/runs/41801278982): historical genuine Tab/Tab/Enter speech capture and separate artifact verifier.
+- Native artifact `13306859138`; separate-verifier artifact `13307932535`. Exact archived ZIP hashes are in `candidate.json`.
+
+These artifacts retain their original synthetic/NONQUALIFYING manifest classification. They do not contain the required authenticated product-owned execution or a repaired native rerun. No new hosted native run was dispatched in this assignment.
+
+## Remaining implementation and acceptance gaps
+
+These are specific technical gaps, **not** a claim that all engineering is finished and only a signature is missing.
+
+1. **Native producer/qualification contract:** `r2-evidence.mjs` still emits synthetic/incomplete classes; `product-bridge.mjs` requires genuine-unqualified source plus an independent native attestation. Their producer/classification transition needs a reviewed design and implementation. Do not relabel an archived diagnostic artifact to bridge this mismatch.
+2. **Sealed runtime metadata:** `buildWorkflowProductExport` requires sealed `native-runtime.json`; the authentic session/writer does not yet emit that file. The producer must obtain and seal legitimate runtime/profile observations; the installed asset's version string alone cannot stand in for a new observation.
+3. **Delivery and admission:** the product workflow remains a proposal. Exact per-request source delivery, durable one-use W5 admission, source/run-bound grant consumption, actual export orchestration and independent signing must be connected before an authorized product-owned baseline. Current committed authority/qualification/dispatch policies remain disabled.
+4. **Actual product ingestion/readback:** durable SQL/custody/storage/bridge code and negative controls exist, but a new legitimate native product artifact has not traversed authentication → saved version → dispatch → sealed source → storage → owned readback.
+5. **Genuine repaired native rerun:** approved immutable repair/source contracts and SQL/UI controls exist. Baseline native request preparation explicitly rejects patched variants; the repair run route currently selects the legacy producer. The repaired-source packet/plan/admission/worker association needs coherent native integration before the required new NVDA rerun.
+6. **Verifier scope:** the deterministic recorder-based focus check has synthetic positive/negative controls. Native validation/status trigger checks deliberately abstain. No genuine paired baseline/rerun or independent withheld-task R7 assessment exists. A MACHINE/L3 symptom check is not external R7 acceptance.
+7. **Product acceptance:** real hosted OAuth, complete owned product flow, stored native report and regression-case retention are not demonstrated. The UI/action controls and local SQL/browser checks do not establish full UI/backend completion.
+8. **Live model validation:** current credit eligibility/balance has not been verified. Calls used: zero of twenty, incremental paid cost ₹0. Do not make a live call until the credit and broker safeguards are verified.
+
+## Independent review requested
+
+Review this exact source/digest and the unresolved producer/admission/repair contracts before selecting a trusted qualification mechanism. Supply a genuinely independent reviewer identity, source-bound review record and public verification key/trust-root procedure through the owner. Keep private signing material outside source, native/page/browser processes and model payloads. The implementing agent must not mint production trust or sign its own qualification.
+
+Before qualification, define the producer/runtime metadata and class transition without modifying historical artifacts; bind a fresh product-owned run/spec/journey/version and exact source/plan to an expiring one-use grant; specify how the independent attester examines and signs the actual new capture. An external source review alone is insufficient to claim product readback or repair success.
+
+After the missing contracts and authority exist, run the fresh authorized baseline through durable readback; obtain a genuine owner patch decision and frozen oracle; execute a distinct pinned repaired native run; then have the external R7 assessor evaluate frozen controls/withheld outcomes without tuning. Preserve failed attempts and inconclusive results.
+
+**No R2/R3/R7-ready notification, production activation, main merge or full-product completion claim is authorized by this package.**
