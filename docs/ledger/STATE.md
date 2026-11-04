@@ -1,5 +1,5 @@
 # STATE — product integration review; full product INCOMPLETE
-Updated: 2026-11-04T10:50:28Z
+Updated: 2026-11-04T11:06:52Z
 - Branch: feat/tabwise-r2-r7-product-completion, isolated tabwise-product-continuation.
 - Source candidate: e3d99addc066da88624728923de49a040784aa61; main ea8bd7c integrated into development only.
 - Native/product histories reconciled; original native archives preserved unchanged.
@@ -16,6 +16,10 @@ Updated: 2026-11-04T10:50:28Z
 - Native/qualification/integration policies remain disabled; no hosted native execution or model calls in this assignment.
 - Model requests0/20, incremental paid₹0; current credit eligibility unverified, so live calls remain barred.
 - No subagents, dependency installs, production activation or main merge.
+- Published draft PR26; Preview7fba797 READY. Protected live-page inspection refused403.
+- Hosted41817348279 failed pin-fixture mutation under read-only copies; cancelled after failure, artifact13314838685 retained.
+- Reproduced70/71 readonly vs71/71 ordinary; temporary-copy chmod preserves assertions; focused17 and final root1252 PASS.
+- Current follow-up CI status: use GitHub checks on draft PR26; no native or production acceptance follows.
 ## Handoff
 - Review package: docs/engineering/Product-completion-review-20261104.md.
 - Source/evidence index: docs/evidence/product-completion-20261104/.

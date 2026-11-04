@@ -90,5 +90,35 @@
     "hosted_oauth": "NOT VERIFIED",
     "release_ready": false,
     "merge_ready": false
+  },
+  "publication": {
+    "pull_request": "https://github.com/ANIRUDDH-001/Tabwise/pull/26",
+    "draft": true,
+    "preview_revision": "7fba797f95ba236d080b0a098079d25559e5fb10",
+    "preview_deployment": "dpl_EVjv4W5zfvFYveJgWYv7jxhyPYLQ",
+    "preview_state": "READY",
+    "protected_live_inspection": "BLOCKED: connector protection-bypass read 403"
+  },
+  "hosted_preflight": {
+    "run_id": "41817348279",
+    "artifact_id": "13314838685",
+    "ordinary": "FAIL: disposable pin fixture inherited read-only attributes",
+    "conclusion": "cancelled after first failure; final source locks and artifact upload PASS",
+    "local_readonly_reproduction": {
+      "files": 71,
+      "pass": 70,
+      "failed_file": "r2-runtime.test.mjs"
+    },
+    "local_ordinary": {
+      "files": 71,
+      "pass": 71
+    },
+    "correction": {
+      "path": "test/r2-runtime.test.mjs",
+      "sha256": "37f197e940533459c3ea746e94e3efb479a72b67e3f7645fd9078fb7de806969",
+      "scope": "make only temporary copies writable; integrity/tamper assertions unchanged",
+      "read_only_focused_pass": 17
+    },
+    "followup": "GitHub checks on PR26 are authoritative"
   }
 }

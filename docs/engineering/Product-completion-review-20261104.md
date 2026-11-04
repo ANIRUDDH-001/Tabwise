@@ -2,7 +2,7 @@
 
 **Status: INCOMPLETE. No R2, R3 or R7 acceptance checkpoint is claimed. Do not merge or activate production from this package.**
 
-Candidate code: `e3d99addc066da88624728923de49a040784aa61` on `feat/tabwise-r2-r7-product-completion`. Later evidence-only commits do not change this code revision. The owner confirmed: “No authority exists yet; prepare the review package”. This package supplies no signature, reviewer identity, private evaluation labels or qualification authority.
+Application/runtime source: `e3d99addc066da88624728923de49a040784aa61` on `feat/tabwise-r2-r7-product-completion`. Later evidence and the read-only test-fixture correction do not change application/runtime code. The owner confirmed: “No authority exists yet; prepare the review package”. This package supplies no signature, reviewer identity, private evaluation labels or qualification authority.
 
 ## Source and evidence
 
@@ -44,6 +44,14 @@ The hosted source inventory previously omitted native runtime files. It now cove
 | Hosted schema, read-only MCP | twelve expected migrations present; 27/27 public tables RLS-enabled | `candidate.json`; no production migration repeated |
 
 Initial failures are preserved: merged-session pin drift, a parallel browser timeout, the new test's missing offline classification, missing packaged native sources, missing request limits/progress controls, and the Preview cancellation gap. The browser test also exposed misleading ingestion-error wording, which was corrected. No failing assertion or threshold was weakened. No new dependency was installed.
+
+## Hosted preflight and publication
+
+[Draft PR #26](https://github.com/ANIRUDDH-001/Tabwise/pull/26) is the ongoing engineering review, not final acceptance. Vercel built the controlled Preview at `7fba797f95ba236d080b0a098079d25559e5fb10` successfully (`dpl_EVjv4W5zfvFYveJgWYv7jxhyPYLQ`, target Preview). Live protected-page inspection was refused by the connector at the protection-bypass read boundary (403); actual hosted OAuth and page acceptance remain unverified. No protection setting or production alias was changed.
+
+[Hosted preflight 41817348279](https://github.com/ANIRUDDH-001/Tabwise/actions/runs/41817348279) failed its ordinary gate in `r2-runtime.test.mjs`. Original artifact `13314838685` was uploaded successfully. The remaining stress work was cancelled after the first failure to inspect the evidence; repeat profiles had exposed the same test failure. Both the final source-lock check and artifact upload passed. Do not report this run as passing.
+
+MEASURED reproduction: the ordinary selection passes 71/71 locally; making the integration checkout read-only reproduces the same `EPERM` on the disposable copy of `r2-nvda-lifecycle.mjs`. `copyFileSync` preserved the source read-only attribute, so the mutation test could not append its deliberate tamper byte. The fixture correction makes only each temporary destination writable before running the unchanged clean-integrity and tamper-rejection assertions. All 17 tests in that file pass with the original tracked runtime source still read-only. Application permissions, runtime files, checks and deadlines are unchanged. Original hosted/local failures and the focused corrected output are included in the evidence index. GitHub checks on the draft PR are authoritative for the follow-up run.
 
 ## Historical native evidence — not this candidate's acceptance
 

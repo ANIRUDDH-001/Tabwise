@@ -10,8 +10,8 @@
     },
     {
       "path": "candidate.json",
-      "bytes": 3058,
-      "sha256": "39a57bc48ab7fceed2dcc4de5c278f5a60a13b1dda44e690ad7e24d1b6741918"
+      "bytes": 4210,
+      "sha256": "8e361432646ce9fd756d99dd094607b64d18832283a841c086f0c95dabcf3421"
     },
     {
       "path": "contracts.tap",
@@ -27,6 +27,16 @@
       "path": "frozen-r1.json",
       "bytes": 91,
       "sha256": "226b7b9401026988a69bc28b180b87cab909536ad73d8006f59df8cbf581fd77"
+    },
+    {
+      "path": "hosted-ordinary-failed.json",
+      "bytes": 73745,
+      "sha256": "d6d67379c85b24e6b51dfc430840bdd183652271901ecf869cd4df331447ddad"
+    },
+    {
+      "path": "hosted-ordinary-failed.tap",
+      "bytes": 278747,
+      "sha256": "7f39f7f138df287c01e33ae791fe889577741b1596c55a67f084032f98c64b88"
     },
     {
       "path": "initial-budget-limit.tap",
@@ -69,6 +79,16 @@
       "sha256": "c9b21b8a5aa1d3eea7c075b179d1758244d7bcfa9715bf05ca2937011633a945"
     },
     {
+      "path": "local-ordinary-pass.json",
+      "bytes": 73737,
+      "sha256": "e5aa9704bb493c4e9b70cdf8164c966f9a1f4ae285f619484f3114d5d3d7b1e6"
+    },
+    {
+      "path": "local-readonly-failed.tap",
+      "bytes": 278822,
+      "sha256": "e022393126b681d3064f4cadb82638dfe3f0730f1353d106a934e8c46f22ea15"
+    },
+    {
       "path": "native-and-repair-controls.browser.tap",
       "bytes": 359,
       "sha256": "040c4df82bb287f3f99a40f4b5c623dbf893bb53fa44bae36e809394f5fb6e90"
@@ -94,14 +114,19 @@
       "sha256": "03460e5e8417c58489f5b7676e8e63474977753aec98d457325c6e0ee89ed728"
     },
     {
+      "path": "readonly-runtime-green.tap",
+      "bytes": 1170,
+      "sha256": "87c2b58d9a83423b16691b237296acfe8c3ce4b97b3b8cc52eae44d8442eca5e"
+    },
+    {
       "path": "recorder-and-oracle.browser.tap",
       "bytes": 1602,
       "sha256": "a9dfa30fb875b1e4c97f2a1e0f68fa92e4ab636d1b6bfe996631212ccd2a6352"
     },
     {
       "path": "root-final.tap",
-      "bytes": 120855,
-      "sha256": "63882a58562cb6974b2ba96c67ddd53203572370090b2d9c3c96add175fff1b6"
+      "bytes": 120800,
+      "sha256": "846533e6f11e0745d413a5dde680aaf4e56291c222c66015e3cc3a304e772d88"
     },
     {
       "path": "route-traces.log",
