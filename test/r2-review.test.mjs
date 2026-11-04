@@ -1308,6 +1308,7 @@ test('S7-W3 the workflow path is the one the R2 policy pins; the pristine fixtur
 // O-11 (D-89) adds arm-inputs; C2 adds input-policy, executor and palette (exact-membership expansion disclosed).
 test('S7-I1 R2_FILES is exactly the union of the S7, custody, O-11 and W3/W4 lifecycle reviewed scopes; r2Digest is the CRLF-normalized per-file digest over it', () => {
   assert.deepEqual([...R2_FILES], [
+    'diagnostics/r2-native/startup-cleanup.mjs','diagnostics/r2-native/startup-diagnostics.mjs',
     'diagnostics/owner-v2/identity.ps1', 'diagnostics/owner-v2/resolver.mjs',
     '.github/workflows/tabwise-r2.yml', 'packages/contracts/index.mjs', 'packages/contracts/limits.mjs',
     'packages/contracts/palette.mjs', 'packages/contracts/r2-product.mjs', 'packages/contracts/schemas.mjs',

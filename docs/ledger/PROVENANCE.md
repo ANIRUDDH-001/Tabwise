@@ -75,3 +75,5 @@ All D8 installs used independent `packages/contracts/` or `web/` manifests/lockf
 
 ## 2026-11-04T05:23:05Z R2-only runtime new work
 R2 lifecycle adaptation reuses Guidepup 0.36.4 MIT (Craig Morten, existing vendor license); evaluates byte-identical guarded class/client/dependencies in a private graph, forks no vendor files. New loader/lifecycle/pins/tests and read-only workflow census authored during event. G1 resolver/identity source reused byte-identically from e6c51f2. Installed dependencies copied locally without version changes or installation; no external fixture/dataset.
+
+Hosted-startup autopsy correction: new diagnostic cleanup/allowlist and controlled actual-class tests authored during event; existing MIT frozen Guidepup reused byte-identically. Existing GitHub artifact downloaded read-only with original provenance/hash, never relabelled. No dependency/install/new dataset/native or paid call.

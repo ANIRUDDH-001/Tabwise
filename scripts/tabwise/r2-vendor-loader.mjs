@@ -27,5 +27,5 @@ export function loadR2Vendor({root,gate,lifecycleFactory=createLifecycle,modules
  cache[startPath]={exports:start};cache[quitPath]={exports:quit};
  const nvdaJs=get('lib/windows/NVDA/NVDA.js'),nvda=new nvdaJs.NVDA();
  const mods={r1Gate,NVDAClient:get('lib/windows/NVDA/NVDAClient.js').NVDAClient,runVbsScript:get('lib/windows/runVbsScript.js'),sendKeys:get('lib/windows/sendKeys.js'),teardown:get('lib/teardown.js'),KeyCodes:get('lib/windows/KeyCodes.js').KeyCodes,Modifiers:get('lib/windows/Modifiers.js').Modifiers,Key:get('lib/windows/Key.js').Key,keyCodeCommands:get('lib/windows/NVDA/keyCodeCommands.js').keyCodeCommands};
- return Object.freeze({nvdaJs,nvda,mods,cache,start,quit,vendor,lifecycle});
+ return Object.freeze({nvdaJs,nvda,mods,cache,start,quit,vendor,lifecycle,installationAvailable:()=>!!get('lib/windows/NVDA/getNVDAInstallationPath.js').getNVDAInstallationPath()});
 }

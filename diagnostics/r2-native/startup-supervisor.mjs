@@ -1,3 +1,4 @@
+import {safeDiagnostic} from './startup-diagnostics.mjs';
 // External containment only. No runtime/native input imports; injected launch and OS custody tools.
 import {processBaseline,createPageCustody,wallMicros,quiescenceOf} from '../../scripts/tabwise/r2-proctree.mjs';
 import {createStartupTrace} from './startup-trace.mjs';
@@ -29,6 +30,8 @@ export async function superviseStartup({launch,tools,protect=[],signal=null,setT
    const value=parseUniqueJson(output);if(value.schema!=='tabwise-startup-only/1'||value.production_qualified!==false||value.native_interaction_pass!==false||value.physical_quiescence_verified!==false||value.sends!==0)throw Error();
    // Do not forward arbitrary child properties or error strings into the artifact.
    report.worker={startup_pass:value.startup_pass===true,sends:0,cleanup_error:value.cleanup_error===true,error:value.error===null?null:'worker-refused',receipt:value.receipt&&Number.isSafeInteger(value.receipt.pid)&&value.receipt.pid>0&&value.receipt.relay_pid===value.receipt.pid&&value.receipt.reset_confirmed===true?{pid:value.receipt.pid,relay_pid:value.receipt.pid,reset_confirmed:true}:null};
+   if(value.diagnostic)report.worker.diagnostic=safeDiagnostic(value.diagnostic);
+   if(value.cleanup_diagnostic)report.worker.cleanup_diagnostic=safeDiagnostic(value.cleanup_diagnostic);
    const observed=value.observed_process;
    if(observed&&observed.pid===report.worker.receipt?.pid&&/^[1-9][0-9]{10,19}$/.test(observed.created??'')&&/^[a-f0-9]{64}$/.test(observed.path_sha256??''))report.worker.observed_process={pid:observed.pid,created:observed.created,path_sha256:observed.path_sha256,physical_quiescence_verified:false};
   }catch{report.reason??='worker-result-refused';}
@@ -41,5 +44,6 @@ export async function superviseStartup({launch,tools,protect=[],signal=null,setT
   trace.cleanup(report.custody);trace.dispose();report.trace=trace.snapshot();
  }
  report.startup_pass=!report.reason&&report.worker?.startup_pass===true&&report.worker.receipt!==null&&!report.worker.cleanup_error&&report.worker.error===null&&report.custody?.confirmed===true&&report.custody.root?.exact===true&&report.custody.quiescent===true&&report.custody.sample_failures===0&&report.custody.errors.length===0&&report.custody.residue.length===0&&report.post?.quiescent===true&&report.post.helper_count===0;
+ report.containment_diagnostic={stage:'supervisor-containment',code:report.custody?.confirmed===true&&report.custody.root?.exact===true&&report.custody.quiescent===true&&report.custody.sample_failures===0&&report.custody.errors.length===0&&report.custody.residue.length===0&&report.post?.quiescent===true&&report.post.helper_count===0?'complete':'unconfirmed'};
  return report;
 }

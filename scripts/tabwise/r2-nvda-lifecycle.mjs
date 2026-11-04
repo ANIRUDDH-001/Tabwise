@@ -15,7 +15,7 @@ export async function processIdentity(pid,{deadline,signal}={}){
  return Object.freeze(value);
 }
 export function createLifecycle({gate,executable,configPath,spawn=spawnProcess,running,query=resolveOwner,identify=processIdentity,pathHash=executableHash}){
- let owned=null,expected=null,lastObserved=null;
+ let owned=null,expected=null,lastObserved=null,stage='nvda-class-start';
  const active=()=>{if(gate.isStopped())throw Error('NVDA startup cancelled: gate stopped');};
  // Every helper has a bounded deadline and observes sticky gate cancellation, including during OS queries.
  async function operation(fn,deadlineMs,allowStopped=false){
@@ -40,20 +40,20 @@ export function createLifecycle({gate,executable,configPath,spawn=spawnProcess,r
   return owned.pid;
  }
  async function start({timeoutMs=15000,pollMs=100,probeMs=500,deadlineMs}={}){
-  const path=executable();if(!path)throw Error('NVDA not installed');
+  stage='installation-path';const path=executable();if(!path)throw Error('NVDA not installed');
   const until=Math.min(deadlineMs??Infinity,performance.now()+timeoutMs);active();
   if(performance.now()>=until)throw Error('NVDA startup deadline exhausted');
-  if((await listeners(until)).outcome!=='absent')throw Error('NVDA listener already running; reset required');
-  active();const child=spawn(path,['--config-path',configPath()],{stdio:'ignore',windowsHide:true,shell:false});
+  stage='initial-listener-query';if((await listeners(until)).outcome!=='absent')throw Error('NVDA listener already running; reset required');
+  stage='spawn';active();const child=spawn(path,['--config-path',configPath()],{stdio:'ignore',windowsHide:true,shell:false});
   let exited=false,closed=false,failed=null;child.on('error',e=>{failed=e;});child.once('exit',()=>{exited=true;});child.once('close',()=>{closed=true;});
   const isAlive=()=>!exited&&!failed&&child.exitCode===null;
   owned={pid:child.pid,process:child,isAlive,isClosed:()=>closed};
   try{
    if(!Number.isSafeInteger(child.pid)||child.pid<=0)throw Error('NVDA process has no PID');
-   expected=await identity(child.pid,until);
-   if(!expected||expected.pid!==child.pid||expected.path_sha256!==pathHash(path)||!isAlive())throw Error('NVDA spawned executable identity mismatch');
+   stage='executable-identity';expected=await identity(child.pid,until);
+   if(!expected||expected.pid!==child.pid||expected.path_sha256!==pathHash(path)||!isAlive())throw Object.assign(Error('NVDA spawned executable identity mismatch'),{r2_code:'identity-mismatch'});
    lastObserved=Object.freeze({...expected,source:'Windows process handle, StartTime, MainModule.FileName',physical_quiescence_verified:false});
-   for(;;){
+   stage='readiness-relay';for(;;){
     active();if(!isAlive())throw failed??Error('NVDA process exited before readiness');
     if(performance.now()>=until)throw Error('NVDA readiness timed out');
     if(await running({timeoutMs:Math.max(1,Math.min(probeMs,until-performance.now()))})){
@@ -61,9 +61,10 @@ export function createLifecycle({gate,executable,configPath,spawn=spawnProcess,r
     }
     await new Promise(resolve=>setTimeout(resolve,Math.min(pollMs,Math.max(1,until-performance.now()))));
    }
-  }catch(cause){try{child.kill();}catch{}const error=Error('NVDA cannot be started',{cause});error.ownedProcess=owned;throw error;}
+  }catch(cause){if(failed)stage='spawn';try{child.kill();}catch{}const error=Error('NVDA cannot be started',{cause});error.ownedProcess=owned;error.r2_stage=stage;if(cause.r2_code==='identity-mismatch')error.r2_code='identity-mismatch';throw error;}
  }
  async function quit(options={}){
+  stage=owned?'cleanup':'initial-listener-query';
   const deadlineMs=options.deadlineMs??performance.now()+9000;
   const result=await listeners(deadlineMs,true);
   if(result.outcome!=='absent')await relayOwnerPid({deadlineMs,allowStopped:true});
@@ -90,5 +91,6 @@ export function createLifecycle({gate,executable,configPath,spawn=spawnProcess,r
   if((await listeners(deadlineMs,true)).outcome!=='absent')throw Error('NVDA cleanup listener remains');
   owned=null;expected=null;return {listener_stopped:true};
  }
- return Object.freeze({start,relayOwnerPid,quit,observedProcess:()=>lastObserved});
+ const tagged=fn=>async(...args)=>{try{return await fn(...args);}catch(error){if(!error.r2_stage)error.r2_stage=stage;throw error;}};
+ return Object.freeze({start:tagged(start),relayOwnerPid,quit:tagged(quit),observedProcess:()=>lastObserved,hasOwnedProcess:()=>owned!==null,diagnostic:()=>({stage,code:gate.isStopped()?'cancelled':'operation-failed'})});
 }

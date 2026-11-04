@@ -1,16 +1,16 @@
-# STATE - final R2 regression closure
-Updated: 2026-11-04T06:09:33Z
-- Parent3bd1a3c; separate new local test-reconciliation commit; no runtime/workflow/pin source change.
-- MEASURED npm test1190/1190 PASS,0 fail/cancel/skip; focused131 PASS; startup offline153 PASS.
-- All20 prior failures individually disposed as PASS; cleanup/fault assertions and thresholds retained.
-- Both loader denials, W5/integrity-before-import, bounded helper mutation/negative checks pass.
-- Frozen R1/runtime pins/preflight/diff checks PASS; source digests unchanged.
-- No NVDA/input, hosted mutation, approval variables, paid calls, installs or push/history rewrite.
-- Next: independent exact-commit source review; owner-only offline hosted attempt1 then new exact zero-key authorization.
-- Blocked: genuine hosted startup result, native provenance/version/attester producers; no R2/R3/R7 promotion.
-- Last verification: npm test ->1190 PASS,exit0 (cache/regression-closure/root-reviewed.tap).
-- Handoff: docs/engineering/R2-final-regression-closure.md; cache/regression-closure/commit-inventory.json.
+# STATE - hosted startup autopsy correction
+Updated: 2026-11-04T07:04:53Z
+- Parent7086d05;run41786837403/attempt2/artifact13301543127 ZIP+3-file index verified.
+- Primary startup cause unresolved; discarded exception/stage cannot be reconstructed.
+- Confirmed actual-class repeated-stop cleanup defect corrected; ownership/query/teardown failures still refuse.
+- Allowlisted startup/cleanup/containment stages/codes; no raw exceptions/paths/env output.
+- MEASURED focused169 PASS; full root1190 PASS,0fail/cancel/skip; frozen/pins/preflight/diff PASS.
+- Runtime pins expanded7->9 for source-bound cleanup/diagnostic modules; qualification digest unchanged.
+- No workflow/vendor/R1/dependency/deadline/auth change; no native/input/hosted write/push/paid call.
+- Next: independent exact-commit source review; fresh new hosted run and separately approved run-bound packet only.
+- Never rerun old41786837403 using consumed approval. Actual primary failure not claimed fixed.
+- Handoff: docs/engineering/R2-hosted-startup-autopsy.md; cache/startup-autopsy/commit-inventory.json.
 ## Handoff
-- New local commit authorized; uncommitted changes after commit: none intended.
-- Verified by: full root1190; focused131; startup offline153; frozen/source/preflight PASS.
-- Review needed: independent other-tool reviewer and owner; no native execution approval inferred.
+- One local correction commit authorized; other-tool independent review remains separate.
+- Verified: npm test1190/1190; focused169/168; frozen integrity/runtime pins/preflight PASS.
+- Blocked: genuine hosted startup result and unresolved primary cause; native provenance/attester producers.

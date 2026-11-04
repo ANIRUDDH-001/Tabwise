@@ -30,3 +30,5 @@ test('cancellation before admission refuses launch; cancellation after launch st
  f.input.launch=()=>{const child=launch();child.send=()=>controller.abort();return child;};
  const b=await superviseStartup({...f.input,signal:controller.signal});assert.equal(b.startup_pass,false);assert.equal(b.custody.confirmed,true);assert.equal(b.reason,'cancelled');
 });
+
+test('surviving NVDA helper cannot be labelled complete containment',async()=>{const f=fixture('ok'),snapshot=f.input.tools.snapshot;f.input.tools.snapshot=async()=>{const s=await snapshot();return {...s,processes:[...s.processes,{pid:999,ppid:1,name:'nvdaHelperRemoteLoader.exe',created:wallMicros(Date.now)}]};};const r=await superviseStartup(f.input);assert.equal(r.startup_pass,false);assert.equal(r.post.helper_count,1);assert.deepEqual(r.containment_diagnostic,{stage:'supervisor-containment',code:'unconfirmed'});});

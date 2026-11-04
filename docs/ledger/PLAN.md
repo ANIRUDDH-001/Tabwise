@@ -616,3 +616,6 @@ Scope: R2-only lifecycle/loader, R2 entry/session/policy, bounded process/workfl
 
 ## F-03 final R2 regression closure — owner authorized
 User: "Resolve all 20 failures in one focused engineering cycle"; "Correct test harness module resolution without removing the original cleanup/fault assertions"; "Commit the corrected source locally." Scope: affected test harness/security/workflow/source-union checks, new negative tests and normal ledgers/handoff. Acceptance: focused, full npm test, frozen/runtime/source digests, startup-only offline tests and preflight; all pass. Ceiling $0; no installs/push/hosted/approval-variable/native/input. Existing runtime pins and frozen R1 preserved. Rollback: new local commit only, no history rewrite.
+
+## F-03 hosted startup autopsy — owner authorized
+User: "Determine and correct the first genuine hosted Windows NVDA startup failure. Do not run another hosted attempt." Scope: read-only GitHub artifact download/hash verification; diagnostic/core/worker/supervisor and R2 cleanup observability, new offline tests and pins; normal ledgers/handoff. Acceptance focused/full root/startup offline/frozen/pins/preflight PASS. $0; no native/input/push/hosted writes/approvals/paid calls. One new local correction commit.
