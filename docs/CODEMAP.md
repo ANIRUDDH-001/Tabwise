@@ -141,3 +141,5 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 | `supabase/migrations/20261103030000_repair_oracle_admission.sql` | Pre-admission oracle tuple plus shared live-dispatch guard; no execution clearance | real PostgreSQL concurrent registration/admission and legacy-dispatch negatives |
 
 | `scripts/release/`, `docs/release/` | Hosted release qualification, canonical atomic owner rollout, create-only preview publication and acceptance packet | F-03 local engineering; hosted/native acceptance blocked |
+
+| `src/deployment-execution.mjs`, `web/test/preview-execution*`, `web/test/helpers/preview-execution-fetch.mjs` | Server Preview execution denial and synthetic inherited-credential HTTP/security checks | guard before reserve/model/GitHub/dispatch/reconciliation; OAuth/save/read/preparation preserved |

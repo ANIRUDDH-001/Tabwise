@@ -693,3 +693,10 @@ Publication conditional: remote main9bb994c is an ancestor; GitHub currently rep
 - Acceptance: local PostgreSQL migration+SQL+isolation+concurrency; build/typecheck/web; route closure and controlled built routes.
 - Results: PASS local gates; hosted OAuth/preparation/egress and cross-tool acceptance remain BLOCKED/unrun.
 - Publication, DB rollout, configuration and protected main actions remain owner-only.
+
+### F-03 / Preview execution safety — owner-authorized correction
+- Base edb89f9; scope shared server guard, paid/broker/legacy/reconciliation boundaries and focused tests/review delta.
+- Acceptance: Preview inherited-credential refusal before effects; production controlled fakes; focused security/routes, TypeScript and build.
+- Cost ceiling $0; no hosted/native/API/dispatch/install/workflow/migration operations.
+- Measured focused77/77, built HTTP Preview+Production, types/build/raw deployment tracing PASS.
+- Scoped local commit authorized; previous uncommitted STATE/LOG records excluded.

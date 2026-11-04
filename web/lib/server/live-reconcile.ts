@@ -6,9 +6,11 @@ import {reconcileRun} from './reconcile.mjs';
 import {ingestArchive} from './artifact-ingest.mjs';
 import {ingestDiagnosticArchive} from './diagnostic-ingest.mjs';
 import {createArtifactCompensation} from './artifact-store.mjs';
+import {isPreviewDeployment} from '../../../src/deployment-execution.mjs';
 type Run={id:string,user_id:string,status:string,deadline_at:string,created_at:string,gh_run_id:string|null,gh_head_sha:string|null,spec_sha256:string|null};
 type Remote={id:number,run_attempt:number,head_sha:string,display_title:string,created_at:string,path:string,event:string,head_branch:string,actor:{login:string},status:string,conclusion:string|null};
 export async function reconcileLive(run:Run){
+ if(isPreviewDeployment())return run;
  const db=serviceClient(),{data:flags}=await db.from('system_flags').select('*').single(),actor=process.env.GH_PAT_OWNER;
  const {data:nativeRequest,error:nativeError}=await db.from('native_product_requests').select('product_run_id').eq('product_run_id',run.id).maybeSingle();
  const {data:producer,error:producerError}=await db.from('run_producers').select('*').eq('product_run_id',run.id).maybeSingle();

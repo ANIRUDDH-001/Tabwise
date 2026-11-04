@@ -728,3 +728,8 @@ Tooling: Context7 ctx7 0.9.0 ran via the user-prescribed npx command in npm cach
 User answer: "Create an isolated, scoped local release commit. No push or merge."
 User answer: "No production DB changes, hosted deployments, GitHub pushes, PR merges, OAuth configuration changes, paid calls or native execution."
 Consequence: local F-03 product/SQL qualification and owner handoff only; $0 paid services.
+
+## Preview execution safety correction — owner instruction
+User answer: "Introduce an explicit Vercel Preview execution-denial boundary before irreversible work, including model reservation and legacy workflow dispatch."
+User answer: "Commit the scoped correction locally with an exact file and SHA inventory, leaving unrelated uncommitted session records intact."
+Consequence: VERCEL_ENV preview denies execution independent of inherited credentials; production approvals retained; no source pin requalification.

@@ -6,6 +6,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { priceOf } from '../budget/prices.mjs';
 import { transportDiagnostics } from './transport.mjs';
+import { assertExecutionAllowed } from '../deployment-execution.mjs';
 
 export const BASE_URL = 'https://api.meta.ai/v1';
 
@@ -33,6 +34,7 @@ export async function respond({
   fetchImpl = fetch, apiKey = process.env.MODEL_API_KEY, baseUrl = BASE_URL, logDir = 'cache/payloads',
   textFormat = null, maxInputBytes = 131072, perCallCapUsd, timeoutMs = 120000, reasoningEffort,
 }) {
+  assertExecutionAllowed();
   const redact = (s) => (apiKey ? String(s).split(apiKey).join('[redacted]') : String(s));
   if (!apiKey) throw new ClientError('MODEL_API_KEY is not set: add it to .env');
   // D-29 and Meta terms 6.1-6.2: Contributor inputs may train Meta's models, so only our own fixtures go there.

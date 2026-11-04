@@ -1,5 +1,7 @@
+import {isPreviewDeployment} from '../../../src/deployment-execution.mjs';
 const terminal=new Set(['completed','failed','cancelled','timed_out']);
 export async function reconcileRun(run,api){
+ if(isPreviewDeployment())return run;
  if(terminal.has(run.status))return run;
  if(Date.parse(run.deadline_at)<=Date.now()){
   await api.transition(run.id,run.status,'timed_out','deadline_exceeded');

@@ -1,6 +1,8 @@
 import {HttpError} from './core.mjs';
+import {assertExecutionAllowed} from '../../../src/deployment-execution.mjs';
 const base='https://api.github.com/repos/ANIRUDDH-001/Tabwise';
 export async function github(path:string,init:RequestInit={}){
+ if(!['GET','HEAD'].includes((init.method??'GET').toUpperCase()))assertExecutionAllowed();
  const token=process.env.GH_PAT;if(!token)throw new HttpError(503,'github_credential_pending');
  if(!path.startsWith('/actions/')||path.includes('..')||path.includes('?')&&!/^\/actions\/workflows\/tabwise-run.yml\/runs\?/.test(path))throw new HttpError(400,'unsupported_github_path');
  const response=await fetch(`${base}${path}`,{...init,headers:{Accept:'application/vnd.github+json',Authorization:`Bearer ${token}`,'X-GitHub-Api-Version':'2026-03-10',...init.headers},cache:'no-store',signal:AbortSignal.timeout(8000),redirect:'error'});

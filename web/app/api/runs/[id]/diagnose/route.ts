@@ -9,8 +9,10 @@ import {diagnose,DIAGNOSIS_PROMPT} from '../../../../../../src/meta/diagnosis.mj
 import {diagnosisInput} from '../../../../../../src/meta/input.mjs';
 import {readRunEvidence} from '../../../../../lib/server/stored-evidence.mjs';
 import {persistValidatedDiagnosis} from '../../../../../../src/repair/persistence.mjs';
+import {assertExecutionAllowed} from '../../../../../../src/deployment-execution.mjs';
 export const maxDuration=150;
 export async function POST(request:Request,{params}:{params:Promise<{id:string}>}){return endpoint(request,async()=>{
+ assertExecutionAllowed();
  const user=await requireUser(),db=serviceClient(),{id}=await params;const {data:run}=await db.from('runs').select('*').eq('id',id).maybeSingle();authorizeRun(user,run);
  const {data:flags}=await db.from('system_flags').select('*').single();
  if(!flags||flags.diagnosis_mode==='off')throw new HttpError(403,'diagnosis_off');

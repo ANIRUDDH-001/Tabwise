@@ -5,9 +5,11 @@ import {assertContract} from '../../../../packages/contracts/index.mjs';
 import {dispatchAdmitted} from '../../../lib/server/jobs.mjs';
 import {github} from '../../../lib/server/github';
 import {nativeRequestRoute} from '../../../lib/server/native-request-live';
+import {assertExecutionAllowed} from '../../../../src/deployment-execution.mjs';
 export async function POST(request:Request){return endpoint(request,async()=>{
  const user=await requireUser(),input=await body(request);
  if(!input||Object.keys(input).some(k=>!['journey_version_id','patch_id'].includes(k))||typeof input.journey_version_id!=='string')throw new HttpError(400,'invalid_run_request');
+ if(input.patch_id!==undefined)assertExecutionAllowed();
  const key=request.headers.get('Idempotency-Key');if(!key||key.length>128)throw new HttpError(400,'idempotency_key_required');
  const db=serviceClient();const {data:version}=await db.from('journey_versions').select('*').eq('id',input.journey_version_id).eq('user_id',user.id).maybeSingle();if(!version)throw new HttpError(404,'journey_version_not_found');
  // No irreversible dispatch path is active before a separately recorded execution approval.

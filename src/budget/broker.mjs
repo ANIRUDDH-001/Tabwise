@@ -4,6 +4,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { priceOf, worstCaseNano, settledNano, toUsd, toNano } from './prices.mjs';
+import { assertExecutionAllowed } from '../deployment-execution.mjs';
 
 export const HARD_CAP_USD = 100; // D25 combined application ceiling; compatibility export.
 export const LOCAL_CAP_USD = 60; // D-59/D13b: local/eval broker may never consume the hosted $40.
@@ -88,6 +89,7 @@ export function openBroker({ dbPath, costsPath, capUsd = LOCAL_CAP_USD, now = ()
   }
 
   function reserve({ model, inputTokens, maxOutputTokens, images = 0, runId = null, task = null, perCallCapUsd = capUsd }) {
+    assertExecutionAllowed();
     if (!priceOf(model)) throw new BudgetError(`unknown model ${model}: no price, refused`);
     if (!isCount(inputTokens) || !isCount(images)) throw new BudgetError('inputTokens and images must be counts');
     if (!isCount(maxOutputTokens)) throw new BudgetError('max_output_tokens is required: the cost cannot be bounded without it');
