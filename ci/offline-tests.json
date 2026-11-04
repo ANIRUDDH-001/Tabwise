@@ -330,5 +330,9 @@
   "r2-import-admission.test.mjs": {
     "kind": "offline",
     "reason": "actual page function body with denial/import hooks in isolated Worker; no runtime loads"
+  },
+  "broker-request-limit.test.mjs": {
+    "kind": "offline",
+    "reason": "temporary SQLite request reservations and append-only local ledger recovery; no API, native runtime, credentials or network"
   }
 }

@@ -48,4 +48,3 @@ jobs:
           path: ${{ runner.temp }}/tabwise-probe-${{ github.run_id }}-2/
           if-no-files-found: warn
           retention-days: 14
-

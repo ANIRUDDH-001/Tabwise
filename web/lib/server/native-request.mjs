@@ -23,18 +23,22 @@ export function nativeRequestView(row){if(!row)return null;if(!Object.hasOwn(mes
 export function nativePreparationEligible(run){return run?.status==='admitted'&&(!run.kind||run.kind==='baseline')&&Boolean(run.journey_version_id)&&['healthy','broken'].includes(run.spec?.variant)&&Array.isArray(run.spec?.steps)&&run.spec.steps.length>0&&run.spec.steps.every(s=>s.key!=='type');}
 export function nativeRequestStore(client){
  const rpc=async(name,args)=>{const {data,error}=await client.rpc(name,args);if(error)throw Error(error.message??String(error));if(!data)throw Error('native request persistence unavailable');return data;};
- return {read:async(user,id)=>{if(client.read)return client.read(user,id);const {data,error}=await client.from('native_product_requests').select('state,request_sha256,github_run_id').eq('product_run_id',id).eq('user_id',user).maybeSingle();if(error)throw Error('native request schema unavailable');return data;},
+ return {read:async(user,id)=>{if(client.read)return client.read(user,id);const {data,error}=await client.from('native_product_requests').select('*').eq('product_run_id',id).eq('user_id',user).maybeSingle();if(error)throw Error('native request schema unavailable');return data;},
  prepare:(user,request,context)=>rpc('prepare_native_product_request',{p_user:user,p_request:request,p_canonical:stable(Object.fromEntries(Object.entries(request).filter(([k])=>k!=='request_sha256'))),p_spec:Buffer.from(context.specBytes).toString('utf8'),p_plan:Buffer.from(context.planBytes).toString('utf8'),p_fixture:Buffer.from(context.fixture).toString('utf8')}),
  transition:(user,id,hash,action,ghId=null)=>rpc('transition_native_product_request',{p_user:user,p_run:id,p_request_sha:hash,p_action:action,p_gh_run_id:ghId})};
 }
-export function createNativeRequestHandler({authenticate,ownedRun,context,store}){return async(request,id)=>{
+export function createNativeRequestHandler({authenticate,ownedRun,context,store,capabilities}){return async(request,id)=>{
  const reply=(status,value)=>Response.json(value,{status,headers:{'Cache-Control':'private, no-store'}});
  try{
   const user=await authenticate(request);if(!user?.id)return reply(401,{reason:'sign_in_required'});
   if(!['GET','POST'].includes(request.method))return reply(405,{reason:'method_not_allowed'});
   if(request.method==='POST'&&request.headers.get('origin')!==new URL(request.url).origin)return reply(403,{reason:'same_origin_required'});
   const run=await ownedRun(user.id,id);if(!run)return reply(404,{reason:'run_not_found'});
-  if(request.method==='GET'){const row=await store.read(user.id,id);return reply(200,{...(nativeRequestView(row)??{state:null,message:nativePreparationEligible(run)?'No native execution request has been prepared.':'This run is not eligible for native request preparation.',native_qualified:false,can_dispatch:false}),can_prepare:!row&&nativePreparationEligible(run)});}
+  if(request.method==='GET'){
+   const row=await store.read(user.id,id);let actions={can_dispatch:false,can_ingest:false};
+   try{if(capabilities){const value=await capabilities(user.id,run,row);actions={can_dispatch:value.can_dispatch===true,can_ingest:value.can_ingest===true};}}catch{}
+   return reply(200,{...(nativeRequestView(row)??{state:null,message:nativePreparationEligible(run)?'No native execution request has been prepared.':'This run is not eligible for native request preparation.',native_qualified:false}),...actions,can_prepare:!row&&nativePreparationEligible(run)});
+  }
   if(!nativePreparationEligible(run))return reply(409,{reason:'native_request_conflict'});
   const c=await context(user.id,run),p=prepareNativeProductRequest({...c,userId:user.id,run});
   return reply(200,nativeRequestView(await store.prepare(user.id,p,c)));

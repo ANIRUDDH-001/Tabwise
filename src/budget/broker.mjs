@@ -4,6 +4,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { priceOf, worstCaseNano, settledNano, toUsd, toNano } from './prices.mjs';
+import { assertExecutionAllowed } from '../deployment-execution.mjs';
 
 export const HARD_CAP_USD = 100; // D25 combined application ceiling; compatibility export.
 export const LOCAL_CAP_USD = 60; // D-59/D13b: local/eval broker may never consume the hosted $40.
@@ -35,7 +36,7 @@ const SCHEMA = `
 
 const isCount = (n) => Number.isSafeInteger(n) && n >= 0;
 
-export function openBroker({ dbPath, costsPath, capUsd = LOCAL_CAP_USD, now = () => new Date().toISOString() }) {
+export function openBroker({ dbPath, costsPath, capUsd = LOCAL_CAP_USD, now = () => new Date().toISOString(), requestBudget = null }) {
   // Historical callers pass the former $100 default explicitly. Saturate that legacy
   // value at $60; it never grants access to the hosted allocation. Other raises refuse.
   if (capUsd === HARD_CAP_USD) capUsd = LOCAL_CAP_USD;
@@ -43,10 +44,15 @@ export function openBroker({ dbPath, costsPath, capUsd = LOCAL_CAP_USD, now = ()
     throw new BudgetError(`cap must be > 0 and <= $${LOCAL_CAP_USD}, got ${capUsd}`);
   }
   const capNano = toNano(capUsd);
+  if (requestBudget !== null && (!/^[a-zA-Z0-9-]{1,100}$/.test(requestBudget.id ?? '') ||
+      !Number.isSafeInteger(requestBudget.maxRequests) || requestBudget.maxRequests < 1)) {
+    throw new BudgetError('invalid request budget');
+  }
   mkdirSync(dirname(dbPath), { recursive: true });
   const db = new DatabaseSync(dbPath);
   db.exec('PRAGMA busy_timeout = 10000');
   db.exec(SCHEMA);
+  db.exec('CREATE TABLE IF NOT EXISTS request_budget (id TEXT PRIMARY KEY, max_requests INTEGER NOT NULL, used INTEGER NOT NULL)');
 
   function tx(fn) {
     db.exec('BEGIN IMMEDIATE');
@@ -81,6 +87,29 @@ export function openBroker({ dbPath, costsPath, capUsd = LOCAL_CAP_USD, now = ()
     metaSet.run('imported_nano', String(nano));
   });
 
+  // Reserve the request count in the same transaction as money. An uncertain/failed
+  // transport still consumes its slot. The append-only costs ledger also survives
+  // loss of SQLite; its maximum sequence is conservative after an interrupted commit.
+  try { tx(() => {
+    const budgets = db.prepare('SELECT * FROM request_budget').all();
+    let budget = budgets[0];
+    if (budgets.length > 1) throw new BudgetError('request budget state ambiguous');
+    if (existsSync(costsPath)) {
+      for (const line of readFileSync(costsPath, 'utf8').split('\n')) {
+        if (!line.trim()) continue;
+        const entry = JSON.parse(line).request_budget;
+        if (!entry) continue;
+        if (!/^[a-zA-Z0-9-]{1,100}$/.test(entry.id ?? '') || !Number.isSafeInteger(entry.max_requests) ||
+            entry.max_requests < 1 || !isCount(entry.sequence)) throw new BudgetError('invalid request budget ledger');
+        if (budget && (budget.id !== entry.id || budget.max_requests !== entry.max_requests)) throw new BudgetError('request budget ledger mismatch');
+        budget = {...(budget ?? {id:entry.id,max_requests:entry.max_requests,used:0}),used:Math.max(budget?.used ?? 0,entry.sequence)};
+      }
+    }
+    if (requestBudget && budget && (budget.id !== requestBudget.id || budget.max_requests !== requestBudget.maxRequests)) throw new BudgetError('request budget cannot be raised or replaced');
+    budget ??= requestBudget && {id:requestBudget.id,max_requests:requestBudget.maxRequests,used:0};
+    if (budget) db.prepare('INSERT OR REPLACE INTO request_budget VALUES (?, ?, ?)').run(budget.id,budget.max_requests,budget.used);
+  }); } catch (error) { db.close(); throw error; }
+
   function current() {
     const t = totals.get();
     const imported = Number(metaGet.get('imported_nano').value);
@@ -88,6 +117,7 @@ export function openBroker({ dbPath, costsPath, capUsd = LOCAL_CAP_USD, now = ()
   }
 
   function reserve({ model, inputTokens, maxOutputTokens, images = 0, runId = null, task = null, perCallCapUsd = capUsd }) {
+    assertExecutionAllowed();
     if (!priceOf(model)) throw new BudgetError(`unknown model ${model}: no price, refused`);
     if (!isCount(inputTokens) || !isCount(images)) throw new BudgetError('inputTokens and images must be counts');
     if (!isCount(maxOutputTokens)) throw new BudgetError('max_output_tokens is required: the cost cannot be bounded without it');
@@ -97,11 +127,24 @@ export function openBroker({ dbPath, costsPath, capUsd = LOCAL_CAP_USD, now = ()
     return tx(() => {
       if (metaGet.get('alarm')) throw new BudgetError('budget alarm: manual reconciliation required before another call');
       const c = current();
+      const requestLimit = db.prepare('SELECT * FROM request_budget').get();
+      if (requestLimit && requestLimit.used >= requestLimit.max_requests) throw new BudgetError('external model request ceiling reached');
       if (c.spent + c.reserved + worst > capNano) {
         throw new BudgetError(`refused: spent $${toUsd(c.spent)} + reserved $${toUsd(c.reserved)} + this call $${toUsd(worst)} > cap $${capUsd}`);
       }
       const r = db.prepare(`INSERT INTO reservations (run_id, task, model, reserved_nano, status, created_utc)
         VALUES (?, ?, ?, ?, 'open', ?)`).run(runId, task, model, worst, now());
+      if (requestLimit) {
+        const sequence = requestLimit.used + 1;
+        db.prepare('UPDATE request_budget SET used = ? WHERE id = ?').run(sequence,requestLimit.id);
+        const line = Object.fromEntries(COST_FIELDS.map(f => [f,null]));
+        Object.assign(line,{run_id:runId,experiment:task,ts_utc:now(),model_id:model,mode:priceOf(model).mode,
+          verdict:'reserved',reserved_usd:toUsd(worst),settled_usd:0,cumulative_usd:toUsd(c.spent),
+          request_budget:{id:requestLimit.id,sequence,max_requests:requestLimit.max_requests},
+          requested_tokens:{input:inputTokens,output:maxOutputTokens,images}});
+        mkdirSync(dirname(costsPath),{recursive:true});
+        appendFileSync(costsPath,JSON.stringify(line)+'\n');
+      }
       return { id: Number(r.lastInsertRowid), reservedUsd: toUsd(worst) };
     });
   }
@@ -158,5 +201,6 @@ export function openBroker({ dbPath, costsPath, capUsd = LOCAL_CAP_USD, now = ()
 // The project's broker. BUDGET_CAP_USD may lower the cap (e.g. a split cap per machine), never raise it.
 export function openProjectBroker() {
   const cap = process.env.BUDGET_CAP_USD ? Number(process.env.BUDGET_CAP_USD) : LOCAL_CAP_USD;
-  return openBroker({ dbPath: 'cache/budget.sqlite', costsPath: 'docs/ledger/COSTS.jsonl', capUsd: cap });
+  return openBroker({ dbPath: 'cache/budget.sqlite', costsPath: 'docs/ledger/COSTS.jsonl', capUsd: cap,
+    requestBudget:{id:'tabwise-product-completion-20261104',maxRequests:20} });
 }

@@ -5,6 +5,7 @@ import {readVerifiedHostedProvenance} from '../../../src/r2/provenance.mjs';
 import {openQualifiedR2ProductEvidence,readQualifiedR2ProductEvidence} from '../../../src/r2/product-bridge.mjs';
 import {readArtifactZip} from './artifact-zip.mjs';
 import {storeArtifactSet} from './artifact-store.mjs';
+import {assertExecutionAllowed} from '../../../src/deployment-execution.mjs';
 export function prepareNativeArchives({userId,row,run,remote,artifacts,evidenceArchive,attestationArchive}){
  if(!row||row.user_id!==userId||run.user_id!==userId||row.state!=='RUN_BOUND'||row.product_run_id&&row.product_run_id!==run.id||row.request.product_run_id!==run.id||run.gh_run_id!==row.github_run_id||run.gh_head_sha!==row.request.revision)throw Error('owned bound native run required');
  const bound=matchNativeProductRun(row.request,{...row.request,github_run_id:row.github_run_id},remote),selected=selectNativeArtifacts(bound,artifacts);
@@ -30,6 +31,7 @@ export async function recoverNativeStoredSet({userId,run,manifest,files,metadata
  }catch{return false;}
 }
 export async function ingestNativeArtifacts({configuration,load,readRemote,listArtifacts,download,verifyHosted,reserve,finish,recoverStored,store,record,cleanup,recordCleanup,userId,runId}){
+ assertExecutionAllowed();
  if(configuration?.enabled!==true||configuration.ingestion_enabled!==true)throw Error('native ingestion disabled');
  const {row,run}=await load(userId,runId);
  if(!row||row.user_id!==userId||run?.user_id!==userId||row.state!=='RUN_BOUND')throw Error('owned bound native run required');
