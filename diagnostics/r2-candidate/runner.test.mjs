@@ -12,6 +12,9 @@ test('candidate workflow separates bootstrap, native authorization and independe
  assert.match(workflow,/TABWISE_CANDIDATE_REQUEST_JSON: \$\{\{ inputs\.candidate_request \}\}/);
  assert.match(workflow,/permissions:\s+contents: read/);assert.doesNotMatch(workflow,/id-token:|pull-requests: write|contents: write/);
  assert.match(workflow,/set -o pipefail/);assert.doesNotMatch(workflow,/run:.*\$\{\{ inputs\.candidate_request/);
+ const native=workflow.slice(workflow.indexOf('  candidate-native:'),workflow.indexOf('  candidate-verify:'));
+ assert.ok(native.indexOf('run: npm ci --ignore-scripts')<native.indexOf('run: node diagnostics/r2-candidate/run.mjs --check-only'),'frozen dependency integrity requires lockfile installation before candidate preflight');
+ assert.ok(native.indexOf('run: node diagnostics/r2-candidate/run.mjs --check-only')<native.indexOf('guidepup setup'),'authorization and full integrity must precede native setup');
 });
 test('candidate worker accepts W5 IPC before protected loading and reuses existing custody',()=>{
  const code=readFileSync(new URL('./run.mjs',import.meta.url),'utf8');

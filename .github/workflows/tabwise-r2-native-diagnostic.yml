@@ -116,11 +116,13 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: 24.22.1
+      # Full frozen integrity includes installed upstream dependency bytes.
+      # Install only the existing lockfile before preflight; no native setup/input.
+      - run: npm ci --ignore-scripts
       - name: Check exact candidate permission before setup
         run: node diagnostics/r2-candidate/run.mjs --check-only
       - name: Preserve saved request before native setup
         run: node diagnostics/r2-candidate/run.mjs --initialize
-      - run: npm ci --ignore-scripts
       - run: npx --no-install guidepup setup --ci
       - run: npx --no-install guidepup install nvda
       - run: npx --no-install playwright install chromium

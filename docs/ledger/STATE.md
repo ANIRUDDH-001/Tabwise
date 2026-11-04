@@ -1,5 +1,5 @@
 # STATE — candidate runner implemented; product binding in progress
-Updated: 2026-11-04T17:15:46Z
+Updated: 2026-11-04T17:21:11Z
 - Worktree D:/Projects/Meta AI/tabwise-product-continuation; branch feat/tabwise-r2-r7-product-completion; draft PR26.
 - Runner published a6d4dc6; CI41873849745 running. Prior CI41840087473 SUCCESS.
 - Implemented separate NONPRODUCTION_UNQUALIFIED request/packet and actual attempt2 W5 purpose. Production admission remains attempt1/BLOCK.
@@ -12,7 +12,10 @@ Updated: 2026-11-04T17:15:46Z
 - No new native baseline yet: request must be durably associated with an actual owned immutable product version before dispatch.
 - Candidate persistence/API implemented; web359 PASS/4 opt-in skips; local DB/API4 PASS; build/types/two route traces PASS.
 - Owned saved seat version1ee1aac3-0a08-49bd-8661-533ba7e6fe54 (owner6198bfc5-5937-46d9-8eac-9b7599cbee52).
-- Next: commit source, create immutable candidate request, dispatch/bootstrap/exact packet/rerun, original artifact readback.
+- First actual owned candidate f5762254-73dc-4ef0-bf70-17afd9a2f1fe/run41875985195 attempt2 failed preflight before setup/input.
+- Measured ordering defect fixed: locked npm ci before unchanged full frozen check; no integrity threshold weakened. Focused48 PASS.
+- First candidate terminal FAILED and approval removed; fresh candidate/source/bootstrap/run required, never attempt3.
+- Next: publish ordering fix, fresh owned candidate and native attempt; continue original readback/storage/UI.
 - Candidate-only migration20261104170315 applied after local SQL/database tests. Hosted RLS/privileges rechecked; no production gate/flag change.
 - Then authenticated evidence storage/timeline, genuine diagnosis (credit check), actual human patch review, patched rerun and R7 comparison/UI.
 - Model calls0/20; paid₹0. Free-credit eligibility unverified; no live model call.
