@@ -3,12 +3,12 @@
   "files": {
     "scripts/tabwise/r2-loader.mjs": "8ca0e483cfa11c3cce2b89b40eb818e5731e5093b8042e324f2fa1af752e0ae9",
     "scripts/tabwise/r2-vendor-loader.mjs": "5fbf83e697f0c4adc4b9a7246cf231050f7643649b29ea050f166da4682bdc5f",
-    "scripts/tabwise/r2-nvda-lifecycle.mjs": "168954fc17475b7d333bc557dac2b39d3bde38e24aabb11eb28d4b5482a9f567",
+    "scripts/tabwise/r2-nvda-lifecycle.mjs": "b7d43d5a11622206de5e52940ece1eed6f4116f7b6b9c856406c0c66badc518d",
     "scripts/tabwise/r2-runtime-integrity.mjs": "9aca50571ea7e073b6d9848d13535db64fe55579919555295db9c53eeb52ca1b",
     "diagnostics/owner-v2/resolver.mjs": "767b2531e73cc75a7a4f9d926864b04ff18f77563d9f347ecc82c0d6858612c6",
-    "diagnostics/owner-v2/identity.ps1": "76b5294721139a513671b1974f8e25641e5ec80a3a008e7fccd9fed7064d14a7",
+    "diagnostics/owner-v2/identity.ps1": "8e1d1e1ce943385e58521cccdc6b65bf1e20e4f5cf32226d3e2ce73c7cd5dac1",
     "scripts/tabwise/r2-session.mjs": "31344077fb186990ea1301cc0990e589c34866019248941b5a01230e040fa1fc",
     "diagnostics/r2-native/startup-cleanup.mjs": "7a57ed1afaeb8a76f460fa573ac68b09fc96282905b3133aa27863c66564bad5",
-    "diagnostics/r2-native/startup-diagnostics.mjs": "0d2bfabc96409f5341e979cbe1dc3c5ecf05a6f9192f01c3da4b4d39bcb48c74"
+    "diagnostics/r2-native/startup-diagnostics.mjs": "aca96d9b51f3c3923f15aa476da284936cbaf5d3a79550ef41c11348fa470cc9"
   }
 }

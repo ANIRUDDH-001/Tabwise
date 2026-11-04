@@ -688,3 +688,6 @@ User: "Resolve all 20 failures in one focused engineering cycle"; "Correct test 
 
 ## F-03 hosted startup autopsy — owner authorized
 User: "Determine and correct the first genuine hosted Windows NVDA startup failure. Do not run another hosted attempt." Scope: read-only GitHub artifact download/hash verification; diagnostic/core/worker/supervisor and R2 cleanup observability, new offline tests and pins; normal ledgers/handoff. Acceptance focused/full root/startup offline/frozen/pins/preflight PASS. $0; no native/input/push/hosted writes/approvals/paid calls. One new local correction commit.
+
+## F-03 measured identity boundary correction
+User: "Run the actual processIdentity implementation against an independently created and verified process." Scope: verified artifact download, real disposable Windows Node/PowerShell reproduction, exact identity helper/classifications, offline review gate, focused/full root once on final source, pins/preflight and minimal handoff. One local reviewed commit; $0; no native/input/hosted mutation/approvals/push/install.

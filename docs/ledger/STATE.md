@@ -1,16 +1,16 @@
-# STATE - hosted startup autopsy correction
-Updated: 2026-11-04T07:04:53Z
-- Parent7086d05;run41786837403/attempt2/artifact13301543127 ZIP+3-file index verified.
-- Primary startup cause unresolved; discarded exception/stage cannot be reconstructed.
-- Confirmed actual-class repeated-stop cleanup defect corrected; ownership/query/teardown failures still refuse.
-- Allowlisted startup/cleanup/containment stages/codes; no raw exceptions/paths/env output.
-- MEASURED focused169 PASS; full root1190 PASS,0fail/cancel/skip; frozen/pins/preflight/diff PASS.
-- Runtime pins expanded7->9 for source-bound cleanup/diagnostic modules; qualification digest unchanged.
-- No workflow/vendor/R1/dependency/deadline/auth change; no native/input/hosted write/push/paid call.
-- Next: independent exact-commit source review; fresh new hosted run and separately approved run-bound packet only.
-- Never rerun old41786837403 using consumed approval. Actual primary failure not claimed fixed.
-- Handoff: docs/engineering/R2-hosted-startup-autopsy.md; cache/startup-autopsy/commit-inventory.json.
+# STATE - measured Windows identity boundary correction
+Updated: 2026-11-04T07:38:01Z
+- Parent81a0072;run41791267134/2 artifact ZIP/index verified;executable-identity operation-failed observed.
+- Primary NVDA-specific identity suboperation unresolved;actual benign Node/PowerShell identity succeeds.
+- Fixed allowlisted identity exit/launch/deadline/output/path-access/process-exit distinctions;identity checks retained.
+- Real sanitized-child PID/creation/exe match,rapid-exit/real helper negatives PASS;no NVDA launch.
+- Offline workflow review now gates packet/native job on real Windows harmless-process identity qualification.
+- MEASURED focused190 PASS;full root once1190 PASS,0fail/cancel/skip;frozen9pins/preflight/diff PASS.
+- Same9 pin scope;3 hashes updated;protected vendor/R1/qualification/deps/tabwise-r2 unchanged.
+- No push/hosted writes/approvals/native/input/paid/installs;new source requires fresh run-bound approval.
+- Last verification npm test ->1190 PASS,exit0 (cache/identity-correction/root-final.tap).
+- Handoff docs/engineering/R2-process-identity-correction.md;exact commit/digest in cache/identity-correction/.
 ## Handoff
-- One local correction commit authorized; other-tool independent review remains separate.
-- Verified: npm test1190/1190; focused169/168; frozen integrity/runtime pins/preflight PASS.
-- Blocked: genuine hosted startup result and unresolved primary cause; native provenance/attester producers.
+- One local reviewed correction commit authorized;working tree clean after commit.
+- Next owner: independent exact-source review;NEW offline Windows qualification run only after publication approval.
+- Blocked: NVDA-specific cause/startup acceptance;no R2/R3/R7 promotion.

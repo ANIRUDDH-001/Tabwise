@@ -6,12 +6,14 @@ import {fileURLToPath} from 'node:url';
 import {resolveOwner,runBounded,systemExecutable,authenticateOwner} from '../../diagnostics/owner-v2/resolver.mjs';
 const identityScript=fileURLToPath(new URL('../../diagnostics/owner-v2/identity.ps1',import.meta.url));
 export const executableHash=path=>createHash('sha256').update(path.toLowerCase()).digest('hex');
-export async function processIdentity(pid,{deadline,signal}={}){
+export async function processIdentity(pid,{deadline,signal,run=runBounded}={}){
  if(!Number.isSafeInteger(pid)||pid<1||pid>2147483647)throw Error('process identity PID refused');
- const result=await runBounded({file:systemExecutable('WindowsPowerShell/v1.0/powershell.exe'),args:['-NoProfile','-NonInteractive','-File',identityScript,'-ProcessId',String(pid)],deadline,signal,maxBytes:4096});
- if(!result.ok)throw Error('process identity unavailable: '+result.reason);
- let value;try{value=JSON.parse(result.stdout);}catch{throw Error('process identity malformed');}
- if(value?.pid!==pid||!/^([1-9][0-9]{10,19})$/.test(value.created??'')||!/^[a-f0-9]{64}$/.test(value.path_sha256??'')||Object.keys(value).sort().join()!=='created,path_sha256,pid')throw Error('process identity invalid');
+ const result=await run({file:systemExecutable('WindowsPowerShell/v1.0/powershell.exe'),args:['-NoProfile','-NonInteractive','-File',identityScript,'-ProcessId',String(pid)],deadline,signal,maxBytes:4096});
+ const refuse=code=>{throw Object.assign(Error(code),{r2_code:code});};
+ if(!result.ok){const code=result.reason==='launch-error'?'identity-helper-launch-failed':['deadline','cancelled'].includes(result.reason)?'identity-helper-timeout':result.exit_code===21?'spawned-process-exited':result.exit_code===22?'identity-process-access-failed':result.exit_code===23?'identity-path-unavailable':'identity-helper-exit';refuse(code);}
+ if(!result.cleanup?.process_close_observed)refuse('identity-output-invalid');
+ let value;try{value=JSON.parse(result.stdout);}catch{refuse('identity-output-invalid');}
+ if(value?.pid!==pid||!/^([1-9][0-9]{10,19})$/.test(value.created??'')||!/^[a-f0-9]{64}$/.test(value.path_sha256??'')||Object.keys(value).sort().join()!=='created,path_sha256,pid')refuse('identity-output-invalid');
  return Object.freeze(value);
 }
 export function createLifecycle({gate,executable,configPath,spawn=spawnProcess,running,query=resolveOwner,identify=processIdentity,pathHash=executableHash}){
@@ -61,7 +63,7 @@ export function createLifecycle({gate,executable,configPath,spawn=spawnProcess,r
     }
     await new Promise(resolve=>setTimeout(resolve,Math.min(pollMs,Math.max(1,until-performance.now()))));
    }
-  }catch(cause){if(failed)stage='spawn';try{child.kill();}catch{}const error=Error('NVDA cannot be started',{cause});error.ownedProcess=owned;error.r2_stage=stage;if(cause.r2_code==='identity-mismatch')error.r2_code='identity-mismatch';throw error;}
+  }catch(cause){if(failed)stage='spawn';else if(!isAlive())cause.r2_code='spawned-process-exited';try{child.kill();}catch{}const error=Error('NVDA cannot be started',{cause});error.ownedProcess=owned;error.r2_stage=stage;if(['identity-mismatch','identity-helper-exit','identity-helper-timeout','identity-helper-launch-failed','identity-output-invalid','spawned-process-exited','identity-process-access-failed','identity-path-unavailable'].includes(cause.r2_code))error.r2_code=cause.r2_code;throw error;}
  }
  async function quit(options={}){
   stage=owned?'cleanup':'initial-listener-query';

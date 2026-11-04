@@ -134,3 +134,5 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 | `test/r2-{quiescence,import-admission}.test.mjs` | Actual bounded helper and page authority/import ordering under isolated Worker module boundaries; no native launch | final R2 regression closure |
 
 | `diagnostics/r2-native/startup-{cleanup,diagnostics}.mjs`, `autopsy.test.mjs` | Source-bound failed-start cleanup confirmation and fixed stage/code diagnostic allowlist; actual-class offline negatives | no native authority |
+
+| `diagnostics/owner-v2/process-identity.test.mjs` | Real sanitized owned Windows Node/PowerShell identity qualification,rapid-exit/launch/deadline/output negatives and offline workflow gate | no NVDA or input |
