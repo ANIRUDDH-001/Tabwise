@@ -622,3 +622,10 @@ User: "Determine and correct the first genuine hosted Windows NVDA startup failu
 
 ## F-03 measured identity boundary correction
 User: "Run the actual processIdentity implementation against an independently created and verified process." Scope: verified artifact download, real disposable Windows Node/PowerShell reproduction, exact identity helper/classifications, offline review gate, focused/full root once on final source, pins/preflight and minimal handoff. One local reviewed commit; $0; no native/input/hosted mutation/approvals/push/install.
+
+## F-03 autonomous R2 recovery (owner directive 2026-11-04)
+Goal: genuine Windows identity, NVDA startup/teardown, approved guarded journey, authentic evidence and product readback.
+Scope: owner-v2 identity/resolver diagnostics; R2 lifecycle/loader/session/entry/evidence/product producer; R2 workflows/tests/pins; normal ledgers.
+Acceptance: actual Windows identity and negative tests; hosted offline review and fresh exact packet; real startup artifact; guarded native journey/evidence/readback; focused security/custody/source tests, frozen R1, final npm test. Missing evidence means incomplete.
+Ceiling: ₹0 incremental, zero paid AI calls. No subagents or unrelated infrastructure/R3/R7 changes.
+Publication: owner explicitly permits reviewed commits/push to fix/F-03-r2-native-runtime and bounded hosted runs under existing exact authorization architecture. Rollback by new revert commit, never history rewrite.

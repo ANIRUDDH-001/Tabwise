@@ -20,6 +20,8 @@ jobs:
         with:
           node-version: 24.22.1
       - run: node --test diagnostics/r2-native/external-trace.test.mjs diagnostics/r2-native/boundaries.test.mjs diagnostics/r2-native/zero-key.test.mjs diagnostics/r2-native/startup-supervisor.test.mjs test/r2-runtime.test.mjs test/r2-runtime-class.test.mjs
+      - name: Measure cold and warm identity helper stages without NVDA
+        run: node diagnostics/owner-v2/identity-timing.mjs
       - name: Qualify real Windows process identity without NVDA
         run: node --test diagnostics/owner-v2/process-identity.test.mjs
       - name: Exact future attempt 2 packet, no execution

@@ -691,3 +691,7 @@ User: "Determine and correct the first genuine hosted Windows NVDA startup failu
 
 ## F-03 measured identity boundary correction
 User: "Run the actual processIdentity implementation against an independently created and verified process." Scope: verified artifact download, real disposable Windows Node/PowerShell reproduction, exact identity helper/classifications, offline review gate, focused/full root once on final source, pins/preflight and minimal handoff. One local reviewed commit; $0; no native/input/hosted mutation/approvals/push/install.
+
+## F-03 autonomous R2 recovery authorization — 2026-11-04
+User answer: "You may commit and push directly to:" "fix/F-03-r2-native-runtime"; "Modify implementation, tests, diagnostics and R2-specific workflows."; "No subagents, parallel AI agents, delegated peer reviewers or unnecessary model calls."; "Incremental budget: ₹0."
+Consequence: sole-agent deterministic review, R2-only implementation/test/workflow edits, reviewed commits/push and source/run-bound hosted execution authorized. Existing identity, source, approval and isolation gates retained; no fabricated signature or qualification.
