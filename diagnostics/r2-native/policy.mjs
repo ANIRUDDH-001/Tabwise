@@ -14,7 +14,7 @@ export const PAGE='validation-healthy';
 export const FIXTURE='fixtures/r2/plans/validation/healthy.html';
 export const FIXTURE_SHA='f22a2f22be578e0609f990564acb703bab40bd8bf770079acc090775d79e9555';
 export const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
-export const SOURCE_FILES=Object.freeze([...new Set([...R2_FILES,...QUALIFICATION_FILES,PLAN,FIXTURE,'src/r2/product-export.mjs','package.json','package-lock.json',WORKFLOW,...['policy','run','verify','test','web-check'].map(n=>`diagnostics/r2-native/${n}.mjs`)])].sort());
+export const SOURCE_FILES=Object.freeze([...new Set([...R2_FILES,...QUALIFICATION_FILES,PLAN,FIXTURE,'src/r2/product-export.mjs','package.json','package-lock.json',WORKFLOW,'.github/workflows/tabwise-owner-query-probe.yml','.github/workflows/tabwise-startup-only.yml','diagnostics/r2-native/owner-query-probe.ps1','test/helpers/sandbox.mjs',...['policy','run','verify','test','web-check','error-test','startup-trace','external-trace.test','probe-runner','cancellation.test','probe-cli.test','probe-cli-fixture-loader','boundary-policy','entry-context','probe-entry','startup-core','startup-supervisor','startup-entry','boundaries.test','zero-key.test','startup-supervisor.test','startup-worker'].map(n=>`diagnostics/r2-native/${n}.mjs`)])].sort());
 export function sourceDigest(root){return sha(SOURCE_FILES.map(path=>`${path}\0${sha(readFileSync(join(root,path),'utf8').replace(/\r\n/g,'\n'))}\n`).join(''));}
 export function packetFor({head,source_digest,run_id,actor}){return {
  schema:'tabwise-native-diagnostic-approval/1',classification:CLASSIFICATION,base:BASE,revision:head,source_digest,

@@ -2,6 +2,7 @@ import {spawn,execFileSync} from 'node:child_process';
 import {readFileSync,writeFileSync,mkdirSync,existsSync} from 'node:fs';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {createStartupTrace} from './startup-trace.mjs';
 import {diagnosticErrorChain,packetFor,sourceDigest,checkDiagnosticApproval,assertProductionBlocked,CLASSIFICATION,BASE,PAGE} from './policy.mjs';
 import {inputFor,indexFiles,projectionFor} from './verify.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url)),entry=fileURLToPath(import.meta.url);
@@ -44,6 +45,7 @@ if(process.argv[2]==='--packet'){
   // No runtime capability in the supervisor. It owns the child and original process-custody implementation.
   mkdirSync(out,{recursive:true});mkdirSync(source);
   const report={schema:'tabwise-native-diagnostic-report/1',classification:CLASSIFICATION,approval,w2a_qualified:false,production_qualified:false,pass:false,preflight:null,child:null,custody:null,post:null,errors:[]};
+  const trace=createStartupTrace();
   save('report.json',report);
   const {windowsProcessTools,processBaseline,quiescenceOf}=await import('../../scripts/tabwise/r2-proctree.mjs');
   const tools=windowsProcessTools({spawn,env:process.env});
@@ -57,9 +59,9 @@ if(process.argv[2]==='--packet'){
    let outcome;
    try{outcome=await runR2Pages({pages:[PAGE],timeoutMs:approval.max_ms,killGraceMs:5000,maxOutputBytes:1048576,processes:tools,signal:cancel.signal,protect:[process.pid,process.ppid],
     launch:()=>{
-     const child=spawn(process.execPath,[entry,'--worker'],{cwd:root,env,windowsHide:true,shell:false,stdio:['ignore','pipe','pipe']});
-     child.stdout.on('data',bytes=>{stdout=(stdout+bytes.toString('utf8')).slice(0,1048576);});return child;
-    },onStderr:(_,bytes)=>{stderr+=bytes.toString('utf8');if(Buffer.byteLength(stderr)>1048576){stderrOverflow=true;stderr=stderr.slice(0,524288);cancel.abort();}}
+     const child=trace.launch(()=>spawn(process.execPath,[entry,'--worker'],{cwd:root,env,windowsHide:true,shell:false,stdio:['ignore','pipe','pipe']}));
+     child.stdout.on('data',bytes=>{trace.output('stdout',bytes);stdout=(stdout+bytes.toString('utf8')).slice(0,1048576);});return child;
+    },onStderr:(_,bytes)=>{trace.output('stderr',bytes);stderr+=bytes.toString('utf8');if(Buffer.byteLength(stderr)>1048576){stderrOverflow=true;stderr=stderr.slice(0,524288);cancel.abort();}}
    });}finally{for(const name of ['SIGINT','SIGTERM','SIGBREAK','SIGHUP'])process.off(name,onCancel);}
    const childResult=outcome.pages[0];report.outcome=outcome;
    report.child={code:childResult.exit_code,outcome:childResult.outcome,timed_out:childResult.outcome==='timeout',output_overflow:stderrOverflow||childResult.outcome==='result-refused'};
@@ -77,6 +79,7 @@ if(process.argv[2]==='--packet'){
    if(sourceDigest(root)!==digest)throw Error('source changed after capture');
    report.pass=session?.completed===true&&session.runtime_checks.brand===true&&session.runtime_checks.post_session_authentic===true&&session.nvda==='stopped'&&!session.cleanup_errors.length&&!session.reasons.length&&report.child.code===0&&!report.child.timed_out&&!report.child.output_overflow&&report.custody.confirmed&&report.custody.quiescent&&report.custody.root?.exact===true&&!report.custody.sample_failures&&!report.custody.errors.length&&report.post.quiescent&&!report.post.helper_processes.length&&report.sealed?.ok===true&&report.projection?.native.accepted===false&&report.projection.native.reason==='native qualification disabled'&&report.projection.exporter.accepted===false&&!report.errors.length;
   }catch(e){report.errors.push(e.message);report.pass=false;}
+  finally{trace.cleanup(report.custody);trace.dispose();try{save('startup-trace.json',trace.snapshot());}catch{}}
   save('report.json',report);save('index.json',indexFiles(out));
   console.log(JSON.stringify(report));process.exitCode=report.pass?0:1;
  }else throw Error('unexpected diagnostic mode');
