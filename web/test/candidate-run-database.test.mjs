@@ -1,0 +1,30 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';import {readFileSync} from 'node:fs';
+import {randomUUID,randomInt} from 'node:crypto';
+import {candidateRunStore,createCandidateRunHandler,dispatchCandidate} from '../lib/server/candidate-run.mjs';
+import {sourceDigest,prepareCandidateRequest} from '../../diagnostics/r2-candidate/policy.mjs';
+const enabled=process.env.TABWISE_CANDIDATE_LOCAL_DB==='g2local',user=randomUUID(),version=randomUUID();
+const quote=v=>v===null?'null':"'"+String(typeof v==='object'?JSON.stringify(v):v).replaceAll("'","''")+"'";
+const sql=s=>execFileSync('C:/Program Files/PostgreSQL/18/bin/psql.exe',['-X','-h','127.0.0.1','-p','55442','-U','g2test','-d','g2local','-At','-q','-v','ON_ERROR_STOP=1','-c',s],{encoding:'utf8',windowsHide:true,timeout:10000}).trim();
+test('candidate API persists owned immutable source; uncertain dispatch cannot repeat',{skip:!enabled},async()=>{
+ const steps=['Tab','Enter','Tab','Tab','Enter'].map((key,n)=>({step:n+1,key,text:null,checkpoint:true}));
+ sql(`insert into public.journey_versions(id,journey_id,user_id,n,steps,sha256) values(${quote(version)},'fernway-seat',${quote(user)},1,${quote(steps)},${quote('a'.repeat(64))});`);
+ const client={rpc:async(name,args)=>{try{return {data:JSON.parse(sql(`set role service_role;select public.${name}(${Object.entries(args).map(([k,v])=>k+'=>'+quote(v)).join(',')})`))};}catch(error){return {error};}},from:()=>{
+  const filters={};const builder={select:()=>builder,eq:(k,v)=>{filters[k]=v;return builder;},maybeSingle:async()=>({data:JSON.parse(sql(`set role service_role;select coalesce((select to_jsonb(c) from public.candidate_native_runs c where ${Object.entries(filters).map(([k,v])=>k+'='+quote(v)).join(' and ')}),'null'::jsonb)`))})};return builder;
+ }};
+ const store=candidateRunStore(client),h=createCandidateRunHandler({authenticate:async()=>({id:user}),configuration:()=>({enabled:true,userId:user,ref:'refs/heads/feat/tabwise-r2-r7-product-completion'}),store,context:()=>({prepareCandidateRequest,revision:'a'.repeat(40),sourceDigest:sourceDigest(),fixture:Buffer.from(readFileSync(new URL('../../fixtures/fernway/index.html',import.meta.url),'utf8').replaceAll('\r\n','\n'))})});
+ const post=()=>new Request('https://tabwise.test/api/candidate-runs',{method:'POST',headers:{origin:'https://tabwise.test','Content-Type':'application/json','Idempotency-Key':'candidate-sql-test'},body:JSON.stringify({journey_version_id:version})});
+ const response=await h(post()),body=await response.json();assert.equal(response.status,201,JSON.stringify(body));
+ assert.equal(body.state,'PREPARED');const id=body.product_run_id;
+ assert.equal((await (await h(post())).json()).product_run_id,id);
+ const saved=await store.read(user,id);assert.equal(saved.spec_text,JSON.stringify(saved.spec));assert.equal(saved.request.classification,'NONPRODUCTION_UNQUALIFIED');
+ assert.equal(await store.read('c1000000-0000-4000-8000-000000000003',id),null);
+ let sends=0;const send=async()=>{sends++;throw Error('lost response after send');};
+ assert.equal((await dispatchCandidate({userId:user,runId:id,requestSha256:saved.request_sha256,store,send})).state,'DISPATCH_UNKNOWN');
+ assert.equal((await dispatchCandidate({userId:user,runId:id,requestSha256:saved.request_sha256,store,send})).state,'DISPATCH_UNKNOWN');assert.equal(sends,1);
+ await assert.rejects(store.transition(user,id,saved.request_sha256,'intent'));
+ const ghId=String(randomInt(100000000,1000000000));await store.transition(user,id,saved.request_sha256,'accepted',ghId);
+ await assert.rejects(store.transition(user,id,saved.request_sha256,'accepted',String(Number(ghId)+1)));
+ assert.equal((await store.read(user,id)).github_run_id,ghId);
+ await store.transition(user,id,saved.request_sha256,'failed');
+});

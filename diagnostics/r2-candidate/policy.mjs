@@ -14,6 +14,7 @@ export const FIXTURE='fixtures/fernway/index.html';
 export const FIXTURE_SHA='5ad4631558cdcc557770ae864957ffc167546cd0af58bd11258808e1c0e523be';
 export const ACTIONS=Object.freeze(['Tab','Enter','Tab','Tab','Enter']);
 export const SOURCE_FILES=Object.freeze([...new Set([...R2_FILES,...QUALIFICATION_FILES,WORKFLOW,FIXTURE,'diagnostics/r2-native/verify.mjs','diagnostics/r2-native/policy.mjs',
+ 'web/lib/server/candidate-run.mjs','web/lib/server/candidate-run-live.ts','web/app/api/candidate-runs/route.ts','web/app/api/candidate-runs/[id]/route.ts','web/test/candidate-run.test.mjs','web/test/candidate-run-database.test.mjs','supabase/migrations/20261104170315_candidate_native_runs.sql','supabase/tests/candidate_native_runs.sql',
  'diagnostics/r2-candidate/policy.mjs','diagnostics/r2-candidate/policy.test.mjs','diagnostics/r2-candidate/run.mjs','diagnostics/r2-candidate/runner.test.mjs','diagnostics/r2-candidate/verify.mjs','diagnostics/r2-candidate/verify.test.mjs','diagnostics/r2-candidate/store.mjs','diagnostics/r2-candidate/store.test.mjs'])].sort());
 const root=resolve(import.meta.dirname,'../..'),hash=v=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v),uuid=v=>typeof v==='string'&&/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(v);
 const fail=why=>{throw Error('candidate refused: '+why);};
@@ -25,13 +26,13 @@ function checked(request){
  if(request.schema!=='tabwise-candidate-native-request/1'||request.classification!==CLASSIFICATION||request.repository!=='ANIRUDDH-001/Tabwise'||request.workflow!==WORKFLOW||request.ref!==REF||request.actor!=='ANIRUDDH-001'||!/^[a-f0-9]{40}$/.test(request.revision??'')||!['source_scope_sha256','runtime_scope_sha256','spec_sha256'].every(k=>hash(request[k]))||!['user_id','product_run_id','journey_version_id'].every(k=>uuid(request[k]))||request.fixture_sha256!==FIXTURE_SHA||request.journey_id!=='fernway-seat'||request.variant!=='broken'||!same(request.actions,ACTIONS)||request.execution_authorized!==false||request.production_qualified!==false||request.request_sha256!==sha256(stable(Object.fromEntries(bodyKeys.map(k=>[k,request[k]])))))fail('request identity/source/scope');
  return request;
 }
-export function prepareCandidateRequest({userId,run,specBytes,fixture,revision,sourceDigest:scope}){
+export function prepareCandidateRequest({userId,run,specBytes,fixture,revision,sourceDigest:scope,sourceRoot=root}){
  assertContract('run-spec',run?.spec);
  if(!uuid(userId)||run.user_id!==userId||run.id!==run.spec.run_id||!uuid(run.journey_version_id)||run.status!=='admitted')fail('owned admitted immutable version required');
  if(!(specBytes instanceof Uint8Array)||specBytes.length>60000||!same(parseUniqueJson(new TextDecoder('utf-8',{fatal:true}).decode(specBytes)),run.spec))fail('exact saved spec required');
  if(!(fixture instanceof Uint8Array)||fixture.length>100000||sha256(Buffer.from(fixture).toString('utf8').replaceAll('\r\n','\n'))!==FIXTURE_SHA||run.spec.app_hash!==FIXTURE_SHA)fail('owned fixture required');
  if(run.spec.journey_id!=='fernway-seat'||run.spec.variant!=='broken'||!same(run.spec.steps.map(s=>s.key),ACTIONS)||run.spec.steps.some((s,n)=>s.step!==n+1||s.text!==null))fail('fixed candidate journey required');
- const body={schema:'tabwise-candidate-native-request/1',classification:CLASSIFICATION,repository:'ANIRUDDH-001/Tabwise',workflow:WORKFLOW,ref:REF,actor:'ANIRUDDH-001',revision,source_scope_sha256:scope,runtime_scope_sha256:qualificationDigest(root),user_id:userId,product_run_id:run.id,journey_version_id:run.journey_version_id,spec_sha256:sha256(specBytes),fixture_sha256:FIXTURE_SHA,journey_id:run.spec.journey_id,variant:'broken',actions:[...ACTIONS],execution_authorized:false,production_qualified:false};
+ const body={schema:'tabwise-candidate-native-request/1',classification:CLASSIFICATION,repository:'ANIRUDDH-001/Tabwise',workflow:WORKFLOW,ref:REF,actor:'ANIRUDDH-001',revision,source_scope_sha256:scope,runtime_scope_sha256:qualificationDigest(sourceRoot),user_id:userId,product_run_id:run.id,journey_version_id:run.journey_version_id,spec_sha256:sha256(specBytes),fixture_sha256:FIXTURE_SHA,journey_id:run.spec.journey_id,variant:'broken',actions:[...ACTIONS],execution_authorized:false,production_qualified:false};
  return Object.freeze(checked({...body,request_sha256:sha256(stable(body))}));
 }
 export function candidatePlan(request){checked(request);return {schema:'tabwise-r2-plan/1',split:'development',spec:{ackMs:1000,observationMs:1500,pollMs:25,timeoutMs:8000},handleTimeoutMs:27000,focusWaitMs:1000,pages:[{id:'candidate-seat',fixture:'fernway/index.html',fixture_sha256:request.fixture_sha256,query:'?flow=seat&variant=broken',task:ACTIONS.map((press,n)=>({step:'step-'+(n+1),press}))}]};}
@@ -68,7 +69,7 @@ export function readCandidateEnvelope(text,{head,scope,sourceRoot=root}){
  const envelope=parseUniqueJson(text);exact(envelope,['request','spec_text']);checked(envelope.request);
  if(typeof envelope.spec_text!=='string')fail('saved spec bytes required');
  const request=envelope.request,spec=parseUniqueJson(envelope.spec_text),fixture=Buffer.from(readFileSync(join(sourceRoot,FIXTURE),'utf8').replaceAll('\r\n','\n'));
- const actual=prepareCandidateRequest({userId:request.user_id,run:{id:request.product_run_id,user_id:request.user_id,journey_version_id:request.journey_version_id,status:'admitted',spec},specBytes:Buffer.from(envelope.spec_text),fixture,revision:head,sourceDigest:scope});
+ const actual=prepareCandidateRequest({userId:request.user_id,run:{id:request.product_run_id,user_id:request.user_id,journey_version_id:request.journey_version_id,status:'admitted',spec},specBytes:Buffer.from(envelope.spec_text),fixture,revision:head,sourceDigest:scope,sourceRoot});
  if(!same(actual,request))fail('saved request/source delivery mismatch');
  return {request,spec,spec_text:envelope.spec_text,fixture,plan:candidatePlan(request)};
 }

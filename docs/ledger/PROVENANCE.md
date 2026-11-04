@@ -123,3 +123,6 @@ New event-time product capture lifecycle/origin adapter, healthy-query verifier 
 
 ## 2026-11-04T17:03:56Z — isolated candidate execution
 New candidate-only policy, runner, durable built-in SQLite W5 adapter, offline verifier and tests authored during event. Reuses existing W5, original guarded NVDA session/custody, owned Fernway and pinned workflow actions; no dependency install, new dataset or external code copied. Candidate ephemeral issuer keys never leave supervisor memory and confer no production qualification. Context7 official GitHub Actions inputs/permissions documentation consulted. Existing root MIT covers original additions.
+
+## 2026-11-04T17:15:46Z — owned candidate persistence
+New isolated candidate table/RLS/service RPCs, API adapter/routes and local PostgreSQL integration tests authored during event. Existing immutable journey/version, original Fernway, native dispatch uncertainty mechanism and raw source packaging reused. No dependency install or external dataset. Context7 official Supabase privileges/functions docs consulted. Migration applied only after isolated SQL/API/database tests passed; hosted RLS and denied anonymous/browser writes rechecked.

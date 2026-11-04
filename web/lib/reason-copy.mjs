@@ -1,6 +1,12 @@
 // Human copy for every reason code emitted by web/app/api/** and web/app/auth/** (T-P0-04, T-P1-04).
 // Copy never names environment variables, secrets or stack traces.
 export const REASON_COPY=Object.freeze({
+ candidate_execution_disabled:'Candidate testing is not enabled here. Your saved journey is retained.',
+ candidate_owner_required:'This candidate test is limited to its configured owner.',
+ invalid_candidate_id:'This candidate link is invalid. Open the saved test again.',
+ candidate_not_found:'This candidate is unavailable for your account.',
+ invalid_candidate_request:'Choose a saved seat selection journey and try again.',
+ candidate_request_conflict:'The candidate request could not be confirmed. Reload its saved details before continuing.',
  run_producer_unresolved:'The saved run has no confirmed worker path. Execution is paused while its identity is checked.',
  native_sender_disabled:'Native execution is not available yet. Your saved request is retained.',
  native_request_not_found:'This native request is unavailable for your account.',

@@ -207,3 +207,5 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 | `README.md`, `LICENSE`, `THIRD_PARTY_NOTICES.md` | Contributor setup, accurate availability and owner-attributed original-material MIT grant | local links, public URLs, dependency-license and bounded credential/history scan |
 
 | `diagnostics/r2-candidate/{policy,run,store,verify}.mjs`, adjacent focused tests; existing diagnostic workflow candidate jobs | Fixed five-key Fernway nonproduction request, separate attempt-2 W5 purpose, durable local consumption, original guarded session/custody and separate-runner readback/tamper checks | NONPRODUCTION_UNQUALIFIED only; no measured native baseline yet |
+
+| `web/lib/server/candidate-run{,-live}.{mjs,ts}`, `/api/candidate-runs`, `/api/candidate-runs/[id]`; `supabase/migrations/20261104170315_candidate_native_runs.sql` and focused SQL/API/database tests | Separate owned immutable candidate source/request, durable dispatch intent and unknown-state refusal; private owner readback | No production run/evidence/budget mutation; explicit candidate environment switch |
