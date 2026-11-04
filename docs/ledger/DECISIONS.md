@@ -677,3 +677,8 @@ User: "You may commit corrections locally on the appropriate feature branches."
 Consequence: isolated fix/F-03-local-stabilization-diagnostic from bb7bea7; local correction commit only, no publication or native execution.
 
 Owner sprint bd81c229: "Codex may create scoped LOCAL commits under the previously approved waiver." "No rerun, new workflow dispatch or reuse of this packet is allowed." New G1 V2 source isolated; no publication or execution.
+
+
+## F-03 R2 integrated runtime (owner request 2026-11-04)
+User: "Integrate it into the real R2 runtime instead." "Continue until all safely executable tasks are complete."
+Scope: R2-only lifecycle/loader, R2 entry/session/policy, bounded process/workflow ownership, new tests, startup-only candidate and normal ledgers. Frozen R1 untouched. Acceptance: new runtime and diagnostic suites; root tests; frozen integrity; product separately validated. Ceiling $0, no paid calls/install/native execution/hosted mutation. Separate worktrees/commits requested. Rollback: retain branches; discard only authored changes after review.

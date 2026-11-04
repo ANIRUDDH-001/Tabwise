@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: 24.22.1
-      - run: node --test diagnostics/r2-native/external-trace.test.mjs diagnostics/r2-native/boundaries.test.mjs diagnostics/r2-native/zero-key.test.mjs diagnostics/r2-native/startup-supervisor.test.mjs
+      - run: node --test diagnostics/r2-native/external-trace.test.mjs diagnostics/r2-native/boundaries.test.mjs diagnostics/r2-native/zero-key.test.mjs diagnostics/r2-native/startup-supervisor.test.mjs test/r2-runtime.test.mjs test/r2-runtime-class.test.mjs
       - name: Exact future attempt 2 packet, no execution
         shell: pwsh
         run: node diagnostics/r2-native/startup-entry.mjs --packet $env:GITHUB_RUN_ID
@@ -40,6 +40,7 @@ jobs:
           node-version: 24.22.1
       - run: node diagnostics/r2-native/startup-entry.mjs --check-only
       - run: npm ci --ignore-scripts
+      - run: node --test diagnostics/owner-v2/r2-loader.test.mjs
       - run: npx --no-install guidepup setup --ci
       - run: npx --no-install guidepup install nvda
       - name: Startup and teardown only, under independent process custody

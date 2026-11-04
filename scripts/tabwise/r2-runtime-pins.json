@@ -1,0 +1,12 @@
+{
+  "schema": "tabwise-r2-runtime-pins/1",
+  "files": {
+    "scripts/tabwise/r2-loader.mjs": "31daf2bf08e45b9c89be8e5e93967f2afcbc8f272c5522a328fb8ab855441c70",
+    "scripts/tabwise/r2-vendor-loader.mjs": "8cf4c91080a2172cb6be607226056a4f95e07c94f6b345b77192264aa1f38e10",
+    "scripts/tabwise/r2-nvda-lifecycle.mjs": "4ea5902a113c8cd282501c4f68d6739dec87cc026b4f8244223b3bfa793c13bf",
+    "scripts/tabwise/r2-runtime-integrity.mjs": "c75d37d13ecffaff92ec5b4372aa925f5d7b922696399ae467a2e911c27218d9",
+    "diagnostics/owner-v2/resolver.mjs": "767b2531e73cc75a7a4f9d926864b04ff18f77563d9f347ecc82c0d6858612c6",
+    "diagnostics/owner-v2/identity.ps1": "76b5294721139a513671b1974f8e25641e5ec80a3a008e7fccd9fed7064d14a7",
+    "scripts/tabwise/r2-session.mjs": "31344077fb186990ea1301cc0990e589c34866019248941b5a01230e040fa1fc"
+  }
+}

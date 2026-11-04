@@ -1,0 +1,11 @@
+import {spawn} from 'node:child_process';
+import {mkdirSync,writeFileSync} from 'node:fs';
+import {join} from 'node:path';
+import {windowsProcessTools,quiescenceOf} from './r2-proctree.mjs';
+const phase=process.env.TABWISE_R2_QUIESCENCE_PHASE;
+if(!['pre','post'].includes(phase)||!process.env.RUNNER_TEMP)throw Error('quiescence phase/output required');
+const snapshot=await windowsProcessTools({spawn,env:process.env}).snapshot();
+const result={schema:'tabwise-r2-quiescence/1',phase,scope:'global',page_custody:'not claimed: see run-summary.json pages[].custody',...quiescenceOf(snapshot),processes:snapshot.processes,physical_quiescence_verified:false,containment_required:true};
+const dir=join(process.env.RUNNER_TEMP,'tabwise-r2/diagnostics');mkdirSync(dir,{recursive:true});
+writeFileSync(join(dir,`quiescence-${phase}.json`),JSON.stringify(result),{flag:'wx'});
+console.log(JSON.stringify(result));if(!result.quiescent)process.exitCode=1;

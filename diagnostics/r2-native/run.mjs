@@ -28,9 +28,9 @@ if(process.argv[2]==='--packet'){
   save('report.json',{schema:'tabwise-native-diagnostic-report/1',classification:CLASSIFICATION,approval,w2a_qualified:false,production_qualified:false,pass:false,stage:'setup-not-completed',errors:['No native session has completed; inspect setup logs']});
   save('index.json',indexFiles(out));
  }else if(process.argv[2]==='--worker'){
-  const {loadQualificationRuntime}=await import('../../scripts/tabwise/qualification-loader.mjs');
+  const {loadR2Runtime}=await import('../../scripts/tabwise/r2-loader.mjs');
   const additionalIntegrity=()=>sourceDigest(root)===digest?[]:['diagnostic reviewed source changed'];
-  const runtime=await loadQualificationRuntime({root,additionalIntegrity});
+  const runtime=await loadR2Runtime({root,additionalIntegrity});
   const stop=()=>{if(!runtime.guard.isStopped())runtime.guard.stop('diagnostic cancelled','timeout');};
   for(const signal of ['SIGINT','SIGTERM','SIGBREAK'])process.on(signal,stop);
   const timer=setTimeout(stop,150000);

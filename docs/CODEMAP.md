@@ -127,3 +127,6 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 | diagnostics/r2-native/error-test.mjs; scripts/tabwise/r2-session.mjs optional diagnostic observer | Redacted nested startup errors in diagnostic-only artifact; unchanged rejection/cleanup; incomplete verifier integrity-only mode | R2-native-attempt2-causes.md |
 
 | `diagnostics/owner-v2/` | Separate read-only netstat resolver, fixed process identity query, strict V2 source/run authorization and local Windows measurements; no native authority | resolver/entry/policy/measure | resolver, real-child, policy tests |
+
+| `scripts/tabwise/r2-{loader,vendor-loader,nvda-lifecycle,runtime-integrity}.mjs`, `r2-runtime-pins.json` | R2-only one-shot private frozen CJS graph and identity-checked bounded startup/owned-handle cleanup; never loads frozen startup/quit implementations | `loadR2Runtime`, `createLifecycle`; new runtime/class/loader tests |
+| `scripts/tabwise/r2-{listeners,quiescence}.mjs` | Bounded fixed-port resolver output and read-only global pre/post workflow census | no native start or input |

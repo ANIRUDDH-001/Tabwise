@@ -608,3 +608,8 @@ D-43/D-44 engineering checkpoint 2026-10-28T02:44:03Z: Codex primary ownership; 
 - Root cause: static assertion required a two-argument spelling; authentic diagnostic accepts optional observational diagnostics after brand refusal.
 - D67: phase measurements and byte-copy setup optimization; all tracked files/full dependency copy and original assertions retained; 30s/100ms unchanged.
 - Rollback: revert isolated local correction commit. No dependency/install/runtime/approval variable or native execution change.
+
+
+## F-03 R2 integrated runtime (owner request 2026-11-04)
+User: "Integrate it into the real R2 runtime instead." "Continue until all safely executable tasks are complete."
+Scope: R2-only lifecycle/loader, R2 entry/session/policy, bounded process/workflow ownership, new tests, startup-only candidate and normal ledgers. Frozen R1 untouched. Acceptance: new runtime and diagnostic suites; root tests; frozen integrity; product separately validated. Ceiling $0, no paid calls/install/native execution/hosted mutation. Separate worktrees/commits requested. Rollback: retain branches; discard only authored changes after review.

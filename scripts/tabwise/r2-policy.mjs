@@ -16,6 +16,7 @@ export const RETIRED_APPROVALS=Object.freeze(['D-72','D-73','D-74']);
 // O-11 (D-89): arm-input custody (src/r2/arm-inputs.mjs) derives model inputs from sealed runs, so it is reviewed scope too.
 // C2: include the producer input policy, guarded executor and their shared press palette in enforced integrity.
 export const R2_FILES=Object.freeze([
+ 'scripts/tabwise/r2-listeners.mjs','scripts/tabwise/r2-quiescence.mjs','scripts/tabwise/r2-loader.mjs','scripts/tabwise/r2-vendor-loader.mjs','scripts/tabwise/r2-nvda-lifecycle.mjs','scripts/tabwise/r2-runtime-integrity.mjs','scripts/tabwise/r2-runtime-pins.json','diagnostics/owner-v2/resolver.mjs','diagnostics/owner-v2/identity.ps1',
  'src/r2/strict-json.mjs', 'src/r2/approval-constants.mjs', 'src/r2/node-review.mjs',
  '.github/workflows/tabwise-r2.yml', 'packages/contracts/index.mjs', 'packages/contracts/limits.mjs',
  'packages/contracts/palette.mjs', 'packages/contracts/r2-product.mjs', 'packages/contracts/schemas.mjs',

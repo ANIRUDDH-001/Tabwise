@@ -10,7 +10,7 @@ export const BOUNDARIES=Object.freeze({
 export function boundaryPacket({root,revision,run,mode}){
  const policy=BOUNDARIES[mode];if(!policy||!/[a-f0-9]{40}/.test(revision)||revision.length!==40||!/^[1-9][0-9]*$/.test(run??''))throw Error('exact revision/run/mode required');
  const argv=mode==='probe'?['powershell.exe','-NoProfile','-NonInteractive','-File','<ROOT>/'+policy.script]:['<NODE>','<ROOT>/'+policy.entry,'--worker'];
- return {schema:'tabwise-boundary-approval/1',mode,repository:'ANIRUDDH-001/Tabwise',actor:'ANIRUDDH-001',ref:'refs/heads/fix/F-03-owner-query-trace',workflow:policy.workflow,event:'workflow_dispatch',revision,source_digest:sourceDigest(root),run_id:run,run_attempt:2,
+ return {schema:'tabwise-boundary-approval/1',mode,repository:'ANIRUDDH-001/Tabwise',actor:'ANIRUDDH-001',ref:mode==='startup'?'refs/heads/fix/F-03-r2-native-runtime':'refs/heads/fix/F-03-owner-query-trace',workflow:policy.workflow,event:'workflow_dispatch',revision,source_digest:sourceDigest(root),run_id:run,run_attempt:2,
   script_sha256:sha(readFileSync(join(root,policy.script),'utf8').replace(/\r\n/g,'\n')),command_sha256:sha(JSON.stringify({argv,shell:false,stdio:mode==='startup'?['ignore','pipe','pipe','ipc']:['ignore','pipe','pipe'],windowsHide:true})),limits:policy,
   output:`RUNNER_TEMP/tabwise-${mode}-${run}-2`,artifact_bytes:131072,actions:[],max_sends:0,production_qualified:false,native_interaction_pass:false,decision:`APPROVE NONQUALIFYING ${mode} ONLY`};
 }

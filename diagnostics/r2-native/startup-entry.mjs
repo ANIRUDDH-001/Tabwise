@@ -11,8 +11,8 @@ else if(context.mode==='--worker'){
  const {runStartupWorker}=await import('./startup-worker.mjs');
  try{
   const result=await runStartupWorker({channel:process,load:async()=>{
-   const {loadQualificationRuntime}=await import('../../scripts/tabwise/qualification-loader.mjs');
-   return loadQualificationRuntime({root:context.root,additionalIntegrity:()=>sourceDigest(context.root)===digest?[]:['startup source changed']});
+   const {loadR2Runtime}=await import('../../scripts/tabwise/r2-loader.mjs');
+   return loadR2Runtime({root:context.root,additionalIntegrity:()=>sourceDigest(context.root)===digest?[]:['startup source changed']});
   }});
   console.log(JSON.stringify(result));process.exitCode=result.startup_pass?0:1;
  }finally{if(process.connected)process.disconnect();}

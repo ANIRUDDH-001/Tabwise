@@ -10,7 +10,7 @@
 // Evidence: composeR2Page seals with no authenticity claim, so the S3 verdict is 'synthetic' or 'incomplete' even for a
 // real run. This module adds no claim and no class (no hosted-run attestation exists yet: owner decision O-10) and
 // reports genuine_evidence:false. The result is JSON only; no live handle leaves this function.
-import {isQualificationRuntime} from './qualification-loader.mjs';
+import {isR2Runtime} from './r2-loader.mjs';
 import {composeR2Page} from './r2-compose.mjs';
 
 const SESSION_SCHEMA = 'tabwise-r2-session-result/1';
@@ -39,7 +39,7 @@ const summarizeAxe = result => ({
  * runtime authenticity, fixture/plan validation); afterwards it always cleans up and returns.
  */
 export async function runR2Session(runtime, data, diagnostics) {
-  if (!isQualificationRuntime(runtime)) throw Error('R2 session requires the owned vendored runtime');
+  if (!isR2Runtime(runtime)) throw Error('R2 session requires the owned vendored runtime');
   if (used) throw Error('R2 session: one page per process');
   used = true;
   const pageStart = performance.now(); // W3/W4 lifecycle origin: work, settle and guard bounds count from here.

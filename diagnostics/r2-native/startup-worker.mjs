@@ -15,6 +15,7 @@ export async function runStartupWorker({channel,load,setTimer=setTimeout,clearTi
   if(cancelled||!channel.connected)throw Error('supervisor lost before runtime');
   runtime=await load();
   const authentic=()=>{if(cancelled||!channel.connected){runtime.guard.stop('startup supervisor lost','pre');throw Error('supervisor lost');}runtime.assertAuthentic();};
-  return await runStartupOnly({authentic,disarm:()=>runtime.guard.disarm(),status:()=>runtime.guard.status(),start:()=>{authentic();return runtime.nvda.start({capture:false,settings:structuredClone(runtime.cfg.nvda_settings)});},stop:()=>runtime.nvda.stop()});
+  const result=await runStartupOnly({authentic,disarm:()=>runtime.guard.disarm(),status:()=>runtime.guard.status(),start:()=>{authentic();return runtime.nvda.start({capture:false,settings:structuredClone(runtime.cfg.nvda_settings)});},stop:()=>runtime.nvda.stop()});
+  return {...result,observed_process:runtime.observedProcess?.()??null};
  }finally{clearTimer(timer);if(onMessage)channel.removeListener('message',onMessage);for(const name of signals)channel.removeListener(name,cancel);}
 }

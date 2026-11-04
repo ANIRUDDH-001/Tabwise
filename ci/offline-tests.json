@@ -258,5 +258,13 @@
   "r2-capture-export.test.mjs": {
     "kind": "offline",
     "reason": "real captureJourney serialization with injected in-memory telemetry; no native execution, browser, credentials or external authority"
+  },
+  "r2-runtime.test.mjs": {
+    "kind": "offline",
+    "reason": "injected startup/identity/ownership fakes only; no native launch or input"
+  },
+  "r2-runtime-class.test.mjs": {
+    "kind": "offline",
+    "reason": "actual frozen NVDA class under isolated R2 loader with controlled lifecycle/platform/client fakes; no native launch or input"
   }
 }
