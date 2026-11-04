@@ -5,7 +5,7 @@ import {join} from 'node:path';
 import {R2_FILES} from '../../scripts/tabwise/r2-policy.mjs';
 import {QUALIFICATION_FILES} from '../../scripts/tabwise/qualification-policy.mjs';
 import {parseUniqueJson} from '../../src/r2/strict-json.mjs';
-export const BRANCH='refs/heads/diag/tabwise-r2-native';
+export const BRANCH='refs/heads/fix/F-03-r2-native-runtime';
 export const WORKFLOW='.github/workflows/tabwise-r2-native-diagnostic.yml';
 export const BASE='d75f04335dc0ba6c9e64fb92fcedc408c5867cfc';
 export const CLASSIFICATION='NONQUALIFYING_NATIVE_R2_DIAGNOSTIC';
@@ -18,7 +18,7 @@ export const SOURCE_FILES=Object.freeze([...new Set([...R2_FILES,...QUALIFICATIO
 export function sourceDigest(root){return sha(SOURCE_FILES.map(path=>`${path}\0${sha(readFileSync(join(root,path),'utf8').replace(/\r\n/g,'\n'))}\n`).join(''));}
 export function packetFor({head,source_digest,run_id,actor}){return {
  schema:'tabwise-native-diagnostic-approval/1',classification:CLASSIFICATION,base:BASE,revision:head,source_digest,
- repository:'ANIRUDDH-001/Tabwise',workflow:WORKFLOW,ref:BRANCH,event:'push',actor,run_id,run_attempt:2,
+ repository:'ANIRUDDH-001/Tabwise',workflow:WORKFLOW,ref:BRANCH,event:'workflow_dispatch',actor,run_id,run_attempt:2,
  fixture:FIXTURE,fixture_sha256:FIXTURE_SHA,page:PAGE,actions:['Tab','Tab','Enter'],max_ms:180000,
  handleTimeoutMs:10000,focusWaitMs:5000,spec:{ackMs:1000,timeoutMs:5000,observationMs:1500,pollMs:50},
  output:'RUNNER_TEMP/tabwise-r2-native-diagnostic',production_qualified:false,
@@ -29,7 +29,7 @@ export function checkDiagnosticApproval({env,head,source_digest,approval,platfor
  if(platform!=='win32'||env.GITHUB_ACTIONS!=='true'||env.RUNNER_ENVIRONMENT!=='github-hosted'||env.RUNNER_OS!=='Windows')errors.push('dedicated GitHub-hosted Windows required');
  if(execArgv.length||Object.keys(env).some(k=>/^(NODE_OPTIONS|R1T_)/i.test(k)&&env[k]))errors.push('runtime hooks forbidden');
  if(!/^[a-f0-9]{40}$/.test(head)||env.GITHUB_SHA!==head||!/^[a-f0-9]{64}$/.test(source_digest))errors.push('source identity');
- if(env.GITHUB_REPOSITORY!=='ANIRUDDH-001/Tabwise'||env.GITHUB_REF!==BRANCH||env.GITHUB_EVENT_NAME!=='push'||env.GITHUB_WORKFLOW_REF!==`ANIRUDDH-001/Tabwise/${WORKFLOW}@${BRANCH}`||env.GITHUB_RUN_ATTEMPT!=='2'||!env.RUNNER_TEMP)errors.push('diagnostic workflow identity');
+ if(env.GITHUB_REPOSITORY!=='ANIRUDDH-001/Tabwise'||env.GITHUB_REF!==BRANCH||env.GITHUB_EVENT_NAME!=='workflow_dispatch'||env.GITHUB_WORKFLOW_REF!==`ANIRUDDH-001/Tabwise/${WORKFLOW}@${BRANCH}`||env.GITHUB_RUN_ATTEMPT!=='2'||!env.RUNNER_TEMP)errors.push('diagnostic workflow identity');
  if(!/^[1-9][0-9]*$/.test(env.GITHUB_RUN_ID??'')||env.GITHUB_ACTOR!=='ANIRUDDH-001'||env.GITHUB_TRIGGERING_ACTOR&&env.GITHUB_TRIGGERING_ACTOR!=='ANIRUDDH-001')errors.push('owner/run identity');
  try {
   const value=typeof approval==='string'?parseUniqueJson(approval):approval;

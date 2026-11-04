@@ -1,10 +1,9 @@
-# NONQUALIFYING. First push runs offline checks only. Native input requires a separately owner-approved
+# NONQUALIFYING. First dispatch runs offline checks only. Native input requires a separately owner-approved
 # exact packet in a repository variable AND a manual rerun of that exact run (attempt 2 only).
 # This is diagnostic authorization, never independent W2a/native attestation or production admission.
 name: tabwise-r2-native-diagnostic
 on:
-  push:
-    branches: [diag/tabwise-r2-native]
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:

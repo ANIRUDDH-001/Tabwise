@@ -7,12 +7,17 @@ import {indexFiles,checkIndex,verifyDiagnostic,checkArtifactApproval} from './ve
 import {checkDiagnosticApproval,packetFor,BRANCH,WORKFLOW,sourceDigest} from './policy.mjs';
 import {fileURLToPath} from 'node:url';
 const head='a'.repeat(40),digest='b'.repeat(64);
-const env={GITHUB_ACTIONS:'true',RUNNER_ENVIRONMENT:'github-hosted',RUNNER_OS:'Windows',GITHUB_REPOSITORY:'ANIRUDDH-001/Tabwise',GITHUB_REF:BRANCH,GITHUB_WORKFLOW_REF:`ANIRUDDH-001/Tabwise/${WORKFLOW}@${BRANCH}`,GITHUB_EVENT_NAME:'push',GITHUB_SHA:head,GITHUB_ACTOR:'ANIRUDDH-001',GITHUB_RUN_ID:'123',GITHUB_RUN_ATTEMPT:'2',RUNNER_TEMP:'D:\\temp'};
+const env={GITHUB_ACTIONS:'true',RUNNER_ENVIRONMENT:'github-hosted',RUNNER_OS:'Windows',GITHUB_REPOSITORY:'ANIRUDDH-001/Tabwise',GITHUB_REF:BRANCH,GITHUB_WORKFLOW_REF:`ANIRUDDH-001/Tabwise/${WORKFLOW}@${BRANCH}`,GITHUB_EVENT_NAME:'workflow_dispatch',GITHUB_SHA:head,GITHUB_ACTOR:'ANIRUDDH-001',GITHUB_RUN_ID:'123',GITHUB_RUN_ATTEMPT:'2',RUNNER_TEMP:'D:\\temp'};
 const approval=packetFor({head,source_digest:digest,run_id:'123',actor:env.GITHUB_ACTOR});
 const run=(overrides={})=>checkDiagnosticApproval({env,head,source_digest:digest,approval,platform:'win32',execArgv:[],...overrides});
 test('only exact separately approved diagnostic identity is accepted',()=>assert.deepEqual(run(),[]));
 test('no approval means no native capability',()=>assert.ok(run({approval:null}).length));
-for(const [key,value] of Object.entries({GITHUB_ACTIONS:'false',RUNNER_ENVIRONMENT:'self-hosted',RUNNER_OS:'Linux',GITHUB_REPOSITORY:'other/repo',GITHUB_REF:'refs/heads/main',GITHUB_EVENT_NAME:'workflow_dispatch',GITHUB_SHA:'c'.repeat(40),GITHUB_ACTOR:'other',GITHUB_RUN_ID:'124',GITHUB_RUN_ATTEMPT:'1',GITHUB_WORKFLOW_REF:'other',RUNNER_TEMP:''}))test('refuses '+key,()=>assert.ok(run({env:{...env,[key]:value}}).length));
+test('journey engineering is manual and bound to the designated R2 source branch',()=>{
+ assert.equal(BRANCH,'refs/heads/fix/F-03-r2-native-runtime');
+ const text=readFileSync(new URL('../../.github/workflows/tabwise-r2-native-diagnostic.yml',import.meta.url),'utf8');assert.match(text,/workflow_dispatch:/);assert.doesNotMatch(text,/\n  push:/);
+ assert.equal(packetFor({head,source_digest:digest,run_id:'123',actor:env.GITHUB_ACTOR}).event,'workflow_dispatch');
+});
+for(const [key,value] of Object.entries({GITHUB_ACTIONS:'false',RUNNER_ENVIRONMENT:'self-hosted',RUNNER_OS:'Linux',GITHUB_REPOSITORY:'other/repo',GITHUB_REF:'refs/heads/main',GITHUB_EVENT_NAME:'push',GITHUB_SHA:'c'.repeat(40),GITHUB_ACTOR:'other',GITHUB_RUN_ID:'124',GITHUB_RUN_ATTEMPT:'1',GITHUB_WORKFLOW_REF:'other',RUNNER_TEMP:''}))test('refuses '+key,()=>assert.ok(run({env:{...env,[key]:value}}).length));
 for(const change of [{platform:'linux'},{execArgv:['--import=x']},{env:{...env,NODE_OPTIONS:'--require=x'}},{head:'c'.repeat(40)},{source_digest:'d'.repeat(64)},{approval:{...approval,max_ms:180001}},{approval:{...approval,actions:['Tab','Enter']}},{approval:{...approval,extra:true}},{approval:{...approval,run_attempt:3}}])test('refuses changed packet or execution boundary '+JSON.stringify(change),()=>assert.ok(run(change).length));
 test('workflow never runs input automatically on first push and separates verifier runner',()=>{
  const text=readFileSync(new URL('../../.github/workflows/tabwise-r2-native-diagnostic.yml',import.meta.url),'utf8');

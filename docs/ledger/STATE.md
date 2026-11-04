@@ -1,9 +1,11 @@
-# STATE — Phase B measured NVDA environment correction
-- A PASS: hosted41795994791 identity14/14; serializer cmdlet stall fixed, no deadlines increased.
-- B diagnostic41796760196/2: native exit1; nvda.log KeyError PROCESSOR_ARCHITECTURE.
-- ZIP74ba9fcf47839d468207b8622e21f906acbc99f4f8471724f2517ebb5456d4bb/index verified; zero sends; custody complete.
-- Corrected startup environment allowlist for Windows architecture metadata; secrets/runtime injection still excluded.
-- Required env regression RED before correction; focused security/native runtime checks next.
-- Next: publish, fresh hosted offline packet and exact startup attempt; then real guarded journey/evidence.
-- No independent native signing authority configured; production gates retained.
+# STATE — Phase B PASS, guarded native journey next
+- A PASS: actual hosted Windows identity14/14; serializer stall fixed without deadline increases.
+- B PASS: dc3ad31 run41797208434/2 artifact13306111472, NVDA2026.2 pid1508 same relay/executable identity.
+- Zero sends; valid receipt; cleanup stopped; independent root custody exact/confirmed, no residue/listener/helper.
+- ZIP9c4e4313e2b90cf6ebae4be5b0d3358da03c6c0fa3b17525c09f91d92f12d743/index verified.
+- Approval revoked after admission and absent.
+- C: bind existing diagnostic workflow manually to authorized fix/F-03-r2-native-runtime; exact source/run/attempt/fixture/key packet retained.
+- Required fixture actions Tab,Tab,Enter only; guarded executor/foreground/owned browser unchanged; classification NONQUALIFYING.
+- Next: focused diagnostics, publish, hosted offline checks then fresh exact attempt2 journey, inspect raw speech/custody.
+- Product gap: independent native signed-attestation authority and enabled reviewed policies unavailable; do not fabricate.
 - Handoff: sole agent; incremental ₹0; no R3/R7 promotion.
