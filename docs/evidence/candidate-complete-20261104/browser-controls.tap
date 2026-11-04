@@ -1,0 +1,24 @@
+✔ candidate report preserves all four verdicts and shows inconclusive checks without a passing claim (2806.4888ms)
+✔ approved candidate repair is visible, keyboard reachable and recovers the same request key (2656.5078ms)
+✔ completed repair navigation opens the existing rerun without allocating another request (831.3314ms)
+✔ candidate desktop/mobile timeline retains qualification boundary and original references (3312.8176ms)
+✔ candidate preparation reuses its saved idempotency key after interrupted response (826.6126ms)
+✔ owned saved version leads to candidate preparation and a resumable workspace link (1171.4093ms)
+✔ recorder ignores page overrides of native DOM identity and name accessors (1143.6891ms)
+✔ target with 199 ID characters never becomes a valid over-bound event (351.8388ms)
+✔ target with 200 ID characters never becomes a valid over-bound event (410.7242ms)
+✔ target with 256 ID characters never becomes a valid over-bound event (465.9135ms)
+✔ target with 2048 ID characters never becomes a valid over-bound event (451.7719ms)
+✔ event and byte caps fail closed and remain incomplete (847.5454ms)
+✔ duplicate label IDs are explicit and cannot silently select one name (356.7976ms)
+✔ over-bound native names are marked incomplete rather than silently accepted (327.9101ms)
+✔ real historical Fernway dialog identities drive the pure oracle in labelled browser controls (1081.7126ms)
+✔ recorder observes unique radio DOM identity and detects a same-name/value clone despite patched accessors (1192.5224ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6053.6707

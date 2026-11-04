@@ -25,6 +25,7 @@ export const SOURCE_FILES=Object.freeze([...new Set([...R2_FILES,...QUALIFICATIO
  'web/lib/server/candidate-comparison.mjs','web/lib/server/candidate-comparison-live.ts','web/app/api/candidate-runs/[id]/comparison/route.ts','web/components/CandidateComparison.tsx','web/test/candidate-comparison.test.mjs','supabase/migrations/20261104190839_candidate_repair_comparison.sql',
  'web/lib/reason-copy.mjs','web/test/repair-radio-identity.test.mjs','web/test/repair-radio-recorder.browser.mjs',
  'web/test/candidate-configuration.test.mjs',
+ 'web/test/candidate-repair-recovery.test.mjs','supabase/migrations/20261104193248_candidate_repair_source_recovery.sql',
  'diagnostics/r2-candidate/repair.mjs','diagnostics/r2-candidate/repair.test.mjs','diagnostics/r2-candidate/focus-restoration.patch','diagnostics/r2-candidate/focus-restoration-review.json',
  'diagnostics/r2-candidate/policy.mjs','diagnostics/r2-candidate/policy.test.mjs','diagnostics/r2-candidate/run.mjs','diagnostics/r2-candidate/runner.test.mjs','diagnostics/r2-candidate/verify.mjs','diagnostics/r2-candidate/verify.test.mjs','diagnostics/r2-candidate/store.mjs','diagnostics/r2-candidate/store.test.mjs'])].sort());
 const root=resolve(import.meta.dirname,'../..'),hash=v=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v),uuid=v=>typeof v==='string'&&/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(v);

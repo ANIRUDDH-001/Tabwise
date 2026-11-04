@@ -1,0 +1,12 @@
+{
+  "code": 0,
+  "summary": {
+    "schema": "tabwise-r2-verify/1",
+    "ok": true,
+    "complete": true,
+    "run_class": "synthetic",
+    "errors": [],
+    "run_manifest_sha256": "66ee2a69c487fd0d46a38cfbeda4c63da38272b2fd10a77f84a27a568b739de5",
+    "genuine_evidence": false
+  }
+}

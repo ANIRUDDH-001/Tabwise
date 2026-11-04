@@ -1,0 +1,69 @@
+{
+  "canonical_ledger": "original app/docs/ledger/COSTS.jsonl",
+  "session_records": [
+    {
+      "run_id": "453627ed-abc1-4f89-bd48-7c5be69a2d76",
+      "experiment": "tabwise-diagnosis",
+      "ts_utc": "2026-11-04T18:38:12.345Z",
+      "git_sha": null,
+      "model_id": "muse-spark-1.3",
+      "mode": "standard",
+      "reasoning_effort": null,
+      "prompt_sha256": null,
+      "input_sha256": null,
+      "output_sha256": null,
+      "tokens_in": null,
+      "tokens_out": null,
+      "tokens_cached": null,
+      "latency_ms": null,
+      "cost_usd": null,
+      "retries": null,
+      "verdict": "reserved",
+      "ground_truth_id": null,
+      "abstained": null,
+      "notes": null,
+      "account": null,
+      "reserved_usd": 0.07100375,
+      "settled_usd": 0,
+      "cumulative_usd": 0.09792585,
+      "request_budget": {
+        "id": "tabwise-product-completion-20261104",
+        "sequence": 1,
+        "max_requests": 20
+      },
+      "requested_tokens": {
+        "input": 43203,
+        "output": 4000,
+        "images": 0
+      }
+    },
+    {
+      "run_id": "453627ed-abc1-4f89-bd48-7c5be69a2d76",
+      "experiment": "tabwise-diagnosis",
+      "ts_utc": "2026-11-04T18:38:24.920Z",
+      "git_sha": null,
+      "model_id": "muse-spark-1.3",
+      "mode": "standard",
+      "reasoning_effort": "minimal",
+      "prompt_sha256": null,
+      "input_sha256": "08088086b33c3399dac482b2bc30a9f5c8f3a6b7cc10ea765b6393f94f9b4b55",
+      "output_sha256": "b9d7582bcb7537ef77b4472c7f1163c9cde2a1289498b68bd04c3023dcbaeb76",
+      "tokens_in": 9627,
+      "tokens_out": 752,
+      "tokens_cached": 0,
+      "latency_ms": 12570,
+      "cost_usd": 0.01522975,
+      "retries": 0,
+      "verdict": null,
+      "ground_truth_id": null,
+      "abstained": null,
+      "notes": null,
+      "account": "team",
+      "reserved_usd": 0.07100375,
+      "settled_usd": 0.01522975,
+      "cumulative_usd": 0.1131556
+    }
+  ],
+  "actual_model_requests": 1,
+  "paid_spend_inr": 0
+}

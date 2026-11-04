@@ -15,7 +15,8 @@ export function candidateRepairRoute(request:Request,id:string){return endpoint(
  const common={db:serviceClient(),userId:user.id,baselineId:id,sourceRoot};
  if(request.method==='GET'){
   const {context}=await adapter.candidateRepairContext(common);
-  return Response.json({classification:'NONPRODUCTION_UNQUALIFIED',production_qualified:false,review:context.review,diff:context.patch},{headers:{'Cache-Control':'private, no-store'}});
+  const existing=await adapter.existingCandidateRepair({...common,review:context.review});
+  return Response.json({classification:'NONPRODUCTION_UNQUALIFIED',production_qualified:false,review:context.review,diff:context.patch,existing_run_id:existing?.product_run_id??null},{headers:{'Cache-Control':'private, no-store'}});
  }
  assertSameOrigin(request);
  const value=await adapter.prepareOwnedCandidateRepair({...common,key:request.headers.get('Idempotency-Key'),revision:c.revision});
