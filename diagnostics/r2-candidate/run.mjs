@@ -13,6 +13,7 @@ const root=resolve(import.meta.dirname,'../..'),entry=resolve(import.meta.dirnam
 const git=(...args)=>execFileSync('git',args,{cwd:root,encoding:'utf8',windowsHide:true,timeout:30000}).trim();
 const save=(dir,name,value)=>writeFileSync(join(dir,name),JSON.stringify(value,null,2)+'\n');
 const readPublic=path=>{const s=lstatSync(path);if(!s.isFile()||s.isSymbolicLink()||s.size>100000)throw Error('candidate public context refused');return parseUniqueJson(readFileSync(path,'utf8'));};
+export function assertChildCompleted(child,hasSession){if(child?.exit_code!==0||child?.outcome!=='accepted')throw Error('candidate page failed; inspect original stderr.log and custody');if(!hasSession)throw Error('candidate page completed without original session record');}
 
 async function main(){
  const mode=process.argv[2]??'--run',env=process.env,head=git('rev-parse','HEAD'),scope=sourceDigest(root);
@@ -32,7 +33,7 @@ async function main(){
  if(git('status','--porcelain','--untracked-files=all'))throw Error('BLOCK: candidate checkout dirty');
  const approval=parseUniqueJson(env.TABWISE_CANDIDATE_EXECUTION_APPROVAL),temp=realpathSync(env.RUNNER_TEMP),rel=relative(root,temp);
  if(!rel||!isAbsolute(rel)&&rel.split(/[\\/]/)[0]!=='..')throw Error('candidate refused: external runtime directory required');
- const out=join(temp,'tabwise-r2-candidate-'+r.product_run_id),source=join(out,'source'),page=input.plan.pages[0],consumer={run_id:env.GITHUB_RUN_ID,attempt:2},binding=candidateBinding(r,approval),id='candidate-'+r.product_run_id;
+ const out=join(temp,'tabwise-r2-candidate'),source=join(out,'source'),page=input.plan.pages[0],consumer={run_id:env.GITHUB_RUN_ID,attempt:2},binding=candidateBinding(r,approval),id='candidate-'+r.product_run_id;
  if(mode==='--check-only'){console.log(JSON.stringify({candidate_authorized:true,classification:CLASSIFICATION,production_qualified:false,product_run_id:r.product_run_id,revision:head}));return;}
  if(mode==='--initialize'){
   mkdirSync(out);save(out,'request.json',{request:r,spec_text:input.spec_text});writeFileSync(join(out,'saved-spec.json'),input.spec_text,{flag:'wx'});save(out,'setup.json',{stage:'native-not-started',classification:CLASSIFICATION,production_qualified:false});return;
@@ -83,6 +84,7 @@ async function main(){
   });}finally{for(const signal of ['SIGINT','SIGTERM','SIGBREAK','SIGHUP'])process.off(signal,stop);}
   writeFileSync(join(out,'stdout.log'),stdout);writeFileSync(join(out,'stderr.log'),stderr);report.outcome=outcome;report.child=outcome.pages[0];report.custody=report.child.custody;
   const snapshot=await tools.snapshot();report.post={...quiescenceOf(snapshot),helper_processes:snapshot.processes.filter(p=>/^nvdahelperremoteloader\.exe$/i.test(p.name))};
+  assertChildCompleted(report.child,existsSync(join(out,'session.json')));
   const session=readPublic(join(out,'session.json'));
   if(r2RunSealable(outcome)&&report.custody?.confirmed&&existsSync(join(source,page.id,'manifest.json'))){
    const {sealR2Run,verifyR2Run}=await import('../../scripts/tabwise/r2-evidence.mjs'),approved={query:page.query,fixture_sha256:r.fixture_sha256,task:page.task},inputs={[page.id]:{fixture:input.fixture,approved}};

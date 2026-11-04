@@ -33,3 +33,6 @@ R2/R3/R7 acceptance remains false. No genuine diagnosis, human patch-review deci
 
 Evidence
 Original and local artifacts are indexed under docs/evidence/candidate-vertical-slice-20261104/index.json. Source-only manifests distinguish the original native scope from the later147-file candidate source.
+
+Update 2026-11-04T17:53:13Z
+Run41876894297/2 is now measured FAIL_BEFORE_CAPTURE. Original ZIP13348208012 SHA5c96491fb3f59e8de9a62bbbc059f3ddc8498b21f46d56d67092b449bb8834cc and separate readback13347799305 SHA60333ee5514e196a732f79122eddc4e19025aef2cd3d7231f3b6bd6bd2614540 are preserved under candidate-runtime-recovery. One permanent W5 consumption and one IPC grant occurred; process custody confirmed cleanup. Worker budget refusal preceded capture. New poll100 plan reserves9479520 bytes under unchanged12000000 cap; all action and speech windows remain unchanged.58 focused tests PASS. Output now uses an exact fixed directory so upload/download/independent verifier roots agree. Failed child stderr is no longer masked by a missing session path. CI41876805609 finalized SUCCESS at2226068. New source/run/packet required; no attempt3 reuse.

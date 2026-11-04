@@ -134,7 +134,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: candidate-native-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/tabwise-r2-candidate-*/
+          path: ${{ runner.temp }}/tabwise-r2-candidate/
           if-no-files-found: warn
           retention-days: 14
   candidate-verify:

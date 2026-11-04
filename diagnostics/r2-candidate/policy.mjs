@@ -7,12 +7,16 @@ import {R2_FILES} from '../../scripts/tabwise/r2-policy.mjs';
 import {QUALIFICATION_FILES,qualificationDigest} from '../../scripts/tabwise/qualification-policy.mjs';
 import {validateBinding} from '../../scripts/tabwise/r2-admission.mjs';
 import {parseUniqueJson} from '../../src/r2/strict-json.mjs';
+import {planR2EvidenceCaps} from '../../scripts/tabwise/r2-evidence.mjs';
 export const REF='refs/heads/feat/tabwise-r2-r7-product-completion';
 export const WORKFLOW='.github/workflows/tabwise-r2-native-diagnostic.yml';
 export const CLASSIFICATION='NONPRODUCTION_UNQUALIFIED';
 export const FIXTURE='fixtures/fernway/index.html';
 export const FIXTURE_SHA='5ad4631558cdcc557770ae864957ffc167546cd0af58bd11258808e1c0e523be';
 export const ACTIONS=Object.freeze(['Tab','Enter','Tab','Tab','Enter']);
+// Poll snapshots every100ms; recorder events and NVDA speech remain continuous.
+// Preserve action/ack/observation windows and the existing12MB evidence ceiling.
+const TIMING=Object.freeze({ackMs:1000,observationMs:1500,pollMs:100,timeoutMs:8000});
 export const SOURCE_FILES=Object.freeze([...new Set([...R2_FILES,...QUALIFICATION_FILES,WORKFLOW,FIXTURE,'diagnostics/r2-native/verify.mjs','diagnostics/r2-native/policy.mjs',
  'web/lib/server/candidate-run.mjs','web/lib/server/candidate-run-live.ts','web/app/api/candidate-runs/route.ts','web/app/api/candidate-runs/[id]/route.ts','web/test/candidate-run.test.mjs','web/test/candidate-run-database.test.mjs','supabase/migrations/20261104170315_candidate_native_runs.sql','supabase/tests/candidate_native_runs.sql',
  'web/lib/server/candidate-evidence.mjs','web/lib/server/candidate-evidence-live.ts','web/app/api/candidate-runs/[id]/evidence/route.ts','web/test/candidate-evidence.test.mjs','web/test/candidate-run.browser.mjs','web/components/CandidateRun.tsx','web/components/PrepareCandidate.tsx','web/components/SavedJourneyVersion.tsx','web/components/OwnedWorkspace.tsx','web/lib/site-navigation.mjs','web/app/api/workspace/route.ts','web/app/candidate-runs/[id]/page.tsx','web/app/candidate-runs/new/page.tsx','supabase/migrations/20261104172612_candidate_evidence_readback.sql',
@@ -28,6 +32,7 @@ function checked(request){
  return request;
 }
 export function prepareCandidateRequest({userId,run,specBytes,fixture,revision,sourceDigest:scope,sourceRoot=root}){
+ planR2EvidenceCaps({actions:ACTIONS.length,...TIMING});
  assertContract('run-spec',run?.spec);
  if(!uuid(userId)||run.user_id!==userId||run.id!==run.spec.run_id||!uuid(run.journey_version_id)||run.status!=='admitted')fail('owned admitted immutable version required');
  if(!(specBytes instanceof Uint8Array)||specBytes.length>60000||!same(parseUniqueJson(new TextDecoder('utf-8',{fatal:true}).decode(specBytes)),run.spec))fail('exact saved spec required');
@@ -36,7 +41,7 @@ export function prepareCandidateRequest({userId,run,specBytes,fixture,revision,s
  const body={schema:'tabwise-candidate-native-request/1',classification:CLASSIFICATION,repository:'ANIRUDDH-001/Tabwise',workflow:WORKFLOW,ref:REF,actor:'ANIRUDDH-001',revision,source_scope_sha256:scope,runtime_scope_sha256:qualificationDigest(sourceRoot),user_id:userId,product_run_id:run.id,journey_version_id:run.journey_version_id,spec_sha256:sha256(specBytes),fixture_sha256:FIXTURE_SHA,journey_id:run.spec.journey_id,variant:'broken',actions:[...ACTIONS],execution_authorized:false,production_qualified:false};
  return Object.freeze(checked({...body,request_sha256:sha256(stable(body))}));
 }
-export function candidatePlan(request){checked(request);return {schema:'tabwise-r2-plan/1',split:'development',spec:{ackMs:1000,observationMs:1500,pollMs:25,timeoutMs:8000},handleTimeoutMs:27000,focusWaitMs:1000,pages:[{id:'candidate-seat',fixture:'fernway/index.html',fixture_sha256:request.fixture_sha256,query:'?flow=seat&variant=broken',task:ACTIONS.map((press,n)=>({step:'step-'+(n+1),press}))}]};}
+export function candidatePlan(request){checked(request);return {schema:'tabwise-r2-plan/1',split:'development',spec:{...TIMING},handleTimeoutMs:27000,focusWaitMs:1000,pages:[{id:'candidate-seat',fixture:'fernway/index.html',fixture_sha256:request.fixture_sha256,query:'?flow=seat&variant=broken',task:ACTIONS.map((press,n)=>({step:'step-'+(n+1),press}))}]};}
 export function candidatePacket({request,githubRunId,issuedAt,expiresAt}){
  const r=checked(request);
  if(!/^[1-9][0-9]{0,19}$/.test(githubRunId??'')||!iso(issuedAt)||!iso(expiresAt)||Date.parse(expiresAt)<=Date.parse(issuedAt)||Date.parse(expiresAt)-Date.parse(issuedAt)>3600000)fail('bounded run authorization required');

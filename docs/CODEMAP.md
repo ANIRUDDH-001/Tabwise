@@ -212,3 +212,5 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 
 | `web/lib/server/candidate-evidence{,-live}.{mjs,ts}`, candidate evidence API, `CandidateRun`/`PrepareCandidate`, saved-version/workspace links; migration20261104172612 and browser/API/database controls | Authenticated GitHub archive/custody replay, private immutable candidate readback and explicitly unqualified timeline | Hosted genuine baseline/credentials pending; no production acceptance |
 | `docs/engineering/Candidate-vertical-slice-20261104.md`, `docs/evidence/candidate-vertical-slice-20261104/` | Original bootstrap/failure bytes, indexed local tests, native/source scope separation and exact external configuration actions | Candidate-only checkpoint, no native acceptance |
+
+| `docs/evidence/candidate-runtime-recovery-20261104/` | Original W5-consumed pre-capture budget refusal, clean process custody and red/green budget correction | run41876894297/2; no accepted native capture |
