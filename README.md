@@ -19,19 +19,28 @@ trace and report can be explored without credentials. Authenticated persistence,
 repair review and orchestration have server implementations and deterministic
 tests. They require the dedicated backend and appropriate permissions.
 
-Genuine NVDA observations exist in the archived diagnostic evidence. Those
-archives remain **NONQUALIFYING**, with their original synthetic/incomplete
-manifest classification. They are not product-owned qualified runs. The current
-native runtime metadata path, fresh product producer lifecycle, product ingestion and real
-repaired rerun still need source-bound native acceptance. The producer candidate
-preserves raw manifests and refuses without committed W5/source authority; its
-successful NVDA path has not been measured. Independent qualification authority
-is unavailable. R2, R3 and R7 are not declared complete.
+A genuine **product-owned nonproduction candidate flow has completed**: saved
+Fernway seat journey, NVDA baseline, real Meta diagnosis, exact human-approved
+patch, fresh native rerun, private original-archive readback and a deterministic
+**FIXED** engineering report. Final runs41895961948/2 and41897432880/2 both passed
+Windows native capture and a separate Linux verifier. Each retained25 observations.
+The comparison restored focus from body to the seat button while preserving the
+protected steps' observed focus and speech. Evidence class **MACHINE/L3**;
+model suggestion **MODEL/L1**.
 
-The ongoing integration is [draft PR #26](https://github.com/ANIRUDDH-001/Tabwise/pull/26)
-on `feat/tabwise-r2-r7-product-completion`. These instructions describe that
-development branch. Main and deployed production may differ. See the
-[review package](docs/engineering/Product-completion-review-20261104.md),
+Original raw manifests retain their synthetic class; the separate candidate
+wrapper is **NONPRODUCTION / UNQUALIFIED**. Nothing is promoted into production
+qualification. External independent qualification authority is unavailable, and
+R2, R3 and R7 are not declared complete against their full registered criteria.
+Native dispatch/authorization/import used the trusted operator adapter over the
+shipped candidate contracts; fully automatic browser dispatch is unfinished.
+
+The public UI is at [Tabwise](https://tabwise-meta.vercel.app/). The completed
+owner-only flow and exact evidence links are in the
+[demo instructions](docs/engineering/Tabwise-demo-readiness-20261104.md) and
+[byte-indexed evidence](docs/evidence/candidate-complete-20261104/index.json).
+PR26 is merged; [PR27](https://github.com/ANIRUDDH-001/Tabwise/pull/27) publishes
+the repair/report UI after its required CI. See the
 [current state](docs/ledger/STATE.md) and `/status` for explicit limits.
 
 ## Capabilities
@@ -48,8 +57,8 @@ development branch. Main and deployed production may differ. See the
   oracle. Missing or unqualified evidence must remain inconclusive.
 - Retain owned reports and regression history through the persistence layer.
 
-These are implemented surfaces and contracts, not a claim that the full live
-native-to-repair workflow has passed acceptance.
+The measured candidate flow above exercises these boundaries. General production
+qualification and fully automatic browser dispatch remain gated.
 
 ## Architecture
 
@@ -70,8 +79,9 @@ flowchart LR
   V --> DB
 ```
 
-The diagram describes the intended integrated flow. Qualification, fresh product
-native export/readback and genuine repair/rerun acceptance remain gated.
+The diagram describes the integrated boundaries. The nonproduction candidate flow
+has measured native export/readback and repair/rerun; production qualification
+and general automatic dispatch remain gated.
 
 | Location | Responsibility |
 | --- | --- |
