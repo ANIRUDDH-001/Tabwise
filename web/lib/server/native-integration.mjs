@@ -39,20 +39,24 @@ export async function reconcileNativeRun(run,row,api){
  if(isPreviewDeployment()||['completed','failed','cancelled','timed_out'].includes(run.status))return run;
  if(!row||row.user_id!==run.user_id||row.product_run_id!==run.id||row.request?.product_run_id!==run.id||row.request_sha256!==row.request.request_sha256)throw Error('native progress ownership/binding mismatch');
  if(!Number.isFinite(Date.parse(run.deadline_at)))throw Error('native progress deadline missing');
- let remote=null;
  if(row.github_run_id){
-  if(!['DISPATCH_ACCEPTED','RUN_BOUND'].includes(row.state)||run.gh_run_id!==row.github_run_id||run.gh_head_sha!==row.request.revision)throw Error('native progress association mismatch');
-  remote=await api.readRemote(row.github_run_id);
-  matchNativeProductRun(row.request,{...row.request,github_run_id:row.github_run_id},remote);
+  if(!['DISPATCH_ACCEPTED','RUN_BOUND'].includes(row.state)||!/^[1-9][0-9]{0,19}$/.test(row.github_run_id)||run.gh_run_id!==row.github_run_id||run.gh_head_sha!==row.request.revision)throw Error('native progress association mismatch');
  }
  if(Date.parse(run.deadline_at)<=Date.now()){
   let cancellationPending=false;
-  if(remote&&remote.status!=='completed')try{await api.cancel(row.github_run_id);}catch{cancellationPending=true;}
+  if(row.github_run_id)try{
+   const remote=await api.readRemote(row.github_run_id);
+   matchNativeProductRun(row.request,{...row.request,github_run_id:row.github_run_id},remote);
+   if(remote.status!=='completed')await api.cancel(row.github_run_id);
+  }catch{cancellationPending=true;}
   const reason=cancellationPending?'deadline_exceeded_cancel_pending':'deadline_exceeded';
   await api.transition(run.id,run.status,'timed_out',reason);
   return {...run,status:'timed_out',reason,evidence_status:'incomplete',cancellation_pending:cancellationPending};
  }
- if(!remote)return run; // Unknown POST outcomes never cause discovery or another send.
+ if(!row.github_run_id)return run; // Unknown POST outcomes never cause discovery or another send.
+ if(api.claim&&await api.claim(run.id)!==true)return run;
+ const remote=await api.readRemote(row.github_run_id);
+ matchNativeProductRun(row.request,{...row.request,github_run_id:row.github_run_id},remote);
  if(remote.status==='completed'&&remote.conclusion!=='success'){
   const status=remote.conclusion==='cancelled'?'cancelled':'failed',reason='native_worker_'+status;
   await api.transition(run.id,run.status,status,reason);

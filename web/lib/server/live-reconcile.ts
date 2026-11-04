@@ -16,6 +16,7 @@ export async function reconcileLive(run:Run){
  const {data:producer,error:producerError}=await db.from('run_producers').select('*').eq('product_run_id',run.id).maybeSingle();
  const lane=producerLane({run,record:producer,error:producerError,native:nativeRequest,nativeError});
  if(lane==='native-r2'&&nativeRequest)return reconcileNativeRun(run,nativeRequest,{
+  claim:async(id:string)=>{const {data,error}=await db.rpc('claim_reconcile',{p_run:id});return !error&&data===true;},
   readRemote:async(id:string)=>(await github(`/actions/runs/${id}`)).data,
   transition:async(id:string,from:string,to:string,reason:string|null)=>{const {error}=await db.rpc('run_transition',{p_id:id,p_from:from,p_to:to,p_reason:reason});if(error)throw new HttpError(409,'run_state_changed');},
   cancel:async(id:string)=>{await github(`/actions/runs/${id}/cancel`,{method:'POST'});}
