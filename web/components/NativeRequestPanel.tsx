@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useState} from 'react';
 type View={state:string|null,message:string,request_sha256?:string,github_run_id?:string|null,native_qualified:false,can_dispatch:boolean,can_ingest?:boolean,can_prepare?:boolean};
-export default function NativeRequestPanel({id}:{id:string}){
+export default function NativeRequestPanel({id,runStatus}:{id:string,runStatus?:string}){
  const [view,setView]=useState<View|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[refresh,setRefresh]=useState(0);
  useEffect(()=>{
   setView(null);
@@ -9,9 +9,9 @@ export default function NativeRequestPanel({id}:{id:string}){
   fetch(`/api/runs/${encodeURIComponent(id)}/native-request`,{cache:'no-store',signal:controller.signal}).then(async r=>{
    if(!r.ok)throw Error(r.status===401?'Sign in to view this request.':'Native request tracking is awaiting server setup.');
    return r.json();
-  }).then(v=>{setView(v);setError('');}).catch(e=>{if(!controller.signal.aborted)setError(e.message);});
+  }).then(v=>{if(!controller.signal.aborted){setView(v);setError('');}}).catch(e=>{if(!controller.signal.aborted)setError(e.message);});
   return()=>controller.abort();
- },[id,refresh]);
+ },[id,refresh,runStatus]);
  const act=async(action:'native-request'|'native-dispatch'|'native-ingest')=>{
   setBusy(true);setError('');
   try{

@@ -27,3 +27,13 @@ test('native request actions follow server capabilities and failed ingestion pre
   await expect(page.getByRole('button',{name:'Retrieve and check evidence',exact:true})).toHaveCount(0);
  }finally{await browser.close();}
 });
+test('native evidence action updates when live run status changes without manual refresh',async()=>{
+ const browser=await chromium.launch({headless:true});let status='dispatched',reads=0;
+ try{const page=await browser.newPage();await page.route('**/*',route=>new URL(route.request().url()).origin===base?route.continue():route.abort());
+ await page.route(`**/api/runs/${id}`,route=>route.fulfill({json:{run_id:id,status,stages:[],patches:[],evidence_status:'pending'}}));
+ await page.route(`**/api/runs/${id}/evidence*`,route=>route.fulfill({json:{events:[],references:[],evidence_status:'pending'}}));
+ await page.route(`**/api/runs/${id}/native-request`,route=>{reads++;return route.fulfill({json:{state:'RUN_BOUND',message:'Synthetic bound worker',can_dispatch:false,can_ingest:status==='uploading',native_qualified:false}});});
+ await page.goto(base+'/runs/'+id);await expect(page.getByText('Synthetic bound worker',{exact:true})).toBeVisible();assert.equal(reads,1);await expect(page.getByRole('button',{name:'Retrieve and check evidence',exact:true})).toHaveCount(0);
+ status='uploading';await expect(page.getByRole('button',{name:'Retrieve and check evidence',exact:true})).toBeVisible({timeout:12000});assert.equal(reads,2);
+ }finally{await browser.close();}
+});
