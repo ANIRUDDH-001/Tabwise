@@ -22,6 +22,8 @@ try {
  try { $digest=[BitConverter]::ToString($hash.ComputeHash([Text.Encoding]::UTF8.GetBytes($path))).Replace('-','').ToLowerInvariant() } finally { $hash.Dispose() }
  Mark 'path-hash'
  if($p.HasExited){exit 21}
+ Mark 'process-live'
+ Mark 'serialization-start'
  [Console]::Out.WriteLine((@{pid=$ProcessId;created=$created;path_sha256=$digest}|ConvertTo-Json -Compress))
  Mark 'output'
 } catch { exit $failure } finally { if($p){$p.Dispose()} }
