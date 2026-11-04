@@ -24,6 +24,8 @@ try {
  if($p.HasExited){exit 21}
  Mark 'process-live'
  Mark 'serialization-start'
- [Console]::Out.WriteLine((@{pid=$ProcessId;created=$created;path_sha256=$digest}|ConvertTo-Json -Compress))
+ # All values are typed decimal integers or computed lowercase hex, so no string escaping
+ # or cmdlet/module autoload is needed. Keep the exact three-field identity contract.
+ [Console]::Out.WriteLine(('{"pid":'+$ProcessId+',"created":"'+$created+'","path_sha256":"'+$digest+'"}'))
  Mark 'output'
 } catch { exit $failure } finally { if($p){$p.Dispose()} }

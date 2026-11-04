@@ -1,8 +1,9 @@
-# STATE — autonomous R2 recovery, Phase A timing probe
+# STATE — autonomous R2 recovery, Phase A serialization fix
 - Owner authorizes sole-agent R2 edits, commits/push, source/run-bound hosted execution; incremental ₹0.
-- Historical run41794287237 fails first processIdentity at5056ms; local13/13 PASS.
-- Added bounded cold/warm identity stage probe before unchanged qualification gate. No timeout or identity guarantee changed.
-- MEASURED focused82/82 PASS; local stage probe cold390ms,warm359ms; diff check PASS.
-- Next: publish reviewed instrumentation; hosted cold measurement; fix measured cause; startup then genuine journey/evidence.
-- Blocked: actual hosted timing/native qualification not yet obtained.
-- Handoff: sole writer; preserve frozen R1 and existing gates; no R3/R7 promotion.
+- MEASURED run41795725412: process-live1976ms; serialization-start1976ms; no output before25027ms timeout/close.
+- Fixed three-field decimal/hex serialization without ConvertTo-Json module dependency. All identity checks/deadlines retained.
+- RED regression: overriding ConvertTo-Json fails old helper; GREEN135/135 focused checks incl real identity14/14.
+- Earlier root1190/1190 PASS; frozen R1/diff PASS; local cold292ms,warm286ms.
+- Next: fresh hosted offline review/packet, exact authorized attempt2 startup, then real guarded journey.
+- Blocked: actual hosted fixed source/native acceptance not yet obtained.
+- Handoff: preserve production qualification/signature gates, no R3/R7 promotion.
