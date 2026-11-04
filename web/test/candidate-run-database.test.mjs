@@ -2,6 +2,8 @@ import {test} from 'node:test';import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';import {readFileSync} from 'node:fs';
 import {randomUUID,randomInt} from 'node:crypto';
 import {candidateRunStore,createCandidateRunHandler,dispatchCandidate} from '../lib/server/candidate-run.mjs';
+import {stable} from '../../packages/contracts/r2-product.mjs';
+import {sha256} from '../../packages/contracts/index.mjs';
 import {sourceDigest,prepareCandidateRequest} from '../../diagnostics/r2-candidate/policy.mjs';
 const enabled=process.env.TABWISE_CANDIDATE_LOCAL_DB==='g2local',user=randomUUID(),version=randomUUID();
 const quote=v=>v===null?'null':"'"+String(typeof v==='object'?JSON.stringify(v):v).replaceAll("'","''")+"'";
@@ -26,5 +28,15 @@ test('candidate API persists owned immutable source; uncertain dispatch cannot r
  const ghId=String(randomInt(100000000,1000000000));await store.transition(user,id,saved.request_sha256,'accepted',ghId);
  await assert.rejects(store.transition(user,id,saved.request_sha256,'accepted',String(Number(ghId)+1)));
  assert.equal((await store.read(user,id)).github_run_id,ghId);
- await store.transition(user,id,saved.request_sha256,'failed');
+ const finish=args=>client.rpc('finish_candidate_native_evidence',args);
+ const incomplete={p_user:user,p_run:id,p_request_sha:saved.request_sha256,p_gh_run_id:ghId,p_readback:{production_qualified:true},p_sha:'a'.repeat(64)};
+ assert.ok((await finish(incomplete)).error,'production-labelled or incomplete candidate readback must be refused');
+ // Synthetic SQL metadata only. No native evidence or real product result.
+ const synthetic={schema:'tabwise-candidate-stored-evidence/1',classification:'NONPRODUCTION_UNQUALIFIED',production_qualified:false,native_interaction_pass:true,product_run_id:id,request_sha256:saved.request_sha256,github_run_id:ghId,revision:saved.request.revision,run_manifest_sha256:'a'.repeat(64),runtime:{schema:'tabwise-native-runtime/2'},rows:[{synthetic_test:true}],archives:{native:{id:'1',sha256:'b'.repeat(64)},readback:{id:'2',sha256:'c'.repeat(64)}}};
+ const args={...incomplete,p_readback:synthetic,p_sha:sha256(stable(synthetic))};
+ assert.ok((await finish({...args,p_user:version})).error,'foreign readback refused');
+ const complete=await finish(args);assert.equal(complete.data?.state,'EVIDENCE_READY');
+ assert.equal((await finish(args)).data?.readback_sha256,args.p_sha);
+ assert.ok((await finish({...args,p_sha:'f'.repeat(64)})).error,'completed evidence cannot be replaced');
+ await assert.rejects(store.transition(user,id,saved.request_sha256,'failed'));
 });

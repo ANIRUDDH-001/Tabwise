@@ -1,0 +1,11 @@
+✔ candidate desktop/mobile timeline retains qualification boundary and original references (1954.9256ms)
+✔ candidate preparation reuses its saved idempotency key after interrupted response (595.7899ms)
+✔ owned saved version leads to candidate preparation and a resumable workspace link (774.6376ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3791.7722

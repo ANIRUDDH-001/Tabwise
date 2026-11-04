@@ -126,3 +126,6 @@ New candidate-only policy, runner, durable built-in SQLite W5 adapter, offline v
 
 ## 2026-11-04T17:15:46Z — owned candidate persistence
 New isolated candidate table/RLS/service RPCs, API adapter/routes and local PostgreSQL integration tests authored during event. Existing immutable journey/version, original Fernway, native dispatch uncertainty mechanism and raw source packaging reused. No dependency install or external dataset. Context7 official Supabase privileges/functions docs consulted. Migration applied only after isolated SQL/API/database tests passed; hosted RLS and denied anonymous/browser writes rechecked.
+
+## 2026-11-04T17:48:05Z — candidate original-evidence readback and UI
+New candidate-only archive association/replay adapter, immutable completion RPC, content-addressed private original staging, authenticated readback and candidate preparation/timeline/workspace UI authored during event. Reuses existing ZIP parser, raw R2 verifier, native projection/runtime validator, private evidence bucket, journey versions and UI classes. No third-party code, dependency install or dataset. Synthetic browser/SQL fixtures are labelled and cannot establish native acceptance. Full14-migration/9-SQL clean PostgreSQL check and local API/repair regressions passed. New original ZIP/failure/test artifacts retained with byte hashes.

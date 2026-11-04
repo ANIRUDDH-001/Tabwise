@@ -1,0 +1,31 @@
+{
+  "request": {
+    "schema": "tabwise-candidate-native-request/1",
+    "classification": "NONPRODUCTION_UNQUALIFIED",
+    "repository": "ANIRUDDH-001/Tabwise",
+    "workflow": ".github/workflows/tabwise-r2-native-diagnostic.yml",
+    "ref": "refs/heads/feat/tabwise-r2-r7-product-completion",
+    "actor": "ANIRUDDH-001",
+    "revision": "2226068588e63bca52b086c6c372d20b951f6856",
+    "source_scope_sha256": "d788f21049d117cb1c34525e9dfbed29514e632e352af885b8218e22ab42c9f0",
+    "runtime_scope_sha256": "1a2991eb6c4bc42ffef5fbc1060d89dd8dc136c456211eddcf8dacf459ddd672",
+    "user_id": "6198bfc5-5937-46d9-8eac-9b7599cbee52",
+    "product_run_id": "8c8528de-c0a4-4024-beea-a3baa9bd9684",
+    "journey_version_id": "1ee1aac3-0a08-49bd-8661-533ba7e6fe54",
+    "spec_sha256": "282d3336a5e88ee3bfc4dd6dbf24c4615a6d741313ac6fcd84a3217f73637df7",
+    "fixture_sha256": "5ad4631558cdcc557770ae864957ffc167546cd0af58bd11258808e1c0e523be",
+    "journey_id": "fernway-seat",
+    "variant": "broken",
+    "actions": [
+      "Tab",
+      "Enter",
+      "Tab",
+      "Tab",
+      "Enter"
+    ],
+    "execution_authorized": false,
+    "production_qualified": false,
+    "request_sha256": "55ff13822a8e60b82d7adaf2bf6fa522394a1680d4df8cb41967e460a7faa1ae"
+  },
+  "spec_text": "{\"steps\":[{\"key\":\"Tab\",\"step\":1,\"text\":null,\"checkpoint\":true},{\"key\":\"Enter\",\"step\":2,\"text\":null,\"checkpoint\":true},{\"key\":\"Tab\",\"step\":3,\"text\":null,\"checkpoint\":true},{\"key\":\"Tab\",\"step\":4,\"text\":null,\"checkpoint\":true},{\"key\":\"Enter\",\"step\":5,\"text\":null,\"checkpoint\":true}],\"run_id\":\"8c8528de-c0a4-4024-beea-a3baa9bd9684\",\"variant\":\"broken\",\"version\":\"0.1.0\",\"app_hash\":\"5ad4631558cdcc557770ae864957ffc167546cd0af58bd11258808e1c0e523be\",\"journey_id\":\"fernway-seat\"}"
+}

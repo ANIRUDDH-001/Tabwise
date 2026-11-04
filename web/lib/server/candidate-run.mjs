@@ -5,6 +5,10 @@ import {parseUniqueJson} from '../../../src/r2/strict-json.mjs';
 const uuid=v=>typeof v==='string'&&/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(v);
 const REF='refs/heads/feat/tabwise-r2-r7-product-completion',CLASSIFICATION='NONPRODUCTION_UNQUALIFIED';
 const shape=row=>row?{...row,request_sha256:row.request?.request_sha256??null}:null;
+export function candidateWorkspaceViews(rows,userId){
+ if(!userId||!Array.isArray(rows)||rows.length>25||rows.some(r=>r.user_id!==userId||r.classification!==CLASSIFICATION||r.production_qualified!==false))throw Error('candidate workspace ownership/classification');
+ return rows.map(({product_run_id,journey_version_id,state,created_at})=>({product_run_id,journey_version_id,state,created_at,classification:CLASSIFICATION,production_qualified:false}));
+}
 export function candidateRunView(row){
  return {product_run_id:row.product_run_id,journey_version_id:row.journey_version_id,state:row.state,classification:CLASSIFICATION,production_qualified:false,github_run_id:row.github_run_id??null,request_sha256:row.request?.request_sha256??null,native_observations_available:row.state==='EVIDENCE_READY'&&row.readback?.native_interaction_pass===true};
 }
@@ -45,7 +49,7 @@ export function createCandidateRunHandler({authenticate,configuration,store,cont
   const specText=JSON.stringify(saved.spec),source=await context(c);
   const prepared=source.prepareCandidateRequest({...source,userId:user.id,run,specBytes:Buffer.from(specText)});
   return reply(201,candidateRunView(await store.prepare(user.id,saved.product_run_id,prepared,specText)));
- }catch(error){if(error.status===401)return reply(401,{reason:'sign_in_required'});return reply(409,{reason:'candidate_request_conflict'});}
+ }catch(error){if(error.status===401)return reply(401,{reason:'sign_in_required'});if(error.status===503&&['sign_in_configuration_pending','server_configuration_pending'].includes(error.reason))return reply(503,{reason:error.reason});return reply(409,{reason:'candidate_request_conflict'});}
 };}
 export async function dispatchCandidate({userId,runId,requestSha256,store,send}){
  // Reuse the existing durable intent/unknown-outcome mechanism. Candidate SQL

@@ -56,7 +56,7 @@ export function sectionFor(pathname){
  if(parts[0]==='w'&&parts[1]==='demo')return 'demo';
  if(parts[0]==='w'&&parts[1]==='me')return 'workspace';
  if(parts[0]==='runs'&&parts[1])return UUID.test(parts[1])?'workspace':'demo';
- if(parts[0]==='patches'||parts[0]==='verifications')return 'workspace';
+   if(parts[0]==='patches'||parts[0]==='verifications'||parts[0]==='candidate-runs')return 'workspace';
  if(parts[0]==='journeys'&&parts[1]==='versions')return 'workspace';
  if(parts[0]==='journeys'||parts[0]==='r'||parts[0]==='apps')return 'demo';
  if(parts[0]==='auth')return 'workspace';
