@@ -723,3 +723,6 @@ User authorization: "You are explicitly authorized to inspect and modify files, 
 User boundary: "No Claude or other agents." / "No Meta Model API requests."
 Consequence: continue the existing two-parent merge; zero paid calls; local dependency reuse; preserve diagnostic worktree and blocked qualification. Normal PR publication authorized; merging requires the stated local/remote/safety/protection gates. This current instruction supersedes earlier user-only Git and cross-tool execution requirements for this task; it grants no R7 qualification.
 Tooling: Context7 ctx7 0.9.0 ran via the user-prescribed npx command in npm cache only; no repository manifest or lock changed.
+
+## F-03 owner continuation: immutable native plan delivery
+User: "After the R2 runtime implementation stabilizes, continue the unfinished product source integration." Scope: new immutable external-plan module/tests, disabled delivery adapter and handoff; existing demo retained. $0, no hosted/native/paid action. Acceptance: targeted plan/W5/delivery tests; web/root/contracts/routes/PostgreSQL/browser/build. Separate local commit from runtime.

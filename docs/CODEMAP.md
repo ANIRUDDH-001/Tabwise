@@ -171,3 +171,5 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 
 | `src/r2/workflow-delivery.mjs`, `scripts/tabwise/product-windows-boundary.mjs` | Disabled native-product delivery revalidation and forensic export package persistence; no input/qualification authority | verifyWindowsDelivery, persistExportPackage, CLI verify/export | web/test/workflow-delivery.test.mjs |
 | `docs/engineering/Final-sprint-*.md`, `tabwise-r2.product-proposal.yml` | Measured sprint/operational/demo handoff and unapplied workflow source | F-03 | exact proposal diff check |
+
+| `src/r2/native-plan.mjs`, `web/test/native-plan-materialization.test.mjs` | Exclusive external per-request plan/fixture delivery, independently signed W5 and exact request admission, byte checks and completion-last inventory; disabled native routing | `materializeNativePlan`, `readNativePlan`; Windows delivery adapter accepts explicit admitted source |

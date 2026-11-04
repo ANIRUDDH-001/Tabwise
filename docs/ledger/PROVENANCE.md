@@ -94,3 +94,6 @@ G2 local checkpoint: owned request schema/RPCs, API/UI, signed-worker binding an
 
 ## F-03 accelerated integration new work — 2026-11-03T18:47:25Z
 Owned synthetic fixtures/replay only: explicit producer custody, disabled native dispatch/binding/ingestion, generated in-process RSA test keys, local PostgreSQL provider and original pinned Fernway source reused under their existing provenance entries. No external dataset or dependency added; no new third-party license is imported. Local same-run repair replay and G1 candidate census are engineering tests, not withheld/native evidence.
+
+## 2026-11-04T05:23:05Z Product native-plan continuation
+New immutable plan delivery, independent signed request-admission verification and synthetic signing/negative fixtures authored during event. Existing owned Fernway and PostgreSQL/Chromium fixtures reused; no new dependency/dataset/license or install. Synthetic signatures and provider replay never represent native acceptance.

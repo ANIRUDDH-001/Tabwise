@@ -685,3 +685,6 @@ Acceptance: serial root suite, ordinary classified suite, web/contracts, typeche
 Cost ceiling: $0 paid services; no model calls, new runtime dependencies, native input, deployments, hosted database changes or other agents. Preserve all historical STATE records.
 Measured local outcome: root1189 PASS/3 DB skips (PG3 PASS separately); web128/contracts21/browser16 PASS; ordinary63 files/1122 tests PASS with13 excluded files explicitly reported; SQL8/migrations9x2 PASS; types/build/R1/preflight PASS.
 Publication conditional: remote main9bb994c is an ancestor; GitHub currently reports main unprotected and no active branch rules. Do not change protection or bypass the requested protected-merge gate.
+
+## F-03 owner continuation: immutable native plan delivery
+User: "After the R2 runtime implementation stabilizes, continue the unfinished product source integration." Scope: new immutable external-plan module/tests, disabled delivery adapter and handoff; existing demo retained. $0, no hosted/native/paid action. Acceptance: targeted plan/W5/delivery tests; web/root/contracts/routes/PostgreSQL/browser/build. Separate local commit from runtime.

@@ -1,16 +1,18 @@
 // Delivery and persistence only; never grants W5 admission or independent native qualification.
+import {readNativePlan} from './native-plan.mjs';
 import {validateProductDelivery} from './product-delivery.mjs';
 import {sha256,LIMITS} from '../../packages/contracts/index.mjs';
 import {safePath} from '../../packages/contracts/r2-product.mjs';
 import {mkdirSync,writeFileSync,readFileSync,lstatSync,readdirSync} from 'node:fs';
 import {dirname,join} from 'node:path';
-export function verifyWindowsDelivery({delivery,github,sourceDigest,qualificationDigest,requestSha256,productRunId,read}){
+export function verifyWindowsDelivery({delivery,github,sourceDigest,qualificationDigest,requestSha256,productRunId,read,planAdmission}){
  const d=validateProductDelivery(delivery),r=d.request,g=github;
  if(g?.workflow!==r.workflow||g.ref!=='refs/heads/main'||g.revision!==r.revision||g.actor!==r.actor||g.triggeringActor!==r.actor||g.attempt!==1||!/^[1-9][0-9]{0,19}$/.test(g.runId??''))throw Error('Windows workflow identity mismatch');
  if(sourceDigest!==r.r2_source_sha256||qualificationDigest!==r.qualification_sha256||requestSha256!==r.request_sha256||productRunId!==r.product_run_id)throw Error('Windows source/request inventory mismatch');
- const disk=read(r),plan=Buffer.from(d.plan_text),fixture=Buffer.from(d.fixture_text);
+ const admitted=planAdmission?readNativePlan({...planAdmission,delivery:d,githubRunId:g.runId}):null;
+ const disk=admitted?{plan:readFileSync(admitted.planPath),fixture:readFileSync(admitted.fixturePath)}:read(r),plan=Buffer.from(d.plan_text),fixture=Buffer.from(d.fixture_text);
  if(!(disk?.plan instanceof Uint8Array)||!(disk?.fixture instanceof Uint8Array)||!plan.equals(Buffer.from(disk.plan))||!fixture.equals(Buffer.from(disk.fixture)))throw Error('Windows committed plan/fixture mismatch');
- return {...d,github_run_id:g.runId,github_run_attempt:1,input_authorized:false,native_qualified:false};
+ return {...d,...(admitted?{native_plan:admitted}:{}),github_run_id:g.runId,github_run_attempt:1,input_authorized:false,native_qualified:false};
 }
 export function persistExportPackage({outputDir,files,write=writeFileSync}){
  let total=0;const paths=new Set();
