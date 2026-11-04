@@ -39,9 +39,25 @@ The public UI is at [Tabwise](https://tabwise-meta.vercel.app/). The completed
 owner-only flow and exact evidence links are in the
 [demo instructions](docs/engineering/Tabwise-demo-readiness-20261104.md) and
 [byte-indexed evidence](docs/evidence/candidate-complete-20261104/index.json).
-PR26 is merged; [PR27](https://github.com/ANIRUDDH-001/Tabwise/pull/27) publishes
-the repair/report UI after its required CI. See the
+PR26 and [PR27](https://github.com/ANIRUDDH-001/Tabwise/pull/27) are merged.
+The deployment dependency correction and isolated-package regression are in
+[PR28](https://github.com/ANIRUDDH-001/Tabwise/pull/28). See the
 [current state](docs/ledger/STATE.md) and `/status` for explicit limits.
+
+### Record the measured flow
+
+Sign in with the existing project owner account and open the
+[genuine baseline](https://tabwise-meta.vercel.app/candidate-runs/e2bf14b6-55c0-4653-af87-3a3ba2d9abe5).
+Show the observed speech/focus and approved patch, then choose **Open approved
+repair rerun** to reach the
+[repaired capture and FIXED report](https://tabwise-meta.vercel.app/candidate-runs/8b77652c-bee8-45d2-b72d-2d40cb960a73).
+These are private owner records. Use the completed captures for recording;
+reopening the approved repair recovers the same run instead of allocating another.
+
+One actual Muse Spark1.3 call used **$0.01522975 promotional credit, ₹0 paid**.
+No fresh model or native execution is needed to inspect this recorded flow.
+The full sources, hashes, cost excerpt and qualification limits are in the
+[submission evidence index](docs/evidence/candidate-complete-20261104/index.json).
 
 ## Capabilities
 
