@@ -779,3 +779,14 @@ Consequence: independently confirmed run41818741025 success atdc41656, nine prof
 ## 2026-11-04T12:29:57Z — autonomous full-product engineering resumed
 User: "MODE: CONTINUE EXECUTION — NOT PLANNING OR STANDBY"; "NO SUBAGENTS. NO DELEGATION. NO REPEATED ROUTINE APPROVAL QUESTIONS."; "Use the existing integration branch."; "Implement a new source-bound product producer path"; "Only use confirmed eligible promotional/free credits."; "Incremental paid charges must remain ₹0."; "Do not merge into main without the final owner approval."; "Add MIT licensing and the complete README before final review."
 Consequence: continue source, tests, commits/push and controlled Preview/hosted validation on PR26; maintain 20-call durable ceiling and absent independent authority. No final merge, production activation, invented qualification or signing identity. Latest existing hosted CI41825434220 independently confirmed SUCCESS atd194721.
+
+## 2026-11-04T13:25:13Z — team and MIT attribution
+User answer to the copyright-holder question:
+> Team: Works on My Machine
+> Project: Tabwise
+> Tagline: “We finally tested it on yours, too.”
+> Team members:
+> - Aniruddh Vijayvargia
+> - Prachi Agarwalla
+
+Consequence: name both contributors in the original-material MIT license and credit their team/tagline in README. Preserve third-party notices and scope; no assignment of third-party rights to the team is implied.
