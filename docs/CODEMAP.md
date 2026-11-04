@@ -168,3 +168,6 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 | `src/r2/product-{delivery,workflow-export}.mjs`, `scripts/tabwise/product-workflow-boundary.mjs` | Disabled exact source delivery and unsigned exporter / trusted-job adapter; no input authority | product-delivery.test.mjs |
 | `web/lib/server/verification-directory.mjs`, native_claim_recovery migration | Finally scratch cleanup, durable refusal retention and transactional claim recovery | native-readiness/native-recovery-database tests |
 | `docs/engineering/Native-workflow-readiness.md`, native-workflow-permission-proposal.patch | Remaining source/permission boundaries and unapplied exact trusted-job proposal | no workflow activation |
+
+| `src/r2/workflow-delivery.mjs`, `scripts/tabwise/product-windows-boundary.mjs` | Disabled native-product delivery revalidation and forensic export package persistence; no input/qualification authority | verifyWindowsDelivery, persistExportPackage, CLI verify/export | web/test/workflow-delivery.test.mjs |
+| `docs/engineering/Final-sprint-*.md`, `tabwise-r2.product-proposal.yml` | Measured sprint/operational/demo handoff and unapplied workflow source | F-03 | exact proposal diff check |

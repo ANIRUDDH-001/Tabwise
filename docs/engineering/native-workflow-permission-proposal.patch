@@ -59,3 +59,49 @@
      runs-on: windows-2025
      timeout-minutes: 60
      permissions:
+@@ -60,6 +102,9 @@
+       verified: ${{ steps.verify.outputs.verified }}
+       run_manifest_sha256: ${{ steps.verify.outputs.run_manifest_sha256 }}
+     env:
++      TABWISE_PRODUCT_BOUND: ${{ inputs.product_bound }}
++      PRODUCT_RUN_ID: ${{ inputs.product_run_id }}
++      PRODUCT_REQUEST_SHA256: ${{ inputs.product_request_sha256 }}
+       TABWISE_R2_APPROVED_REVISION: ${{ inputs.approved_revision }}
+       TABWISE_R2_OWNER_APPROVAL: ${{ inputs.owner_approval }}
+       TABWISE_R2_PLAN_SHA256: ${{ inputs.plan_sha256 }}
+@@ -83,6 +128,16 @@
+           if ($env:TABWISE_R2_OWNER_APPROVAL -cnotmatch '^D-[0-9]+\z') { throw 'owner_approval must be D-n' }
+           if ($env:TABWISE_R2_PLAN_SHA256 -cnotmatch '^[0-9a-f]{64}\z') { throw 'plan_sha256 must be 64 lowercase hex' }
+           if ($env:TABWISE_R2_PLAN_PATH -cnotmatch '^fixtures/r2/plans/[a-z][a-z0-9-]{0,63}\.json\z') { throw 'plan_path outside fixtures/r2/plans' }
++      - name: Download immutable product delivery
++        if: inputs.product_bound
++        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
++        with:
++          name: tabwise-product-delivery-${{ github.run_id }}-1
++          path: ${{ runner.temp }}/tabwise-product-delivery
++          digest-mismatch: error
++      - name: Revalidate product delivery on Windows before native setup
++        if: inputs.product_bound
++        run: node scripts/tabwise/product-windows-boundary.mjs verify
+       - name: Install dependencies from the lockfile (no install scripts)
+         run: npm ci --ignore-scripts
+       - name: Prepare the VM for screen-reader automation (Guidepup)
+@@ -172,6 +227,18 @@
+           if ($v.schema -isnot [string] -or $v.schema -cne 'tabwise-r2-verify/1' -or $v.ok -isnot [bool] -or -not $v.ok -or $v.complete -isnot [bool] -or -not $v.complete -or $v.run_manifest_sha256 -isnot [string] -or $v.run_manifest_sha256 -cnotmatch '^[0-9a-f]{64}\z') { throw 'verification output refused' }
+           "verified=true" >> $env:GITHUB_OUTPUT
+           "run_manifest_sha256=$($v.run_manifest_sha256)" >> $env:GITHUB_OUTPUT
++      # This export remains fail-closed while sealed native runtime/provenance is absent.
++      - name: Build product candidate from sealed capture only
++        if: inputs.product_bound && steps.verify.outputs.verified == 'true'
++        run: node scripts/tabwise/product-windows-boundary.mjs export
++      - name: Preserve product export candidate and partial-write forensics
++        if: always() && inputs.product_bound
++        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
++        with:
++          name: tabwise-r2-product-candidate-${{ github.run_id }}-1
++          path: ${{ runner.temp }}/tabwise-product-export/
++          if-no-files-found: warn
++          retention-days: 30
+       - name: Upload sealed run evidence
+         if: always()
+         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
