@@ -1,5 +1,14 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
 import * as evidence from '../lib/server/candidate-evidence.mjs';
+import {sha256} from '../../packages/contracts/index.mjs';
+test('original archive bytes roundtrip through the existing JSON-only private bucket',()=>{
+ assert.equal(typeof evidence.encodeCandidateArchive,'function');assert.equal(typeof evidence.decodeCandidateArchive,'function');
+ const bytes=Buffer.from([0,255,13,10,80,75,3,4]),expected={id:'123',sha256:sha256(bytes),bytes:bytes.length};
+ const wrapped=evidence.encodeCandidateArchive(bytes,expected);assert.deepEqual(evidence.decodeCandidateArchive(wrapped,expected),bytes);
+ for(const edit of [v=>v.data='AA==',v=>v.sha256='f'.repeat(64),v=>v.original_artifact_id='124',v=>v.encoding='raw',v=>v.extra=true]){const body=JSON.parse(wrapped);edit(body);assert.throws(()=>evidence.decodeCandidateArchive(Buffer.from(JSON.stringify(body)),expected));}
+ assert.throws(()=>evidence.decodeCandidateArchive(wrapped,{...expected,bytes:bytes.length+1}));
+ assert.throws(()=>evidence.encodeCandidateArchive(Buffer.alloc(3000001),{id:'123',sha256:sha256(Buffer.alloc(3000001)),bytes:3000001}));
+});
 const row={user_id:'owner',product_run_id:'product',state:'RUN_BOUND',github_run_id:'123',request:{repository:'ANIRUDDH-001/Tabwise',workflow:'.github/workflows/tabwise-r2-native-diagnostic.yml',ref:'refs/heads/feat/tabwise-r2-r7-product-completion',revision:'a'.repeat(40),actor:'ANIRUDDH-001'}};
 const remote={id:123,status:'completed',conclusion:'success',event:'workflow_dispatch',head_branch:'feat/tabwise-r2-r7-product-completion',head_sha:'a'.repeat(40),path:row.request.workflow,run_attempt:2,actor:{login:'ANIRUDDH-001'},triggering_actor:{login:'ANIRUDDH-001'},repository:{full_name:'ANIRUDDH-001/Tabwise'}};
 const jobs=['candidate-native','candidate-verify'].map(name=>({name,status:'completed',conclusion:'success',run_attempt:2}));

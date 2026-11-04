@@ -1,25 +1,21 @@
-# STATE — candidate implementation validated; native attempt pending
-Updated: 2026-11-04T17:53:13Z
-- Current worktree D:/Projects/Meta AI/tabwise-product-continuation; branch feat/tabwise-r2-r7-product-completion; draft PR26.
-- Published runner a6d4dc6, owned persistence bf24b41, measured setup-order fix2226068. Current import/UI changes validated and ready to publish.
-- Candidate-only W5 attempt2 and original guarded native/custody integration implemented; production remains attempt1/BLOCK.
-- First owned run41875985195/2 failed frozen-integrity preflight before installed dependency bytes existed. Fixed locked-install ordering with RED/GREEN; no integrity gate weakened.
-- Failed candidatef5762254 is terminal FAILED; its approval removed. No attempt3 reuse.
-- Current candidate8c8528de-c0a4-4024-beea-a3baa9bd9684; owner6198bfc5-5937-46d9-8eac-9b7599cbee52; seat version1ee1aac3-0a08-49bd-8661-533ba7e6fe54.
-- Request55ff13822a8e60b82d7adaf2bf6fa522394a1680d4df8cb41967e460a7faa1ae durably RUN_BOUND to41876894297/source2226068588e63bca52b086c6c372d20b951f6856.
-- Run41876894297/2 completed FAIL_BEFORE_CAPTURE: evidence budget17946720>12000000. Original archive13348208012 verified; W5 consumption1, clean custody.
-- Candidate8c8528de terminal FAILED; approval removed. New run required. Poll100 plan9479520 bytes prechecked before consumption; unchanged12MB cap/all observation windows.
-- Frozen original source read-only worktree D:/Projects/Meta AI/tabwise-candidate-source-2226068 (133 files); later candidate source147 files is separate.
-- Candidate import/readback and prepare/timeline/workspace UI implemented; complete raw replay and original GitHub digests required; no production evidence writer/qualification used.
-- Candidate migrations20261104170315 and20261104172612 applied; RLS/browser-write denial/service-only finish verified. Hosted accepted count0.
-- Local candidate-local-20261104T174805Z: focused58 PASS; web364 PASS/4 opt-in skips; synthetic browser3 PASS; clean PostgreSQL14 migrations/9 SQL + native/candidate/repair integrations PASS.
-- Build/types and all147 raw source paths on3 candidate API routes PASS; frozen R1 PASS; diff check PASS.
-- CI41876805609/source2226068 SUCCESS finalized. Earlier41873849745 cancelled, not test failure.
-- Preview branch nonsecret candidate enabled/user/ref configured. Sensitive SUPABASE_SERVICE_ROLE_KEY and GH_PAT unavailable in Preview; production-only key cannot be retrieved.
-- Exact required credential action and evidence limits: docs/engineering/Candidate-vertical-slice-20261104.md. No protected hosted auth/API/storage success claimed.
-- Next: publish tested budget/root/failure-report correction with validated import/UI checkpointdc7e530; fresh candidate/request/bootstrap/native run. Then actual stored timeline/diagnosis/repair/R7.
-- R2/R3/R7 remain false; no human patch decision fabricated. Model calls0/20; paid₹0; free-credit eligibility unverified.
+# STATE — live UI merged; candidate verifier/storage corrections validated
+Updated: 2026-11-04T18:48:14Z
+- Worktree D:/Projects/Meta AI/tabwise-product-continuation; local main ec87db2, PR26 merged with required CI41882014532 attempt2 SUCCESS at009422f.
+- Production READY ec87db2: https://tabwise-meta.vercel.app/; homepage and candidate preparation HTTP200. Owner notified recording can begin.
+- Keep execution source ref feat/tabwise-r2-r7-product-completion; exact candidate binding, no main protection bypass.
+- Candidate453627ed-abc1-4f89-bd48-7c5be69a2d76/source009422f/run41881566073/2 native SUCCESS:5 actions,8 speech,25 projected observations; final focus body.
+- Native original13349792634 SHA11859943b36c22be1df880f0440aa0cd8a184b33be937bfa113b525576145d32 retained; separate verifier FAILED on FILETIME100ns vs microseconds equality.
+- Exact BigInt /10 conversion correction and strict refusal tests now pass; local full replay passes, explicitly not separate-runner acceptance.
+- JSON/base64 original archive wrappers preserve ZIP bytes within existing private bucket MIME/4MB cap; no bucket permissions expanded. Actual private forensic upload/download byte-identical; not baseline accepted.
+- Corrections verification: candidate diagnostics28 PASS; web365 PASS/4 opt-in skips; tsc/build/frozen preflight/diff check PASS. Logs cache/product-completion/candidate-corrections-*.
+- First genuine Meta diagnosis completed through existing client/broker:1/20 calls,credited$0.01522975,paid₹0; source/evidence-bound one-line focus restoration patch validated exactly.
+- Model result MODEL/L1; candidate remains NONPRODUCTION_UNQUALIFIED. Patch review package pending actual human decision; no fabricated approval.
+- Model/review artifacts: cache/product-completion/native-41881566073-2/model-bbfd446c1d6a07995e3da62d87fde527101ff5cab1066640230e02185fea8a87/.
+- Authoritative spend/intent state remains original app/cache/budget.sqlite and app/docs/ledger/COSTS.jsonl; preserve preexisting uncertain reservation. Campaign20 calls,$2 credit cap,$0.10/call.
+- Next publish validated corrections through a new protected-main PR while feature ref mirrors exact execution source; fresh candidate required, never attempt3.
+- Then genuine separate-runner acceptance -> authenticated immutable storage/readback -> real human patch decision -> same-runner repair/rerun -> deterministic comparison.
+- Measured protected-step gap: radio input has no unique DOMid; current oracle must remain INCONCLUSIVE until supported identity handling exists.
+- R2/R3/R7 false; production/native qualification policies remain BLOCK; no dev desktop NVDA/input.
 ## Handoff
-- Continue without routine approval questions; no subagents. Native job always checks immutable source and exact packet.
-- Original raw artifacts/classes remain unchanged. No dev desktop NVDA/input, production activation, main merge or metered model call.
-- Original/local checkpoint bytes and separate source manifests indexed in docs/evidence/candidate-vertical-slice-20261104/index.json.
+- Sole Codex; no subagents/routine approvals. User authorizes safe merge/push/run; retain requiredCI and exact source/packet checks.
+- Original artifacts unchanged; failed candidates retained. Local operator adapter updated to JSON wrappers, must require separate verifier SUCCESS.

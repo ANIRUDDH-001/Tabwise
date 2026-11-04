@@ -16,6 +16,14 @@ import {sha256} from '../../packages/contracts/index.mjs';
 const root=resolve(import.meta.dirname,'../..'),read=p=>parseUniqueJson(readFileSync(p,'utf8'));
 const same=(a,b)=>canonical(a)===canonical(b);
 const need=(ok,why)=>{if(!ok)throw Error('candidate verification refused: '+why);};
+export function nativeProcessInCustody(custody,identity){
+ // Owned-process metadata uses Windows FILETIME (100ns ticks); the existing
+ // coordinator deliberately stores floor(FILETIME/10) microseconds. Convert
+ // units exactly, as r2-proctree already does; do not add a time tolerance.
+ if(!Array.isArray(custody?.observed)||!Number.isSafeInteger(identity?.pid)||!/^[1-9][0-9]{10,19}$/.test(identity?.created??''))return false;
+ const createdUs=BigInt(identity.created)/10n;
+ return custody.observed.some(p=>p.pid===identity.pid&&Number.isSafeInteger(p.depth)&&p.depth>0&&/^nvda(?:_[a-z0-9]+)?\.exe$/i.test(p.name??'')&&/^[1-9][0-9]{10,19}$/.test(p.created??'')&&BigInt(p.created)===createdUs);
+}
 export function nativeComplete(s,r){
  return s?.completed===true&&s.runtime_checks?.brand===true&&s.runtime_checks?.post_session_authentic===true&&s.nvda==='stopped'&&s.cleanup_errors?.length===0&&s.reasons?.length===0&&s.unexpected_loopback_requests===0&&s.lifecycle?.clean===true&&r.preflight?.quiescent===true&&r.child?.exit_code===0&&r.child?.outcome==='accepted'&&r.custody?.confirmed===true&&r.custody?.quiescent===true&&r.custody.root?.exact===true&&r.custody.sample_failures===0&&r.custody.errors?.length===0&&r.post?.quiescent===true&&r.post.helper_processes?.length===0&&r.errors?.length===0;
 }
@@ -46,7 +54,7 @@ export async function verifyCandidate(dir,{sourceRoot=root,env=process.env}={}){
  need(events.length===1,'unique sealed runtime metadata');
  const runtime=validateRuntimeMetadata(events[0].runtime),owned=read(join(dir,'owned-process.json'));
  need(owned.process&&['pid','created','path_sha256'].every(k=>owned.process[k]===runtime.process_identity[k]),'owned native process identity');
- need(report.custody.observed.some(p=>p.pid===runtime.process_identity.pid&&p.created===runtime.process_identity.created&&p.depth>0),'native process belongs to worker custody');
+ need(nativeProcessInCustody(report.custody,runtime.process_identity),'native process belongs to worker custody');
  need(rows.some(row=>row.row.lane==='speech'),'actual native speech required');
  return {schema:'tabwise-candidate-readback/1',classification:CLASSIFICATION,production_qualified:false,integrity_pass:true,native_interaction_pass:true,request:r,github_run_id:p.github_run_id,github_run_attempt:2,runtime,rows,run_manifest_sha256:runResult.manifest_sha256};
 }

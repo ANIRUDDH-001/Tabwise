@@ -4,6 +4,13 @@ import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import * as verifier from './verify.mjs';
+test('owned FILETIME ticks map exactly to coordinator microseconds, with no tolerance',()=>{
+ assert.equal(typeof verifier.nativeProcessInCustody,'function');
+ const identity={pid:1456,created:'134382890362068982'},row={pid:1456,created:'13438289036206898',name:'nvda.exe',depth:1};
+ assert.equal(verifier.nativeProcessInCustody({observed:[row]},identity),true);
+ for(const edit of [p=>p.pid++,p=>p.created='13438289036206899',p=>p.created='13438289036206897',p=>p.depth=0,p=>p.name='node.exe',p=>p.created='invalid']){const bad={...row};edit(bad);assert.equal(verifier.nativeProcessInCustody({observed:[bad]},identity),false);}
+ assert.equal(verifier.nativeProcessInCustody({observed:[]},identity),false);
+});
 test('candidate verifier refuses absent source rather than accepting a report flag',async()=>{
  assert.equal(typeof verifier.verifyCandidate,'function');
  const dir=mkdtempSync(join(tmpdir(),'candidate-empty-'));
