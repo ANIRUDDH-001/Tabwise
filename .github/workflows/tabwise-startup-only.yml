@@ -1,0 +1,14 @@
+# Registration only. Reviewed source branch supplies the executable workflow.
+name: tabwise-startup-only
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  registration:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - name: Registration only
+        run: echo "No NVDA executes on main. Use the separately reviewed source branch."
