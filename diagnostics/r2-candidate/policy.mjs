@@ -27,6 +27,8 @@ export const SOURCE_FILES=Object.freeze([...new Set([...R2_FILES,...QUALIFICATIO
  'web/test/candidate-configuration.test.mjs',
  'web/test/candidate-repair-recovery.test.mjs','supabase/migrations/20261104193248_candidate_repair_source_recovery.sql',
  'web/lib/server/native-request.mjs','web/lib/server/verification-directory.mjs','web/test/candidate-packaged-imports.test.mjs',
+ 'diagnostics/r2-candidate/web-repair-source.json',
+ 'web/lib/server/candidate-comparison-read.mjs','web/test/candidate-comparison-read.test.mjs',
  'diagnostics/r2-candidate/repair.mjs','diagnostics/r2-candidate/repair.test.mjs','diagnostics/r2-candidate/focus-restoration.patch','diagnostics/r2-candidate/focus-restoration-review.json',
  'diagnostics/r2-candidate/policy.mjs','diagnostics/r2-candidate/policy.test.mjs','diagnostics/r2-candidate/run.mjs','diagnostics/r2-candidate/runner.test.mjs','diagnostics/r2-candidate/verify.mjs','diagnostics/r2-candidate/verify.test.mjs','diagnostics/r2-candidate/store.mjs','diagnostics/r2-candidate/store.test.mjs'])].sort());
 const root=resolve(import.meta.dirname,'../..'),hash=v=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v),uuid=v=>typeof v==='string'&&/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(v);

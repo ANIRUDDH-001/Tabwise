@@ -758,36 +758,38 @@ Owner checkpoint directive: finish/publish this coherent unit, report actual CI/
 
 ### A — operational candidate runner and admission (first implementation)
 Files: existing .github/workflows/tabwise-r2-native-diagnostic.yml; new diagnostics/r2-candidate/{policy,run,verify}.mjs and focused tests; existing scripts/tabwise/r2-admission.mjs only for minimal candidate-purpose support; new packages/contracts/r2-candidate.mjs for a separate nonproduction envelope.
-- [ ] Write refusal tests first for wrong SHA/ref/workflow/actor/attempt, substituted run/spec/version/fixture, extra keys/actions, expired or reused grants and any production-qualification claim.
-- [ ] Reuse the diagnostic workflow with a separate candidate mode/job and exact integration-branch/source identity. Retain legacy diagnostic behavior and production main-only checks. Candidate W5 uses its own purpose and actual attempt2 after packet-only bootstrap; never disguise it as production attempt1.
-- [ ] Reuse existing W5 consume/read, coordinator process grants, source pins, native session, process custody and cleanup. Scope any staging trust root/credentials to candidate use and keep signing/OIDC material outside runtime/page processes. Do not add native runner permissions or a general environment framework.
-- [ ] Freeze the owned request before dispatch and persist the actual returned GitHub run association; unknown outcomes cannot dispatch again. Produce original artifacts plus independent separate-runner integrity verification with honest qualification labels.
+- [x] Write refusal tests first for wrong SHA/ref/workflow/actor/attempt, substituted run/spec/version/fixture, extra keys/actions, expired or reused grants and any production-qualification claim.
+- [x] Reuse the diagnostic workflow with a separate candidate mode/job and exact integration-branch/source identity. Retain legacy diagnostic behavior and production main-only checks. Candidate W5 uses its own purpose and actual attempt2 after packet-only bootstrap; never disguise it as production attempt1.
+- [x] Reuse existing W5 consume/read, coordinator process grants, source pins, native session, process custody and cleanup. Scope any staging trust root/credentials to candidate use and keep signing/OIDC material outside runtime/page processes. Do not add native runner permissions or a general environment framework.
+- [x] Freeze the owned request before dispatch and persist the actual returned GitHub run association; unknown outcomes cannot dispatch again. Produce original artifacts plus independent separate-runner integrity verification with honest qualification labels.
 Checks: focused candidate policy/admission/custody tests; unchanged production rejection controls; source-bound hosted candidate run. Notify Checkpoint A only after operational measurement.
 
 ### B — genuine baseline into product storage/readback
 Files: new web/lib/server/candidate-run.mjs and candidate API routes; minimal candidate persistence migration/tests; existing artifact-store, journey-version and run/evidence UI components.
-- [ ] Use an authenticated isolated test principal and the existing immutable-version flow. Separate candidate storage/metadata from qualified production evidence.
-- [ ] Ingest only the exact source/run artifact after ownership, hashes, complete raw replay, runtime metadata and custody checks. Reuse current storage compensation/readback mechanics.
-- [ ] Demonstrate product API readback and a visible timeline with NONPRODUCTION / UNQUALIFIED labels. Missing, partial, swapped or tampered evidence must refuse or remain inconclusive.
+- [x] Use an authenticated isolated test principal and the existing immutable-version flow. Separate candidate storage/metadata from qualified production evidence.
+- [x] Ingest only the exact source/run artifact after ownership, hashes, complete raw replay, runtime metadata and custody checks. Reuse current storage compensation/readback mechanics.
+- [x] Demonstrate product API readback and a visible timeline with NONPRODUCTION / UNQUALIFIED labels. Missing, partial, swapped or tampered evidence must refuse or remain inconclusive.
 Checks: real isolated database/API tests, genuine saved-version -> native artifact -> durable readback, corresponding browser view. Publish exact source/run/archive/ownership evidence and R2 GENUINE BASELINE ENGINEERING PASS/FAIL.
 
 ### C — diagnosis, genuine review and patched bytes on the same runner
 Files: existing src/meta/input.mjs and model client/broker; src/repair/{application,rerun}.mjs; candidate adapter and patch/apply/rerun routes/UI.
-- [ ] Feed the real candidate observations through the existing bounded input/output pipeline, carrying explicit qualification limitations. Verify credits before live inference; otherwise keep actual inference blocked rather than substitute a recorded answer.
-- [ ] Generate and validate a minimal hash-bound patch. Present an exact reviewable diff and persist the actual human decision; delegated routine execution authorization is not a fabricated patch-review record.
-- [ ] Route the approved immutable candidate through the same candidate-native worker with a new owned run and exact patched bytes. Preserve baseline and collect fresh speech/focus.
+- [x] Feed the real candidate observations through the existing bounded input/output pipeline, carrying explicit qualification limitations. Verify credits before live inference; otherwise keep actual inference blocked rather than substitute a recorded answer.
+- [x] Generate and validate a minimal hash-bound patch. Present an exact reviewable diff and persist the actual human decision; delegated routine execution authorization is not a fabricated patch-review record.
+- [x] Route the approved immutable candidate through the same candidate-native worker with a new owned run and exact patched bytes. Preserve baseline and collect fresh speech/focus.
 Checks: stale/wrong/unapproved/duplicate patch, source substitution, failed application and partial rerun controls; genuine paired native runs. Publish R3 GENUINE REPAIR/RERUN ENGINEERING PASS/FAIL.
 
 ### D — independent engineering comparison and final UI flow
 Files: existing repair-verdict/oracle services, report/verification UI and candidate evidence reader.
-- [ ] Reuse deterministic focus and protected-step checks with frozen expectations and original evidence references. Keep engineering results distinct from externally signed production qualification.
-- [ ] Demonstrate FIXED/NOT_FIXED/REGRESSED/INCONCLUSIVE controls; incomplete or unsupported observations cannot silently become FIXED.
-- [ ] Persist the comparison/report and run one complete browser workflow, then required desktop/mobile/keyboard and status-announcement checks.
+- [x] Reuse deterministic focus and protected-step checks with frozen expectations and original evidence references. Keep engineering results distinct from externally signed production qualification.
+- [x] Demonstrate FIXED/NOT_FIXED/REGRESSED/INCONCLUSIVE controls; incomplete or unsupported observations cannot silently become FIXED.
+- [x] Persist the comparison/report and run one complete browser workflow, then required desktop/mobile/keyboard and status-announcement checks.
 Checks: actual paired source/run/patch identities, persisted verdict and visible report. Publish R7 and product acceptance only on measured results.
 
 ### Efficiency and publication
-- [ ] Long terminal tasks use bounded asynchronous exec sessions with retained IDs/logs. Work on independent source/UI/API tasks while CI or native setup runs; no orphan watchers or repeated status polling.
-- [ ] Run focused checks during development; full source/build/integrity checks and hosted CI at meaningful risk-bearing commits. Do not push documentation-only churn to rerun the stress matrix.
-- [ ] Keep execution artifacts immutable and pinned while developing later commits. Preserve failed outputs. Maintain PR26 and the actual current state.
-- [ ] Preserve a truthful submission candidate before November5 07:30 IST; owner handles video/submission. Broader symptom categories, general execution infrastructure and ornamental redesign wait.
-- [ ] Commit/push/run automatically when the applicable requirements are met. The mandate's acceptance/review conditions still determine whether any eventual merge is valid; incomplete work is not merged to unlock execution.
+- [x] Long terminal tasks use bounded asynchronous exec sessions with retained IDs/logs. Work on independent source/UI/API tasks while CI or native setup runs; no orphan watchers or repeated status polling.
+- [x] Run focused checks during development; full source/build/integrity checks and hosted CI at meaningful risk-bearing commits. Do not push documentation-only churn to rerun the stress matrix.
+- [x] Keep execution artifacts immutable and pinned while developing later commits. Preserve failed outputs. Maintain PR26 and the actual current state.
+- [x] Preserve a truthful submission candidate before November5 07:30 IST; owner handles video/submission. Broader symptom categories, general execution infrastructure and ornamental redesign wait.
+- [x] Commit/push/run automatically when the applicable requirements are met. The mandate's acceptance/review conditions still determine whether any eventual merge is valid; incomplete work is not merged to unlock execution.
+
+MEASURED checkpoint2026-11-04T20:49:45Z: A/B/C engineering stages complete with actual owned native pairs and private readback. D deterministic comparison is FIXED and the built local browser/API flow passes with raw source access denied; final hosted release check remains pending.415 focused,1275 root,16 browser controls pass. Original full registered R2/R3/R7 qualification flags remain false. Final deployment acceptance must be recorded separately.

@@ -39,9 +39,11 @@ The public UI is at [Tabwise](https://tabwise-meta.vercel.app/). The completed
 owner-only flow and exact evidence links are in the
 [demo instructions](docs/engineering/Tabwise-demo-readiness-20261104.md) and
 [byte-indexed evidence](docs/evidence/candidate-complete-20261104/index.json).
-PR26 and [PR27](https://github.com/ANIRUDDH-001/Tabwise/pull/27) are merged.
-The deployment dependency correction and isolated-package regression are in
-[PR28](https://github.com/ANIRUDDH-001/Tabwise/pull/28). See the
+PR26, PR28 and [PR27](https://github.com/ANIRUDDH-001/Tabwise/pull/27) are merged.
+The [deployment dependency correction](https://github.com/ANIRUDDH-001/Tabwise/pull/28)
+and isolated-package regression are retained. Completed-record web views bundle
+the hash-checked approved source; they recover the original immutable report
+without relying on raw server source paths or recomputing a stored verdict. See the
 [current state](docs/ledger/STATE.md) and `/status` for explicit limits.
 
 ### Record the measured flow
@@ -53,6 +55,8 @@ repair rerun** to reach the
 [repaired capture and FIXED report](https://tabwise-meta.vercel.app/candidate-runs/8b77652c-bee8-45d2-b72d-2d40cb960a73).
 These are private owner records. Use the completed captures for recording;
 reopening the approved repair recovers the same run instead of allocating another.
+Creating a fresh capture or its initial comparison uses the trusted operator
+path; the web view does not silently start a new worker or inference request.
 
 One actual Muse Spark1.3 call used **$0.01522975 promotional credit, ₹0 paid**.
 No fresh model or native execution is needed to inspect this recorded flow.
