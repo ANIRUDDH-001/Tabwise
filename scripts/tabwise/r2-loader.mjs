@@ -1,16 +1,20 @@
 // Built-ins and built-in-only verifier first. No frozen module evaluates before integrity passes.
 import {readFileSync} from 'node:fs';
+import {spawn as spawnProcess} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {resolve,sep} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {runtimeIntegrity} from './r2-runtime-integrity.mjs';
 import {checkFrozenIntegrity} from '../check-r1-baseline.mjs';
+import {systemExecutable} from '../../diagnostics/owner-v2/resolver.mjs';
+// Fixed system module path avoids unbounded automatic command/module discovery on hosted Windows.
+export const R2_FOREGROUND_BOOTSTRAP="$PSModuleAutoLoadingPreference='None'; Import-Module ($PSHOME+'\\Modules\\Microsoft.PowerShell.Utility\\Microsoft.PowerShell.Utility.psd1') -ErrorAction Stop;\n";
 const ROOT=fileURLToPath(new URL('../../',import.meta.url)),runtimes=new WeakSet();let claimed=false;
 export const isR2Runtime=runtime=>runtimes.has(runtime);
 export async function loadR2Runtime({root=ROOT,additionalIntegrity=()=>[]}={}){
  if(claimed)throw Error('R2 runtime already claimed; one-shot process required');claimed=true;
  const initial=checkFrozenIntegrity(root);initial.errors.push(...runtimeIntegrity(root));initial.ok=initial.errors.length===0;if(!initial.ok)throw Error(initial.errors.join('; '));
- const [{sendGate},tree,{foregroundProbe}]=await Promise.all([
+ const [{sendGate},tree,{foregroundProbe,PROBE_PS}]=await Promise.all([
   import(pathToFileURL(resolve(root,'src/speech/sendguard.mjs')).href),
   import(pathToFileURL(resolve(root,'src/speech/vendortree.mjs')).href),
   import(pathToFileURL(resolve(root,'src/speech/foreground.mjs')).href),
@@ -34,6 +38,6 @@ export async function loadR2Runtime({root=ROOT,additionalIntegrity=()=>[]}={}){
  };
  guard.setIntegrity(inspect);
  const manifest=JSON.parse(readFileSync(resolve(vendor,'manifest.json'),'utf8'));
- const runtime=Object.freeze({guard,getGate:r1Gate.getGate,nvda,NVDAClient:mods.NVDAClient,relayOwnerPid:start.relayOwnerPid,observedProcess:graph.lifecycle.observedProcess,processExit:graph.lifecycle.processExit,startupState:()=>({owned:graph.lifecycle.hasOwnedProcess()}),startupDiagnostic:()=>graph.installationAvailable()?({stage:'nvda-class-start',code:'startup-failed'}):({stage:'installation-path',code:'operation-failed'}),cleanupStartup:async error=>{const {cleanupFailedStartup}=await import('../../diagnostics/r2-native/startup-cleanup.mjs');return cleanupFailedStartup({nvda,lifecycle:graph.lifecycle,startupError:error});},versions:Object.freeze({node:process.versions.node,guidepup:'0.36.4 (R2 pinned lifecycle, frozen guarded dependencies)',expected_nvda_asset:manifest.screenReaders.find(reader=>reader.id==='nvda').assets[0].version}),cfg:Object.freeze(JSON.parse(readFileSync(resolve(root,'fixtures/r1/steps.json'),'utf8'))),createForeground:()=>foregroundProbe({timeoutMs:2000}),assertAuthentic:()=>{const errors=inspect();if(errors.length)throw Error(errors.join('; '));}});
+ const runtime=Object.freeze({guard,getGate:r1Gate.getGate,nvda,NVDAClient:mods.NVDAClient,relayOwnerPid:start.relayOwnerPid,observedProcess:graph.lifecycle.observedProcess,processExit:graph.lifecycle.processExit,startupState:()=>({owned:graph.lifecycle.hasOwnedProcess()}),startupDiagnostic:()=>graph.installationAvailable()?({stage:'nvda-class-start',code:'startup-failed'}):({stage:'installation-path',code:'operation-failed'}),cleanupStartup:async error=>{const {cleanupFailedStartup}=await import('../../diagnostics/r2-native/startup-cleanup.mjs');return cleanupFailedStartup({nvda,lifecycle:graph.lifecycle,startupError:error});},versions:Object.freeze({node:process.versions.node,guidepup:'0.36.4 (R2 pinned lifecycle, frozen guarded dependencies)',expected_nvda_asset:manifest.screenReaders.find(reader=>reader.id==='nvda').assets[0].version}),cfg:Object.freeze(JSON.parse(readFileSync(resolve(root,'fixtures/r1/steps.json'),'utf8'))),createForeground:()=>foregroundProbe({timeoutMs:2000,spawn:(_file,_args,options)=>spawnProcess(systemExecutable('WindowsPowerShell/v1.0/powershell.exe'),['-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(R2_FOREGROUND_BOOTSTRAP+PROBE_PS,'utf16le').toString('base64')],options)}),assertAuthentic:()=>{const errors=inspect();if(errors.length)throw Error(errors.join('; '));}});
  runtime.assertAuthentic();runtimes.add(runtime);return runtime;
 }

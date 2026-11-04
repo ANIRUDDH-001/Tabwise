@@ -5,6 +5,11 @@ const script=fileURLToPath(new URL('./identity.ps1',import.meta.url));
 // Independently framed readback avoids the same hosted cmdlet-autoload failure as the query under test.
 const ps=p=>`$ErrorActionPreference='Stop';$p=[Diagnostics.Process]::GetProcessById(${p});try{$null=$p.Handle;$h=[Security.Cryptography.SHA256]::Create();try{$hash=[BitConverter]::ToString($h.ComputeHash([Text.Encoding]::UTF8.GetBytes($p.MainModule.FileName.ToLowerInvariant()))).Replace('-','').ToLowerInvariant()}finally{$h.Dispose()};[Console]::Out.Write([string]$p.Id+'|'+[string]$p.StartTime.ToUniversalTime().ToFileTimeUtc()+'|'+$hash)}finally{$p.Dispose()}`;
 const helper=pid=>runBounded({file:systemExecutable('WindowsPowerShell/v1.0/powershell.exe'),args:['-NoProfile','-NonInteractive','-File',script,'-ProcessId',String(pid)],deadline:performance.now()+5000});
+test('R2 foreground bootstrap loads only trusted system Utility with autoload disabled, without desktop access',{skip:process.platform!=='win32'},async()=>{
+ const {R2_FOREGROUND_BOOTSTRAP}=await import('../../scripts/tabwise/r2-loader.mjs');assert.equal(typeof R2_FOREGROUND_BOOTSTRAP,'string');assert.match(R2_FOREGROUND_BOOTSTRAP,/PSModuleAutoLoadingPreference='None'/);
+ const command=R2_FOREGROUND_BOOTSTRAP+`Add-Type -TypeDefinition 'public static class R2BootstrapProbe { public static int Value = 7; }'; [Console]::Out.Write((@{value=[R2BootstrapProbe]::Value}|ConvertTo-Json -Compress))`;
+ const result=await runBounded({file:systemExecutable('WindowsPowerShell/v1.0/powershell.exe'),args:['-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(command,'utf16le').toString('base64')],deadline:performance.now()+5000});assert.equal(result.ok,true);assert.equal(result.cleanup.process_close_observed,true);assert.deepEqual(JSON.parse(result.stdout),{value:7});
+});
 test('fixed identity output does not depend on PowerShell module autoload or ConvertTo-Json',{skip:process.platform!=='win32'},async()=>{
  const command=`function ConvertTo-Json { throw 'serialization cmdlet must not be used' }; & '${script.replaceAll("'","''")}' -ProcessId ${process.pid}`;
  const result=await runBounded({file:systemExecutable('WindowsPowerShell/v1.0/powershell.exe'),args:['-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(command,'utf16le').toString('base64')],deadline:performance.now()+5000});

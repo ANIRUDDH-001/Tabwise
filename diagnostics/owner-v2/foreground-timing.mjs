@@ -1,11 +1,12 @@
 // Hosted read-only probe of the unchanged foreground helper, no key/focus operation and no window text output.
 import {spawn} from 'node:child_process';
 import assert from 'node:assert/strict';
+import {R2_FOREGROUND_BOOTSTRAP} from '../../scripts/tabwise/r2-loader.mjs';
 import {PROBE_PS} from '../../src/speech/foreground.mjs';
 import {runBounded,systemExecutable} from './resolver.mjs';
 import {r2ChildEnv} from '../../scripts/tabwise/r2-run.mjs';
 const mark=s=>`[Console]::Error.WriteLine('FG_TIMING ${s}')\n`;
-const code=mark('script-entry')+PROBE_PS
+const code=mark('script-entry')+mark('utility-import-start')+R2_FOREGROUND_BOOTSTRAP+mark('utility-ready')+PROBE_PS
  .replace('Add-Type -TypeDefinition',mark('type-start')+'Add-Type -TypeDefinition')
  .replace('while ($null',mark('type-ready')+'while ($null')
  .replace('  $request =',mark('request-start')+'  $request =')
