@@ -15,7 +15,7 @@ test('observer only uses read-only client surface and keeps an immutable append-
  const fake=setup(),observer=await module.createSpeechObserver(fake.args);
  assert.equal(fake.connects[0].capture,false);assert.equal(fake.connects[0].deadlineMs,1000);
  const first=observer.read();for(const text of ['one','two','three'])fake.client.emit('speak',text);
- const next=observer.read();assert.equal(first.phrases.length,0);assert.deepEqual(next.phrases,['one','two','three']);
+ const next=observer.read();assert.equal(first.phrases.length,0);assert.deepEqual(next.phrases,['one','two','three']);assert.deepEqual(next.observations,observer.journal());next.observations[0].text='changed';assert.equal(observer.read().observations[0].text,'one');
  next.phrases[0]='forged';assert.equal(observer.read().phrases[0],'one');assert.equal(observer.read().session,first.session);
  assert.deepEqual(observer.journal().map(e=>e.seq),[1,2,3]);
  fake.client.emit('close');assert.equal(observer.read().connected,false);assert.equal(observer.read().complete,false);assert.equal(fake.stops.length,1);

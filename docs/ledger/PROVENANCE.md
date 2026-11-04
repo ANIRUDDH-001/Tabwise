@@ -97,3 +97,14 @@ Owned synthetic fixtures/replay only: explicit producer custody, disabled native
 
 ## 2026-11-04T05:23:05Z Product native-plan continuation
 New immutable plan delivery, independent signed request-admission verification and synthetic signing/negative fixtures authored during event. Existing owned Fernway and PostgreSQL/Chromium fixtures reused; no new dependency/dataset/license or install. Synthetic signatures and provider replay never represent native acceptance.
+
+| 2026-11-03 | NONQUALIFYING native diagnostic wrapper, approval tests and separate verifier | Newly authored during event; existing project licensing | Reuses existing licensed validation fixture and pinned dependencies/actions; no new third-party code or dataset |
+
+## 2026-11-04T05:23:05Z R2-only runtime new work
+R2 lifecycle adaptation reuses Guidepup 0.36.4 MIT (Craig Morten, existing vendor license); evaluates byte-identical guarded class/client/dependencies in a private graph, forks no vendor files. New loader/lifecycle/pins/tests and read-only workflow census authored during event. G1 resolver/identity source reused byte-identically from e6c51f2. Installed dependencies copied locally without version changes or installation; no external fixture/dataset.
+
+Hosted-startup autopsy correction: new diagnostic cleanup/allowlist and controlled actual-class tests authored during event; existing MIT frozen Guidepup reused byte-identically. Existing GitHub artifact downloaded read-only with original provenance/hash, never relabelled. No dependency/install/new dataset/native or paid call.
+
+R2 recovery identity stage probe and fixed typed-field serializer: newly authored during event, existing project license; no new dependencies/fixtures/datasets. Node24 child-process close contract consulted via Context7; no external code copied.
+
+R2 autonomous recovery: new event-time journal binding, exact system-module foreground bootstrap and negative tests authored during event. Frozen R1/vendor unchanged; no new dependency/license/dataset. Archived native observations/screenshots use the existing approved project-owned synthetic fixture on isolated GitHub-hosted Windows; originals retain NONQUALIFYING/synthetic manifest classification. PowerShell/Node official documentation consulted via Context7; no external code copied.

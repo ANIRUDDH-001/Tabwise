@@ -726,3 +726,44 @@ Tooling: Context7 ctx7 0.9.0 ran via the user-prescribed npx command in npm cach
 
 ## F-03 owner continuation: immutable native plan delivery
 User: "After the R2 runtime implementation stabilizes, continue the unfinished product source integration." Scope: new immutable external-plan module/tests, disabled delivery adapter and handoff; existing demo retained. $0, no hosted/native/paid action. Acceptance: targeted plan/W5/delivery tests; web/root/contracts/routes/PostgreSQL/browser/build. Separate local commit from runtime.
+
+## F-03 native diagnostic implementation authorization
+User answer: "Implement, test and push the diagnostic branch. Stop only when explicit approval or a genuine external dependency is required."
+User answer: "After authorization, exercise genuine NVDA keyboard interaction, speech observation, focus and page-event capture, source attribution and teardown."
+Consequence: build and push disabled native-input bootstrap; prepare exact owner packet from committed revision/run. No variable provisioning, rerun, input, qualification or merge before that explicit approval.
+
+## Native attempt2 follow-up - 2026-11-03T02:56:29Z
+User: "Preserve the complete nested NVDA startup error/cause chain in diagnostic-only evidence, without changing frozen vendor code or exposing credentials." "Fix only a demonstrated problem." "Do NOT rerun attempt 3: the existing approval is bound to attempt 2. Any new native run requires a new exact approval packet and my authorization." "Keep main untouched." Other session received direct user authorization to hand off edits/pushes. No native run, approval or paid infrastructure authorized/performed here.
+
+## F-03 native diagnostic offline coverage approval
+User answer: "Approve offline coverage fix (Recommended): aligns hosted coverage with local checks; ₹0, small test runtime increase."
+Consequence: existing offline workflow command runs diagnostics/r2-native/test.mjs and error-test.mjs; native jobs, approvals, flags and deadlines unchanged.
+
+## F-03 local-first diagnostic task authorization
+User: "Fix the native diagnostic's stale S5b-S1 signature assertion." "Investigate the D67 timing timeout without relaxing production guards."
+User: "You may commit corrections locally on the appropriate feature branches."
+Consequence: isolated fix/F-03-local-stabilization-diagnostic from bb7bea7; local correction commit only, no publication or native execution.
+
+Owner sprint bd81c229: "Codex may create scoped LOCAL commits under the previously approved waiver." "No rerun, new workflow dispatch or reuse of this packet is allowed." New G1 V2 source isolated; no publication or execution.
+
+
+## F-03 R2 integrated runtime (owner request 2026-11-04)
+User: "Integrate it into the real R2 runtime instead." "Continue until all safely executable tasks are complete."
+Scope: R2-only lifecycle/loader, R2 entry/session/policy, bounded process/workflow ownership, new tests, startup-only candidate and normal ledgers. Frozen R1 untouched. Acceptance: new runtime and diagnostic suites; root tests; frozen integrity; product separately validated. Ceiling $0, no paid calls/install/native execution/hosted mutation. Separate worktrees/commits requested. Rollback: retain branches; discard only authored changes after review.
+
+## F-03 final R2 regression closure — owner authorized
+User: "Resolve all 20 failures in one focused engineering cycle"; "Correct test harness module resolution without removing the original cleanup/fault assertions"; "Commit the corrected source locally." Scope: affected test harness/security/workflow/source-union checks, new negative tests and normal ledgers/handoff. Acceptance: focused, full npm test, frozen/runtime/source digests, startup-only offline tests and preflight; all pass. Ceiling $0; no installs/push/hosted/approval-variable/native/input. Existing runtime pins and frozen R1 preserved. Rollback: new local commit only, no history rewrite.
+
+## F-03 hosted startup autopsy — owner authorized
+User: "Determine and correct the first genuine hosted Windows NVDA startup failure. Do not run another hosted attempt." Scope: read-only GitHub artifact download/hash verification; diagnostic/core/worker/supervisor and R2 cleanup observability, new offline tests and pins; normal ledgers/handoff. Acceptance focused/full root/startup offline/frozen/pins/preflight PASS. $0; no native/input/push/hosted writes/approvals/paid calls. One new local correction commit.
+
+## F-03 measured identity boundary correction
+User: "Run the actual processIdentity implementation against an independently created and verified process." Scope: verified artifact download, real disposable Windows Node/PowerShell reproduction, exact identity helper/classifications, offline review gate, focused/full root once on final source, pins/preflight and minimal handoff. One local reviewed commit; $0; no native/input/hosted mutation/approvals/push/install.
+
+## F-03 autonomous R2 recovery authorization — 2026-11-04
+User answer: "You may commit and push directly to:" "fix/F-03-r2-native-runtime"; "Modify implementation, tests, diagnostics and R2-specific workflows."; "No subagents, parallel AI agents, delegated peer reviewers or unnecessary model calls."; "Incremental budget: ₹0."
+Consequence: sole-agent deterministic review, R2-only implementation/test/workflow edits, reviewed commits/push and source/run-bound hosted execution authorized. Existing identity, source, approval and isolation gates retained; no fabricated signature or qualification.
+
+## Full product completion mandate — owner authorization
+User: "The owner authorizes you to carry out the full engineering implementation." "Commit meaningful changes." "Push to a dedicated product-completion development branch." "Create or update a draft integration pull request." "Deploy controlled Preview candidates for actual acceptance testing." "No subagents whatsoever." "Incremental paid spend: ₹0." "Absolute ceiling: 20 external model API requests across this assignment." "Do not merge into main."
+Scope: R2/R3/R7, authenticated product evidence, frontend/backend, operational/security completion and exact-source checkpoint evidence. Mandate authorizes necessary R2 workflow implementation; it never authorizes fabricated external qualification or patch-owner decisions. No new dependencies currently required.

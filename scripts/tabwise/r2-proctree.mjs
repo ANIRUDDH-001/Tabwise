@@ -28,7 +28,8 @@ export const PROCESS_SNAPSHOT_PS = [
   '$now=[string][DateTime]::UtcNow.ToFileTimeUtc()',
   '$rows=@(Get-CimInstance -ClassName Win32_Process -Property ProcessId,ParentProcessId,Name,CreationDate | ForEach-Object { $c=$null; if($_.CreationDate){$c=[string]$_.CreationDate.ToFileTimeUtc()}; [pscustomobject]@{pid=[int64]$_.ProcessId;ppid=[int64]$_.ParentProcessId;name=[string]$_.Name;created=$c} })',
   // Listing every listener never hits the cmdlet's not-found error, so any other failure still stops the script.
-  '$listen=@(Get-NetTCPConnection -State Listen | Where-Object {$_.LocalPort -eq 6837} | ForEach-Object {[int64]$_.OwningProcess} | Sort-Object -Unique)',
+  '$cfg=ConvertFrom-Json -InputObject ([Console]::In.ReadToEnd())',
+  '$reply=& $cfg.node $cfg.module; if($LASTEXITCODE -ne 0){throw "bounded listener query failed"}; $listen=@(); $parsed=ConvertFrom-Json -InputObject ($reply -join ""); if($null -ne $parsed){$listen=@($parsed)}',
   `[Console]::Out.Write((ConvertTo-Json -InputObject ([ordered]@{schema="${SNAPSHOT_SCHEMA}";now=$now;processes=$rows;nvda_listeners=$listen}) -Compress -Depth 4))`,
 ].join('; ');
 export const PROCESS_TERMINATE_PS = [
@@ -111,7 +112,7 @@ export function windowsProcessTools({spawn, env, timeoutMs = HELPER_TIMEOUT_MS})
     child.stdin?.end(input ?? '');
   });
   return Object.freeze({
-    snapshot: async () => parseProcessSnapshot(await run(PROCESS_SNAPSHOT_PS, '')),
+    snapshot: async () => parseProcessSnapshot(await run(PROCESS_SNAPSHOT_PS, JSON.stringify({node:process.execPath,module:decodeURIComponent(new URL('./r2-listeners.mjs',import.meta.url).pathname).replace(/^\/([A-Za-z]:)/,'$1')}))),
     terminate: async targets => {
       if (!Array.isArray(targets) || !targets.length || targets.length > MAX_TARGETS || !targets.every(t => pidOk(t?.pid) && t.pid > 4 && t.pid <= 0x7fffffff && digits(t?.created)))
         throw Error('process terminate: invalid targets');

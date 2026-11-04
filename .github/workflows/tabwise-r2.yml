@@ -113,16 +113,8 @@ jobs:
         env:
           TABWISE_R2_QUIESCENCE_PHASE: pre
         run: |
-          $ErrorActionPreference = 'Stop'
-          $diag = Join-Path $env:RUNNER_TEMP 'tabwise-r2/diagnostics'
-          New-Item -ItemType Directory -Force -Path $diag | Out-Null
-          $rows = @(Get-CimInstance -ClassName Win32_Process -Property ProcessId,ParentProcessId,Name,CreationDate | ForEach-Object { [ordered]@{pid = [int64]$_.ProcessId; ppid = [int64]$_.ParentProcessId; name = [string]$_.Name; created = $(if ($_.CreationDate) { [string]$_.CreationDate.ToFileTimeUtc() } else { $null })} })
-          $nvda = @($rows | Where-Object { $_.name -match '^nvda(_[a-z0-9]+)?\.exe\z' })
-          $listen = @(Get-NetTCPConnection -State Listen | Where-Object { $_.LocalPort -eq 6837 } | ForEach-Object { [int64]$_.OwningProcess } | Sort-Object -Unique)
-          $q = [ordered]@{schema = 'tabwise-r2-quiescence/1'; phase = $env:TABWISE_R2_QUIESCENCE_PHASE; scope = 'global'; page_custody = 'not claimed: see run-summary.json pages[].custody'; quiescent = ($nvda.Count -eq 0 -and $listen.Count -eq 0); nvda_processes = $nvda; nvda_listeners = $listen; processes = $rows}
-          ConvertTo-Json -InputObject $q -Depth 4 -Compress | Set-Content -LiteralPath (Join-Path $diag "quiescence-$($env:TABWISE_R2_QUIESCENCE_PHASE).json") -Encoding utf8NoBOM
-          ConvertTo-Json -InputObject ([ordered]@{phase = $q.phase; scope = $q.scope; quiescent = $q.quiescent; nvda_processes = $nvda; nvda_listeners = $listen}) -Depth 4 -Compress
-          if (-not $q.quiescent) { throw "R2 $($q.phase)-run quiescence refused: an NVDA process or 6837 listener is present (global check; nothing was terminated)" }
+          node scripts/tabwise/r2-quiescence.mjs
+          if ($LASTEXITCODE -ne 0) { throw "R2 global process/listener quiescence refused" }
       # Runs every page through the same gate; seals and verifies the run manifest; exit 0 only if all pages are accepted and verified.
       # The summary (per-page custody) goes to the uploaded diagnostics directory, beside and never inside the sealed run.
       - name: R2 run
@@ -147,16 +139,8 @@ jobs:
         env:
           TABWISE_R2_QUIESCENCE_PHASE: post
         run: |
-          $ErrorActionPreference = 'Stop'
-          $diag = Join-Path $env:RUNNER_TEMP 'tabwise-r2/diagnostics'
-          New-Item -ItemType Directory -Force -Path $diag | Out-Null
-          $rows = @(Get-CimInstance -ClassName Win32_Process -Property ProcessId,ParentProcessId,Name,CreationDate | ForEach-Object { [ordered]@{pid = [int64]$_.ProcessId; ppid = [int64]$_.ParentProcessId; name = [string]$_.Name; created = $(if ($_.CreationDate) { [string]$_.CreationDate.ToFileTimeUtc() } else { $null })} })
-          $nvda = @($rows | Where-Object { $_.name -match '^nvda(_[a-z0-9]+)?\.exe\z' })
-          $listen = @(Get-NetTCPConnection -State Listen | Where-Object { $_.LocalPort -eq 6837 } | ForEach-Object { [int64]$_.OwningProcess } | Sort-Object -Unique)
-          $q = [ordered]@{schema = 'tabwise-r2-quiescence/1'; phase = $env:TABWISE_R2_QUIESCENCE_PHASE; scope = 'global'; page_custody = 'not claimed: see run-summary.json pages[].custody'; quiescent = ($nvda.Count -eq 0 -and $listen.Count -eq 0); nvda_processes = $nvda; nvda_listeners = $listen; processes = $rows}
-          ConvertTo-Json -InputObject $q -Depth 4 -Compress | Set-Content -LiteralPath (Join-Path $diag "quiescence-$($env:TABWISE_R2_QUIESCENCE_PHASE).json") -Encoding utf8NoBOM
-          ConvertTo-Json -InputObject ([ordered]@{phase = $q.phase; scope = $q.scope; quiescent = $q.quiescent; nvda_processes = $nvda; nvda_listeners = $listen}) -Depth 4 -Compress
-          if (-not $q.quiescent) { throw "R2 $($q.phase)-run quiescence refused: an NVDA process or 6837 listener is present (global check; nothing was terminated)" }
+          node scripts/tabwise/r2-quiescence.mjs
+          if ($LASTEXITCODE -ne 0) { throw "R2 global process/listener quiescence refused" }
       # A fresh process re-checks every gate and runs verifyR2Run from disk. No loader, session, child or runtime.
       - name: Re-verify sealed run from disk
         id: verify

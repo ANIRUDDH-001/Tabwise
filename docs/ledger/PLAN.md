@@ -688,3 +688,49 @@ Publication conditional: remote main9bb994c is an ancestor; GitHub currently rep
 
 ## F-03 owner continuation: immutable native plan delivery
 User: "After the R2 runtime implementation stabilizes, continue the unfinished product source integration." Scope: new immutable external-plan module/tests, disabled delivery adapter and handoff; existing demo retained. $0, no hosted/native/paid action. Acceptance: targeted plan/W5/delivery tests; web/root/contracts/routes/PostgreSQL/browser/build. Separate local commit from runtime.
+
+### F-03 / NONQUALIFYING native integration diagnostic
+- User: "Build a separately gated NONQUALIFYING native R2 integration diagnostic on a fresh GitHub-hosted Windows runner." "Prepare the exact revision, fixture, permitted keyboard actions, execution bounds and explicit owner-approval packet before any native input."
+- Scope: diagnostics/r2-native/{policy,run,verify,test,web-check}.mjs; dedicated workflow; normal ledgers/CODEMAP/PROVENANCE. Existing loader/session and production gates unchanged.
+- Steps: approval/refusal tests first; gated wrapper over existing session and custody; separate-runner source verification/tampering; hosted offline bootstrap; exact packet; stop for owner approval before any native rerun.
+- Acceptance: node --test diagnostics/r2-native/test.mjs; hosted full root/web/contracts/browser/API/types/build/preflight/frozen checks; native and separate verifier only after exact explicit approval.
+- Bounds: one existing healthy page; Tab,Tab,Enter; worker stop150s, supervisor180s plus existing bounded custody; one run ID/attempt2; ₹0, no model/dependency changes.
+- Rollback: delete diagnostic branch; production and main unchanged. No new acceptance/qualification claim.
+
+### Native attempt2 cause retention and incomplete verifier
+- Source e165; actual artifact verification/standalone comparison; no native rerun.
+- Files: diagnostic policy/run/verify/new error tests, observational session callback, Ubuntu verifier command; normal handoff ledgers.
+- Acceptance: preserved/redacted nested causes, original rejection unchanged, actual failed artifact integrity-only RED/GREEN and3 tamper refusals; native verdict remains false.
+- Native underlying cause unknown because original chain was lost. Never extend deadline or reorder startup speculatively.
+
+### F-03 / local-first native diagnostic stabilization
+- Owner request: fix thoroughly locally; preserve branding/import/runtime boundaries, zero spend, no push/native run/merge.
+- Files: test/r2-review.test.mjs; test/tabwise-d67-timing.test.mjs; approved offline command in .github/workflows/tabwise-r2-native-diagnostic.yml; session ledgers.
+- Acceptance: node --test --test-timeout=10000 "test/*.test.mjs"; node --test diagnostics/r2-native/test.mjs diagnostics/r2-native/error-test.mjs; preflight, frozen R1, git diff --check; all exit 0.
+- Root cause: static assertion required a two-argument spelling; authentic diagnostic accepts optional observational diagnostics after brand refusal.
+- D67: phase measurements and byte-copy setup optimization; all tracked files/full dependency copy and original assertions retained; 30s/100ms unchanged.
+- Rollback: revert isolated local correction commit. No dependency/install/runtime/approval variable or native execution change.
+
+
+## F-03 R2 integrated runtime (owner request 2026-11-04)
+User: "Integrate it into the real R2 runtime instead." "Continue until all safely executable tasks are complete."
+Scope: R2-only lifecycle/loader, R2 entry/session/policy, bounded process/workflow ownership, new tests, startup-only candidate and normal ledgers. Frozen R1 untouched. Acceptance: new runtime and diagnostic suites; root tests; frozen integrity; product separately validated. Ceiling $0, no paid calls/install/native execution/hosted mutation. Separate worktrees/commits requested. Rollback: retain branches; discard only authored changes after review.
+
+## F-03 final R2 regression closure — owner authorized
+User: "Resolve all 20 failures in one focused engineering cycle"; "Correct test harness module resolution without removing the original cleanup/fault assertions"; "Commit the corrected source locally." Scope: affected test harness/security/workflow/source-union checks, new negative tests and normal ledgers/handoff. Acceptance: focused, full npm test, frozen/runtime/source digests, startup-only offline tests and preflight; all pass. Ceiling $0; no installs/push/hosted/approval-variable/native/input. Existing runtime pins and frozen R1 preserved. Rollback: new local commit only, no history rewrite.
+
+## F-03 hosted startup autopsy — owner authorized
+User: "Determine and correct the first genuine hosted Windows NVDA startup failure. Do not run another hosted attempt." Scope: read-only GitHub artifact download/hash verification; diagnostic/core/worker/supervisor and R2 cleanup observability, new offline tests and pins; normal ledgers/handoff. Acceptance focused/full root/startup offline/frozen/pins/preflight PASS. $0; no native/input/push/hosted writes/approvals/paid calls. One new local correction commit.
+
+## F-03 measured identity boundary correction
+User: "Run the actual processIdentity implementation against an independently created and verified process." Scope: verified artifact download, real disposable Windows Node/PowerShell reproduction, exact identity helper/classifications, offline review gate, focused/full root once on final source, pins/preflight and minimal handoff. One local reviewed commit; $0; no native/input/hosted mutation/approvals/push/install.
+
+## F-03 autonomous R2 recovery (owner directive 2026-11-04)
+Goal: genuine Windows identity, NVDA startup/teardown, approved guarded journey, authentic evidence and product readback.
+Scope: owner-v2 identity/resolver diagnostics; R2 lifecycle/loader/session/entry/evidence/product producer; R2 workflows/tests/pins; normal ledgers.
+Acceptance: actual Windows identity and negative tests; hosted offline review and fresh exact packet; real startup artifact; guarded native journey/evidence/readback; focused security/custody/source tests, frozen R1, final npm test. Missing evidence means incomplete.
+Ceiling: ₹0 incremental, zero paid AI calls. No subagents or unrelated infrastructure/R3/R7 changes.
+Publication: owner explicitly permits reviewed commits/push to fix/F-03-r2-native-runtime and bounded hosted runs under existing exact authorization architecture. Rollback by new revert commit, never history rewrite.
+
+- Recovery outcome: real hosted native3-step journey/speech/teardown PASS at90c13f4 run41801278982/2, separate verification/tamper checks PASS; root1199 and diagnostics174 PASS.
+- Full R2 remains incomplete: independent native qualification/signing authority and real product-owned run binding unavailable; exporter/readback refuse. Original artifacts/handoff archived; no R3/R7 or product policy promotion.

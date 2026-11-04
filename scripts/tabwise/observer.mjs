@@ -34,7 +34,7 @@ export async function createSpeechObserver({NVDAClient,guard,getGate,relayOwnerP
   connected=true;
  }catch(error){fail(error.message);await close();throw error;}
  return Object.freeze({
-  read:()=>{const live=registered()&&connected&&!closed&&!failed&&!guard.isStopped();return {source:'nvda',session,connected:live,complete:live,phrases:[...phrases]};},
+  read:()=>{const live=registered()&&connected&&!closed&&!failed&&!guard.isStopped();return {source:'nvda',session,connected:live,complete:live,phrases:[...phrases],observations:structuredClone(journal)};},
   journal:()=>structuredClone(journal),close,
   normalization:'Frozen vendored relay speech strings: trim/collapse whitespace, discard non-string sequence parts, join with comma-space. Not raw audio or raw protocol frames.',
  });

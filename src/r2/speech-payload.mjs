@@ -72,8 +72,9 @@ export function speechLaneRecord(read) {
     typeof read.connected !== 'boolean' || typeof read.complete !== 'boolean' || !Array.isArray(read.phrases) || read.phrases.some(p => typeof p !== 'string')) {
     throw Error('speech lane: observer read must be {source, session, connected, complete, phrases:string[]}');
   }
+  if(Object.hasOwn(read,'observations')&&(!Array.isArray(read.observations)||read.observations.length!==read.phrases.length||read.observations.some((e,i)=>e?.seq!==i+1||e.clock!==NODE_CLOCK||e.text!==read.phrases[i]||!time(e.t)||(i>0&&e.t<read.observations[i-1].t))))throw Error('speech lane: observer receipt journal invalid');
   return {kind: 'observer-journal', schema: SPEECH_LANE_SCHEMA, source: read.source, session: read.session,
-    connected: read.connected, complete: read.complete, phrases: [...read.phrases]};
+    connected: read.connected, complete: read.complete, phrases: [...read.phrases],...(Object.hasOwn(read,'observations')?{observations:structuredClone(read.observations)}:{})};
 }
 
 // ---- nonce-redact/2 (§8.7 as revised by O-12, D-85) ----
@@ -226,6 +227,10 @@ function checkLane(speech, c) {
   const covered = c.preexisting_phrases + c.raw.length;
   if (lane.phrases.length < covered) fail('speech-lane', `journal has ${lane.phrases.length} phrases; the capture saw ${covered}`);
   for (const p of c.raw) if (lane.phrases[p.seq - 1] !== p.text) fail('speech-lane', `raw seq ${p.seq} differs from the sealed observer journal`);
+  if(Object.hasOwn(lane,'observations')){
+    speechLaneRecord(lane); // Independent sequence/text/clock/order validation of the sealed journal.
+    for(const p of c.raw){const e=lane.observations[p.seq-1];if(p.timing!=='observer-receipt'||p.arrived_after.t!==e?.t||p.received.t<e.t)fail('speech-lane','observer receipt timestamp differs from raw capture');}
+  }else if(c.raw.some(p=>p.timing==='observer-receipt'))fail('speech-lane','observer receipt journal missing');
   return {late_phrases: lane.phrases.length - covered};
 }
 function checkRecords(c, actions) {

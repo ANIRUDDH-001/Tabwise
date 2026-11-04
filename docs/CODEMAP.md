@@ -173,3 +173,26 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 | `docs/engineering/Final-sprint-*.md`, `tabwise-r2.product-proposal.yml` | Measured sprint/operational/demo handoff and unapplied workflow source | F-03 | exact proposal diff check |
 
 | `src/r2/native-plan.mjs`, `web/test/native-plan-materialization.test.mjs` | Exclusive external per-request plan/fixture delivery, independently signed W5 and exact request admission, byte checks and completion-last inventory; disabled native routing | `materializeNativePlan`, `readNativePlan`; Windows delivery adapter accepts explicit admitted source |
+
+| diagnostics/r2-native/; .github/workflows/tabwise-r2-native-diagnostic.yml | Separate NONQUALIFYING owner-packet gate, unchanged guarded session/custody, source projection/refusal and separate-runner artifact/tamper verification; attempt1 offline only | run.mjs --packet RUN_ID; test.mjs; native input requires explicit approval |
+
+| diagnostics/r2-native/error-test.mjs; scripts/tabwise/r2-session.mjs optional diagnostic observer | Redacted nested startup errors in diagnostic-only artifact; unchanged rejection/cleanup; incomplete verifier integrity-only mode | R2-native-attempt2-causes.md |
+
+| `diagnostics/owner-v2/` | Separate read-only netstat resolver, fixed process identity query, strict V2 source/run authorization and local Windows measurements; no native authority | resolver/entry/policy/measure | resolver, real-child, policy tests |
+
+| `scripts/tabwise/r2-{loader,vendor-loader,nvda-lifecycle,runtime-integrity}.mjs`, `r2-runtime-pins.json` | R2-only one-shot private frozen CJS graph and identity-checked bounded startup/owned-handle cleanup; never loads frozen startup/quit implementations | `loadR2Runtime`, `createLifecycle`; new runtime/class/loader tests |
+| `scripts/tabwise/r2-{listeners,quiescence}.mjs` | Bounded fixed-port resolver output and read-only global pre/post workflow census | no native start or input |
+
+| `test/r2-{quiescence,import-admission}.test.mjs` | Actual bounded helper and page authority/import ordering under isolated Worker module boundaries; no native launch | final R2 regression closure |
+
+| `diagnostics/r2-native/startup-{cleanup,diagnostics}.mjs`, `autopsy.test.mjs` | Source-bound failed-start cleanup confirmation and fixed stage/code diagnostic allowlist; actual-class offline negatives | no native authority |
+
+| `diagnostics/owner-v2/process-identity.test.mjs` | Real sanitized owned Windows Node/PowerShell identity qualification,rapid-exit/launch/deadline/output negatives and offline workflow gate | no NVDA or input |
+
+| `diagnostics/owner-v2/identity-timing.mjs` | Bounded owned Node cold/warm PowerShell identity stage measurements, no NVDA/input | offline hosted review diagnostic |
+
+| `diagnostics/r2-native/startup-log.mjs` | Fixed-path bounded scrubbed NVDA log diagnostic; no runtime authority | startup artifact |
+
+| `diagnostics/owner-v2/foreground-timing.mjs` | Hosted read-only unchanged foreground helper stage timing, omits window text, no keys/focus | journey offline review |
+
+| `docs/evidence/r2-recovery/`, `docs/engineering/R2-autonomous-recovery-handoff.md` | Immutable original successful startup/native/separate-verifier archives, derived summary, measured fixes and explicit product-qualification blocker | runtime90c13f4, run41801278982/2 |

@@ -41,9 +41,9 @@ async function runPage(gate) {
   const phase = createQualificationIntegrity({root, head: gate.head, reviewedDigest: gate.status.qualification_sha256});
   const r2Phase = () => (r2Digest(root) === gate.status.reviewed_sha256 ? [] : ['R2 reviewed content changed']);
   if (r2Phase().length) throw Error('BLOCK: R2 reviewed content changed before runtime load');
-  const {loadQualificationRuntime, isQualificationRuntime} = await import('./tabwise/qualification-loader.mjs');
-  const runtime = await loadQualificationRuntime({root, additionalIntegrity: phase.checkSend});
-  if (!isQualificationRuntime(runtime)) throw Error('BLOCK: authentic R2 runtime required');
+  const {loadR2Runtime, isR2Runtime} = await import('./tabwise/r2-loader.mjs');
+  const runtime = await loadR2Runtime({root, additionalIntegrity: phase.checkSend});
+  if (!isR2Runtime(runtime)) throw Error('BLOCK: authentic R2 runtime required');
   const abort = why => { if (!runtime.guard.isStopped()) runtime.guard.stop(`R2 page ${why}`, 'timeout'); };
   const onSignal = () => abort('signal');
   const removeCrash = installQualificationCrashHandlers({abort: () => abort('crash'), record: event => console.error(JSON.stringify({r2_page: page.id, ...event}))});
