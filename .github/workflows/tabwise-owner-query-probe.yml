@@ -1,0 +1,14 @@
+# Registration only. The reviewed execution branch supplies the diagnostic workflow.
+name: tabwise-owner-query-probe
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  registration:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - name: Registration only
+        run: echo "No diagnostic executes on main. Use the independently approved source branch."
