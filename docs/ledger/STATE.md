@@ -1,27 +1,22 @@
-# STATE — product integration review; full product INCOMPLETE
-Updated: 2026-11-04T11:06:52Z
-- Branch: feat/tabwise-r2-r7-product-completion, isolated tabwise-product-continuation.
-- Source candidate: e3d99addc066da88624728923de49a040784aa61; main ea8bd7c integrated into development only.
-- Native/product histories reconciled; original native archives preserved unchanged.
-- Implemented: native progress/deadlines/lease, server-derived UI actions, Preview guards, request ceiling, hosted source inventory.
-- MEASURED npm test:1252 PASS,3 DB opt-ins; web321 PASS,3 DB opt-ins; all6 opt-ins separately PASS.
-- Contracts21, diagnostic139, browser17, SQL8 suites/12 existing migrations PASS; local cluster stopped.
-- Build/types,9 route packages, Preview+Production controlled HTTP, runtime/frozen/preflight/diff PASS.
-- Hosted read-only MCP:12 expected migrations present; public tables27/27 RLS; no migration repeated.
-- Historical native run41801278982/2 is NONQUALIFYING diagnostic at90c13f4, not this source's product run.
-- Owner: "No authority exists yet; prepare the review package". No production key/signature invented.
-- Blocked acceptance: new product-owned native export/ingest/readback, genuine approved repair/rerun, external R7, hosted OAuth.
-- Engineering gaps: producer class/runtime metadata; workflow/source/W5 delivery; repaired native request path; verifier symptom scope.
-- Next: independent exact-source/contract review and real qualification authority; implement remaining producer/repair boundaries under it.
-- Native/qualification/integration policies remain disabled; no hosted native execution or model calls in this assignment.
-- Model requests0/20, incremental paid₹0; current credit eligibility unverified, so live calls remain barred.
-- No subagents, dependency installs, production activation or main merge.
-- Published draft PR26; Preview7fba797 READY. Protected live-page inspection refused403.
-- Hosted41817348279 failed pin-fixture mutation under read-only copies; cancelled after failure, artifact13314838685 retained.
-- Reproduced70/71 readonly vs71/71 ordinary; temporary-copy chmod preserves assertions; focused17 and final root1252 PASS.
-- Current follow-up CI status: use GitHub checks on draft PR26; no native or production acceptance follows.
+# STATE — R2 runtime metadata continuation; product INCOMPLETE
+Updated: 2026-11-04T11:37:43Z
+- Branch feat/tabwise-r2-r7-product-completion; latest runtime source 19d17a5098809406d5ff07041c6b44487718956c.
+- Draft PR26; main ea8bd7c unchanged; no production activation.
+- CI41818741025 PASS atdc41656:9 profiles x71 selected files; original artifacts preserved.
+- New metadata implementation at19d17a5 has separate fresh local checks; prior CI does not qualify new native source.
+- Own-process version/binary query + exact A15 readback -> sealed events -> verified export connection implemented.
+- New validator enters reviewed/per-send pin scope; original classes/archives/caps unchanged.
+- R2 digest507d0eb3b448f07a83f054508de7f0168a1d625e59b8e2a3045d00c3c85c74ee.
+- MEASURED root1269 PASS/3 DB opt-ins; web328 PASS/3 DB opt-ins; diagnostics140 PASS.
+- Build/types,9 route traces,frozen R1/pins/clean preflight PASS. DB opt-ins passed earlier; no schema change.
+- Actual Windows metadata check used own Node process; no NVDA launched or physical input sent.
+- Original product-review source/evidence retained; runtime-continuation.json contains current source and tests.
+- Owner: "No authority exists yet; prepare the review package"; then "continue" and "CI also passed".
+- Blockers: independent authority; native class/producer contract; actual owned native ingestion/readback; repaired native delivery/rerun; R7; hosted OAuth.
+- Qualification/native/integration policies remain disabled. No self-trusted production key or signature.
+- Model requests0/20; paid incremental₹0; current credits unverified so no live calls.
 ## Handoff
-- Review package: docs/engineering/Product-completion-review-20261104.md.
-- Source/evidence index: docs/evidence/product-completion-20261104/.
-- Preserve failures; original archived native observations never promoted or rewritten.
-- Independent reviewer and owner review pending; no R2/R3/R7-ready checkpoint claimed.
+- Review docs/engineering/Product-completion-review-20261104.md and runtime evidence index.
+- Preserve historical failures and exact archived native diagnostics; never relabel them.
+- No R2/R3/R7 engineering-ready or full-product completion claim.
+- Next: review new source/qualification contract and continue safe producer/repair integration; live acceptance needs real authority.

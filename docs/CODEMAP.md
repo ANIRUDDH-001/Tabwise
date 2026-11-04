@@ -199,3 +199,5 @@ C2 successor addendum (2026-10-31): scripts/tabwise/r2-policy.mjs now enforces 2
 
 | `src/deployment-execution.mjs`, native request/progress helpers, `test/broker-request-limit.test.mjs`, `web/test/native-{progress,controls}*` | Preview execution refusal, durable request ceiling, owned native progress and server-derived UI controls | root/web/browser/SQL evidence in product completion package |
 | `docs/engineering/Product-completion-review-20261104.md`, `docs/evidence/product-completion-20261104/` | Exact-source incomplete engineering review, original test logs, native artifact hashes and unresolved authority/implementation criteria | candidate.json and evidence-index.json; no qualification authority |
+
+| `src/r2/runtime-metadata.mjs`, identity helper metadata switch, native session events; `test/r2-runtime-metadata.test.mjs`, `diagnostics/owner-v2/runtime-metadata.test.mjs` | Bounded owned-process file version/hash plus A15 readback; sealed event metadata export; no qualification | Runtime continuation evidence index; real Windows check uses own Node process only |

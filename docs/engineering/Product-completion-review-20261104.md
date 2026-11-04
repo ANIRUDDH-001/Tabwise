@@ -2,7 +2,7 @@
 
 **Status: INCOMPLETE. No R2, R3 or R7 acceptance checkpoint is claimed. Do not merge or activate production from this package.**
 
-Application/runtime source: `e3d99addc066da88624728923de49a040784aa61` on `feat/tabwise-r2-r7-product-completion`. Later evidence and the read-only test-fixture correction do not change application/runtime code. The owner confirmed: “No authority exists yet; prepare the review package”. This package supplies no signature, reviewer identity, private evaluation labels or qualification authority.
+Latest application/runtime source: `19d17a5098809406d5ff07041c6b44487718956c` on `feat/tabwise-r2-r7-product-completion`; see the continuation below. The initial candidate `e3d99addc066da88624728923de49a040784aa61` remains preserved in `candidate.json`. The owner confirmed: “No authority exists yet; prepare the review package”. This package supplies no signature, reviewer identity, private evaluation labels or qualification authority.
 
 ## Source and evidence
 
@@ -68,7 +68,7 @@ These artifacts retain their original synthetic/NONQUALIFYING manifest classific
 These are specific technical gaps, **not** a claim that all engineering is finished and only a signature is missing.
 
 1. **Native producer/qualification contract:** `r2-evidence.mjs` still emits synthetic/incomplete classes; `product-bridge.mjs` requires genuine-unqualified source plus an independent native attestation. Their producer/classification transition needs a reviewed design and implementation. Do not relabel an archived diagnostic artifact to bridge this mismatch.
-2. **Sealed runtime metadata:** `buildWorkflowProductExport` requires sealed `native-runtime.json`; the authentic session/writer does not yet emit that file. The producer must obtain and seal legitimate runtime/profile observations; the installed asset's version string alone cannot stand in for a new observation.
+2. **Sealed runtime metadata — engineering connection added:** the continuation at `19d17a5` queries owned-process executable metadata and settings readback, writes an event into the existing sealed journal, and reads it through the exporter. Actual hosted NVDA execution of this new metadata path remains unmeasured. Installed asset metadata is not used as an observation fallback.
 3. **Delivery and admission:** the product workflow remains a proposal. Exact per-request source delivery, durable one-use W5 admission, source/run-bound grant consumption, actual export orchestration and independent signing must be connected before an authorized product-owned baseline. Current committed authority/qualification/dispatch policies remain disabled.
 4. **Actual product ingestion/readback:** durable SQL/custody/storage/bridge code and negative controls exist, but a new legitimate native product artifact has not traversed authentication → saved version → dispatch → sealed source → storage → owned readback.
 5. **Genuine repaired native rerun:** approved immutable repair/source contracts and SQL/UI controls exist. Baseline native request preparation explicitly rejects patched variants; the repair run route currently selects the legacy producer. The repaired-source packet/plan/admission/worker association needs coherent native integration before the required new NVDA rerun.
@@ -85,3 +85,22 @@ Before qualification, define the producer/runtime metadata and class transition 
 After the missing contracts and authority exist, run the fresh authorized baseline through durable readback; obtain a genuine owner patch decision and frozen oracle; execute a distinct pinned repaired native run; then have the external R7 assessor evaluate frozen controls/withheld outcomes without tuning. Preserve failed attempts and inconclusive results.
 
 **No R2/R3/R7-ready notification, production activation, main merge or full-product completion claim is authorized by this package.**
+
+## Continuation after hosted CI passed
+
+MEASURED: [hosted preflight 41818741025](https://github.com/ANIRUDDH-001/Tabwise/actions/runs/41818741025) completed successfully for PR head `dc4165651fcb176fbb6e1bf2085ea93382beb82c`. Its checkout record names GitHub's temporary merge revision `cb2e730a829f20d9cf85930e407e132f6c2f0c9f`. All nine profiles passed all 71 selected files; before/after source and checkout checks passed. Original result JSON files are preserved with `ci-41818741025-` prefixes. This is offline preflight, not new NVDA execution or native qualification.
+
+The owner then requested “continue” and reported “CI also passed”. Sole-agent implementation continued with runtime metadata, without activating independent authority.
+
+At `19d17a5098809406d5ff07041c6b44487718956c`:
+
+- The fixed bounded Windows helper has an opt-in read-only metadata query. It reads the owned process's actual `MainModule.FileVersionInfo.ProductVersion` and executable SHA-256, preserving the existing three-field identity output for ordinary identity queries. It uses the process handle/start-time/path identity and refuses a stopped, mismatched or unreadable process, missing/nonnumeric version, failed helper or unconfirmed helper closure. No manifest/default version substitutes for a failed observation.
+- The private authentic runtime exposes this query only for its owned live NVDA process after relay/identity revalidation. The session rechecks authenticity and the exact A15 settings readback, then writes the `tabwise-native-runtime/2` record into its existing events lane before input. Its settings digest must equal the fixed supported profile, not an arbitrary digest behind an A15 label. No path, token, signature or qualification flag is recorded.
+- The exporter verifies the sealed events bytes and requires exactly one valid metadata record. Tampering, duplication, extra claims, substituted settings or an ambiguous legacy/new source refuses. Historical `/1` metadata remains readable under its old contract; historical archives and evidence classes were not rewritten. There is no new evidence-file allowlist or cap, so the existing historical reconstruction contract is preserved.
+- The new validator is in the reviewed source and per-send runtime pin scopes; changes to its bytes are detected. Runtime pin count expands from nine to ten. All production qualification and integration policies remain disabled.
+
+MEASURED local validation: root 1,269 pass with three previously exercised DB opt-ins; web 328 pass with three previously exercised DB opt-ins; diagnostics 140 pass; build/TypeScript, nine deployment route traces, frozen R1, runtime pins, preflight and diff checks pass. Actual read-only Windows observation of this Node process matched its independently hashed executable and version. The real evidence writer sealed and the exporter read a test-only runtime record while missing capture correctly remained `incomplete`. No NVDA started, no keyboard input was sent, and no model request was made. These checks are engineering evidence, not a hosted native acceptance result for the new path.
+
+CITED API semantics: [Microsoft's process file-version documentation](https://github.com/microsoftdocs/powershell-docs/blob/main/reference/7.7/Microsoft.PowerShell.Management/Get-Process.md), fetched through Context7. The implementation uses the fixed .NET properties directly to avoid automatic module discovery; no third-party implementation was copied.
+
+The current R2 source digest is `507d0eb3b448f07a83f054508de7f0168a1d625e59b8e2a3045d00c3c85c74ee`. Qualification-source digest remains `1a2991eb6c4bc42ffef5fbc1060d89dd8dc136c456211eddcf8dacf459ddd672`. Any future authority must review this new source; the prior hosted offline pass cannot authorize it. See `runtime-continuation.json` and `runtime-evidence-index.json` for exact source/evidence hashes and the outstanding acceptance criteria.

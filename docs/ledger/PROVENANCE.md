@@ -111,3 +111,6 @@ R2 autonomous recovery: new event-time journal binding, exact system-module fore
 
 ## 2026-11-04T10:44:37Z — product completion integration
 Merged previously authored native runtime and product lifecycle sources; reused the existing owned Fernway and frozen Guidepup under their recorded licenses. Added request-count reservations, native progress/control/Preview guards and isolated synthetic tests during the event. No dependency install, new dataset, third-party code or new license. Historical native archives remain byte-identical and NONQUALIFYING. Context7 Next.js tracing documentation consulted; no external code copied.
+
+## 2026-11-04T11:37:43Z — observed runtime metadata
+New event-time Windows process version/hash observer, fixed-profile data validator, sealed-journal exporter and negative fixtures authored during event. Reuses existing owned fixtures and installed Windows/.NET facilities; no dependency install/license/data added. Microsoft official property documentation retrieved via Context7; no external code copied. Read-only actual process test observes this Node executable, not NVDA; no desktop/input/native acceptance implied.

@@ -1,0 +1,45 @@
+✔ runtime metadata binds observed file version/executable identity and exact read-back profile (2.3566ms)
+✔ runtime metadata refuses pid substitution (0.2822ms)
+✔ runtime metadata refuses created substitution (0.1066ms)
+✔ runtime metadata refuses path substitution (0.1014ms)
+✔ runtime metadata refuses version substitution (0.1784ms)
+✔ runtime metadata refuses hash substitution (0.1506ms)
+✔ runtime metadata refuses settings substitution (0.1434ms)
+✔ runtime metadata refuses readback substitution (0.1504ms)
+✔ runtime metadata rejects forged qualification and unexpected fields (0.2694ms)
+✔ bounded metadata query uses the fixed identity helper and exact observed-process binding (0.5827ms)
+✔ metadata helper refuses failed (0.3242ms)
+✔ metadata helper refuses unclosed (0.1375ms)
+✔ metadata helper refuses pid (0.1111ms)
+✔ metadata helper refuses created (0.1506ms)
+✔ metadata helper refuses extra (0.2082ms)
+✔ runtime integrity detects changed runtime metadata validator bytes (27.7329ms)
+✖ sealed runtime validator refuses a different settings digest behind the A15 label (0.8021ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 16
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 122.1314
+
+✖ failing tests:
+
+test at test\r2-runtime-metadata.test.mjs:33:1
+✖ sealed runtime validator refuses a different settings digest behind the A15 label (0.8021ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///D:/Projects/Meta%20AI/tabwise-product-continuation/test/r2-runtime-metadata.test.mjs:34:114)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'throws',
+    diff: 'simple'
+  }

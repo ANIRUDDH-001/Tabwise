@@ -1,0 +1,27 @@
+✔ R2 foreground bootstrap loads only trusted system Utility with autoload disabled, without desktop access (769.805ms)
+✔ fixed identity output does not depend on PowerShell module autoload or ConvertTo-Json (433.8425ms)
+{"case":"owned-node-identity","elapsed_ms":319.62840000000006,"helper_elapsed_ms":297.087,"helper_exit":0,"helper_close":true,"pid_match":true,"creation_match":true,"executable_match":true,"native":false}
+{"case":"rapid-exit","helper_exit":21,"elapsed_ms":284.28480000000036,"helper_close":true,"code":"spawned-process-exited","native":false}
+✔ actual Windows identity helper qualifies owned Node child before native startup (1460.8367ms)
+✔ bounded identity classifies launch-error (0.4589ms)
+✔ bounded identity classifies deadline (0.19ms)
+✔ bounded identity classifies cancelled (0.1324ms)
+✔ bounded identity classifies exit (0.1442ms)
+✔ invalid identity output and unclosed helper refuse (0.3121ms)
+{"case":"real-helper-negatives","launch":"launch-error","timeout":"deadline","timeout_close":true,"parser":"identity-output-invalid","raw_output":"omitted","native":false}
+✔ real Windows helper launch, deadline and parser failures stay distinguishable (306.3536ms)
+✔ Windows offline review gates native job and approval packet on actual identity qualification (1.6984ms)
+✔ fixed helper exit 21 maps only to spawned-process-exited (0.3917ms)
+✔ fixed helper exit 22 maps only to identity-process-access-failed (0.2108ms)
+✔ fixed helper exit 23 maps only to identity-path-unavailable (0.2073ms)
+✔ fixed helper exit 24 maps only to identity-helper-exit (0.1673ms)
+✔ offline identity gate rejects skipped, removed, reordered or failure-masked qualification (1.2979ms)
+✔ actual Windows metadata query binds this process and binary bytes without starting NVDA (1031.166ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3072.6508

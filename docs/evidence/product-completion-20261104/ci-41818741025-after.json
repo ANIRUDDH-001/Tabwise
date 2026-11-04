@@ -1,0 +1,41 @@
+{
+  "ok": true,
+  "head": "cb2e730a829f20d9cf85930e407e132f6c2f0c9f",
+  "checks": [
+    {
+      "name": "node version",
+      "ok": true,
+      "detail": "24.22.1"
+    },
+    {
+      "name": "lock sha256",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "lock dependencies",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "lock vendor_tree",
+      "ok": true,
+      "detail": "d80eb577e272dd7c16135ebfeaa9e3dc9162308b0ea1323a9b158dcafb774e1d"
+    },
+    {
+      "name": "Day-1 gates",
+      "ok": true,
+      "detail": "ca0c9feb568e7c9c4ea41832607f510af0cbf5548242adcd77f729e039af3362"
+    },
+    {
+      "name": "dependency tree",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "checkout unchanged",
+      "ok": true,
+      "detail": []
+    }
+  ]
+}
