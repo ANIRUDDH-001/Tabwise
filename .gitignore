@@ -1,10 +1,23 @@
-# Secrets (AGENTS Security)
+# Environment files
 .env
 .env.*
 !.env.example
 
-# Local agent settings
-.claude/settings.local.json
+# Local development records
+/.claude/
+/.codex/
+/AGENTS.md
+/CLAUDE.md
+/web/AGENTS.md
+/TABWISE-PRODUCT-DIRECTION.md
+/docs/CODEMAP.md
+/docs/evidence/
+/docs/governance/
+/docs/reviews/
+/docs/engineering/*
+!/docs/engineering/native-workflow-permission-proposal.patch
+/docs/ledger/*
+!/docs/ledger/PLAN.md
 
 # Python
 .venv/

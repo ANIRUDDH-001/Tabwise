@@ -1,19 +1,2 @@
-# Append-only ledgers: keep both sides' lines on merge (12 RT39)
-docs/ledger/LOG.jsonl merge=union
-docs/ledger/COSTS.jsonl merge=union
-
-# Vendored upstream bytes (D-39): never convert line endings, so files stay byte-identical to npm's
+# Preserve the exact upstream bytes of vendored code.
 vendor/** -text
-
-# Original test outputs are byte-preserved evidence, including terminal whitespace.
-docs/evidence/product-completion-20261104/*.tap -text -diff
-docs/evidence/product-completion-20261104/*.log -text -diff
-docs/evidence/product-completion-20261104/*.json -text whitespace=cr-at-eol
-
-# Keep original candidate ZIP outputs, raw logs and their indexed byte hashes.
-docs/evidence/candidate-vertical-slice-20261104/** -text -diff
-docs/evidence/candidate-runtime-recovery-20261104/** -text -diff
-docs/evidence/candidate-baseline-20261104/** -text -diff
-docs/evidence/candidate-repair-20261104/** -text -diff
-docs/evidence/candidate-complete-20261104/** -text -diff
-docs/evidence/candidate-web-recovery-20261104/** -text -diff
